@@ -1,0 +1,9 @@
+{
+    "ignore": [
+        "dist/public/", "dist/views/", "*.ts", "*.js.map"
+    ],
+    "events": {
+        "start": "npm run copy-assets; echo 'Done rebuild'"
+    },
+    "ext": "*"
+}

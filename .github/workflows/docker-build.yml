@@ -1,0 +1,35 @@
+name: Docker build and run
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: bahmutov/npm-install@v1
+
+      - name: Lint
+        run: |
+          npm run lint
+
+      - name: Build in docker
+        run: |
+          npm run docker-build
+
+      - name: Start in docker
+        run: |
+          npm run docker-run
+
+      - name: Test
+        run: |
+          curl -sSf http://localhost:3000
+
+      - name: Stop
+        if: always()
+        run: |
+          docker stop express-ts
