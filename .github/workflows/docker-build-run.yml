@@ -23,13 +23,14 @@ jobs:
 
       - name: Start in docker
         run: |
-          npm run docker-run
+          nohup npm run docker-run > output.txt &
+          sleep 5
 
       - name: Test
         run: |
           curl -sSf http://localhost:3000
 
-      - name: Stop
+      - name: Echo output
         if: always()
         run: |
-          docker stop express-ts
+          cat output.txt
