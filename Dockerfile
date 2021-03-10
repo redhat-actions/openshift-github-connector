@@ -1,7 +1,5 @@
 FROM node:14-alpine
 
-LABEL author="tetchel@gmail.com"
-
 WORKDIR /app
 
 ENV NODE_ENV prod

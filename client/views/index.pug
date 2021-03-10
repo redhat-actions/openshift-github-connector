@@ -1,0 +1,31 @@
+extends lib/layout
+
+block content
+  div#index-jumbotron.jumbotron.border.border-dark
+    h2.text-center OpenShift GitHub Actions Connector
+    h5.text-center
+      | OpenShift GitHub Actions Connector is designed to help you work seamlessly with Red Hat Developer tools
+      | and Openshift clusters.
+
+    hr.my-4
+    p
+      | This application can access your your GitHub org or personal account
+      | and authenticate against Openshift to enable default integrations.
+      ul
+        li Install and Configure OpenShift Clusters for use with Red Hat Actions
+        li Manage, modify and configure Red Hat actions in your repositories
+        li Manage OpenShift GitHub Runners
+
+      form#github-app-form.row.justify-content-center.mt-5(method='post')
+        input#github-manifest-data.d-none(type="manifest" name="manifest")
+        button#github-btn.btn.btn-primary.btn-lg.d-flex(type="submit")
+          i.fab.fa-github.fa-2x.mr-3.text-black
+          div.font-weight-bold.align-self-center
+            | Create your app
+
+block scripts
+  script.
+    const appManifest = !{appManifest};
+    const state = "#{state}";
+
+  script(src='/js/index.js')
