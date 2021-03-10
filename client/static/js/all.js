@@ -1,12 +1,12 @@
 console.log("all.js loaded");
 
 $.when($.ready)
-.then((() => {
-    $('.navbar-nav')
-        .attr('data-placement', 'bottom');
+    .then((() => {
+        $(".navbar-nav")
+            .attr("data-placement", "bottom");
 
-    $('[title]')
+        $("[title]")
         // .attr('data-placement', 'top')
-        .tooltip();
-
-}));
+            // @ts-ignore
+            .tooltip();
+    }));

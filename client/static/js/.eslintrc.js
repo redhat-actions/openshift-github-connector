@@ -1,8 +1,13 @@
 module.exports = {
     extends: [
-        "../../eslintrc.js"
+        "../../../.eslintrc.js"
     ],
+    env: {
+        browser: true,
+        es6: true,
+        jquery: true,
+    },
     rules: {
-        "no-console": 0
+        "@typescript-eslint/ban-ts-comment": 0
     }
 }
