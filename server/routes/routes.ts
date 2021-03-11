@@ -8,6 +8,10 @@ const Routes = {
         PostInstall: "/app/post-install",
     },
 
+    Cluster: {
+        Root: "/cluster",
+    },
+
     Webhook: "/webhook",
 };
 

@@ -9,6 +9,14 @@
             "restart": true,
             "protocol": "inspector"
         },
+        {
+            "name": "Attach to remote",
+            "type": "node",
+            "request": "attach",
+            "restart": true,
+            "protocol": "inspector",
+            "port": 9229
+        }
     ],
     "compounds": []
 }

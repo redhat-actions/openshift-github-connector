@@ -53,18 +53,18 @@ class GitHubApp {
         this.configNoSecrets = GitHubAppConfig.getConfigWithoutSecrets(config);
     }
 
-    static isInitialized(): boolean {
+    public static isInitialized(): boolean {
         return !!this._instance;
     }
 
-    static instance(): GitHubApp {
+    public static get instance(): GitHubApp {
         if (!this._instance) {
             throw new Error(`GitHubApp instance requested before created`);
         }
         return this._instance;
     }
 
-    static async create(appConfig: GitHubAppConfig, installationID: number): Promise<GitHubApp> {
+    public static async create(appConfig: GitHubAppConfig, installationID: number): Promise<GitHubApp> {
         if (this._instance) {
             console.warn(`githubApp already exists; recreating`);
         }

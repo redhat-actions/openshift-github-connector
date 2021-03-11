@@ -24,7 +24,7 @@ namespace GitHubAppMemento {
     }
 
     export async function tryLoad(): Promise<GitHubApp | undefined> {
-        console.log(`Load app config from ${CONFIG_SAVE_PATH}`);
+        console.log(`Try to load app config from ${CONFIG_SAVE_PATH}`);
 
         let mementoStr;
         try {

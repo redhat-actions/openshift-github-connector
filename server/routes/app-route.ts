@@ -10,11 +10,11 @@ export default router;
 
 router.route(Routes.App.Root)
     .get(async (req, res, next) => {
-        // if (!(await GitHubApp.isAppInstalled())) {
-        //     throw new Error(`App base page but it's not installed!`);
-        // }
+        if (!GitHubApp.isInitialized()) {
+            return sendError(res, 400, `App has not yet been created.`);
+        }
 
-        const octo = GitHubApp.instance().installationOctokit;
+        const octo = GitHubApp.instance.installationOctokit;
         const installationsReq = octo.request("GET /app/installations");
         const repositoriesReq = octo.request("GET /installation/repositories");
 
@@ -22,8 +22,8 @@ router.route(Routes.App.Root)
         const repositories = (await repositoriesReq).data.repositories;
 
         return res.render("app", {
-            appConfig: GitHubApp.instance().configNoSecrets,
-            appUrls: GitHubApp.instance().urls,
+            appConfig: GitHubApp.instance.configNoSecrets,
+            appUrls: GitHubApp.instance.urls,
             installations,
             repositories,
         });
@@ -70,6 +70,6 @@ router.route(Routes.App.PostInstall)
         const installationID = Number(installationIDStr);
 
         await GitHubApp.create(githubAppConfig, installationID);
-        return res.render("post-install");
+        return res.redirect(Routes.App.Root);
     })
     .all(send405([ "GET" ]));

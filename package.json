@@ -21,6 +21,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@kubernetes/client-node": "^0.14.0",
     "@octokit/app": "^10.2.2",
     "@octokit/core": "^3.3.0",
     "cookie-parser": "^1.4.5",

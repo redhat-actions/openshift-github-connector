@@ -1,0 +1,51 @@
+oc delete deploy openshift-actions-connector;
+oc delete svc openshift-actions-connector;
+oc delete route openshift-actions-connector
+
+    && oc new-app --docker-image=quay.io/tetchell/openshift-actions-connector:latest \
+    && oc expose svc openshift-actions-connector
+
+buildah bud --layers -t quay.io/tetchell/openshift-actions-connector:latest \
+    && buildah push quay.io/tetchell/openshift-actions-connector:latest
+
+
+> config.getContextObject(config.getCurrentContext())
+{
+  cluster: 'inCluster',
+  name: 'inClusterContext',
+  user: 'inClusterUser'
+}
+
+
+/app $ ls /var/run/secrets/kubernetes.io/serviceaccount/
+ca.crt          namespace       service-ca.crt  token
+
+{
+  "iss": "kubernetes/serviceaccount",
+  "kubernetes.io/serviceaccount/namespace": "tetchell-code",
+  "kubernetes.io/serviceaccount/secret.name": "default-token-vpqqd",
+  "kubernetes.io/serviceaccount/service-account.name": "default",
+  "kubernetes.io/serviceaccount/service-account.uid": "5d4f969d-6e55-44f0-8eac-67a83147fdd8",
+  "sub": "system:serviceaccount:tetchell-code:default"
+}
+
+oc create -f - <<EOF
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: openshift-actions-connector
+spec:
+  selector:
+    app: openshift-actions-connector
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: openshift-actions-connector
+    spec:
+      containers:
+        - name: openshift-actions-connector
+          image: quay.io/tetchell/openshift-actions-connector:latest
+
+
+EOF

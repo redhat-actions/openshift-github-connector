@@ -8,6 +8,7 @@ import path from "path";
 import indexRouter from "./routes/root-route";
 import appRouter from "./routes/app-route";
 import webhookRouter from "./routes/webhook-route";
+import clusterRouter from "./routes/cluster-route";
 import { sendError } from "./util/error";
 import GitHubAppMemento from "./gh-app/app-memento";
 
@@ -30,6 +31,7 @@ app.use(morgan("dev"));
 app.use("/", indexRouter);
 app.use(appRouter);
 app.use(webhookRouter);
+app.use(clusterRouter);
 
 // catch 404
 app.use((req, res, next) => res.status(404).render("404", { path: req.path }));

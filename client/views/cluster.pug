@@ -1,0 +1,27 @@
+extends lib/layout
+
+block content
+  h2.text-center Welcome to the cluster page
+
+  h4 Cluster:
+    |
+    |
+    a(href=clusterInfo.server) #{clusterInfo.name}
+
+  if clusterInfo.user
+    h4 Logged in as #{clusterInfo.user}
+  else
+    h4 No user
+
+  if namespace
+    h4 Namespace #{namespace}
+  else
+    h4 No namespace selected
+
+  if !pods
+    p There are no pods :(
+  else
+    h4 Here are the pods
+    ul
+      each pod in pods
+        li= pod
