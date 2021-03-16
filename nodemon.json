@@ -1,5 +1,6 @@
 {
     "ignore": [
+        "dist/views/"
     ],
     "events": {
     },
