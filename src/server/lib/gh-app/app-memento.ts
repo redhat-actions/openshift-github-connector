@@ -41,6 +41,12 @@ namespace GitHubAppMemento {
         const memento: GitHubAppMemento = JSON.parse(mementoStr);
         return GitHubApp.create(memento, memento.installationID);
     }
+
+    export async function clear(): Promise<void> {
+        Log.info(`Remove ${CONFIG_SAVE_PATH}`);
+        await fs.unlink(CONFIG_SAVE_PATH);
+        GitHubApp.delete();
+    }
 }
 
 export default GitHubAppMemento;

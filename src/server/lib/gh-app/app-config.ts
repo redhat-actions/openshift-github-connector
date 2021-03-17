@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import Endpoints from "../../../common/endpoints";
 import Log from "../../logger";
-import { GitHubAppConfig, GitHubAppConfigNoSecrets } from "../../../common/interfaces/github-app";
+import { GitHubAppConfig, GitHubAppConfigNoSecrets, GitHubAppManifest } from "../../../common/interfaces/github-app";
 
 // https://stackoverflow.com/questions/42999983/typescript-removing-readonly-modifier
 type Writeable<T> = { -readonly [K in keyof T]: T[K] };
@@ -22,7 +22,7 @@ export async function createAppConfig(code: string): Promise<GitHubAppConfig> {
     return config;
 }
 
-export function getAppManifest(serverUrl: string): Record<string, unknown> {
+export function getAppManifest(serverUrl: string): GitHubAppManifest {
     let serverUrlNoSlash = serverUrl;
     if (serverUrlNoSlash.endsWith("/")) {
         serverUrlNoSlash = serverUrlNoSlash.substring(0, serverUrlNoSlash.length - 1);

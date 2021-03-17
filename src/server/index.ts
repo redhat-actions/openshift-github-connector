@@ -46,16 +46,16 @@ app.use(getLoggingMiddleware());
 Object.values(Routes).map((router) => app.use(router));
 
 app.route("/").get((req, res, next) => {
-    res.send(`Hello!`);
+  res.send(`Hello!`);
 }).all(send405([ "GET" ]));
 
 const sendHealth = (res: express.Response): void => {
-    res.json({ status: "OK" });
+  res.json({ status: "OK" });
 };
 
 app.route(Endpoints.Health.path)
-    .get((req, res, next) => sendHealth(res))
-    .all(send405([ "GET" ]));
+  .get((req, res, next) => sendHealth(res))
+  .all(send405([ "GET" ]));
 
 // catch 404
 // app.use((req, res, next) => res.status(404).render(Views.NotFound, { path: req.path }));
@@ -63,21 +63,21 @@ app.use((req, res, next) => sendError(res, 404, `No page at ${req.url}`));
 
 // error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    Log.error(`Uncaught error:`, err);
+  Log.error(`Uncaught error:`, err);
 
-    const message = err.message || err.toString();
-    sendError(res, 500, message, undefined, false);
+  const message = err.message || err.toString();
+  sendError(res, 500, message, undefined, false);
 });
 
 const PORT = process.env.PORT || 3003;
 
 app.listen(PORT)
-    .on("listening", () => {
-        Log.info(`Listening on port ${PORT}`);
-    }).on("error", (err) => {
-        Log.fatal(`Failed to start HTTP server`, err);
-    });
+  .on("listening", () => {
+    Log.info(`Listening on port ${PORT}`);
+  }).on("error", (err) => {
+    Log.fatal(`Failed to start HTTP server`, err);
+  });
 
 startup().catch((err) => {
-    Log.error(`Uncaught startup error`, err);
+  Log.error(`Uncaught startup error`, err);
 });

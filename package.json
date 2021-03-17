@@ -75,7 +75,7 @@
     "webpack-cli": "^4.5.0",
     "webpack-node-externals": "^2.5.2"
   },
-  "proxy": "http://localhost:3003/",
+  "proxy": "http://73013ed9b7e4.ngrok.io/",
   "browserslist": {
     "production": [
       ">0.2%",

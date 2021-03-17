@@ -3,7 +3,8 @@ module.exports = {
         "@redhat-actions/eslint-config"
     ],
     ignorePatterns: [
-        "webpack.config.*.js"
+        "webpack.config.*.js",
+        "build/"
     ],
     parserOptions: {
         ecmaVersion: 14,
@@ -24,7 +25,9 @@ module.exports = {
         "arrow-body-style": 0,
         // "import/no-relative-parent-imports": [ 2 ],
         "@typescript-eslint/explicit-function-return-type": [ 2, { allowExpressions: true }],
-        "padded-blocks": [ 0, ]
+        "padded-blocks": [ 0, ],
+        "indent": [ 2, 2 ],
+        "max-len": [ 2, 100, { ignoreUrls: true } ],
     },
     overrides: [{
         files: [ "*.tsx" ],
@@ -34,7 +37,7 @@ module.exports = {
             "import/extensions": [ 2, { "css": "always" }],
             "@typescript-eslint/explicit-function-return-type": [ 0 ],
             "@typescript-eslint/explicit-module-boundary-types": [ 0 ],
-            "@typescript-eslint/ban-types": [ 0 ]
+            "@typescript-eslint/ban-types": [ 0 ],
         },
     }]
 }

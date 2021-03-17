@@ -43,6 +43,10 @@ class GitHubApp {
         return this._instance;
     }
 
+    public static delete(): void {
+        this._instance = undefined;
+    }
+
     public static async create(appConfig: GitHubAppConfig, installationID: number): Promise<GitHubApp> {
         if (this._instance) {
             Log.warn(`githubApp already exists; recreating`);

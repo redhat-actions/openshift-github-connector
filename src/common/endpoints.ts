@@ -1,24 +1,24 @@
 export class ApiEndpoint {
 
-    constructor(
+  constructor(
         private readonly parentEndpoint: ApiEndpoint | undefined,
         private readonly endpoint: string,
-    ) {
-        if (!this.endpoint.startsWith("/")) {
-            this.endpoint = "/" + endpoint;
-        }
+  ) {
+    if (!this.endpoint.startsWith("/")) {
+      this.endpoint = "/" + endpoint;
     }
+  }
 
-    public get path(): string {
-        if (this.parentEndpoint) {
-            return this.parentEndpoint.path + this.endpoint;
-        }
-        return this.endpoint;
+  public get path(): string {
+    if (this.parentEndpoint) {
+      return this.parentEndpoint.path + this.endpoint;
     }
+    return this.endpoint;
+  }
 
-    public toString(): string {
-        return this.path;
-    }
+  public toString(): string {
+    return this.path;
+  }
 }
 
 const Root = new ApiEndpoint(undefined, "/");
@@ -37,18 +37,18 @@ const Cluster = new ApiEndpoint(undefined, "/cluster");
 const Webhook = new ApiEndpoint(undefined, "/webhook");
 
 const Endpoints = {
-    Root,
-    Health,
-    Setup: {
-        Root: Setup,
-        CreateApp,
-        PostCreateApp,
-        PostInstallApp,
-        CreateSA,
-    },
-    App,
-    Cluster,
-    Webhook,
+  Root,
+  Health,
+  Setup: {
+    Root: Setup,
+    CreateApp,
+    PostCreateApp,
+    PostInstallApp,
+    CreateSA,
+  },
+  App,
+  Cluster,
+  Webhook,
 };
 
 export default Endpoints;

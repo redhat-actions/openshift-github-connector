@@ -2,13 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Chrome",
-            "request": "launch",
-            "type": "pwa-chrome",
-            "url": "http://localhost:3000",
-            "webRoot": "${workspaceFolder}"
-        },
-        {
+            // run chrome with 'google-chrome --remote-debugging-port=9222'
             "name": "Attach to Chrome",
             "port": 9222,
             "request": "attach",
@@ -16,15 +10,14 @@
             "webRoot": "${workspaceFolder}"
         },
         {
-            "name": "Attach Debugger to Server",
-            "type": "node",
-            "request": "attach",
-            "processId": "${command:PickProcess}",
-            "restart": true,
-            "protocol": "inspector"
+            "name": "Launch Chrome",
+            "request": "launch",
+            "type": "pwa-chrome",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}"
         },
         {
-            "name": "Attach to remote",
+            "name": "Debug server",
             "type": "node",
             "request": "attach",
             "restart": true,

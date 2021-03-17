@@ -12,11 +12,11 @@ html, body {
 }
 
 a {
-  color: blue;
+  color: #6ad;
 }
 
 a:focus, a:hover {
-  color: #88f;
+  color: #aff;
 }
 
 .navbar {
@@ -44,6 +44,6 @@ main {
   color: white;
 }
 
-.btn i.fa, .btn i.fas, .btn i.fab {
-  margin-right: 1em;
+.btn i.fa, .btn i.fas, .btn i.fab, .btn svg {
+  margin-right: 0.5em;
 }
