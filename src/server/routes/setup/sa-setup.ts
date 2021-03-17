@@ -1,7 +1,7 @@
 import express from "express";
-import Paths from "../paths";
+import Paths from "../../../common/paths";
 import { send405, sendError } from "../../util/send-error";
-import KubeWrapper from "../../../lib/kube/kube-wrapper";
+import KubeWrapper from "../../lib/kube/kube-wrapper";
 import { getFriendlyHTTPError } from "../../util";
 
 const router = express.Router();
@@ -19,8 +19,6 @@ router.route(Paths.Setup.CreateSA)
             throw new Error(`Could not initialize Kubernetes wrapper`);
         }
 
-        return res.render("setup/create-sa", {
-
-        });
+        return res.json({ message: "It's the create sa page" });
     })
     .all(send405([ "GET" ]));

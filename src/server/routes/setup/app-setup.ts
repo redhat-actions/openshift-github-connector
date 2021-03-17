@@ -2,10 +2,11 @@ import express from "express";
 import { v4 as uuid } from "uuid";
 
 import { getServerUrl } from "../../util";
-import GitHubAppConfig from "../../../lib/gh-app/app-config";
-import GitHubApp from "../../../lib/gh-app/app";
+import Paths from "../../../common/paths";
+import { GitHubAppConfig } from "../../../common/interfaces/github-app";
+import GitHubApp from "../../lib/gh-app/app";
 import { send405, sendError } from "../../util/send-error";
-import Paths from "../paths";
+import { createAppConfig, getAppManifest } from "../../lib/gh-app/app-config";
 
 const router = express.Router();
 
@@ -14,9 +15,9 @@ let githubAppConfig: GitHubAppConfig | undefined;
 router.route(Paths.Setup.CreateApp)
     .get(async (req, res, next) => {
         const state = uuid();
-        const manifest = GitHubAppConfig.getAppManifest(getServerUrl(req, false));
+        const manifest = getAppManifest(getServerUrl(req, false));
 
-        return res.render("setup/create-app", {
+        return res.json({
             manifest,
             state,
         });
@@ -35,7 +36,7 @@ router.route(Paths.Setup.PostCreate)
 
         // eslint-disable-next-line @typescript-eslint/no-base-to-string
         const code = qsCode.toString();
-        githubAppConfig = await GitHubAppConfig.createAppConfig(code);
+        githubAppConfig = await createAppConfig(code);
 
         const newInstallURL = `https://github.com/settings/apps/${githubAppConfig.slug}/installations`;
         return res.redirect(newInstallURL);

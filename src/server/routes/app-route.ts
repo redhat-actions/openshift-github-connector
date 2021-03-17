@@ -1,10 +1,9 @@
 import express from "express";
 
-import Views from "../../views/util/views";
-import GitHubApp from "../../lib/gh-app/app";
+import GitHubApp from "../lib/gh-app/app";
 import { send405, sendError } from "../util/send-error";
-import { AppPageProps } from "../../views/app-page";
-import Paths from "./paths";
+import Paths from "../../common/paths";
+import { AppPageState } from "../../common/interfaces/api-types";
 
 const router = express.Router();
 
@@ -22,14 +21,14 @@ router.route(Paths.App.Root)
         const installations = (await installationsReq).data;
         const repositories = (await repositoriesReq).data.repositories;
 
-        const props: AppPageProps = {
+        const resBody: AppPageState = {
             appConfig: app.configNoSecrets,
             appUrls: app.urls,
             installations,
             repositories,
         };
 
-        return res.render(Views.App, props);
+        return res.json(resBody);
     })
     .all(send405([ "GET" ]));
 

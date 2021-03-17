@@ -1,22 +1,9 @@
-# Express-TS Template
+# OpenShift Actions Connector
 
-Docker and Kube-ready Express application in TypeScript with speedy development.
+Coming soon...
 
-## Developing
+### Project Structure
 
-First, `npm i` to install dependencies.
+The backend is in Express, and the frontend is in React using create-react-app. Code can be shared across the stack from the `common/` directory.
 
-Then, to set up fast reloading:
-
-`./dev.sh`
-
-Alternatively, run:
-
-`npm run ts-watch` and `npm run dev`
-
-in **separate** terminals.
-
-The project's TypeScript will be compiled incrementally, and static files will be copied into the dist/ folder on change. The app is restarted after any static file change or TypeScript compile.
-
-## Building and Running in Docker
-See `npm run docker-run`.
+The structure is adapted from [this blog post](https://spin.atomicobject.com/2020/08/17/cra-express-share-code), and the boilerplate code is in [this repository](https://github.com/gvanderclay/cra-express).

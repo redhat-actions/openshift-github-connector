@@ -28,7 +28,7 @@ jobs:
 
       - name: Test
         run: |
-          curl -sSf http://localhost:3000
+          curl -sSf http://localhost:3003
 
       - name: Echo output
         if: always()

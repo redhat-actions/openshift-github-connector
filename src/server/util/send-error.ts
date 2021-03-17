@@ -1,23 +1,26 @@
 import express from "express";
 import { getReasonPhrase, StatusCodes } from "http-status-codes";
-import Views from "../../views/util/views";
-import Log from "../../lib/logger";
-import { ErrorPageProps } from "../../views/errors/error";
+import { ErrorResponse } from "../../common/interfaces/api-types";
+import Log from "../logger";
 
-export function sendError(res: express.Response, statusCode: StatusCodes, message: string, log: boolean = true): void {
+export function sendError(
+    res: express.Response, statusCode: StatusCodes, detail: string, title?: string, log: boolean = true
+): void {
     const statusMessage = getReasonPhrase(statusCode);
 
     if (log) {
-        Log.warn(`Error ${statusCode} error: ${message}`);
+        Log.warn(`Error ${statusCode} error: ${detail}`);
     }
     res.status(statusCode);
 
-    const props: ErrorPageProps = {
-        message,
-        statusCode,
+    const resBody: ErrorResponse = {
+        detail,
+        status: statusCode,
         statusMessage,
+        title: title ?? "Error",
     };
-    res.render(Views.Error, props);
+
+    res.header("Content-Type", "application/problem+json").json(resBody);
 }
 
 export const send405 = (allowed: string[]) => (
@@ -25,6 +28,6 @@ export const send405 = (allowed: string[]) => (
         const allowedStr = allowed.join(", ").toUpperCase();
 
         res.setHeader("Allow", allowedStr);
-        sendError(res, 405, `Method ${req.method} not allowed. Allow ${allowedStr}`);
+        sendError(res, 405, `${req.method} ${req.url} not allowed. Allow ${allowedStr}`, "Not allowed");
     }
 );

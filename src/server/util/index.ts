@@ -1,5 +1,5 @@
 import express from "express";
-import { KubeHttpError } from "../../lib/kube/kube-wrapper";
+import { KubeHttpError } from "../lib/kube/kube-wrapper";
 
 export function getServerUrl(req: express.Request, includePath: boolean = false): string {
     let reqPath = "/";

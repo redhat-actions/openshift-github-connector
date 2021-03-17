@@ -1,34 +1,35 @@
 {
-    "$schema": "https://json.schemastore.org/tsconfig",
-    "compilerOptions": {
-      /* Visit https://aka.ms/tsconfig.json to read more about this file */
-      /*
-          From https://www.npmjs.com/package/@tsconfig/node14
-          and https://nextjs.org/learn/excel/typescript/create-tsconfig
-      */
-      "lib": [
-        "ES2020",
-        "DOM", "DOM.Iterable"
-      ],
-      // "baseUrl": ".",
-      "outDir": "./dist",
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "isolatedModules": true,
+    "allowJs": true,
+    "sourceMap": true,
 
-      "jsx": "react",
-
-      "module": "commonjs",
-      "moduleResolution": "node",
-      "target": "es2020",
-      "sourceMap": true,
-      "strict": true,
-      "esModuleInterop": true,
-      "skipLibCheck": true,
-      "forceConsistentCasingInFileNames": true,
-      "noUnusedLocals": true,
-      // "noUnusedParameters": true,
-      "noImplicitReturns": true,
-      "noFallthroughCasesInSwitch": true
-    },
-    "exclude": [
-      "node_modules"
-    ]
-  }
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": true,
+    // "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "src/server"
+  ]
+}

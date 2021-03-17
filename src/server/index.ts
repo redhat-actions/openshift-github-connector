@@ -4,37 +4,36 @@ import "express-async-errors";
 import cookieParser from "cookie-parser";
 import path from "path";
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import { createEngine as createReactEngine } from "express-react-views";
-
 import Routes from "./routes";
-import Views from "../views/util/views";
-import { sendError } from "./util/send-error";
-import Log, { getLoggingMiddleware } from "../lib/logger";
+import { send405, sendError } from "./util/send-error";
+import Log, { getLoggingMiddleware } from "./logger";
 import { startup } from "./startup";
+import Paths from "../common/paths";
 
 const app = express();
 
+/*
 const isDev = process.env.NODE_ENV === "dev";
 const reactViewEnv = isDev ? "development" : "";
 Log.info(`Is dev mode ? ${isDev}`);
 if (isDev) {
     app.set("env", reactViewEnv);
-}
+}*/
 
-const publicDir = path.join(__dirname, "..", "..", "public");
-// https://github.com/reactjs/express-react-views/issues/79
-const viewsDir = path.resolve(__dirname, "..", "views");
-// viewEngine = "tsx";
-const viewEngine = "js";
-
-Log.info(`Using ${viewEngine} as view engine from directory ${viewsDir}`);
+const publicDir = path.join(process.cwd(), "public");
 Log.info(`Static resources from ${publicDir}`);
+app.use(express.static(publicDir));
 
-app.set("views", viewsDir);
-app.engine(viewEngine, createReactEngine({ settings: { env: reactViewEnv } }));
-app.set("view engine", viewEngine);
+// https://github.com/reactjs/express-react-views/issues/79
+// const viewsDir = path.resolve(__dirname, "..", "views");
+// viewEngine = "tsx";
+// const viewEngine = "js";
+
+// Log.info(`Using ${viewEngine} as view engine from directory ${viewsDir}`);
+
+// app.set("views", viewsDir);
+// app.engine(viewEngine, createReactEngine({ settings: { env: reactViewEnv } }));
+// app.set("view engine", viewEngine);
 // app.set("view engine", "pug");
 
 app.use(express.json());
@@ -43,22 +42,31 @@ app.use(cookieParser());
 
 // app.use(morgan("dev"));
 app.use(getLoggingMiddleware());
-app.use(express.static(publicDir));
 
 Object.values(Routes).map((router) => app.use(router));
 
+app.route("/").get((req, res, next) => {
+    // res.sendFile(path.join(publicDir, "index.html"));
+    res.send("Hello!");
+}).all(send405([ "GET" ]));
+
+app.route(Paths.Health)
+    .get((req, res, next) => res.json({ status: "OK" }))
+    .all(send405([ "GET" ]));
+
 // catch 404
-app.use((req, res, next) => res.status(404).render(Views.NotFound, { path: req.path }));
+// app.use((req, res, next) => res.status(404).render(Views.NotFound, { path: req.path }));
+app.use((req, res, next) => sendError(res, 404, `No page at ${req.url}`));
 
 // error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
     Log.error(`Uncaught error:`, err);
 
     const message = err.message || err.toString();
-    sendError(res, 500, message, false);
+    sendError(res, 500, message, undefined, false);
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3003;
 
 app.listen(PORT)
     .on("listening", () => {

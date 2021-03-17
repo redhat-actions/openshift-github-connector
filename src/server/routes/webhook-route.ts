@@ -1,7 +1,7 @@
 import express from "express";
 import { send405 } from "../util/send-error";
-import Log from "../../lib/logger";
-import Paths from "./paths";
+import Log from "../logger";
+import Paths from "../../common/paths";
 
 const router = express.Router();
 export default router;

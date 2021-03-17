@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    // https://stackoverflow.com/a/58836714
+    "target": "ES2018",
+    "lib": [
+      "esnext"
+    ],
+    "outDir": "../../dist",
+
+    "module": "esnext",
+    "moduleResolution": "node",
+
+    "noEmit": false,
+    "allowJs": false,
+    "allowUmdGlobalAccess": false
+  },
+  "include": [
+    "./"
+  ],
+  "exclude": [
+    "../client/"
+  ]
+}
