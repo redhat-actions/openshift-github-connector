@@ -26,6 +26,7 @@ export default function app(): JSX.Element {
                     <Switch>
                         <Route exact path="/" component={Homepage}></Route>
                         <Route exact path="/app" component={AppPage}></Route>
+                        <Route exact path="/cluster" component={AppPage}></Route>
                     </Switch>
                 </main>
             </div>

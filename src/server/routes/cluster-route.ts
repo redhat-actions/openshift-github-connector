@@ -2,7 +2,7 @@ import express from "express";
 import KubeWrapper from "../lib/kube/kube-wrapper";
 import { send405 } from "../util/send-error";
 
-import Paths from "../../common/paths";
+import Endpoints from "../../common/endpoints";
 import Log from "../logger";
 
 const router = express.Router();
@@ -33,7 +33,7 @@ async function getKubeClusterStatus(req: express.Request, res: express.Response)
     res.json(resBody);
 }
 
-router.route(Paths.Cluster.Root)
+router.route(Endpoints.Cluster.path)
     .get(async (req, res, next) => {
         return getKubeClusterStatus(req, res);
     })

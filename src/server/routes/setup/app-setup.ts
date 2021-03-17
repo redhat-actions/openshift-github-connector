@@ -2,7 +2,7 @@ import express from "express";
 import { v4 as uuid } from "uuid";
 
 import { getServerUrl } from "../../util";
-import Paths from "../../../common/paths";
+import Endpoints from "../../../common/endpoints";
 import { GitHubAppConfig } from "../../../common/interfaces/github-app";
 import GitHubApp from "../../lib/gh-app/app";
 import { send405, sendError } from "../../util/send-error";
@@ -12,7 +12,7 @@ const router = express.Router();
 
 let githubAppConfig: GitHubAppConfig | undefined;
 
-router.route(Paths.Setup.CreateApp)
+router.route(Endpoints.Setup.CreateApp.path)
     .get(async (req, res, next) => {
         const state = uuid();
         const manifest = getAppManifest(getServerUrl(req, false));
@@ -24,7 +24,7 @@ router.route(Paths.Setup.CreateApp)
     })
     .all(send405([ "GET" ]));
 
-router.route(Paths.Setup.PostCreate)
+router.route(Endpoints.Setup.PostCreateApp.path)
     .get(async (req, res, next) => {
         // const { code, state } = req.query;
         const qsCode = req.query.code;
@@ -43,7 +43,7 @@ router.route(Paths.Setup.PostCreate)
     })
     .all(send405([ "GET" ]));
 
-router.route(Paths.Setup.PostInstall)
+router.route(Endpoints.Setup.PostInstallApp.path)
     .get(async (req, res, next) => {
         // 'install' or 'update'
         // const setupAction = req.query.setup_action;
@@ -62,7 +62,7 @@ router.route(Paths.Setup.PostInstall)
         const installationID = Number(installationIDStr);
 
         await GitHubApp.create(githubAppConfig, installationID);
-        return res.redirect(Paths.App.Root);
+        return res.redirect(Endpoints.App.path);
     })
     .all(send405([ "GET" ]));
 

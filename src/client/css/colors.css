@@ -14,4 +14,8 @@
     --rh-gray-darkest: #151515;          /* from OpenShift console */
 
     --w3-red: #f44336;
+
+    /* match to index.html */
+    --bg-color: var(--rh-gray-darkest);
+    --fg-color: white;
 }

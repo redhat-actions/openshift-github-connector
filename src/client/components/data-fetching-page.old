@@ -1,15 +1,11 @@
 import React from "react";
 import { RouteComponentProps } from "react-router-dom";
 
-export default abstract class DataLoadingPage<Data> extends React.Component<RouteComponentProps, {
-    data: Data | undefined,
-    loaded: boolean
-    loadingError: Error | undefined,
-}> {
+export default abstract class DataLoadingPage<Data> extends React.Component<RouteComponentProps & { pageName: string}> {
 
     constructor(
         props: RouteComponentProps,
-        private readonly dataEndpointPath: string
+        private readonly pageName: string,
     ) {
         super(props);
         this.state = { data: undefined, loadingError: undefined, loaded: false };
@@ -45,7 +41,7 @@ export default abstract class DataLoadingPage<Data> extends React.Component<Rout
         if (!this.state || !this.state.loaded) {
             return (
                 <React.Fragment>
-                    <h1>Loading...</h1>
+                    <h1>Loading {this.props.pageName}...</h1>
                 </React.Fragment>
             );
         }

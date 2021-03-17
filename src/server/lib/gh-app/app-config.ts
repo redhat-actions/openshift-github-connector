@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import Paths from "../../../common/paths";
+import Endpoints from "../../../common/endpoints";
 import Log from "../../logger";
 import { GitHubAppConfig, GitHubAppConfigNoSecrets } from "../../../common/interfaces/github-app";
 
@@ -29,9 +29,9 @@ export function getAppManifest(serverUrl: string): Record<string, unknown> {
     }
 
     // eslint-disable-next-line camelcase
-    const setup_url = serverUrlNoSlash + Paths.Setup.PostInstall;
+    const setup_url = serverUrlNoSlash + Endpoints.Setup.PostInstallApp;
     // eslint-disable-next-line camelcase
-    const redirect_url = serverUrlNoSlash + Paths.Setup.PostCreate;
+    const redirect_url = serverUrlNoSlash + Endpoints.Setup.PostCreateApp;
 
     // https://docs.github.com/en/developers/apps/creating-a-github-app-from-a-manifest#github-app-manifest-parameters
     // Tthe following parameters can also be in this payload
@@ -41,7 +41,7 @@ export function getAppManifest(serverUrl: string): Record<string, unknown> {
         description: "Connect your OpenShift cluster to GitHub Actions",
         url: "https://github.com/redhat-actions",
         hook_attributes: {
-            url: serverUrlNoSlash + Paths.Webhook,
+            url: serverUrlNoSlash + Endpoints.Webhook,
         },
         // request_oauth_on_install: true,
         setup_url,

@@ -8,7 +8,7 @@ import Routes from "./routes";
 import { send405, sendError } from "./util/send-error";
 import Log, { getLoggingMiddleware } from "./logger";
 import { startup } from "./startup";
-import Paths from "../common/paths";
+import Endpoints from "../common/endpoints";
 
 const app = express();
 
@@ -46,12 +46,15 @@ app.use(getLoggingMiddleware());
 Object.values(Routes).map((router) => app.use(router));
 
 app.route("/").get((req, res, next) => {
-    // res.sendFile(path.join(publicDir, "index.html"));
-    res.send("Hello!");
+    res.send(`Hello!`);
 }).all(send405([ "GET" ]));
 
-app.route(Paths.Health)
-    .get((req, res, next) => res.json({ status: "OK" }))
+const sendHealth = (res: express.Response): void => {
+    res.json({ status: "OK" });
+};
+
+app.route(Endpoints.Health.path)
+    .get((req, res, next) => sendHealth(res))
     .all(send405([ "GET" ]));
 
 // catch 404
