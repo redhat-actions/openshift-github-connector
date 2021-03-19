@@ -10,10 +10,13 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./css/colors.css";
 import "./css/index.css";
 
-import Homepage from "./pages/home";
+import Homepage from "./pages/home-page";
 import AppPage from "./pages/app-page";
 import Endpoints from "../common/endpoints";
 import SetupAppPage from "./pages/setup/setup-app";
+import SetupHomePage from "./pages/setup/setup-home";
+import ClusterPage from "./pages/cluster-page";
+import SetupSAPage from "./pages/setup/setup-sa";
 
 export default function app(): JSX.Element {
   library.add(fab, fas);
@@ -28,7 +31,10 @@ export default function app(): JSX.Element {
           <Switch>
             <Route exact path="/" component={Homepage}></Route>
             <Route exact path={Endpoints.App.path} component={AppPage}></Route>
+            <Route exact path={Endpoints.Setup.Root.path} component={SetupHomePage}></Route>
             <Route exact path={Endpoints.Setup.CreateApp.path} component={SetupAppPage}></Route>
+            <Route exact path={Endpoints.Cluster.path} component={ClusterPage}></Route>
+            <Route exact path={Endpoints.Setup.CreateSA.path} component={SetupSAPage}></Route>
           </Switch>
         </main>
       </div>

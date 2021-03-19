@@ -1,14 +1,14 @@
 import express from "express";
 import { v4 as uuid } from "uuid";
 
-import { getClientUrl, getServerUrl, removeTrailingSlash } from "../../util";
-import Endpoints from "../../../common/endpoints";
-import { GitHubAppConfig } from "../../../common/interfaces/github-app";
-import GitHubApp from "../../lib/gh-app/app";
-import { send405, sendError } from "../../util/send-error";
-import { createAppConfig, getAppManifest } from "../../lib/gh-app/app-config";
-import { CreateAppResponse } from "../../../common/interfaces/api-types";
-import Log from "../../logger";
+import { getClientUrl, getServerUrl, removeTrailingSlash } from "../util";
+import Endpoints from "../../common/endpoints";
+import { GitHubAppConfig } from "../../common/interfaces/github-app";
+import GitHubApp from "../lib/gh-app/app";
+import { send405, sendError } from "../util/send-error";
+import { createAppConfig, getAppManifest } from "../lib/gh-app/app-config";
+import ApiResponses from "../../common/interfaces/api-responses";
+import Log from "../logger";
 
 const router = express.Router();
 
@@ -21,7 +21,7 @@ router.route(Endpoints.Setup.CreateApp.path)
     const state = uuid();
     const manifest = getAppManifest(getServerUrl(req, false));
 
-    const resBody: CreateAppResponse = {
+    const resBody: ApiResponses.CreateAppResponse = {
       manifest, state,
     };
     clientUrl = removeTrailingSlash(getClientUrl(req));

@@ -12,11 +12,11 @@ html, body {
 }
 
 a {
-  color: #6ad;
+  color: #8df;
 }
 
 a:focus, a:hover {
-  color: #aff;
+  color: #fff;
 }
 
 .navbar {
@@ -33,7 +33,8 @@ a:focus, a:hover {
 
 main {
   min-width: var(--breakpoint-sm);
-  width: var(--breakpoint-lg);
+  width: 80%;
+  max-width: var(--breakpoint-lg);
 }
 
 .text-black {
@@ -44,6 +45,24 @@ main {
   color: white;
 }
 
-.btn i.fa, .btn i.fas, .btn i.fab, .btn svg {
-  margin-right: 0.5em;
+.card {
+  background-color: var(--rh-gray-dark);
+  color: var(--fg-color);
+  border-radius: 0.5rem;
+  box-shadow: 0.1rem 0.1rem 0.1rem black;
+}
+
+.card-title {
+  border-bottom: 2px solid var(--rh-gray);
+  padding-bottom: 1em;
+  margin-bottom: 0;
+}
+
+dl, ol, ul {
+  padding-inline-start: 1em;
+  margin-bottom: 0;
+}
+
+.btn {
+  max-height: 3em;
 }

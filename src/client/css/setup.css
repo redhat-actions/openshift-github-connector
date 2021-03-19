@@ -1,0 +1,16 @@
+.table td {
+    vertical-align: middle;
+}
+
+.table tr {
+    height: 4rem;
+}
+
+td .btn {
+    min-width: 15ch;
+}
+
+.push-right {
+    display: flex;
+    justify-content: flex-end;
+}

@@ -12,7 +12,7 @@
   "scripts": {
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "concurrently -p name -c 'yellow,magenta,cyan' -n 'server,server,ui' 'yarn dev:server:webpack' 'yarn dev:server:nodemon' 'yarn dev:client'",
+    "dev": "concurrently -p name -c 'yellow,magenta,cyan' -n 'webpack,server,ui' 'yarn dev:server:webpack' 'yarn dev:server:nodemon' 'yarn dev:client'",
     "dev:client": "wait-on -l tcp:3003 && react-scripts start",
     "dev:server": "concurrently -p name -c 'yellow,magenta' -n 'webpack,server' 'yarn dev:server:webpack' 'yarn dev:server:nodemon'",
     "dev:server:webpack": "webpack --config webpack.config.server.js --watch",
@@ -66,6 +66,7 @@
     "@typescript-eslint/parser": "^4.17.0",
     "concurrently": "^6.0.0",
     "eslint": "^7.21.0",
+    "eslint-plugin-react": "^7.22.0",
     "nodemon": "^2.0.7",
     "react-scripts": "^4.0.3",
     "ts-loader": "^8.0.18",
@@ -75,7 +76,7 @@
     "webpack-cli": "^4.5.0",
     "webpack-node-externals": "^2.5.2"
   },
-  "proxy": "http://73013ed9b7e4.ngrok.io/",
+  "proxy": "http://localhost:3003/",
   "browserslist": {
     "production": [
       ">0.2%",

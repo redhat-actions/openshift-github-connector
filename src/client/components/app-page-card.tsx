@@ -1,3 +1,4 @@
+import React from "react";
 import LinkButton, { LinkButtonProps } from "./link-btn";
 
 export default function appPageCard(props: {
@@ -7,15 +8,15 @@ export default function appPageCard(props: {
 }): JSX.Element {
   return (
     <div className="text-black card mb-4 p-3">
-      <div className="d-flex card-title row justify-content-between">
-        <div className="col">
-          <h4 className="font-weight-bold mb-1">
+      <div className="card-title d-flex justify-content-between">
+        <div className="d-flex align-items-center">
+          <h4 className="font-weight-bold m-0">
             {props.header}
           </h4>
         </div>
-        <div className="col-3 d-flex">
+        <div className="d-flex">
           {
-            props.buttons.map((btnProps) => <LinkButton style={{ flexGrow: 1 }} {...btnProps}></LinkButton>)
+            props.buttons.map((btnProps, i) => <LinkButton key={i} style={{ flexGrow: 1 }} {...btnProps}></LinkButton>)
           }
         </div>
       </div>

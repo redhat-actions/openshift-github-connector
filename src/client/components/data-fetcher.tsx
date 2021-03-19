@@ -5,7 +5,8 @@ import { ApiEndpoint } from "../../common/endpoints";
 interface BaseDataFetcherProps<Data> {
     children: (data: Data) => React.ReactNode;
     type: "generic" | "api";
-    loadingType?: "text" | "spinner" | "none";
+    loadingDisplay?: "text" | "spinner" | "spinner-1em" | "none" | JSX.Element;
+    loadingStyle?: React.CSSProperties;
 }
 
 interface GenericDataFetcherProps<Data> extends BaseDataFetcherProps<Data> {
@@ -61,6 +62,9 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
       this.setState({ loadingError: err });
     }
     finally {
+      // If you receive an error on this line "Objects are not valid as a React child"
+      // It is not a problem with the DataFetcher - somewhere in a DataFetcher's child you have put an object in JSX that should be a string
+      // The browser console will contain a trace of the errored element
       this.setState({ loaded: true });
     }
   }
@@ -69,38 +73,49 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
     console.log(`Fetching ${apiEndpoint}...`);
     const res = await fetch(apiEndpoint);
     const data = await res.json();
+    if (Object.keys(data).length === 0) {
+      console.warn(`DataFetcher received empty response from ${apiEndpoint}`);
+    }
     return data;
   }
 
   public render() {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!this.state || !this.state.loaded) {
-      const loadingDisplayType = this.props.loadingType || "text";
+      const loadingDisplayType = this.props.loadingDisplay || "text";
       if (loadingDisplayType === "text") {
         return (
-          <span>Loading...</span>
+          <span style={this.props.loadingStyle} >Loading...</span>
         );
       }
-      else if (loadingDisplayType === "spinner") {
+      else if (loadingDisplayType === "spinner" || loadingDisplayType === "spinner-1em") {
+        const loadingStyle = this.props.loadingStyle ?? {};
+
+        if (loadingDisplayType === "spinner-1em") {
+          loadingStyle.height = "1em";
+          loadingStyle.width = "1em";
+        }
+
         return (
-          <div className="d-flex justify-content-center">
-            <Spinner animation="border" variant="primary"/>
-          </div>
+          <Spinner style={loadingStyle} animation="border" variant="primary"/>
         );
       }
-      return (<></>);
+      else if (loadingDisplayType === "none") {
+        return (<></>);
+      }
+      return loadingDisplayType;
     }
     else if (this.state.loadingError) {
       return (
         <span className="text-danger">
-                    Error fetching data: {this.state.loadingError}
+          Error fetching data: {this.state.loadingError}
         </span>
       );
     }
     else if (this.state.data == null) {
       return (
         <span className="text-danger">
-                    Unknown error fetching data
+          Unknown error fetching data
         </span>
       );
     }

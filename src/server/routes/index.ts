@@ -1,11 +1,10 @@
 import app from "./app-route";
 import cluster from "./cluster-route";
 import webhook from "./webhook-route";
-import appSetup from "./setup/app-setup-route";
-import saSetup from "./setup/sa-setup-route";
+import appSetup from "./app-setup-route";
 
 const Routes = {
-  app, cluster, webhook, appSetup, saSetup,
+  app, cluster, webhook, appSetup,
 };
 
 export default Routes;

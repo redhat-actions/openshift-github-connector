@@ -1,5 +1,7 @@
 import * as k8s from "@kubernetes/client-node";
+import ApiResponses from "../../../common/interfaces/api-responses";
 import Log from "../../logger";
+import { getFriendlyHTTPError } from "../../util";
 
 export type KubeHttpError = Error & { response: any };
 
@@ -29,6 +31,13 @@ export default class KubeWrapper {
 
     public static get initError(): KubeHttpError | undefined {
         return this._initError;
+    }
+
+    public static get initErrorFriendly(): string | undefined {
+        if (!this._initError) {
+            return undefined;
+        }
+        return getFriendlyHTTPError(this._initError);
     }
 
     public static async initialize(): Promise<KubeWrapper> {
@@ -82,7 +91,7 @@ export default class KubeWrapper {
         return this.config.getContextObject(currentContext)?.namespace;
     }
 
-    public getClusterInfo(): { name: string, user: string, server: string } {
+    public getClusterConfig(): ApiResponses.ClusterConfig {
         const cluster = this.config.getCurrentCluster();
         if (!cluster) {
             throw new Error(`Failed to get cluster info, current cluster is undefined`);

@@ -1,10 +1,11 @@
 import express from "express";
 import { getReasonPhrase, StatusCodes } from "http-status-codes";
-import { ErrorResponse } from "../../common/interfaces/api-types";
+import ApiResponses from "../../common/interfaces/api-responses";
 import Log from "../logger";
 
 export function sendError(
-  res: express.Response, statusCode: StatusCodes, detail: string, title?: string, log: boolean = true
+  res: express.Response, statusCode: StatusCodes, detail: string, title?: string,
+  log: boolean = true
 ): void {
   const statusMessage = getReasonPhrase(statusCode);
 
@@ -13,7 +14,7 @@ export function sendError(
   }
   res.status(statusCode);
 
-  const resBody: ErrorResponse = {
+  const resBody: ApiResponses.Error = {
     detail,
     status: statusCode,
     statusMessage,
