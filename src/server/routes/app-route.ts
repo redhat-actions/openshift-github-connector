@@ -2,17 +2,17 @@ import express from "express";
 
 import GitHubApp from "../lib/gh-app/app";
 import { send405 } from "../util/send-error";
-import Endpoints from "../../common/endpoints";
-import ApiResponses from "../../common/interfaces/api-responses";
+import ApiEndpoints from "../../common/api-endpoints";
+import ApiResponses from "../../common/api-responses";
 import GitHubAppMemento from "../lib/gh-app/app-memento";
 import Log from "../logger";
 
 const router = express.Router();
 
-router.route(Endpoints.App.path)
+router.route(ApiEndpoints.App.Root.path)
   .get(async (req, res, next) => {
     if (!GitHubApp.isInitialized()) {
-      Log.info("App is not initialized; sending empty body");
+      Log.info("App is not initialized");
       const resBody: ApiResponses.GitHubAppState = {
         app: false,
       };

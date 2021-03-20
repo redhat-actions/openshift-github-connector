@@ -1,6 +1,6 @@
 import React from "react";
 import { Spinner } from "react-bootstrap";
-import { ApiEndpoint } from "../../common/endpoints";
+import UrlPath from "../../common/types/url-path";
 
 interface BaseDataFetcherProps<Data> {
     children: (data: Data) => React.ReactNode;
@@ -16,7 +16,7 @@ interface GenericDataFetcherProps<Data> extends BaseDataFetcherProps<Data> {
 
 interface ApiDataFetcherProps<Data> extends BaseDataFetcherProps<Data> {
     type: "api";
-    endpoint: ApiEndpoint;
+    endpoint: UrlPath;
 }
 
 type DataFetcherProps<Data> = GenericDataFetcherProps<Data> | ApiDataFetcherProps<Data>;

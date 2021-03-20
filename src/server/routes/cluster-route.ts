@@ -2,9 +2,9 @@ import express from "express";
 import KubeWrapper from "../lib/kube/kube-wrapper";
 import { send405 } from "../util/send-error";
 
-import Endpoints from "../../common/endpoints";
+import ApiEndpoints from "../../common/api-endpoints";
 import Log from "../logger";
-import ApiResponses from "../../common/interfaces/api-responses";
+import ApiResponses from "../../common/api-responses";
 
 const router = express.Router();
 export default router;
@@ -35,7 +35,7 @@ async function getKubeClusterStatus(req: express.Request, res: express.Response)
   res.json(resBody);
 }
 
-router.route(Endpoints.Cluster.path)
+router.route(ApiEndpoints.Cluster.Root.path)
   .get(async (req, res, next) => {
     return getKubeClusterStatus(req, res);
   })

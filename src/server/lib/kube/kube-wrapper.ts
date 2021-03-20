@@ -1,5 +1,5 @@
 import * as k8s from "@kubernetes/client-node";
-import ApiResponses from "../../../common/interfaces/api-responses";
+import ApiResponses from "../../../common/api-responses";
 import Log from "../../logger";
 import { getFriendlyHTTPError } from "../../util";
 

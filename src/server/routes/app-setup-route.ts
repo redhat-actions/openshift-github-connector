@@ -2,12 +2,12 @@ import express from "express";
 import { v4 as uuid } from "uuid";
 
 import { getClientUrl, getServerUrl, removeTrailingSlash } from "../util";
-import Endpoints from "../../common/endpoints";
-import { GitHubAppConfig } from "../../common/interfaces/github-app";
+import ApiEndpoints from "../../common/api-endpoints";
+import { GitHubAppConfig } from "../../common/types/github-app";
 import GitHubApp from "../lib/gh-app/app";
 import { send405, sendError } from "../util/send-error";
 import { createAppConfig, getAppManifest } from "../lib/gh-app/app-config";
-import ApiResponses from "../../common/interfaces/api-responses";
+import ApiResponses from "../../common/api-responses";
 import Log from "../logger";
 
 const router = express.Router();
@@ -16,7 +16,7 @@ let githubAppConfig: GitHubAppConfig | undefined;
 // hack
 let clientUrl: string | undefined;
 
-router.route(Endpoints.Setup.CreateApp.path)
+router.route(ApiEndpoints.Setup.CreateApp.path)
   .get(async (req, res, next) => {
     const state = uuid();
     const manifest = getAppManifest(getServerUrl(req, false));
@@ -30,7 +30,7 @@ router.route(Endpoints.Setup.CreateApp.path)
   })
   .all(send405([ "GET" ]));
 
-router.route(Endpoints.Setup.PostCreateApp.path)
+router.route(ApiEndpoints.Setup.PostCreateApp.path)
   .get(async (req, res, next) => {
     // const { code, state } = req.query;
     const qsCode = req.query.code;
@@ -49,7 +49,7 @@ router.route(Endpoints.Setup.PostCreateApp.path)
   })
   .all(send405([ "GET" ]));
 
-router.route(Endpoints.Setup.PostInstallApp.path)
+router.route(ApiEndpoints.Setup.PostInstallApp.path)
   .get(async (req, res, next) => {
     // 'install' or 'update'
     // const setupAction = req.query.setup_action;
@@ -72,7 +72,7 @@ router.route(Endpoints.Setup.PostInstallApp.path)
       throw new Error("clientUrl is undefined, nowhere to redirect to");
     }
 
-    const redirectUrl = clientUrl + Endpoints.App.path;
+    const redirectUrl = clientUrl + ApiEndpoints.App.Root.path;
     Log.debug(`Post-install redirect to ${redirectUrl}`);
     return res.redirect(redirectUrl);
   })

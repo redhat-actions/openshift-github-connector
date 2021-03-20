@@ -2,10 +2,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import { Button, Jumbotron } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import Endpoints from "../../common/endpoints";
+import ApiEndpoints from "../../common/api-endpoints";
 import DataFetcher from "../components/data-fetcher";
+import ClientPages from "./client-pages";
 
-export default function homepage(): JSX.Element {
+export default function Homepage(): JSX.Element {
   return (
     <React.Fragment>
       <Jumbotron className="text-black">
@@ -25,7 +26,7 @@ export default function homepage(): JSX.Element {
         </ul>
 
         <div className="row justify-content-center">
-          <Link to={Endpoints.Setup.Root.path}>
+          <Link to={ClientPages.Setup.path}>
             <Button className="btn-primary btn-lg d-flex align-items-center mt-3 px-5">
               <div className="font-weight-bold align-self-center" title="Get Started">
                 Get Started
@@ -39,7 +40,7 @@ export default function homepage(): JSX.Element {
           <div className="ml-auto"></div>
           <div>
             Backend status:&nbsp;
-            <DataFetcher type="api" endpoint={Endpoints.Health}>
+            <DataFetcher type="api" endpoint={ApiEndpoints.Health}>
               {(data: { status: string }) => (
                 <React.Fragment>
                   <span className={data.status === "OK" ? "text-success" : "text-danger"}>

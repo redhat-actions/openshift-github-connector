@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
-import Endpoints from "../../../common/endpoints";
+import ApiEndpoints from "../../../common/api-endpoints";
 import Log from "../../logger";
-import { GitHubAppConfig, GitHubAppConfigNoSecrets, GitHubAppManifest } from "../../../common/interfaces/github-app";
+import { GitHubAppConfig, GitHubAppConfigNoSecrets, GitHubAppManifest } from "../../../common/types/github-app";
 
 // https://stackoverflow.com/questions/42999983/typescript-removing-readonly-modifier
 type Writeable<T> = { -readonly [K in keyof T]: T[K] };
@@ -29,9 +29,9 @@ export function getAppManifest(serverUrl: string): GitHubAppManifest {
     }
 
     // eslint-disable-next-line camelcase
-    const setup_url = serverUrlNoSlash + Endpoints.Setup.PostInstallApp;
+    const setup_url = serverUrlNoSlash + ApiEndpoints.Setup.PostInstallApp;
     // eslint-disable-next-line camelcase
-    const redirect_url = serverUrlNoSlash + Endpoints.Setup.PostCreateApp;
+    const redirect_url = serverUrlNoSlash + ApiEndpoints.Setup.PostCreateApp;
 
     // https://docs.github.com/en/developers/apps/creating-a-github-app-from-a-manifest#github-app-manifest-parameters
     // Tthe following parameters can also be in this payload
@@ -41,7 +41,7 @@ export function getAppManifest(serverUrl: string): GitHubAppManifest {
         description: "Connect your OpenShift cluster to GitHub Actions",
         url: "https://github.com/redhat-actions",
         hook_attributes: {
-            url: serverUrlNoSlash + Endpoints.Webhook,
+            url: serverUrlNoSlash + ApiEndpoints.Webhook,
         },
         // request_oauth_on_install: true,
         setup_url,

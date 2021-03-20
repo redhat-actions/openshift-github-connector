@@ -8,7 +8,7 @@ import Routes from "./routes";
 import { send405, sendError } from "./util/send-error";
 import Log, { getLoggingMiddleware } from "./logger";
 import { startup } from "./startup";
-import Endpoints from "../common/endpoints";
+import ApiEndpoints from "../common/api-endpoints";
 
 const app = express();
 
@@ -24,18 +24,6 @@ const publicDir = path.join(process.cwd(), "public");
 Log.info(`Static resources from ${publicDir}`);
 app.use(express.static(publicDir));
 
-// https://github.com/reactjs/express-react-views/issues/79
-// const viewsDir = path.resolve(__dirname, "..", "views");
-// viewEngine = "tsx";
-// const viewEngine = "js";
-
-// Log.info(`Using ${viewEngine} as view engine from directory ${viewsDir}`);
-
-// app.set("views", viewsDir);
-// app.engine(viewEngine, createReactEngine({ settings: { env: reactViewEnv } }));
-// app.set("view engine", viewEngine);
-// app.set("view engine", "pug");
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -45,21 +33,21 @@ app.use(getLoggingMiddleware());
 
 Object.values(Routes).map((router) => app.use(router));
 
-app.route("/").get((req, res, next) => {
-  res.send(`Hello!`);
+app.route(ApiEndpoints.Api.path).get((req, res, next) => {
+  res.send(`Hello! This is the API root.`);
 }).all(send405([ "GET" ]));
 
 const sendHealth = (res: express.Response): void => {
   res.json({ status: "OK" });
 };
 
-app.route(Endpoints.Health.path)
+app.route(ApiEndpoints.Health.path)
   .get((req, res, next) => sendHealth(res))
   .all(send405([ "GET" ]));
 
 // catch 404
 // app.use((req, res, next) => res.status(404).render(Views.NotFound, { path: req.path }));
-app.use((req, res, next) => sendError(res, 404, `No page at ${req.url}`));
+app.use((req, res, next) => sendError(res, 404, `No route at ${req.url}`));
 
 // error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

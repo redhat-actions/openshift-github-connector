@@ -10,21 +10,34 @@ function getLogger(): log4js.Logger {
     return _logger;
   }
 
-  const FILENAME_LEN = 15;
+  const FILENAME_LEN = 18;
+
+  // https://log4js-node.github.io/log4js-node/layouts.html#Pattern-format
+  const loggerLayout = {
+    type: "pattern",
+    pattern: `%[%-5p %d %${FILENAME_LEN}f{1}:%3l%] | %m`,
+  };
+
   const config = {
     appenders: {
       out: {
         type: "stdout",
-        // https://log4js-node.github.io/log4js-node/layouts.html#Pattern-format
-        layout: {
-          type: "pattern",
-          pattern: `%[%-5p %d %${FILENAME_LEN}f{1}:%3l%] | %m`,
-        },
+        layout: loggerLayout,
+      },
+      file: {
+        // https://log4js-node.github.io/log4js-node/file.html
+        type: "file",
+        // removes colour
+        pattern: loggerLayout.pattern.replace(/%\[/g, "").replace(/%\]/g, ""),
+        filename: "server.log",
+        maxLogSize: 1024 * 1024,
+        keepFileExt: true,
+        // flags: "w",   // write instead of append
       },
     },
     categories: {
       [LOG_CATEGORY]: {
-        appenders: [ "out" ],
+        appenders: [ "out", "file" ],
         level: "debug",
         enableCallStack: true,
       },
@@ -50,8 +63,9 @@ export function getLoggingMiddleware(): any {
     format: (req: express.Request, res: express.Response, format) => {
       let fmt = `:method :url :status`;
       if (Object.keys(req.body).length > 0) {
-        fmt += ` :content-length ${JSON.stringify(req.body)}`;
+        fmt += `\nReceived body:\n${JSON.stringify(req.body)}`;
       }
+
       return format(fmt);
     },
   });

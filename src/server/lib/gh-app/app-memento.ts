@@ -2,7 +2,7 @@ import os from "os";
 import path from "path";
 import { promises as fs } from "fs";
 import GitHubApp from "./app";
-import { GitHubAppConfig } from "../../../common/interfaces/github-app";
+import { GitHubAppConfig } from "../../../common/types/github-app";
 import Log from "../../logger";
 
 type GitHubAppMemento = GitHubAppConfig & { installationID: number };

@@ -4,9 +4,10 @@ import {
   Button, Spinner, Table,
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import Endpoints, { ApiEndpoint } from "../../../common/endpoints";
-import ApiResponses from "../../../common/interfaces/api-responses";
+import ApiEndpoints from "../../../common/api-endpoints";
+import ApiResponses from "../../../common/api-responses";
 import DataFetcher from "../../components/data-fetcher";
+import ClientPages, { ClientPage } from "../client-pages";
 
 import "../../css/setup.css";
 
@@ -14,8 +15,8 @@ function getStatusCells(success: boolean, btnLabels: {
   failure: string,
   success: string
 }, btnLinks: {
-  failure: ApiEndpoint,
-  success: ApiEndpoint
+  failure: ClientPage,
+  success: ClientPage
 }) {
 
   const statusIcon = success
@@ -49,7 +50,7 @@ export default function SetupHomePage() {
       <td>
         <FontAwesomeIcon icon="question" className="text-warning" />
       </td>
-      <td className="push-right">
+      <td className="push-right align-middle">
         <Spinner animation="border" variant="primary" style={{ height: "1em", width: "1em" }}/>
       </td>
     </React.Fragment>
@@ -64,15 +65,15 @@ export default function SetupHomePage() {
           <tbody>
             <tr>
               <td>App Bound</td>
-              <DataFetcher type="api" endpoint={Endpoints.App} loadingDisplay={tdLoadingDisplay} >
+              <DataFetcher type="api" endpoint={ApiEndpoints.App.Root} loadingDisplay={tdLoadingDisplay} >
                 {
                   (data: ApiResponses.GitHubAppState) => {
                     return getStatusCells(data.app, {
                       failure: "Set up App",
                       success: "View App",
                     }, {
-                      failure: Endpoints.Setup.CreateApp,
-                      success: Endpoints.App,
+                      failure: ClientPages.SetupApp,
+                      success: ClientPages.App,
                     });
                   }
                 }
@@ -80,15 +81,15 @@ export default function SetupHomePage() {
             </tr>
             <tr>
               <td>Cluster connected</td>
-              <DataFetcher type="api" endpoint={Endpoints.Cluster} loadingDisplay={tdLoadingDisplay}>
+              <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root} loadingDisplay={tdLoadingDisplay}>
                 {
                   (data: ApiResponses.ClusterState) => {
                     return getStatusCells(data.connected, {
                       failure: "View Error",
                       success: "View Cluster",
                     }, {
-                      failure: Endpoints.Cluster,
-                      success: Endpoints.Cluster,
+                      failure: ClientPages.Cluster,
+                      success: ClientPages.Cluster,
                     });
                   }
                 }
@@ -96,15 +97,15 @@ export default function SetupHomePage() {
             </tr>
             <tr>
               <td>Service Account Bound</td>
-              <DataFetcher type="api" endpoint={Endpoints.Cluster} loadingDisplay={tdLoadingDisplay}>
+              <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.ServiceAccount} loadingDisplay={tdLoadingDisplay}>
                 {
-                  (data: any) => {
-                    return getStatusCells(data.serviceAccount, {
+                  (data: ApiResponses.ServiceAccountState) => {
+                    return getStatusCells(data.serviceAccountSetup, {
                       failure: "Create Service Account",
                       success: "View Service Account",
                     }, {
-                      failure: Endpoints.Setup.CreateSA,
-                      success: Endpoints.Cluster,
+                      failure: ClientPages.SetupSA,
+                      success: ClientPages.Cluster,
                     });
                   }
                 }

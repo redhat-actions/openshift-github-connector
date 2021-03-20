@@ -1,4 +1,8 @@
-import { GitHubAppConfigNoSecrets, GitHubAppManifest, GitHubAppUrls } from "./github-app";
+import {
+  GitHubAppConfigNoSecrets,
+  GitHubAppManifest,
+  GitHubAppUrls,
+} from "./types/github-app";
 
 export namespace ApiResponses {
 
@@ -49,6 +53,19 @@ export namespace ApiResponses {
   }
 
   export type ClusterState = ClusterStateDisconnected | ClusterStateConnected;
+
+  export interface ServiceAccountStateSetup {
+    serviceAccountSetup: true;
+    serviceAccount: {
+      name: string;
+    };
+  }
+
+  export interface ServiceAccountStateNotSetup {
+    serviceAccountSetup: false;
+  }
+
+  export type ServiceAccountState = ServiceAccountStateSetup | ServiceAccountStateNotSetup;
 }
 
 export default ApiResponses;

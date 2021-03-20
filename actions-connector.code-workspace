@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"editor.tabSize": 2,
+		"typescript.format.semicolons": "insert",
+		"typescript.preferences.quoteStyle": "double",
+    "javascript.preferences.quoteStyle": "double",
+		"js/ts.implicitProjectConfig.checkJs": true,
+
+		"css.lint.float": "warning",
+    "css.lint.duplicateProperties": "warning",
+    "css.lint.zeroUnits": "warning",
+
+		"files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+	}
+}

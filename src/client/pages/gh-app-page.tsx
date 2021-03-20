@@ -2,22 +2,23 @@ import React from "react";
 import { Route } from "react-router-dom";
 
 import AppPageCard from "../components/app-page-card";
-import ApiResponses from "../../common/interfaces/api-responses";
 import DataFetcher from "../components/data-fetcher";
-import Endpoints from "../../common/endpoints";
+import ApiEndpoints from "../../common/api-endpoints";
 import FaBtnBody from "../components/fa-btn-body";
+import ApiResponses from "../../common/api-responses";
+import ClientPages from "./client-pages";
 
-export default function AppPage() {
+export default function GitHubAppPage() {
   const DOCS_ICON = "book";
   const EDIT_ICON = "cog";
 
   return (
-    <DataFetcher loadingDisplay="spinner" type="api" endpoint={Endpoints.App}>
+    <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.App.Root}>
       {(data: ApiResponses.GitHubAppState) => {
         if (!data.app) {
           return (
             <Route render={ ({ history }) => {
-              history.replace(Endpoints.Setup.CreateApp.path);
+              history.replace(ClientPages.SetupApp.path);
               return (<></>);
             }} />
           );
@@ -30,7 +31,7 @@ export default function AppPage() {
               <div className="ml-auto"></div>
               <button className="btn btn-lg btn-danger mr-4" title="Unbind" onClick={
                 async () => {
-                  await fetch(Endpoints.App.path, { method: "DELETE" }).catch(console.error);
+                  await fetch(ApiEndpoints.App.Root.path, { method: "DELETE" }).catch(console.error);
                   window.location.reload();
                 }
               }>
@@ -48,6 +49,7 @@ export default function AppPage() {
               icon: DOCS_ICON,
               label: "Docs",
               tooltip: "GitHub Documentation",
+              mr: true,
             }, {
               href: data.appUrls.permissions,
               icon: EDIT_ICON,
@@ -63,11 +65,11 @@ export default function AppPage() {
               </ul>
             </AppPageCard>
             <AppPageCard header="Event Subscriptions" buttons={[{
-              // eslint-disable-next-line max-len
               href: "https://docs.github.com/en/developers/apps/creating-a-github-app-using-url-parameters#github-app-webhook-events",
               icon: DOCS_ICON,
               label: "Docs",
               tooltip: "GitHub Documentation",
+              mr: true,
             }, {
               href: data.appUrls.permissions,
               icon: EDIT_ICON,

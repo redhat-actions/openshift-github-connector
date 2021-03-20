@@ -2,12 +2,12 @@ import React from "react";
 import { Jumbotron, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import DataFetcher from "../../components/data-fetcher";
-import Endpoints from "../../../common/endpoints";
-import ApiResponses from "../../../common/interfaces/api-responses";
+import ApiEndpoints from "../../../common/api-endpoints";
+import ApiResponses from "../../../common/api-responses";
 
 export default function SetupAppPage(): JSX.Element {
   return (
-    <DataFetcher loadingDisplay="spinner" type="api" endpoint={Endpoints.Setup.CreateApp}>{
+    <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.Setup.CreateApp}>{
       (data: ApiResponses.CreateAppResponse) => {
         const githubManifestUrl = `https://github.com/settings/apps/new?state=${data.state}`;
 

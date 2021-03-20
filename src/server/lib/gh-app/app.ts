@@ -2,7 +2,7 @@ import { App } from "@octokit/app";
 import { Octokit } from "@octokit/core";
 
 import Log from "../../logger";
-import { GitHubAppConfig, GitHubAppConfigNoSecrets, GitHubAppUrls } from "../../../common/interfaces/github-app";
+import { GitHubAppConfig, GitHubAppConfigNoSecrets, GitHubAppUrls } from "../../../common/types/github-app";
 import GitHubAppMemento from "./app-memento";
 import { getConfigWithoutSecrets } from "./app-config";
 

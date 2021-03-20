@@ -1,6 +1,6 @@
 import express from "express";
 import { getReasonPhrase, StatusCodes } from "http-status-codes";
-import ApiResponses from "../../common/interfaces/api-responses";
+import ApiResponses from "../../common/api-responses";
 import Log from "../logger";
 
 export function sendError(

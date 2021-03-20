@@ -1,9 +1,9 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import { Button, Table } from "react-bootstrap";
-import Endpoints from "../../common/endpoints";
-import ApiResponses from "../../common/interfaces/api-responses";
+import ApiEndpoints from "../../common/api-endpoints";
+import ApiResponses from "../../common/api-responses";
 import DataFetcher from "../components/data-fetcher";
+import FaBtnBody from "../components/fa-btn-body";
 
 export default function ClusterPage(): JSX.Element {
   return (
@@ -12,27 +12,26 @@ export default function ClusterPage(): JSX.Element {
         It&apos;s the cluster page
         <div className="ml-auto"></div>
         <Button title="Reload Cluster Status" className="btn-light" onClick={async () => {
-          await fetch(Endpoints.Cluster.path, { method: "PUT" });
+          await fetch(ApiEndpoints.Cluster.Root.path, { method: "PUT" });
           window.location.reload();
         }}>
-          <FontAwesomeIcon fixedWidth icon="sync-alt"/>
-          Refresh
+          <FaBtnBody icon="sync-alt" text="Refresh" />
         </Button>
       </h1>
-      <DataFetcher type="api" endpoint={Endpoints.Cluster} loadingDisplay="spinner">{
-        (data: ApiResponses.ClusterState) => {
-          if (!data.connected) {
-            return (
-              <React.Fragment>
-                <h5>Could not obtain cluster info:</h5>
-                <p className="text-danger">{data.error}</p>
-              </React.Fragment>
-            );
-          }
-          return (
-            <React.Fragment>
-              <Table className="table-dark">
-                <tbody>
+      <Table className="table-dark">
+        <tbody>
+          <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root} loadingDisplay="spinner">{
+            (data: ApiResponses.ClusterState) => {
+              if (!data.connected) {
+                return (
+                  <React.Fragment>
+                    <h5>Could not obtain cluster info:</h5>
+                    <p className="text-danger">{data.error}</p>
+                  </React.Fragment>
+                );
+              }
+              return (
+                <React.Fragment>
                   {Object.entries({
                     Cluster: data.clusterInfo.name,
                     "Api Server": <a href={data.clusterInfo.server}>{data.clusterInfo.server}</a>,
@@ -47,14 +46,31 @@ export default function ClusterPage(): JSX.Element {
                         {value}
                       </td>
                     </tr>
-                  ))
-                  }
-                </tbody>
-              </Table>
-            </React.Fragment>
-          );
-        }
-      }</DataFetcher>
+                  ))}
+                </React.Fragment>
+              );
+            }
+          }
+          </DataFetcher>
+          <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.ServiceAccount} loadingDisplay="none">{
+            (data: ApiResponses.ServiceAccountState) => {
+              return (
+                <React.Fragment>
+                  <tr>
+                    <td className="font-weight-bold">
+                      Service Account
+                    </td>
+                    <td>
+                      {data.serviceAccountSetup ? data.serviceAccount.name : <span className="text-danger">None</span> }
+                    </td>
+                  </tr>
+                </React.Fragment>
+              );
+            }
+          }
+          </DataFetcher>
+        </tbody>
+      </Table>
     </React.Fragment>
   );
 }

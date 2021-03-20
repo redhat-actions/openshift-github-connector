@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch, Route } from "react-router-dom";
+import { Switch } from "react-router-dom";
 import { Helmet } from "react-helmet";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -10,13 +10,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./css/colors.css";
 import "./css/index.css";
 
-import Homepage from "./pages/home-page";
-import AppPage from "./pages/app-page";
-import Endpoints from "../common/endpoints";
-import SetupAppPage from "./pages/setup/setup-app";
-import SetupHomePage from "./pages/setup/setup-home";
-import ClusterPage from "./pages/cluster-page";
-import SetupSAPage from "./pages/setup/setup-sa";
+import ClientPages from "./pages/client-pages";
 
 export default function app(): JSX.Element {
   library.add(fab, fas);
@@ -29,12 +23,10 @@ export default function app(): JSX.Element {
       <div id="wrapper" className="d-flex w-100 justify-content-center">
         <main>
           <Switch>
-            <Route exact path="/" component={Homepage}></Route>
-            <Route exact path={Endpoints.App.path} component={AppPage}></Route>
-            <Route exact path={Endpoints.Setup.Root.path} component={SetupHomePage}></Route>
-            <Route exact path={Endpoints.Setup.CreateApp.path} component={SetupAppPage}></Route>
-            <Route exact path={Endpoints.Cluster.path} component={ClusterPage}></Route>
-            <Route exact path={Endpoints.Setup.CreateSA.path} component={SetupSAPage}></Route>
+            {
+              /* Creates the Route objects that map routes to components that represent pages */
+              Object.values(ClientPages).map((page) => page.route)
+            }
           </Switch>
         </main>
       </div>

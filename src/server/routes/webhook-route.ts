@@ -1,11 +1,11 @@
 import express from "express";
 import { send405 } from "../util/send-error";
-import Endpoints from "../../common/endpoints";
+import ApiEndpoints from "../../common/api-endpoints";
 
 const router = express.Router();
 export default router;
 
-router.route(Endpoints.Webhook.path)
+router.route(ApiEndpoints.Webhook.path)
   .post((req, res, next) => {
     // Log.info(`A WEBHOOK`, req.body);
     res.sendStatus(204);
