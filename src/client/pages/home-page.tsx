@@ -36,8 +36,7 @@ export default function Homepage(): JSX.Element {
           </Link>
         </div>
 
-        <div className="d-flex">
-          <div className="ml-auto"></div>
+        <div className="d-flex justify-content-end mt-3">
           <div>
             Backend status:&nbsp;
             <DataFetcher type="api" endpoint={ApiEndpoints.Health}>

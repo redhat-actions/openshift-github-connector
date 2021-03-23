@@ -1,7 +1,7 @@
 import express from "express";
 import { v4 as uuid } from "uuid";
 
-import { getClientUrl, getServerUrl, removeTrailingSlash } from "../util";
+import { getClientUrl as getFrontendUrl, getServerUrl, removeTrailingSlash } from "../util";
 import ApiEndpoints from "../../common/api-endpoints";
 import { GitHubAppConfig } from "../../common/types/github-app";
 import GitHubApp from "../lib/gh-app/app";
@@ -24,7 +24,7 @@ router.route(ApiEndpoints.Setup.CreateApp.path)
     const resBody: ApiResponses.CreateAppResponse = {
       manifest, state,
     };
-    clientUrl = removeTrailingSlash(getClientUrl(req));
+    clientUrl = removeTrailingSlash(getFrontendUrl(req));
 
     return res.json(resBody);
   })

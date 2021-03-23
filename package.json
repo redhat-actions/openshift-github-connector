@@ -17,11 +17,15 @@
     "dev:server": "concurrently -p name -c 'yellow,magenta' -n 'webpack,srv' 'yarn dev:server:webpack' 'yarn dev:server:nodemon'",
     "dev:server:webpack": "webpack --config webpack.config.server.js --watch",
     "dev:server:nodemon": "rm -f build/server.js && wait-on -l build/server.js && nodemon --inspect build/server.js",
-    "build": "yarn build:client && yarn build:backend",
+    "build": "yarn build:client && yarn build:server",
     "build:client": "react-scripts build",
     "build:server": "webpack --config webpack.config.server.js",
-    "docker-build": "docker build -t openshift-actions-connector .",
-    "docker-run": "docker run -p 3003:3003 --name openshift-actions-connector openshift-actions-connector:latest",
+    "docker-build:client": "docker build . -f containerize/Containerfile.client -t openshift-actions-connector-client:latest",
+    "docker-build:server": "docker build . -f containerize/Containerfile.server -t openshift-actions-connector-server:latest",
+    "docker-build": "concurrently -p name -c 'cyan,yellow' -n 'client,server' 'yarn docker-build:client' 'yarn docker-build:server'",
+    "docker-run:client": "docker run -p 3000:3000 openshift-actions-connector-client:latest",
+    "docker-run:server": "docker run --init -p 3003:3003 openshift-actions-connector-server:latest",
+    "docker-run": "concurrently -p name -c 'cyan,yellow' -n 'ui,srv' 'yarn docker-run:client' 'yarn docker-run:server'",
     "lint": "eslint ."
   },
   "dependencies": {
@@ -34,6 +38,7 @@
     "@octokit/core": "^3.3.0",
     "bootstrap": "^4.6.0",
     "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
     "http-status-codes": "^2.1.4",
@@ -46,6 +51,7 @@
     "react-dom": "^17.0.1",
     "react-helmet": "^6.1.0",
     "react-router-dom": "^5.2.0",
+    "serve": "^11.3.2",
     "source-map-support": "^0.5.19",
     "uuid": "^8.3.2",
     "web-vitals": "^1.1.1"
@@ -53,6 +59,7 @@
   "devDependencies": {
     "@redhat-actions/eslint-config": "^1.2.14",
     "@types/cookie-parser": "^1.4.2",
+    "@types/cors": "^2.8.10",
     "@types/express": "^4.17.11",
     "@types/log4js": "^2.3.5",
     "@types/node": "14",

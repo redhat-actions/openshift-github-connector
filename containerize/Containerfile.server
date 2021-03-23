@@ -1,0 +1,55 @@
+FROM node:14-alpine as builder
+
+WORKDIR /app
+
+COPY package.json yarn.lock ./
+
+RUN yarn install --frozen-lockfile --no-cache
+
+# note: eslintrc must be copied
+# https://github.com/facebook/create-react-app/issues/9791
+COPY tsconfig.json webpack.config.server.js .eslintrc.js README.md ./
+COPY src/ ./src
+
+ENV NODE_ENV production
+ENV WEBPACK_NODE_MODULES true
+RUN yarn build:server
+RUN mv -v build/ server/
+
+##################################################
+
+FROM node:14-alpine
+
+ARG USER=node
+ENV USER $USER
+
+RUN mkdir -v /app  \
+    && chown $USER:0 /app \
+    && chmod 774 /app
+WORKDIR /app
+
+RUN apk add curl
+RUN curl -sSLf \
+    https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.7.2/openshift-client-linux.tar.gz \
+    | tar --exclude README.md -xzvf - \
+    && mv oc kubectl /usr/local/bin
+
+# RUN yarn global add --frozen-lockfile \
+    # These are the external dependencies
+    # as specified in server webpack.config
+    # log4js express @kubernetes/client-node
+
+COPY --chown=$USER package.json yarn.lock ./
+
+USER $USER
+
+ENV NODE_ENV production
+
+ARG BACKEND_PORT=3003
+ENV BACKEND_PORT $BACKEND_PORT
+
+EXPOSE $BACKEND_PORT
+
+COPY --chown=$USER --from=builder /app/server ./
+
+ENTRYPOINT [ "node", "server.js" ]

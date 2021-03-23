@@ -1,6 +1,8 @@
 import React from "react";
 import { Spinner } from "react-bootstrap";
 import UrlPath from "../../common/types/url-path";
+import Constants from "../util/constants";
+import getEndpointUrl from "../util/get-endpoint-url";
 
 interface BaseDataFetcherProps<Data> {
     children: (data: Data) => React.ReactNode;
@@ -71,12 +73,31 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
 
   private async fetchFromApi(apiEndpoint: string): Promise<Data> {
     console.log(`Fetching ${apiEndpoint}...`);
-    const res = await fetch(apiEndpoint);
+    const res = await fetch(getEndpointUrl(apiEndpoint), {
+      headers: {
+        Accept: Constants.CT_JSON,
+      },
+    });
+
+    if (res.status >= 400) {
+      throw new Error(`Received error from ${apiEndpoint}: ${await this.getHttpError(res)}`);
+    }
+
+    const ct = res.headers.get("Content-Type");
+    if (!ct || !ct.startsWith(Constants.CT_JSON)) {
+      console.error(`Received non-JSON response from ${apiEndpoint}. Content-Type is "${ct}"`);
+      throw new Error(await this.getHttpError(res));
+    }
+
     const data = await res.json();
     if (Object.keys(data).length === 0) {
       console.warn(`DataFetcher received empty response from ${apiEndpoint}`);
     }
     return data;
+  }
+
+  private async getHttpError(res: Response): Promise<string> {
+    return `${res.status} ${res.statusText}: ${await res.text()}`;
   }
 
   public render() {
@@ -108,7 +129,7 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
     else if (this.state.loadingError) {
       return (
         <span className="text-danger">
-          Error fetching data: {this.state.loadingError}
+          {this.state.loadingError.message}
         </span>
       );
     }

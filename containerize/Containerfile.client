@@ -1,0 +1,54 @@
+FROM node:14-alpine as builder
+
+WORKDIR /app
+
+COPY package.json yarn.lock ./
+
+RUN yarn install --frozen-lockfile --no-cache
+
+# note: eslintrc must be copied
+# https://github.com/facebook/create-react-app/issues/9791
+COPY tsconfig.json webpack.config.server.js .eslintrc.js README.md ./
+COPY public/ ./public
+COPY src/ ./src
+
+ARG PROTOCOL=http
+ARG BACKEND_PORT=3003
+# https://create-react-app.dev/docs/adding-custom-environment-variables/
+ENV REACT_APP_BACKEND_PROTOCOL $PROTOCOL
+ENV REACT_APP_BACKEND_PORT $BACKEND_PORT
+
+RUN yarn build:client
+RUN mv -v build/ client/
+
+##################################################
+
+FROM node:14-alpine
+
+ARG USER=node
+ENV USER $USER
+
+RUN mkdir -v /app  \
+    && chown $USER:0 /app \
+    && chmod 774 /app
+WORKDIR /app
+
+COPY --chown=$USER package.json yarn.lock ./
+RUN yarn global add --frozen-lockfile \
+    # This package is used to serve the bundled, static react app
+    serve
+
+USER $USER
+
+ENV NODE_ENV production
+
+ARG PROTOCOL=http
+ARG FRONTEND_PORT=3000
+ENV FRONTEND_PROTOCOL $PROTOCOL
+ENV FRONTEND_PORT $FRONTEND_PORT
+
+EXPOSE $FRONTEND_PORT
+
+COPY --chown=$USER --from=builder /app/client ./
+
+ENTRYPOINT [ "sh", "-c", "serve --listen $FRONTEND_PORT --single ./" ]

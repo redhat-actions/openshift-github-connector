@@ -3,3 +3,5 @@ dist/
 build/
 yarn-error.log
 server*.log
+client.out
+server.out

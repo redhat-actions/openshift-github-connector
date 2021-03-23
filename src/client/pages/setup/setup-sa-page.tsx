@@ -6,6 +6,7 @@ import ApiEndpoints from "../../../common/api-endpoints";
 import ApiRequests from "../../../common/api-requests";
 import CopyToClipboardBtn from "../../components/copy-btn";
 import FaBtnBody from "../../components/fa-btn-body";
+import getEndpointUrl from "../../util/get-endpoint-url";
 import ClientPages from "../client-pages";
 
 const saInputID = "serviceAccountName";
@@ -17,7 +18,7 @@ async function onSubmitServiceAccount() {
       serviceAccountName: saName,
     };
 
-    await fetch(ApiEndpoints.Cluster.ServiceAccount.path, {
+    await fetch(getEndpointUrl(ApiEndpoints.Cluster.ServiceAccount.path), {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",

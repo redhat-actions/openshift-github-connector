@@ -4,6 +4,7 @@ import ApiEndpoints from "../../common/api-endpoints";
 import ApiResponses from "../../common/api-responses";
 import DataFetcher from "../components/data-fetcher";
 import FaBtnBody from "../components/fa-btn-body";
+import getEndpointUrl from "../util/get-endpoint-url";
 
 export default function ClusterPage(): JSX.Element {
   return (
@@ -12,7 +13,7 @@ export default function ClusterPage(): JSX.Element {
         It&apos;s the cluster page
         <div className="ml-auto"></div>
         <Button title="Reload Cluster Status" className="btn-light" onClick={async () => {
-          await fetch(ApiEndpoints.Cluster.Root.path, { method: "PUT" });
+          await fetch(getEndpointUrl(ApiEndpoints.Cluster.Root.path), { method: "PUT" });
           window.location.reload();
         }}>
           <FaBtnBody icon="sync-alt" text="Refresh" />

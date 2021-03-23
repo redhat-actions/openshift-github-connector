@@ -7,6 +7,7 @@ import ApiEndpoints from "../../common/api-endpoints";
 import FaBtnBody from "../components/fa-btn-body";
 import ApiResponses from "../../common/api-responses";
 import ClientPages from "./client-pages";
+import getEndpointUrl from "../util/get-endpoint-url";
 
 export default function GitHubAppPage() {
   const DOCS_ICON = "book";
@@ -31,7 +32,7 @@ export default function GitHubAppPage() {
               <div className="ml-auto"></div>
               <button className="btn btn-lg btn-danger mr-4" title="Unbind" onClick={
                 async () => {
-                  await fetch(ApiEndpoints.App.Root.path, { method: "DELETE" }).catch(console.error);
+                  await fetch(getEndpointUrl(ApiEndpoints.App.Root.path), { method: "DELETE" }).catch(console.error);
                   window.location.reload();
                 }
               }>

@@ -10,7 +10,8 @@ export default class KubeWrapper {
     private static _initError: KubeHttpError | undefined;
 
     constructor(
-        private readonly config: k8s.KubeConfig
+        private readonly config: k8s.KubeConfig,
+        public readonly isInCluster: boolean,
     ) {
 
     }
@@ -45,12 +46,12 @@ export default class KubeWrapper {
 
         const tmpConfig = new k8s.KubeConfig();
 
-        // let isInCluster = false;
+        let isInCluster = false;
         try {
             tmpConfig.loadFromCluster();
             await KubeWrapper.testConfig(tmpConfig);
             Log.info(`Loaded k8s config from cluster`);
-            // isInCluster = true;
+            isInCluster = true;
         }
         catch (err) {
             // when running in openshift this should be a real error
@@ -62,7 +63,6 @@ export default class KubeWrapper {
                 tmpConfig.loadFromDefault();
                 await KubeWrapper.testConfig(tmpConfig);
                 Log.info(`Loaded k8s config from default`);
-                this._initError = undefined;
             }
             catch (err2) {
                 Log.error(`Failed to load default kubeconfig`, err);
@@ -71,7 +71,8 @@ export default class KubeWrapper {
             }
         }
 
-        this._instance = new KubeWrapper(tmpConfig);
+        this._instance = new KubeWrapper(tmpConfig, isInCluster);
+        this._initError = undefined;
 
         const currentNS = this._instance.getCurrentNamespace();
         if (currentNS) {
