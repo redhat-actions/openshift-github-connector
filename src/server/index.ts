@@ -51,6 +51,10 @@ const sendHealth = (res: express.Response): void => {
   res.json({ status: "OK" });
 };
 
+app.route("/health")
+  .get((req, res, next) => sendHealth(res))
+  .all(send405([ "GET" ]));
+
 app.route(ApiEndpoints.Health.path)
   .get((req, res, next) => sendHealth(res))
   .all(send405([ "GET" ]));
@@ -77,6 +81,7 @@ app.listen(port)
     Log.fatal(`Failed to start HTTP server`, err);
   });
 
-startup().catch((err) => {
-  Log.error(`Uncaught startup error`, err);
-});
+startup()
+  .catch((err) => {
+    Log.error(`Uncaught startup error`, err);
+  });

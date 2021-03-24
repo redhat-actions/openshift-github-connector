@@ -1,7 +1,7 @@
 import UrlPath from "./types/url-path";
 
 const Api = new UrlPath(undefined, "/api/v1");
-const Health = new UrlPath(undefined, "/health");
+const Health = new UrlPath(Api, "/health");
 
 const Setup = new UrlPath(Api, "/setup");
 const CreateApp = new UrlPath(Setup, "/create-app");

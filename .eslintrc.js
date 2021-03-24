@@ -31,7 +31,7 @@ module.exports = {
     "no-use-before-define": 0,
     "arrow-body-style": 0,
 
-    "@typescript-eslint/no-unused-vars": [ 2, { argsIgnorePattern: "(^_|req|res|next|context)" } ],
+    "@typescript-eslint/no-unused-vars": [ 2, { argsIgnorePattern: "(^_|req|res|next)" } ],
     "@typescript-eslint/no-inferrable-types": [ 2, { ignoreParameters: true }],
     "@typescript-eslint/no-use-before-define": 2,
     "@typescript-eslint/explicit-function-return-type": [ 2, { allowExpressions: true }],
@@ -45,7 +45,7 @@ module.exports = {
     rules: {
       "no-console": 0,
       "max-len": [ 2, 150 ],
-      "import/extensions": [ 2, { "css": "always" }],
+      "import/extensions": [ 2, { css: "always", json: "always" }],
       "@typescript-eslint/explicit-function-return-type": [ 0 ],
       "@typescript-eslint/explicit-module-boundary-types": [ 0 ],
       "@typescript-eslint/ban-types": [ 0 ],

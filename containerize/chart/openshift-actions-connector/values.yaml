@@ -1,0 +1,41 @@
+# Default values for openshift-actions-connector.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+appName: openshift-actions-connector
+
+securityContext:
+  securityContext:
+    # readOnlyRootFilesystem: true
+    runAsNonRoot: true
+
+################################################################################
+
+serverReplicaCount: 1
+
+serverImage: quay.io/tetchell/openshift-actions-connector-server
+serverTag: latest
+
+serverServiceName: openshift-actions-connector-server-service
+serverPort: 3003
+serverPortName: server-port
+
+deploymentLabels:
+# Labels:
+  app: openshift-actions-connector
+  # tier: server
+
+################################################################################
+
+clientReplicaCount: 1
+
+clientImage: quay.io/tetchell/openshift-actions-connector-client
+clientTag: latest
+
+clientServiceName: openshift-actions-connector-client-service
+clientPort: 3000
+clientPortName: client-port
+
+# clientLabels:
+  # app: openshift-actions-connector
+  # tier: client

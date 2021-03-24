@@ -15,11 +15,24 @@ jobs:
 
       - name: Lint
         run: |
-          npm run lint
+          yarn lint
 
       - name: Build in docker
         run: |
-          npm run docker-build
+          yarn docker-build
 
-      - name: Start in docker
+      - name: Run in docker
         run: |
+          yarn docker-run-d
+          sleep 10
+
+      - name: Test
+        shell: bash
+        run: |
+          set -eEx
+          curl -sSf http://localhost:3000
+          curl -sSf http://localhost:3003
+
+      - name: Take down
+        run: |
+          docker stop $(docker ps -q)

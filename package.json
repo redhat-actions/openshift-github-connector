@@ -10,6 +10,7 @@
     "node": ">= 14"
   },
   "scripts": {
+    "lint": "eslint .",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "dev": "concurrently -p name -c 'yellow,magenta,cyan' -n 'webpack,srv,ui' 'yarn dev:server:webpack' 'yarn dev:server:nodemon' 'yarn dev:client'",
@@ -20,13 +21,13 @@
     "build": "yarn build:client && yarn build:server",
     "build:client": "react-scripts build",
     "build:server": "webpack --config webpack.config.server.js",
-    "docker-build:client": "docker build . -f containerize/Containerfile.client -t openshift-actions-connector-client:latest",
-    "docker-build:server": "docker build . -f containerize/Containerfile.server -t openshift-actions-connector-server:latest",
-    "docker-build": "concurrently -p name -c 'cyan,yellow' -n 'client,server' 'yarn docker-build:client' 'yarn docker-build:server'",
-    "docker-run:client": "docker run -p 3000:3000 openshift-actions-connector-client:latest",
-    "docker-run:server": "docker run --init -p 3003:3003 openshift-actions-connector-server:latest",
-    "docker-run": "concurrently -p name -c 'cyan,yellow' -n 'ui,srv' 'yarn docker-run:client' 'yarn docker-run:server'",
-    "lint": "eslint ."
+    "docker-build": "docker build . -f containerize/Containerfile -t openshift-actions-connector:latest",
+    "docker-run": "docker run openshift-actions-connector:latest --name openshift-actions-connector -p 3000:3000 -p 3003:3003",
+    "docker-run-d": "docker run -d openshift-actions-connector:latest --name openshift-actions-connector -p 3000:3000 -p 3003:3003",
+    "depr-docker-build:client": "docker build . -f containerize/Containerfile.client -t openshift-actions-connector-client:latest",
+    "depr-docker-build:server": "docker build . -f containerize/Containerfile.server -t openshift-actions-connector-server:latest",
+    "depr-docker-build": "concurrently -p name -c 'cyan,yellow' -n 'client,server' 'yarn docker-build:client' 'yarn docker-build:server'",
+    "dept-docker-run": "concurrently -p name -c 'cyan,yellow' -n 'ui,srv' 'yarn docker-run:client' 'yarn docker-run:server'"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.34",

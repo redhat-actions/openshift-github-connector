@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appName }}-server
+spec:
+  selector:
+    matchLabels:
+      {{- toYaml .Values.deploymentLabels | nindent 6 }}
+  replicas: {{ .Values.serverReplicaCount }}
+  template:
+    metadata:
+      labels:
+        {{- toYaml .Values.deploymentLabels | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Values.appName }}-server
+          imagePullPolicy: Always
+          image: {{ .Values.serverImage }}:{{ .Values.serverTag }}
+          ports:
+            - name: {{ .Values.clientPortName }}
+              containerPort: {{ .Values.clientPort }}
+            - name: {{ .Values.serverPortName }}
+              containerPort: {{ .Values.serverPort }}
+
+          {{- toYaml .Values.securityContext | nindent 10 }}
+          resources:
+            limits:
+              cpu: 250m
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 512Mi

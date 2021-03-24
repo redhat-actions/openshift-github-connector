@@ -18,21 +18,8 @@ jobs:
 
       - name: Lint
         run: |
-          npm run lint
+          yarn lint
 
       - name: Build
         run: |
-          npm run build
-
-      - name: Start
-        run: |
-          nohup npm run start > output.txt &
-          sleep 5
-
-      - name: Test
-        run: |
-          curl -sSf http://localhost:3003
-
-      - name: Echo output
-        run: |
-          cat output.txt
+          yarn build

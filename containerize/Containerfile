@@ -12,11 +12,14 @@ COPY tsconfig.json webpack.config.server.js .eslintrc.js README.md ./
 COPY public/ ./public
 COPY src/ ./src
 
-ARG PROTOCOL=http
-ARG BACKEND_PORT=3003
+ENV NODE_ENV production
+ENV WEBPACK_NODE_MODULES true
+RUN yarn build:server
+RUN mv -v build/ server/
+
 # https://create-react-app.dev/docs/adding-custom-environment-variables/
-ENV REACT_APP_BACKEND_PROTOCOL $PROTOCOL
-ENV REACT_APP_BACKEND_PORT $BACKEND_PORT
+# ARG PROTOCOL=http
+# ENV REACT_APP_BACKEND_PROTOCOL $PROTOCOL
 
 RUN yarn build:client
 RUN mv -v build/ client/
@@ -33,10 +36,15 @@ RUN mkdir -v /app  \
     && chmod 774 /app
 WORKDIR /app
 
+RUN apk add curl
+
 COPY --chown=$USER package.json yarn.lock ./
 RUN yarn global add --frozen-lockfile \
     # This package is used to serve the bundled, static react app
     serve
+    # These are the external dependencies
+    # as specified in server webpack.config
+    # log4js express @kubernetes/client-node
 
 USER $USER
 
@@ -46,9 +54,14 @@ ARG PROTOCOL=http
 ARG FRONTEND_PORT=3000
 ENV FRONTEND_PROTOCOL $PROTOCOL
 ENV FRONTEND_PORT $FRONTEND_PORT
+ARG BACKEND_PORT=3003
+ENV BACKEND_PORT $BACKEND_PORT
 
 EXPOSE $FRONTEND_PORT
+EXPOSE $BACKEND_PORT
 
-COPY --chown=$USER --from=builder /app/client ./
+COPY --chown=$USER containerize/entrypoint.sh ./
+COPY --chown=$USER --from=builder /app/client ./client
+COPY --chown=$USER --from=builder /app/server ./server
 
-ENTRYPOINT [ "sh", "-c", "serve --listen $FRONTEND_PORT --single ./" ]
+ENTRYPOINT "./entrypoint.sh"

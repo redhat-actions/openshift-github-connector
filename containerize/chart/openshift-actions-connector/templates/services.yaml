@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.serverServiceName }}
+spec:
+    type: ClusterIP
+    selector:
+      {{ toYaml .Values.deploymentLabels | nindent 6}}
+    ports:
+    - port: 80
+      targetPort: {{ .Values.serverPort }}
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.clientServiceName }}
+spec:
+    type: ClusterIP
+    selector:
+      {{ toYaml .Values.deploymentLabels | nindent 6 }}
+    ports:
+    - port: 80
+      targetPort: {{ .Values.clientPort }}
+      protocol: TCP
