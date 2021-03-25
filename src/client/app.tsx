@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch } from "react-router-dom";
+import { Route, Switch } from "react-router-dom";
 import { Helmet } from "react-helmet";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -11,6 +11,7 @@ import "./css/colors.css";
 import "./css/index.css";
 
 import ClientPages from "./pages/client-pages";
+import NotFound from "./pages/errors/404";
 
 export default function app(): JSX.Element {
   library.add(fab, fas);
@@ -27,6 +28,9 @@ export default function app(): JSX.Element {
               /* Creates the Route objects that map routes to components that represent pages */
               Object.values(ClientPages).map((page) => page.route)
             }
+            <Route path="*">
+              <NotFound path={window.location.pathname}/>
+            </Route>
           </Switch>
         </main>
       </div>

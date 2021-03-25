@@ -13,10 +13,10 @@ securityContext:
 
 serverReplicaCount: 1
 
-serverImage: quay.io/tetchell/openshift-actions-connector-server
+serverImage: quay.io/tetchell/openshift-actions-connector
 serverTag: latest
 
-serverServiceName: openshift-actions-connector-server-service
+serverServiceName: actions-connector-server-svc
 serverPort: 3003
 serverPortName: server-port
 
@@ -29,10 +29,10 @@ deploymentLabels:
 
 clientReplicaCount: 1
 
-clientImage: quay.io/tetchell/openshift-actions-connector-client
-clientTag: latest
+# clientImage: quay.io/tetchell/openshift-actions-connector-client
+# clientTag: latest
 
-clientServiceName: openshift-actions-connector-client-service
+clientServiceName: actions-connector-client-svc
 clientPort: 3000
 clientPortName: client-port
 

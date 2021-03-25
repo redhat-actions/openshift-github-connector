@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function error(props: { path: string }): JSX.Element {
+export default function notFound(props: { path: string }): JSX.Element {
   return (
     <React.Fragment>
       <h1 className="mb-3">404 Not Found</h1>

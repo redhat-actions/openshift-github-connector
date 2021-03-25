@@ -63,6 +63,10 @@ export function removeTrailingSlash(s: string): string {
  * Transform an HTTP error eg. from the K8s library into something readable.
  */
 export function getFriendlyHTTPError(err: KubeHttpError): string {
+  if (!err.response) {
+    return JSON.stringify(err);
+  }
+
   const errRes = err.response;
   return `${errRes.request.method} ${errRes.request.uri.href}: `
         + `${errRes.statusCode} ${errRes.body.message || errRes.body.reason}`;

@@ -65,7 +65,7 @@ export default class KubeWrapper {
                 Log.info(`Loaded k8s config from default`);
             }
             catch (err2) {
-                Log.error(`Failed to load default kubeconfig`, err);
+                Log.warn(`Failed to load default kubeconfig`, err);
                 this._initError = err2;
                 throw err2;
             }

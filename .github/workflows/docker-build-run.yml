@@ -11,11 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: bahmutov/npm-install@v1
-
-      - name: Lint
+      - name: Install
         run: |
-          yarn lint
+          yarn --frozen-lockfile add wait-on
 
       - name: Build in docker
         run: |
@@ -23,16 +21,33 @@ jobs:
 
       - name: Run in docker
         run: |
-          yarn docker-run-d
-          sleep 10
+          set -eEx
+          nohup yarn docker-run > out.log 2>&1 &
+
+          yarn wait-on -l tcp:3000 -t 60000
+          yarn wait-on -l tcp:3003 -t 60000
+
+          echo "::group::docker inspect"
+          docker inspect $(docker ps -q)
+          echo "::endgroup::"
 
       - name: Test
         shell: bash
         run: |
           set -eEx
+          docker ps
           curl -sSf http://localhost:3000
           curl -sSf http://localhost:3003
 
+      - name: Logs
+        if: always()
+        run: |
+          echo "nohup output:"
+          cat out.log
+          echo "Container logs:"
+          docker logs $(docker ps -a -q)
+
       - name: Take down
+        if: always()
         run: |
           docker stop $(docker ps -q)

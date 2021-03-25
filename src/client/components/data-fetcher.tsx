@@ -86,6 +86,10 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
     const ct = res.headers.get("Content-Type");
     if (!ct || !ct.startsWith(Constants.CT_JSON)) {
       console.error(`Received non-JSON response from ${apiEndpoint}. Content-Type is "${ct}"`);
+      if (ct && ct.startsWith("text/html")) {
+        console.error(`Recieved HTML page as fetch response`);
+        throw new Error(`${apiEndpoint} could not be reached`);
+      }
       throw new Error(await this.getHttpError(res));
     }
 
@@ -129,7 +133,7 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
     else if (this.state.loadingError) {
       return (
         <span className="text-danger">
-          {this.state.loadingError.message}
+          Error fetching: {this.state.loadingError.message}
         </span>
       );
     }

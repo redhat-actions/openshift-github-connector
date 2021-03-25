@@ -82,6 +82,9 @@ app.listen(port)
   });
 
 startup()
+  .then(() => {
+    Log.info(`Finished startup`);
+  })
   .catch((err) => {
     Log.error(`Uncaught startup error`, err);
   });

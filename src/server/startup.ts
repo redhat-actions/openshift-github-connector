@@ -32,6 +32,4 @@ export async function startup(): Promise<void> {
     loadGitHubApp(),
     loadKube(),
   ]);
-
-  Log.info(`Finished startup`);
 }
