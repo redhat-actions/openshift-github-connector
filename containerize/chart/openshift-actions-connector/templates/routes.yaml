@@ -1,0 +1,43 @@
+
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ .Values.appName }}-client
+  annotations:
+    # https://docs.openshift.com/container-platform/4.1/networking/routes/route-configuration.html#nw-enabling-hsts_route-configuration
+    haproxy.router.openshift.io/hsts_header: max-age=31536000;includeSubDomains;preload
+spec:
+  # do not put another . or the TLS cert domain will no longer match
+  {{ $host := printf "%s-%s.%s" .Values.appName .Release.Namespace .Values.clusterDomain }}
+  host: {{ $host }}
+  path: /
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  to:
+    kind: Service
+    name: {{ .Values.clientServiceName }}
+    weight: 100
+
+  wildcardPolicy: None
+
+---
+
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ .Values.appName }}-server
+  annotations:
+    haproxy.router.openshift.io/hsts_header: max-age=31536000;includeSubDomains;preload
+spec:
+  host: {{ $host }}
+  path: /api
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  to:
+    kind: Service
+    name: {{ .Values.serverServiceName }}
+    weight: 100
+
+  wildcardPolicy: None

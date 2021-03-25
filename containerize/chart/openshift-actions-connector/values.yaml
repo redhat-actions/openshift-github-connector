@@ -2,12 +2,14 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-appName: openshift-actions-connector
+appName: actions-connector
 
 securityContext:
   securityContext:
     # readOnlyRootFilesystem: true
     runAsNonRoot: true
+
+clusterDomain: apps.member.crt-stage.com
 
 ################################################################################
 
