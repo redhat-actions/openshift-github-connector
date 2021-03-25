@@ -1,7 +1,6 @@
 import GitHubAppMemento from "./lib/gh-app/app-memento";
 import KubeWrapper from "./lib/kube/kube-wrapper";
 import Log from "./logger";
-import { getFriendlyHTTPError } from "./util";
 
 async function loadGitHubApp(): Promise<void> {
   try {
@@ -23,7 +22,7 @@ async function loadKube(): Promise<void> {
     await KubeWrapper.initialize();
   }
   catch (err) {
-    Log.warn(`Failed to initialize KubeWrapper`, getFriendlyHTTPError(err));
+    Log.warn(`Failed to initialize KubeWrapper`);
   }
 }
 

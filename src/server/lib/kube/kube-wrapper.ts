@@ -56,7 +56,7 @@ export default class KubeWrapper {
         catch (err) {
             // when running in openshift this should be a real error
             // Log.warn(`Failed to load config in-cluster`, err);
-            Log.warn(`Failed to load config in-cluster`);
+            Log.warn(`Failed to load config in-cluster`, err);
             this._initError = err;
 
             try {
@@ -65,7 +65,7 @@ export default class KubeWrapper {
                 Log.info(`Loaded k8s config from default`);
             }
             catch (err2) {
-                Log.warn(`Failed to load default kubeconfig`, err);
+                Log.warn(`Failed to load default kubeconfig`, err2);
                 this._initError = err2;
                 throw err2;
             }

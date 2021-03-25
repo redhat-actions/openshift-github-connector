@@ -23,13 +23,15 @@ jobs:
         run: |
           set -eEx
           nohup yarn docker-run > out.log 2>&1 &
+          echo "View output in Logs step below"
+          sleep 10
 
           yarn wait-on -l tcp:3000 -t 60000
           yarn wait-on -l tcp:3003 -t 60000
 
-          echo "::group::docker inspect"
+      - name: Docker inspect
+        run: |
           docker inspect $(docker ps -q)
-          echo "::endgroup::"
 
       - name: Test
         shell: bash
@@ -42,9 +44,10 @@ jobs:
       - name: Logs
         if: always()
         run: |
-          echo "nohup output:"
+          echo "============ nohup output ============"
           cat out.log
-          echo "Container logs:"
+          echo "========== end nohup output =========="
+          echo "=========== Container logs ==========="
           docker logs $(docker ps -a -q)
 
       - name: Take down
