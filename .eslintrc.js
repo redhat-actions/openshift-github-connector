@@ -36,7 +36,7 @@ module.exports = {
     "@typescript-eslint/no-use-before-define": 2,
     "@typescript-eslint/explicit-function-return-type": [ 2, { allowExpressions: true }],
     "indent": [ 2, 2 ],
-    "max-len": [ 2, 100, { ignoreUrls: true } ],
+    "max-len": [ 2, 120, { ignoreUrls: true } ],
 
     "react/react-in-jsx-scope": [ 0 ]
   },

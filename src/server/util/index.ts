@@ -2,21 +2,9 @@ import express from "express";
 import os from "os";
 import { URL } from "url";
 
-import { KubeHttpError } from "../lib/kube/kube-wrapper";
 import Log from "../logger";
 
-export function getServerUrl(req: express.Request, includePath: boolean = false): string {
-  let reqPath = "/";
-  if (includePath) {
-    reqPath = req.url;
-  }
-
-  const serverUrl = `${req.protocol}://${req.get("Host")}${reqPath}`;
-  Log.info(`Server URL is ${serverUrl}`);
-  return serverUrl;
-}
-
-export function getClientUrl(req: express.Request): string {
+export function getFrontendUrl(req: express.Request): string {
   const referrer = req.headers.referer;
   if (!referrer) {
     throw new Error(`Failed to get client URL; 'Referer' header missing!`);
@@ -59,10 +47,38 @@ export function removeTrailingSlash(s: string): string {
   return s;
 }
 
+export function getServerUrl(req: express.Request, includePath: boolean = false): string {
+  let reqPath = "/";
+  if (includePath) {
+    reqPath = req.url;
+  }
+
+  const serverUrl = removeTrailingSlash(`${req.protocol}://${req.get("Host")}${reqPath}`);
+  Log.info(`Server URL is ${serverUrl}`);
+  return serverUrl;
+}
+
+export function getClientUrl(req: express.Request): string {
+  const proto = req.secure ? "https" : "http";
+  // this may fail if the request is cross-origin
+  const host = req.header("X-Forwarded-Host") || req.header("Host");
+  const clientUrl = `${proto}://${host}`;
+  Log.info(`Client URL is ${clientUrl}`);
+  return clientUrl;
+}
+
+export function tob64(s: string): string {
+  return Buffer.from(s).toString("base64");
+}
+
+export function fromb64(data: string): string {
+  return Buffer.from(data, "base64").toString("utf-8");
+}
+
 /**
  * Transform an HTTP error eg. from the K8s library into something readable.
  */
-export function getFriendlyHTTPError(err: KubeHttpError): string {
+export function getFriendlyHTTPError(err: { response?: any } & Error): string {
   if (!err.response) {
     return JSON.stringify(err);
   }
@@ -70,4 +86,8 @@ export function getFriendlyHTTPError(err: KubeHttpError): string {
   const errRes = err.response;
   return `${errRes.request.method} ${errRes.request.uri.href}: `
         + `${errRes.statusCode} ${errRes.body.message || errRes.body.reason}`;
+}
+
+export function isInK8s(): boolean {
+  return process.env.IN_K8S === "true";
 }

@@ -27,6 +27,8 @@ module.exports = () => {
     },
     resolve: {
       extensions: [ ".ts", ".tsx", ".js" ],
+      // https://github.com/gr2m/universal-github-app-jwt/issues/38
+      mainFields: [ "main", "module" ],
     },
     externals: bundleNodeModules ? [
       // dependencies that webpack cannot resolve must go here

@@ -30,7 +30,7 @@ router.route(ApiEndpoints.App.Root.path)
 
     const resBody: ApiResponses.GitHubAppState = {
       app: true,
-      appConfig: app.configNoSecrets,
+      appConfig: app.config,
       appUrls: app.urls,
       installations,
       repositories,

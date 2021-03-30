@@ -9,7 +9,7 @@ import { send405, sendError } from "./util/send-error";
 import Log, { getLoggingMiddleware } from "./logger";
 import { startup } from "./startup";
 import ApiEndpoints from "../common/api-endpoints";
-import { getAllowedOrigins } from "./util";
+import { getAllowedOrigins, isInK8s } from "./util";
 
 const app = express();
 
@@ -36,6 +36,13 @@ app.use(cors({
 
 // app.use(morgan("dev"));
 app.use(getLoggingMiddleware());
+
+Log.info(`In k8s=${isInK8s()}`);
+
+if (isInK8s()) {
+  Log.info(`Trusting first proxy`);
+  app.set("trust proxy", 1);
+}
 
 Object.values(Routes).map((router) => app.use(router));
 

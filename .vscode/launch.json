@@ -22,7 +22,8 @@
             "request": "attach",
             "restart": true,
             "protocol": "inspector",
-            "port": 9229
+            "port": 9229,
+            "address": "localhost"
         }
     ],
     "compounds": []

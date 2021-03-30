@@ -27,8 +27,9 @@ async function loadKube(): Promise<void> {
 }
 
 export async function startup(): Promise<void> {
+  await loadKube();
+
   await Promise.all([
     loadGitHubApp(),
-    loadKube(),
   ]);
 }

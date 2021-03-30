@@ -22,6 +22,7 @@
     "build:server": "webpack --config webpack.config.server.js",
     "build": "yarn build:client && yarn build:server",
     "docker-build": "docker build . -f containerize/Containerfile --build-arg BUILD_DATE=$(date +'2021-03-24-21:34:10-0400') --build-arg VCS_REF=$(git rev-parse HEAD | cut -c -7) -t openshift-actions-connector:latest",
+    "docker-build:dev": "docker build . -f containerize/dev/Containerfile.dev -t openshift-actions-connector-dev:latest",
     "docker-run": "docker run --rm --name openshift-actions-connector -p 3000:3000 -p 3003:3003 openshift-actions-connector:latest",
     "docker-run-d": "docker run -d --rm --name openshift-actions-connector -p 3000:3000 -p 3003:3003 openshift-actions-connector:latest",
     "docker-tag": "export TAG=quay.io/tetchell/openshift-actions-connector:latest && docker tag openshift-actions-connector:latest $TAG",
@@ -39,8 +40,8 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.2",
     "@fortawesome/react-fontawesome": "^0.1.14",
     "@kubernetes/client-node": "^0.14.0",
-    "@octokit/app": "^10.2.2",
-    "@octokit/core": "^3.3.0",
+    "@octokit/app": "^11.1.0",
+    "@octokit/core": "^3.3.1",
     "bootstrap": "^4.6.0",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
@@ -66,7 +67,6 @@
     "@types/cookie-parser": "^1.4.2",
     "@types/cors": "^2.8.10",
     "@types/express": "^4.17.11",
-    "@types/log4js": "^2.3.5",
     "@types/node": "14",
     "@types/node-fetch": "^2.5.8",
     "@types/react": "^17.0.3",
@@ -88,7 +88,7 @@
     "webpack-cli": "^4.5.0",
     "webpack-node-externals": "^2.5.2"
   },
-  "proxy": "http://localhost:3003/",
+  "proxy": "https://3a9bd356ce0d.ngrok.io",
   "browserslist": {
     "production": [
       ">0.2%",

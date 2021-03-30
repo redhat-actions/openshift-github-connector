@@ -24,12 +24,11 @@ async function getKubeClusterStatus(req: express.Request, res: express.Response)
   }
 
   const clusterInfo = KubeWrapper.instance.getClusterConfig();
-  const namespace = KubeWrapper.instance.getCurrentNamespace();
 
   const resBody: ApiResponses.ClusterStateConnected = {
     connected: true,
     clusterInfo,
-    namespace,
+    namespace: KubeWrapper.instance.namespace,
   };
 
   res.json(resBody);

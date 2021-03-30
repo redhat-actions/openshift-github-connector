@@ -17,7 +17,7 @@ serve --listen $FRONTEND_PORT --single ./client &
 client_pid=$!
 sleep 1
 
-node server/server.js &
+node --inspect server/server.js &
 server_pid=$!
 
 wait $server_pid

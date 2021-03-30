@@ -1,12 +1,12 @@
 import fetch from "node-fetch";
 import ApiEndpoints from "../../../common/api-endpoints";
 import Log from "../../logger";
-import { GitHubAppConfig, GitHubAppConfigNoSecrets, GitHubAppManifest } from "../../../common/types/github-app";
+import { GitHubAppConfig, GitHubAppManifest } from "../../../common/types/github-app";
 
 // https://stackoverflow.com/questions/42999983/typescript-removing-readonly-modifier
-type Writeable<T> = { -readonly [K in keyof T]: T[K] };
+// type Writeable<T> = { -readonly [K in keyof T]: T[K] };
 
-export async function createAppConfig(code: string): Promise<GitHubAppConfig> {
+export async function exchangeCodeForAppConfig(code: string): Promise<GitHubAppConfig> {
     Log.info(`Exchanging code for app config...`);
     const codeConvertUrl = `https://api.github.com/app-manifests/${code}/conversions`;
 
@@ -22,28 +22,31 @@ export async function createAppConfig(code: string): Promise<GitHubAppConfig> {
     return config;
 }
 
-export function getAppManifest(serverUrl: string): GitHubAppManifest {
-    let serverUrlNoSlash = serverUrl;
-    if (serverUrlNoSlash.endsWith("/")) {
-        serverUrlNoSlash = serverUrlNoSlash.substring(0, serverUrlNoSlash.length - 1);
-    }
+export const CLIENT_CALLBACK_QUERYPARAM = `client_callback`;
+
+export function getAppManifest(serverUrl: string, clientUrl: string): GitHubAppManifest {
+    const clientCallback = `${clientUrl}/app`;
 
     // eslint-disable-next-line camelcase
-    const setup_url = serverUrlNoSlash + ApiEndpoints.Setup.PostInstallApp;
+    const setup_url = serverUrl + ApiEndpoints.Setup.PostInstallApp.path +
+        `?${CLIENT_CALLBACK_QUERYPARAM}=${clientCallback}`;
+
     // eslint-disable-next-line camelcase
-    const redirect_url = serverUrlNoSlash + ApiEndpoints.Setup.PostCreateApp;
+    const redirect_url = serverUrl + ApiEndpoints.Setup.PostCreateApp.path;
+    const incomingWebhookUrl = serverUrl + ApiEndpoints.Webhook.path;
 
     // https://docs.github.com/en/developers/apps/creating-a-github-app-from-a-manifest#github-app-manifest-parameters
-    // Tthe following parameters can also be in this payload
+    // the following parameters can also be in this payload
     // https://docs.github.com/en/developers/apps/creating-a-github-app-using-url-parameters#github-app-configuration-parameters
     return {
         name: "OpenShift Actions Connector",
         description: "Connect your OpenShift cluster to GitHub Actions",
         url: "https://github.com/redhat-actions",
         hook_attributes: {
-            url: serverUrlNoSlash + ApiEndpoints.Webhook,
+            url: incomingWebhookUrl,
         },
-        // request_oauth_on_install: true,
+        request_oauth_on_install: true,
+        callback_url: setup_url,
         setup_url,
         redirect_url,
         setup_on_update: true,
@@ -58,6 +61,7 @@ export function getAppManifest(serverUrl: string): GitHubAppManifest {
     };
 }
 
+/*
 export function getConfigWithoutSecrets(config: GitHubAppConfig): GitHubAppConfigNoSecrets {
     const configNoSecrets = { ...config } as Partial<Writeable<GitHubAppConfig>>;
     delete configNoSecrets.client_id;
@@ -67,3 +71,4 @@ export function getConfigWithoutSecrets(config: GitHubAppConfig): GitHubAppConfi
 
     return configNoSecrets as GitHubAppConfigNoSecrets;
 }
+*/

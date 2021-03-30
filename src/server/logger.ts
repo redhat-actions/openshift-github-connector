@@ -62,6 +62,12 @@ export function getLoggingMiddleware(): any {
     ],
     format: (req: express.Request, res: express.Response, format) => {
       let fmt = `:method :url :status`;
+
+      const headers = req.headers;
+      // save some space
+      delete headers["user-agent"];
+      fmt += `\n${JSON.stringify(req.headers)}\n`;
+
       if (Object.keys(req.body).length > 0) {
         fmt += `\nReceived body:\n${JSON.stringify(req.body)}`;
       }

@@ -1,7 +1,8 @@
 import React from "react";
 import { Spinner } from "react-bootstrap";
+import ApiResponses from "../../common/api-responses";
 import UrlPath from "../../common/types/url-path";
-import Constants from "../util/constants";
+import HttpConstants from "../../common/http-constants";
 import getEndpointUrl from "../util/get-endpoint-url";
 
 interface BaseDataFetcherProps<Data> {
@@ -72,25 +73,25 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
   }
 
   private async fetchFromApi(apiEndpoint: string): Promise<Data> {
-    console.log(`Fetching ${apiEndpoint}...`);
     const res = await fetch(getEndpointUrl(apiEndpoint), {
       headers: {
-        Accept: Constants.CT_JSON,
+        [HttpConstants.Headers.Accept]:
+          HttpConstants.ContentTypes.Json + "," + HttpConstants.ContentTypes.Problem,
       },
     });
 
-    if (res.status >= 400) {
-      throw new Error(`Received error from ${apiEndpoint}: ${await this.getHttpError(res)}`);
-    }
-
-    const ct = res.headers.get("Content-Type");
-    if (!ct || !ct.startsWith(Constants.CT_JSON)) {
+    const ct = res.headers.get(HttpConstants.Headers.ContentType);
+    if (!ct || !ct.startsWith(HttpConstants.ContentTypes.Json)) {
       console.error(`Received non-JSON response from ${apiEndpoint}. Content-Type is "${ct}"`);
-      if (ct && ct.startsWith("text/html")) {
+      if (ct && ct.startsWith(HttpConstants.ContentTypes.Html)) {
         console.error(`Recieved HTML page as fetch response`);
         throw new Error(`${apiEndpoint} could not be reached`);
       }
-      throw new Error(await this.getHttpError(res));
+      throw new Error(await this.getHttpError(res, ct));
+    }
+
+    if (res.status >= 400) {
+      throw new Error(`Received error from ${apiEndpoint}: ${await this.getHttpError(res, ct)}`);
     }
 
     const data = await res.json();
@@ -100,8 +101,22 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
     return data;
   }
 
-  private async getHttpError(res: Response): Promise<string> {
-    return `${res.status} ${res.statusText}: ${await res.text()}`;
+  private async getHttpError(res: Response, contentType: string | null | undefined): Promise<string> {
+    let message: string;
+    if (contentType?.startsWith(HttpConstants.ContentTypes.Json) || contentType?.startsWith(HttpConstants.ContentTypes.Problem)) {
+      const resBody = await res.json();
+      if (resBody.detail) {
+        const errorBody = resBody as ApiResponses.Error;
+        message = `${errorBody.title}: ${errorBody.detail}`;
+      }
+      else {
+        message = JSON.stringify(resBody);
+      }
+    }
+    else {
+      message = await res.text();
+    }
+    return `${res.status} ${res.statusText}: ${message}`;
   }
 
   public render() {
@@ -133,7 +148,7 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
     else if (this.state.loadingError) {
       return (
         <span className="text-danger">
-          Error fetching: {this.state.loadingError.message}
+          {this.state.loadingError.message}
         </span>
       );
     }

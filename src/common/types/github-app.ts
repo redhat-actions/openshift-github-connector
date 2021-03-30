@@ -41,8 +41,12 @@ export type GitHubAppConfig = Readonly<{
   events: string[]
 }>;
 
-export type GitHubAppConfigNoSecrets =
-  Omit<GitHubAppConfig, "webhook_secret" | "pem" | "client_secret">;
+export type GitHubAppConfigSecrets = {
+  client_id: string;
+  client_secret: string;
+  pem: string;
+  webhook_secret: string;
+};
 
 export interface GitHubAppUrls {
   /**

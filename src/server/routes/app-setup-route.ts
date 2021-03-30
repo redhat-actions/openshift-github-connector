@@ -1,80 +1,176 @@
 import express from "express";
 import { v4 as uuid } from "uuid";
 
-import { getClientUrl as getFrontendUrl, getServerUrl, removeTrailingSlash } from "../util";
+import { getClientUrl, getServerUrl } from "../util";
 import ApiEndpoints from "../../common/api-endpoints";
-import { GitHubAppConfig } from "../../common/types/github-app";
 import GitHubApp from "../lib/gh-app/app";
 import { send405, sendError } from "../util/send-error";
-import { createAppConfig, getAppManifest } from "../lib/gh-app/app-config";
+import { CLIENT_CALLBACK_QUERYPARAM, exchangeCodeForAppConfig, getAppManifest } from "../lib/gh-app/app-config";
 import ApiResponses from "../../common/api-responses";
 import Log from "../logger";
+import GitHubAppMemento from "../lib/gh-app/app-memento";
+import HttpConstants from "../../common/http-constants";
 
 const router = express.Router();
 
-let githubAppConfig: GitHubAppConfig | undefined;
-// hack
-let clientUrl: string | undefined;
+const STATE_TIME_LIMIT_MS = 5 * 60 * 1000;
+// maps states to their creation (issued at) times.
+const states = new Map<string, number>();
+
+const CREATION_COOKIE_NAME = "creation_data";
+// Prefer to keep this short,
+// but we have to leave enough time for user to select all the repositories they want
+// and give them a way to recover from failing to do it in time without recreating the app
+const CREATION_COOKIE_EXPIRY = 15 * 60 * 1000;
+type CreationCookieData = Omit<GitHubAppMemento, "installationId">;
 
 router.route(ApiEndpoints.Setup.CreateApp.path)
   .get(async (req, res, next) => {
     const state = uuid();
-    const manifest = getAppManifest(getServerUrl(req, false));
+    states.set(state, Date.now());
+    const manifest = getAppManifest(getServerUrl(req, false), getClientUrl(req));
 
     const resBody: ApiResponses.CreateAppResponse = {
       manifest, state,
     };
-    clientUrl = removeTrailingSlash(getFrontendUrl(req));
 
-    return res.json(resBody);
+    Log.info(`Heres the manifest`, manifest);
+
+    return res
+      // this page is not cached or you run into issues with state reuse if you use back/fwd buttons
+      // This could perhaps be removed outside of development.
+      .header(HttpConstants.Headers.CacheControl, "no-store")
+      .json(resBody);
   })
   .all(send405([ "GET" ]));
 
 router.route(ApiEndpoints.Setup.PostCreateApp.path)
   .get(async (req, res, next) => {
     // const { code, state } = req.query;
-    const qsCode = req.query.code;
-    req.query = {};
-
-    if (qsCode == null) {
-      throw new Error(`No code found in callback URL querystring`);
+    const state = req.query.state?.toString();
+    if (!state) {
+      return sendError(
+        res, 400,
+        `No state provided in querystring. Please restart the app creation process`,
+        `Missing state`
+      );
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-base-to-string
-    const code = qsCode.toString();
-    githubAppConfig = await createAppConfig(code);
+    const stateIAt = states.get(state);
+    if (!stateIAt) {
+      return sendError(
+        res, 400,
+        `The state parameter provided was not issued by this application, `
+          + `or has already been claimed. Please restart the app creation process.`,
+        `Invalid state`
+      );
+    }
+    states.delete(state);
+    const stateAge = Date.now() - stateIAt;
+    if (stateAge > STATE_TIME_LIMIT_MS) {
+      return sendError(
+        res, 400,
+        `The state parameter provided has expired. Please restart the app creation process.`,
+        `Expired state`
+      );
+    }
 
-    const newInstallURL = `https://github.com/settings/apps/${githubAppConfig.slug}/installations`;
+    res.removeHeader(HttpConstants.Headers.CacheControl);
+
+    const code = req.query.code?.toString();
+    if (!code) {
+      throw new Error(`No code found in callback URL query`);
+    }
+
+    // req.query = {};
+
+    const config = await exchangeCodeForAppConfig(code);
+
+    const creationData: CreationCookieData = {
+      appId: config.id.toString(),
+      privateKey: config.pem,
+    };
+
+    res.cookie(CREATION_COOKIE_NAME, JSON.stringify(creationData), {
+      httpOnly: true,
+      maxAge: CREATION_COOKIE_EXPIRY,
+      secure: req.secure,
+      // Because the endpoint that uses this cookie has its request inititated by GitHub,
+      // we cannot use the strict SS policy.
+      sameSite: "lax",
+    });
+
+    const newInstallURL = `https://github.com/settings/apps/${config.slug}/installations`;
     return res.redirect(newInstallURL);
   })
   .all(send405([ "GET" ]));
+
+// const APP_ID_COOKIE_NAME = "github_app_id";
 
 router.route(ApiEndpoints.Setup.PostInstallApp.path)
   .get(async (req, res, next) => {
     // 'install' or 'update'
     // const setupAction = req.query.setup_action;
 
-    if (githubAppConfig == null) {
-      throw new Error(`GitHub App Config was not created before post install callback`);
+    const installationId = req.query.installation_id?.toString();
+    if (installationId == null) {
+      return sendError(
+        res, 400,
+        `No installation_id provided in querystring`,
+        `Missing installation_id`
+      );
     }
 
-    const installationIDStr = req.query.installation_id?.toString();
-    if (installationIDStr == null) {
-      return sendError(res, 400, `No installation ID provided to setup callback!`);
-    }
-    if (Number.isNaN(installationIDStr)) {
-      throw new Error(`Installation ID "${installationIDStr}" is invalid`);
-    }
-    const installationID = Number(installationIDStr);
-
-    await GitHubApp.create(githubAppConfig, installationID);
-    if (!clientUrl) {
-      throw new Error("clientUrl is undefined, nowhere to redirect to");
+    if (Number.isNaN(installationId)) {
+      return sendError(
+        res, 400, `installation_id "${installationId}" is not a number`,
+        `Invalid installation_id`
+      );
     }
 
-    const redirectUrl = clientUrl + ApiEndpoints.App.Root.path;
-    Log.debug(`Post-install redirect to ${redirectUrl}`);
-    return res.redirect(redirectUrl);
+    const creationCookieRaw = req.cookies[CREATION_COOKIE_NAME];
+    if (creationCookieRaw == null) {
+      return sendError(
+        res, 400, `App creation flow cookie '${CREATION_COOKIE_NAME}' is missing. `
+          + `Please restart the app creation process.`,
+        `Missing ${CREATION_COOKIE_NAME} cookie`,
+      );
+    }
+    res.clearCookie(CREATION_COOKIE_NAME);
+
+    const creationCookieData = JSON.parse(creationCookieRaw) as CreationCookieData;
+
+    if (!creationCookieData.appId || !creationCookieData.privateKey) {
+      return sendError(
+        res, 400,
+        `Creation cookie is missing required field. Please restart the app creation process.`,
+        `${CREATION_COOKIE_NAME} missing key`,
+      );
+    }
+
+    const app = await GitHubApp.create({
+      appId: creationCookieData.appId,
+      privateKey: creationCookieData.privateKey,
+      installationId,
+    });
+
+    Log.info(`Successfully saved new GitHub app ${app.config.name}`);
+
+    const clientCallbackUrlRaw = req.query[CLIENT_CALLBACK_QUERYPARAM];
+    if (!clientCallbackUrlRaw) {
+      return sendError(
+        res, 400,
+        `Callback URL is missing from query. Please restart the app creation process.`,
+        `Missing query parameter`
+      );
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
+    const clientCallbackUrl = clientCallbackUrlRaw.toString();
+
+    Log.debug(`Post-install redirect to ${clientCallbackUrl}`);
+
+    return res.redirect(clientCallbackUrl);
   })
   .all(send405([ "GET" ]));
 

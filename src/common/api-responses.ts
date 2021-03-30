@@ -1,5 +1,5 @@
 import {
-  GitHubAppConfigNoSecrets,
+  GitHubAppConfig,
   GitHubAppManifest,
   GitHubAppUrls,
 } from "./types/github-app";
@@ -27,7 +27,7 @@ export namespace ApiResponses {
 
   export interface GitHubAppReadyState {
     app: true;
-    appConfig: GitHubAppConfigNoSecrets,
+    appConfig: GitHubAppConfig,
     appUrls: GitHubAppUrls,
     installations: any,
     repositories: any,

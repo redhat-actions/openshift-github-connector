@@ -1,0 +1,39 @@
+FROM node:14-alpine
+
+ARG USER=1000
+
+RUN mkdir -v /app  \
+    && chown $USER:0 /app \
+    && chmod 774 /app
+WORKDIR /app
+
+COPY package.json yarn.lock ./
+
+RUN yarn install --frozen-lockfile
+
+# note: eslintrc must be copied
+# https://github.com/facebook/create-react-app/issues/9791
+COPY tsconfig.json webpack.config.server.js .eslintrc.js README.md ./
+COPY public/ ./public
+COPY src/ ./src
+
+# https://create-react-app.dev/docs/adding-custom-environment-variables/
+# ARG PROTOCOL=http
+# ENV REACT_APP_BACKEND_PROTOCOL $PROTOCOL
+
+RUN apk add curl jq sed
+
+ARG PROTOCOL=http
+ARG FRONTEND_PORT=3000
+ENV FRONTEND_PROTOCOL $PROTOCOL
+ENV FRONTEND_PORT $FRONTEND_PORT
+ARG BACKEND_PORT=3003
+ENV BACKEND_PORT $BACKEND_PORT
+
+EXPOSE $FRONTEND_PORT
+EXPOSE $BACKEND_PORT
+EXPOSE 9229
+
+COPY --chown=$USER containerize/dev/entrypoint.dev.sh ./entrypoint.sh
+
+ENTRYPOINT "./entrypoint.sh"

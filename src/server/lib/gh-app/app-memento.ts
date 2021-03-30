@@ -1,52 +1,84 @@
-import os from "os";
-import path from "path";
-import { promises as fs } from "fs";
 import GitHubApp from "./app";
-import { GitHubAppConfig } from "../../../common/types/github-app";
+
 import Log from "../../logger";
+import KubeWrapper from "../kube/kube-wrapper";
+import { fromb64, tob64 } from "../../util";
 
-type GitHubAppMemento = GitHubAppConfig & { installationID: number };
+type GitHubAppMemento = {
+  appId: string,
+  privateKey: string,
+  installationId: string
+}
 
-const CONFIG_SAVE_PATH = path.join(os.tmpdir(), "github-app-config.json");
+const SECRET_NAME = "actions-connector-app-data";
 
 namespace GitHubAppMemento {
-    // at least for dev purposes, we have to save the app configuration to disk
-    // so we don't have to recreate the app every time the webapp restarts
-    export async function save(instance: GitHubApp): Promise<void> {
-        Log.info(`Save app config to ${CONFIG_SAVE_PATH}`);
-
-        const memento: GitHubAppMemento = {
-            ...instance.config,
-            installationID: instance.installationID,
-        };
-
-        const mementoStr = JSON.stringify(memento, undefined, 4);
-        await fs.writeFile(CONFIG_SAVE_PATH, mementoStr);
+  export async function save(memento: GitHubAppMemento): Promise <void> {
+    try {
+      await clear();
+    }
+    catch (err) {
+      Log.debug(`Failed to clear existing GitHubAppMemento`, err);
     }
 
-    export async function tryLoad(): Promise<GitHubApp | undefined> {
-        Log.info(`Try to load app config from ${CONFIG_SAVE_PATH}`);
+    const data = {
+      appId: tob64(memento.appId.toString()),
+      privateKey: tob64(memento.privateKey),
+      installationId: tob64(memento.installationId.toString()),
+    };
 
-        let mementoStr;
-        try {
-            mementoStr = (await fs.readFile(CONFIG_SAVE_PATH)).toString();
-        }
-        catch (err) {
-            if (err.code === "ENOENT") {
-                return undefined;
-            }
-            throw err;
-        }
+    const secretResult = await KubeWrapper.instance.client.createNamespacedSecret(KubeWrapper.instance.ns, {
+      type: "Opaque",
+      metadata: {
+        name: SECRET_NAME,
+      },
+      data,
+    });
 
-        const memento: GitHubAppMemento = JSON.parse(mementoStr);
-        return GitHubApp.create(memento, memento.installationID);
+    Log.info(`Saved app data into `
+      + `${secretResult.body.metadata?.namespace}/${secretResult.body.kind}/${secretResult.body.metadata?.name}`
+    );
+  }
+
+  export async function tryLoad(): Promise <GitHubApp | undefined> {
+    Log.info(`Try to load app config from ${SECRET_NAME}`);
+
+    const secretsList = await KubeWrapper.instance.client.listNamespacedSecret(KubeWrapper.instance.ns);
+    const appSecret = secretsList.body.items.find((secret) => secret.metadata?.name === SECRET_NAME);
+    if (!appSecret) {
+      return undefined;
     }
 
-    export async function clear(): Promise<void> {
-        Log.info(`Remove ${CONFIG_SAVE_PATH}`);
-        await fs.unlink(CONFIG_SAVE_PATH);
-        GitHubApp.delete();
+    const data = appSecret.data;
+    if (data == null) {
+      Log.error(`Secret ${SECRET_NAME} was found, but did not have any data`);
+      return undefined;
     }
+
+    const appSecretData: GitHubAppMemento = {
+      appId: fromb64(data.appId),
+      privateKey: fromb64(data.privateKey),
+      installationId: fromb64(data.installationId),
+    };
+
+    return GitHubApp.create({ ...appSecretData });
+  }
+
+  export async function clear(): Promise <void> {
+    Log.info(`Delete ${SECRET_NAME}`);
+    try {
+      await KubeWrapper.instance.client.deleteNamespacedSecret(SECRET_NAME, KubeWrapper.instance.ns);
+    }
+    catch (err) {
+      if (err.response.statusCode === 404) {
+        Log.info(`${SECRET_NAME} did not exist`)
+      }
+      else {
+        Log.warn(`Error deleting ${SECRET_NAME}`, err);
+      }
+    }
+    GitHubApp.delete();
+  }
 }
 
 export default GitHubAppMemento;

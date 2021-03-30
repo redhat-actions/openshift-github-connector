@@ -8,6 +8,9 @@ securityContext:
   securityContext:
     # readOnlyRootFilesystem: true
     runAsNonRoot: true
+    capabilities:
+      drop:
+        - ALL
 
 clusterDomain: apps.member.crt-stage.com
 
@@ -23,7 +26,6 @@ serverPort: 3003
 serverPortName: server-port
 
 deploymentLabels:
-# Labels:
   app: openshift-actions-connector
   # tier: server
 

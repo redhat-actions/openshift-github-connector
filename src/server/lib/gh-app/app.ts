@@ -2,9 +2,8 @@ import { App } from "@octokit/app";
 import { Octokit } from "@octokit/core";
 
 import Log from "../../logger";
-import { GitHubAppConfig, GitHubAppConfigNoSecrets, GitHubAppUrls } from "../../../common/types/github-app";
+import { GitHubAppConfig, GitHubAppUrls } from "../../../common/types/github-app";
 import GitHubAppMemento from "./app-memento";
-import { getConfigWithoutSecrets } from "./app-config";
 
 const GITHUB_HOST = "github.com";
 
@@ -12,8 +11,6 @@ class GitHubApp {
     private static _instance: GitHubApp | undefined;
 
     public readonly urls: GitHubAppUrls;
-
-    public readonly configNoSecrets: GitHubAppConfigNoSecrets;
 
     constructor(
         public readonly config: GitHubAppConfig,
@@ -28,8 +25,6 @@ class GitHubApp {
             install: `https://${GITHUB_HOST}/settings/apps/${config.slug}/installations`,
             installationSettings: `https://${GITHUB_HOST}/settings/installations/${installationID}`,
         };
-
-        this.configNoSecrets = getConfigWithoutSecrets(config);
     }
 
     public static isInitialized(): boolean {
@@ -47,35 +42,40 @@ class GitHubApp {
         this._instance = undefined;
     }
 
-    public static async create(appConfig: GitHubAppConfig, installationID: number): Promise<GitHubApp> {
+    public static async create(memento: GitHubAppMemento, save: boolean = false): Promise<GitHubApp> {
         if (this._instance) {
             Log.warn(`githubApp already exists; recreating`);
         }
 
-        Log.info(`Creating github app instance ${appConfig.name}`);
+        Log.info(`First line of private key is ${memento.privateKey.split("\n")[0]}`);
 
         const app = new App({
-            appId: appConfig.id,
-            privateKey: appConfig.pem,
-            oauth: {
-                clientId: appConfig.client_id,
-                clientSecret: appConfig.client_secret,
-            },
-            webhooks: {
-                secret: appConfig.webhook_secret,
-            },
+            appId: memento.appId,
+            privateKey: memento.privateKey,
+            // oauth: {
+                // clientId: appConfig.client_id,
+                // clientSecret: appConfig.client_secret,
+            // },
+            // webhooks: {
+                // secret: appConfig.webhook_secret,
+            // },
         });
 
-        const installOctokit = await app.getInstallationOctokit(installationID);
+        const config = (await app.octokit.request("GET /app")).data as GitHubAppConfig;
+
+        const installationIdNum = Number(memento.installationId);
+        const installOctokit = await app.getInstallationOctokit(installationIdNum);
 
         this._instance = new GitHubApp(
-            appConfig,
+            config,
             app.octokit,
             installOctokit,
-            installationID,
+            installationIdNum,
         );
 
-        await GitHubAppMemento.save(this._instance);
+        if (save) {
+            await GitHubAppMemento.save(memento);
+        }
 
         return this._instance;
     }
