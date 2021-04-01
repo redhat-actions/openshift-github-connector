@@ -28,7 +28,10 @@ function getLogger(): log4js.Logger {
         // https://log4js-node.github.io/log4js-node/file.html
         type: "file",
         // removes colour
-        pattern: loggerLayout.pattern.replace(/%\[/g, "").replace(/%\]/g, ""),
+        layout: {
+          type: loggerLayout.type,
+          layout: loggerLayout.pattern.replace(/%\[/g, "").replace(/%\]/g, ""),
+        },
         filename: "server.log",
         maxLogSize: 1024 * 1024,
         keepFileExt: true,
@@ -66,7 +69,8 @@ export function getLoggingMiddleware(): any {
       const headers = req.headers;
       // save some space
       delete headers["user-agent"];
-      fmt += `\n${JSON.stringify(req.headers)}\n`;
+      // fmt += `\n${JSON.stringify(req.headers)}\n`;
+      fmt += `\ncookie: ${JSON.stringify(req.headers.cookie)}`;
 
       if (Object.keys(req.body).length > 0) {
         fmt += `\nReceived body:\n${JSON.stringify(req.body)}`;

@@ -14,20 +14,21 @@ import HttpConstants from "../../common/http-constants";
 const router = express.Router();
 
 const STATE_TIME_LIMIT_MS = 5 * 60 * 1000;
-// maps states to their creation (issued at) times.
-const states = new Map<string, number>();
+
+// maps state tokens to info about the in-progress app creation
+const creationsInProgress = new Map<string, { iat: number, sessionID: string }>();
 
 const CREATION_COOKIE_NAME = "creation_data";
 // Prefer to keep this short,
 // but we have to leave enough time for user to select all the repositories they want
 // and give them a way to recover from failing to do it in time without recreating the app
 const CREATION_COOKIE_EXPIRY = 15 * 60 * 1000;
-type CreationCookieData = Omit<GitHubAppMemento, "installationId">;
+type CreationCookieData = Omit<GitHubAppMemento, "installationId"> & { sessionID: string };
 
 router.route(ApiEndpoints.Setup.CreateApp.path)
   .get(async (req, res, next) => {
     const state = uuid();
-    states.set(state, Date.now());
+    creationsInProgress.set(state, { iat: Date.now(), sessionID: req.sessionID });
     const manifest = getAppManifest(getServerUrl(req, false), getClientUrl(req));
 
     const resBody: ApiResponses.CreateAppResponse = {
@@ -38,11 +39,14 @@ router.route(ApiEndpoints.Setup.CreateApp.path)
 
     return res
       // this page is not cached or you run into issues with state reuse if you use back/fwd buttons
-      // This could perhaps be removed outside of development.
       .header(HttpConstants.Headers.CacheControl, "no-store")
       .json(resBody);
   })
   .all(send405([ "GET" ]));
+
+// NOTE THAT since post-create-app and post-install-app have their requests originate from github.com,
+// these requests have a DIFFERENT session ID cookie
+// so you CANNOT try and use it here to persist data.
 
 router.route(ApiEndpoints.Setup.PostCreateApp.path)
   .get(async (req, res, next) => {
@@ -56,8 +60,8 @@ router.route(ApiEndpoints.Setup.PostCreateApp.path)
       );
     }
 
-    const stateIAt = states.get(state);
-    if (!stateIAt) {
+    const stateMapValue = creationsInProgress.get(state);
+    if (!stateMapValue) {
       return sendError(
         res, 400,
         `The state parameter provided was not issued by this application, `
@@ -65,8 +69,8 @@ router.route(ApiEndpoints.Setup.PostCreateApp.path)
         `Invalid state`
       );
     }
-    states.delete(state);
-    const stateAge = Date.now() - stateIAt;
+    creationsInProgress.delete(state);
+    const stateAge = Date.now() - stateMapValue.iat;
     if (stateAge > STATE_TIME_LIMIT_MS) {
       return sendError(
         res, 400,
@@ -89,6 +93,7 @@ router.route(ApiEndpoints.Setup.PostCreateApp.path)
     const creationData: CreationCookieData = {
       appId: config.id.toString(),
       privateKey: config.pem,
+      sessionID: stateMapValue.sessionID,
     };
 
     res.cookie(CREATION_COOKIE_NAME, JSON.stringify(creationData), {
@@ -104,8 +109,6 @@ router.route(ApiEndpoints.Setup.PostCreateApp.path)
     return res.redirect(newInstallURL);
   })
   .all(send405([ "GET" ]));
-
-// const APP_ID_COOKIE_NAME = "github_app_id";
 
 router.route(ApiEndpoints.Setup.PostInstallApp.path)
   .get(async (req, res, next) => {
@@ -140,7 +143,7 @@ router.route(ApiEndpoints.Setup.PostInstallApp.path)
 
     const creationCookieData = JSON.parse(creationCookieRaw) as CreationCookieData;
 
-    if (!creationCookieData.appId || !creationCookieData.privateKey) {
+    if (!creationCookieData.appId || !creationCookieData.privateKey || !creationCookieData.sessionID) {
       return sendError(
         res, 400,
         `Creation cookie is missing required field. Please restart the app creation process.`,
@@ -148,13 +151,18 @@ router.route(ApiEndpoints.Setup.PostInstallApp.path)
       );
     }
 
-    const app = await GitHubApp.create({
+    Log.info(`Cookie SID is ${req.sessionID}`);
+    Log.info(`Saved-state SID is ${creationCookieData.sessionID}`);
+
+    const memento: GitHubAppMemento = {
       appId: creationCookieData.appId,
       privateKey: creationCookieData.privateKey,
       installationId,
-    });
+    };
 
-    Log.info(`Successfully saved new GitHub app ${app.config.name}`);
+    const app = await GitHubApp.create(creationCookieData.sessionID, memento, true);
+
+    Log.info(`Successfully created new GitHub app ${app.config.name}`);
 
     const clientCallbackUrlRaw = req.query[CLIENT_CALLBACK_QUERYPARAM];
     if (!clientCallbackUrlRaw) {

@@ -3,6 +3,9 @@ import express from "express";
 import "express-async-errors";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import session from "express-session";
+import createMemoryStore from "memorystore";
+import { v4 as uuid } from "uuid";
 
 import Routes from "./routes";
 import { send405, sendError } from "./util/send-error";
@@ -36,6 +39,34 @@ app.use(cors({
 
 // app.use(morgan("dev"));
 app.use(getLoggingMiddleware());
+
+const dayMs = 1000 * 60 * 60 * 24;
+const MemoryStore = createMemoryStore(session);
+app.use(session({
+  // replace w/ set-once kube secret
+  secret: "-IM64IG8SgvAYvp082R3aJOy",
+  store: new MemoryStore({ checkPeriod: dayMs }),
+  resave: false,
+  saveUninitialized: true,
+  genid: (req): string => {
+    const id = uuid();
+    // since the session id is also used for the secret name,
+    // we have to transform it so it can be part of a k8s resource name
+    // https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#dns-subdomain-names
+
+    // uuid v4 is safe to use without modification.
+    return id;
+  },
+  cookie: {
+    httpOnly: true,
+    maxAge: dayMs,
+    // name: ""
+    // sameSite: "lax",  // strict
+    sameSite: false,
+    // secure: "auto",
+    secure: false,
+  },
+}));
 
 Log.info(`In k8s=${isInK8s()}`);
 
@@ -71,11 +102,22 @@ app.route(ApiEndpoints.Health.path)
 app.use((req, res, next) => sendError(res, 404, `No route at ${req.url}`));
 
 // error handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err_: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const err = { ...err_ };
+
+  if (err.response) {
+    // delete http response data that results in a nasty long log
+    delete err.response._readableState;
+    delete err.response._events;
+    delete err.response_eventsCount;
+    delete err.response._eventsCount;
+    delete err.response.socket;
+    delete err.response.client;
+  }
   Log.error(`Uncaught error:`, err);
 
   const message = err.message || err.toString();
-  sendError(res, 500, message, undefined, false);
+  sendError(res, 500, message, "Error", false);
 });
 
 const port = process.env.PORT || process.env.BACKEND_PORT || 3003;

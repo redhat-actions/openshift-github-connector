@@ -17,6 +17,6 @@ export default class UrlPath {
   }
 
   public toString(): string {
-    return this.endpoint;
+    return this.path;
   }
 }

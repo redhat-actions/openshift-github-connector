@@ -31,10 +31,6 @@ export type GitHubAppConfig = Readonly<{
   html_url: string,
   created_at: string,     // iso date format
   updated_at: string,     // iso date format
-  client_id: string,
-  webhook_secret: string,
-  pem: string,
-  client_secret: string,
   permissions: {
     [key: string]: "read" | "write";
   },

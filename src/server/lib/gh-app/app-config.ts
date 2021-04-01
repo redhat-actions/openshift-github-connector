@@ -1,18 +1,22 @@
 import fetch from "node-fetch";
 import ApiEndpoints from "../../../common/api-endpoints";
 import Log from "../../logger";
-import { GitHubAppConfig, GitHubAppManifest } from "../../../common/types/github-app";
+import {
+    GitHubAppConfig,
+    GitHubAppConfigSecrets,
+    GitHubAppManifest,
+} from "../../../common/types/github-app";
 
 // https://stackoverflow.com/questions/42999983/typescript-removing-readonly-modifier
 // type Writeable<T> = { -readonly [K in keyof T]: T[K] };
 
-export async function exchangeCodeForAppConfig(code: string): Promise<GitHubAppConfig> {
+export async function exchangeCodeForAppConfig(code: string): Promise<GitHubAppConfig & GitHubAppConfigSecrets> {
     Log.info(`Exchanging code for app config...`);
     const codeConvertUrl = `https://api.github.com/app-manifests/${code}/conversions`;
 
     const convertResponse = await fetch(codeConvertUrl, { method: "POST" });
 
-    const config: GitHubAppConfig | undefined = await convertResponse.json();
+    const config: GitHubAppConfig & GitHubAppConfigSecrets | undefined = await convertResponse.json();
 
     if (config == null) {
         throw new Error("Failed to get app config!");
@@ -22,17 +26,18 @@ export async function exchangeCodeForAppConfig(code: string): Promise<GitHubAppC
     return config;
 }
 
+// there should be a better way...
 export const CLIENT_CALLBACK_QUERYPARAM = `client_callback`;
 
 export function getAppManifest(serverUrl: string, clientUrl: string): GitHubAppManifest {
     const clientCallback = `${clientUrl}/app`;
 
+    const redirect_url = serverUrl + ApiEndpoints.Setup.PostCreateApp.path;
     // eslint-disable-next-line camelcase
     const setup_url = serverUrl + ApiEndpoints.Setup.PostInstallApp.path +
         `?${CLIENT_CALLBACK_QUERYPARAM}=${clientCallback}`;
 
     // eslint-disable-next-line camelcase
-    const redirect_url = serverUrl + ApiEndpoints.Setup.PostCreateApp.path;
     const incomingWebhookUrl = serverUrl + ApiEndpoints.Webhook.path;
 
     // https://docs.github.com/en/developers/apps/creating-a-github-app-from-a-manifest#github-app-manifest-parameters
@@ -45,7 +50,7 @@ export function getAppManifest(serverUrl: string, clientUrl: string): GitHubAppM
         hook_attributes: {
             url: incomingWebhookUrl,
         },
-        request_oauth_on_install: true,
+        // request_oauth_on_install: true,
         callback_url: setup_url,
         setup_url,
         redirect_url,

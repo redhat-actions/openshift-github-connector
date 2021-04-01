@@ -11,7 +11,8 @@ const router = express.Router();
 
 router.route(ApiEndpoints.App.Root.path)
   .get(async (req, res, next) => {
-    if (!GitHubApp.isInitialized()) {
+    const app = await GitHubApp.getAppForSession(req.sessionID);
+    if (!app) {
       Log.info("App is not initialized");
       const resBody: ApiResponses.GitHubAppState = {
         app: false,
@@ -20,7 +21,6 @@ router.route(ApiEndpoints.App.Root.path)
       return res.json(resBody);
     }
 
-    const app = GitHubApp.instance;
     const octo = app.installationOctokit;
     const installationsReq = octo.request("GET /app/installations");
     const repositoriesReq = octo.request("GET /installation/repositories");
@@ -39,7 +39,7 @@ router.route(ApiEndpoints.App.Root.path)
     return res.json(resBody);
   })
   .delete(async (req, res, next) => {
-    await GitHubAppMemento.clear();
+    await GitHubAppMemento.clear(req.sessionID);
     res.status(204).send();
   })
   .all(send405([ "GET" ]));

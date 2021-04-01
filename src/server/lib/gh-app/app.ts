@@ -8,7 +8,7 @@ import GitHubAppMemento from "./app-memento";
 const GITHUB_HOST = "github.com";
 
 class GitHubApp {
-    private static _instance: GitHubApp | undefined;
+    private static appsMap = new Map<string, GitHubApp>();
 
     public readonly urls: GitHubAppUrls;
 
@@ -27,29 +27,25 @@ class GitHubApp {
         };
     }
 
-    public static isInitialized(): boolean {
-        return !!this._instance;
-    }
+    public static async getAppForSession(sessionID: string): Promise<GitHubApp | undefined> {
 
-    public static get instance(): GitHubApp {
-        if (!this._instance) {
-            throw new Error(`GitHubApp instance requested before created`);
-        }
-        return this._instance;
-    }
-
-    public static delete(): void {
-        this._instance = undefined;
-    }
-
-    public static async create(memento: GitHubAppMemento, save: boolean = false): Promise<GitHubApp> {
-        if (this._instance) {
-            Log.warn(`githubApp already exists; recreating`);
+        const inMap = this.appsMap.get(sessionID);
+        if (inMap) {
+            return inMap;
         }
 
-        Log.info(`First line of private key is ${memento.privateKey.split("\n")[0]}`);
+        const inMemento = await GitHubAppMemento.tryLoad(sessionID);
+        if (inMemento) {
+            this.appsMap.set(sessionID, inMemento);
+            return inMemento;
+        }
 
-        const app = new App({
+        Log.info(`No app for session ${sessionID}`);
+        return undefined;
+    }
+
+    public static async create(sessionID: string, memento: GitHubAppMemento, saveSecret: boolean): Promise<GitHubApp> {
+        const ghAppObj = new App({
             appId: memento.appId,
             privateKey: memento.privateKey,
             // oauth: {
@@ -61,23 +57,34 @@ class GitHubApp {
             // },
         });
 
-        const config = (await app.octokit.request("GET /app")).data as GitHubAppConfig;
+        const config = (await ghAppObj.octokit.request("GET /app")).data as GitHubAppConfig;
 
         const installationIdNum = Number(memento.installationId);
-        const installOctokit = await app.getInstallationOctokit(installationIdNum);
+        const installOctokit = await ghAppObj.getInstallationOctokit(installationIdNum);
 
-        this._instance = new GitHubApp(
+        const app = new GitHubApp(
             config,
-            app.octokit,
+            ghAppObj.octokit,
             installOctokit,
             installationIdNum,
         );
 
-        if (save) {
-            await GitHubAppMemento.save(memento);
+        if (saveSecret) {
+            await GitHubAppMemento.save(sessionID, memento);
         }
+        this.appsMap.set(sessionID, app);
 
-        return this._instance;
+        return app;
+    }
+
+    public static async delete(sessionId: string) {
+        if (this.appsMap.has(sessionId)) {
+            Log.info(`Delete ${sessionId} from apps map`)
+            this.appsMap.delete(sessionId);
+        }
+        else {
+            Log.error(`Requested to delete ${sessionId} from apps map, but it was not found`);
+        }
     }
 }
 
