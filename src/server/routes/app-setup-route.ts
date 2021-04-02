@@ -14,7 +14,6 @@ const STATE_TIME_LIMIT_MS = 5 * 60 * 1000;
 
 const creationsInProgress = new Map<string, { iat: number, state: string }>();
 
-router.route(ApiEndpoints.Setup.SetCreateAppState.path)
 // .get(async (req, res, next) => {
 //   const state = uuid();
 //   creationsInProgress.set(state, { iat: Date.now() /* sessionID: req.sessionID */ });
@@ -26,11 +25,13 @@ router.route(ApiEndpoints.Setup.SetCreateAppState.path)
 
 //   Log.info(`Heres the manifest`, manifest);
 
-  //   return res
-  //     // this page is not cached or you run into issues with state reuse if you use back/fwd buttons
-  //     .header(HttpConstants.Headers.CacheControl, "no-store")
-  //     .json(resBody);
-  // })
+//   return res
+//     // this page is not cached or you run into issues with state reuse if you use back/fwd buttons
+//     .header(HttpConstants.Headers.CacheControl, "no-store")
+//     .json(resBody);
+// })
+
+router.route(ApiEndpoints.Setup.SetCreateAppState.path)
   .post(async (req, res, next) => {
     const state = req.body.state;
     if (!state) {
@@ -78,10 +79,10 @@ router.route(ApiEndpoints.Setup.CreatingApp.path)
     // https://github.com/eligrey/FileSaver.js/wiki/Saving-a-remote-file#using-http-header
     res.setHeader("Content-Type", "application/octet-stream; charset=utf-8");
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"; filename*="${filename}"`);
-    const appConfigStr = JSON.stringify(app);
-    res.setHeader("Content-length", Buffer.byteLength(appConfigStr, "utf8"));
+    const appWSecretsString = JSON.stringify(appWithSecrets);
+    res.setHeader("Content-length", Buffer.byteLength(appWSecretsString, "utf8"));
 
-    return res.send(appConfigStr);
+    return res.send(appWSecretsString);
 
   })
   .post(async (req, res, next) => {

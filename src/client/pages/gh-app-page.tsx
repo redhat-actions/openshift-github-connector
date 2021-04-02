@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 
 import AppPageCard from "../components/app-page-card";
@@ -8,6 +8,7 @@ import FaBtnBody from "../components/fa-btn-body";
 import ApiResponses from "../../common/api-responses";
 import ClientPages from "./client-pages";
 import getEndpointUrl from "../util/get-endpoint-url";
+import { fetchJSON } from "../util/client-util";
 
 export default function GitHubAppPage() {
   const DOCS_ICON = "book";
@@ -15,12 +16,31 @@ export default function GitHubAppPage() {
 
   const history = useHistory();
 
-  const [ countdown, setCountdown ] = useState(5000);
+  const [ countdown, setCountdown ] = useState(3000);
+
+  let countdownInterval: NodeJS.Timeout | undefined;
+  useEffect(() => {
+    countdownInterval = setInterval(() => {
+      if (countdown <= 0) {
+        history.push(ClientPages.CreateApp.path);
+      }
+      else {
+        setCountdown(countdown - 1000);
+      }
+    }, 1000);
+
+    return function cleanup() {
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+      }
+    };
+  });
 
   return (
     <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.App.Root}>
       {(data: ApiResponses.GitHubAppState) => {
         if (!data.app) {
+          console.log(`render with countdown=${countdown}`);
           return (
             <React.Fragment>
               <p>A GitHub App has not yet been added to the connector.</p>
@@ -28,19 +48,11 @@ export default function GitHubAppPage() {
                 <a href={ClientPages.CreateApp.path}>Create an App</a>
               </h2>
               <p>You will be redirected in {Math.round(countdown / 1000)} ...</p>
-              <script>
-                {setInterval(() => {
-                  if (countdown <= 0) {
-                    history.replace(ClientPages.CreateApp.path);
-                  }
-                  else {
-                    setCountdown(countdown - 1000);
-                  }
-                }, 1000)}
-              </script>
             </React.Fragment>
           );
         }
+
+        if (countdownInterval) { clearInterval(countdownInterval); }
 
         return (
           <React.Fragment>
@@ -49,7 +61,7 @@ export default function GitHubAppPage() {
               <div className="ml-auto"></div>
               <button className="btn btn-lg btn-danger mr-4" title="Unbind" onClick={
                 async () => {
-                  await fetch(getEndpointUrl(ApiEndpoints.App.Root.path), { method: "DELETE" }).catch(console.error);
+                  await fetchJSON("DELETE", getEndpointUrl(ApiEndpoints.App.Root.path));
                   window.location.reload();
                 }
               }>

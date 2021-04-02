@@ -115,7 +115,7 @@ export default class KubeWrapper {
 
 		const user = this.config.getCurrentUser();
 		if (!user) {
-			throw new Error(`Failed to get current user, current user is udnefined`);
+			throw new Error(`Failed to get current user, current user is undefined`);
 		}
 
 		return {
@@ -130,6 +130,9 @@ export default class KubeWrapper {
 	}
 
 	public get client() {
+		if (KubeWrapper.initError) {
+			throw new Error(KubeWrapper.initErrorFriendly);
+		}
 		return this.config.makeApiClient(k8s.CoreV1Api);
 	}
 }

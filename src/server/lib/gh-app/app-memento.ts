@@ -85,7 +85,7 @@ namespace GitHubAppMemento {
 
   export async function tryLoad(sessionId: string): Promise<GitHubAppMemento | GitHubAppMementoNotInstalled | undefined> {
     const secretName = getSecretName(sessionId);
-    Log.info(`Try to load app config from ${secretName}`);
+    Log.info(`Try to load app config from ${KubeWrapper.instance.ns}/secret/${secretName}`);
 
     const secretsList = await KubeWrapper.instance.client.listNamespacedSecret(KubeWrapper.instance.ns);
     const appSecret = secretsList.body.items.find((secret) => secret.metadata?.name === secretName);

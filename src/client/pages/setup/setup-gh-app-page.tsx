@@ -9,7 +9,7 @@ import getEndpointUrl from "../../util/get-endpoint-url";
 import ClientPages from "../client-pages";
 import { GitHubAppConfigWithSecrets } from "../../../common/types/github-app";
 import DataFetcher from "../../components/data-fetcher";
-import { fetchJson } from "../../util/client-util";
+import { fetchJSON } from "../../util/client-util";
 
 export function getAppManifest(appUrl: string): Record<string, unknown> {
   // the redirect url is the first one, which is redirected to after the app is created
@@ -65,7 +65,7 @@ export function CreateAppPage(): JSX.Element {
 
         <form className="row justify-content-center mt-5" method="post" action={githubManifestUrl} onSubmit={
           () => {
-            fetchJson("POST", ApiEndpoints.Setup.SetCreateAppState.path, {
+            fetchJSON("POST", ApiEndpoints.Setup.SetCreateAppState.path, {
               body: JSON.stringify({ state }),
             })
               .catch((console.error));
@@ -105,7 +105,7 @@ export function CreatingAppPage() {
     <React.Fragment>
       <DataFetcher loadingDisplay="spinner" type="generic" fetchData={
         async (): Promise<GitHubAppConfigWithSecrets> => {
-          return fetchJson("POST", ApiEndpoints.Setup.CreatingApp.path, {
+          return fetchJSON("POST", ApiEndpoints.Setup.CreatingApp.path, {
             body: JSON.stringify({ code, state }),
           });
         }
@@ -114,11 +114,13 @@ export function CreatingAppPage() {
           const installUrl = `https://github.com/settings/apps/${data.slug}/installations`;
           console.log("Redirect to " + installUrl);
           return (
-            <p>
-              Saved app successfully. Redirecting...
-              {window.location.replace(installUrl)}
-              {/* <a href={installUrl}>{installUrl}</a> */}
-            </p>
+            <React.Fragment>
+              <p>
+                Saved app successfully. Redirecting to install page...
+                {window.location.replace(installUrl)}
+              </p>
+              <a href={installUrl}>{installUrl}</a>
+            </React.Fragment>
           );
         }}
       </DataFetcher>
@@ -163,7 +165,7 @@ export function InstalledAppPage(): JSX.Element {
     <React.Fragment>
       <DataFetcher loadingDisplay="spinner" type="generic" fetchData={
         async (): Promise<void> => {
-          return fetchJson("POST", ApiEndpoints.Setup.PostInstallApp.path, {
+          return fetchJSON("POST", ApiEndpoints.Setup.PostInstallApp.path, {
             body: JSON.stringify({ installationId }),
           });
         }

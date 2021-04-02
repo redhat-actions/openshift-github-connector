@@ -6,3 +6,4 @@ server*.log
 out*.log
 client.out
 server.out
+sessions/

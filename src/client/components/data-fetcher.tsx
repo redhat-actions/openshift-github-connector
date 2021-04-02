@@ -1,7 +1,7 @@
 import React from "react";
 import { Spinner } from "react-bootstrap";
 import UrlPath from "../../common/types/url-path";
-import { fetchJson } from "../util/client-util";
+import { fetchJSON } from "../util/client-util";
 
 interface BaseDataFetcherProps<Data> {
     children: (data: Data) => React.ReactNode;
@@ -47,7 +47,7 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
     try {
       let data: Data;
       if (this.props.type === "api") {
-        data = await fetchJson("GET", this.props.endpoint.path);
+        data = await fetchJSON("GET", this.props.endpoint.path);
       }
       else {
         data = await this.props.fetchData();
