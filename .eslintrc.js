@@ -5,7 +5,8 @@ module.exports = {
   ],
   ignorePatterns: [
     "webpack.config.*.js",
-    "build/"
+    "build/",
+    "jwt.js", "key.js", "auth.js"
   ],
   settings: {
     react: {

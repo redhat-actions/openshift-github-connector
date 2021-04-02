@@ -1,9 +1,7 @@
 import React from "react";
 import { Spinner } from "react-bootstrap";
-import ApiResponses from "../../common/api-responses";
 import UrlPath from "../../common/types/url-path";
-import HttpConstants from "../../common/http-constants";
-import getEndpointUrl from "../util/get-endpoint-url";
+import { fetchJson } from "../util/client-util";
 
 interface BaseDataFetcherProps<Data> {
     children: (data: Data) => React.ReactNode;
@@ -49,7 +47,7 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
     try {
       let data: Data;
       if (this.props.type === "api") {
-        data = await this.fetchFromApi(this.props.endpoint.path);
+        data = await fetchJson("GET", this.props.endpoint.path);
       }
       else {
         data = await this.props.fetchData();
@@ -70,53 +68,6 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
       // The browser console will contain a trace of the errored element
       this.setState({ loaded: true });
     }
-  }
-
-  private async fetchFromApi(apiEndpoint: string): Promise<Data> {
-    const res = await fetch(getEndpointUrl(apiEndpoint), {
-      headers: {
-        [HttpConstants.Headers.Accept]:
-          HttpConstants.ContentTypes.Json + "," + HttpConstants.ContentTypes.Problem,
-      },
-    });
-
-    const ct = res.headers.get(HttpConstants.Headers.ContentType);
-    if (!ct || !ct.startsWith(HttpConstants.ContentTypes.Json)) {
-      console.error(`Received non-JSON response from ${apiEndpoint}. Content-Type is "${ct}"`);
-      if (ct && ct.startsWith(HttpConstants.ContentTypes.Html)) {
-        console.error(`Recieved HTML page as fetch response`);
-        throw new Error(`${apiEndpoint} could not be reached`);
-      }
-      throw new Error(await this.getHttpError(res, ct));
-    }
-
-    if (res.status >= 400) {
-      throw new Error(`Received error from ${apiEndpoint}: ${await this.getHttpError(res, ct)}`);
-    }
-
-    const data = await res.json();
-    if (Object.keys(data).length === 0) {
-      console.warn(`DataFetcher received empty response from ${apiEndpoint}`);
-    }
-    return data;
-  }
-
-  private async getHttpError(res: Response, contentType: string | null | undefined): Promise<string> {
-    let message: string;
-    if (contentType?.startsWith(HttpConstants.ContentTypes.Json) || contentType?.startsWith(HttpConstants.ContentTypes.Problem)) {
-      const resBody = await res.json();
-      if (resBody.detail) {
-        const errorBody = resBody as ApiResponses.Error;
-        message = `${errorBody.title}: ${errorBody.detail}`;
-      }
-      else {
-        message = JSON.stringify(resBody);
-      }
-    }
-    else {
-      message = await res.text();
-    }
-    return `${res.status} ${res.statusText}: ${message}`;
   }
 
   public render() {

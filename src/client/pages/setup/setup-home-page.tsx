@@ -72,7 +72,7 @@ export default function SetupHomePage() {
                       failure: "Set up App",
                       success: "View App",
                     }, {
-                      failure: ClientPages.SetupApp,
+                      failure: ClientPages.CreateApp,
                       success: ClientPages.App,
                     });
                   }

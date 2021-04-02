@@ -10,7 +10,7 @@ export function sendError(
   const statusMessage = getReasonPhrase(statusCode);
 
   if (log) {
-    Log.warn(`Error ${statusCode} error: ${detail}`);
+    Log.warn(`Error ${statusCode} ${statusMessage}: ${detail}`);
   }
   res.status(statusCode);
 

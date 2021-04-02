@@ -38,11 +38,13 @@ export type GitHubAppConfig = Readonly<{
 }>;
 
 export type GitHubAppConfigSecrets = {
-  client_id: string;
-  client_secret: string;
+  // client_id: string;
+  // client_secret: string;
   pem: string;
   webhook_secret: string;
 };
+
+export type GitHubAppConfigWithSecrets = GitHubAppConfig & GitHubAppConfigSecrets;
 
 export interface GitHubAppUrls {
   /**

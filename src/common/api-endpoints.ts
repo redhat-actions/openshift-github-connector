@@ -4,7 +4,9 @@ const Api = new UrlPath(undefined, "/api/v1");
 const Health = new UrlPath(Api, "/health");
 
 const Setup = new UrlPath(Api, "/setup");
-const CreateApp = new UrlPath(Setup, "/create-app");
+const CreatingApp = new UrlPath(Setup, "/creating-app");
+const SetCreateAppState = new UrlPath(CreatingApp, "/state");
+// const SaveApp = new UrlPath(Setup, "/save-app");
 const PostCreateApp = new UrlPath(Setup, "/post-create-app");
 const PostInstallApp = new UrlPath(Setup, "/post-install-app");
 
@@ -20,7 +22,9 @@ const ApiEndpoints = {
   Health,
   Setup: {
     Root: Setup,
-    CreateApp,
+    SetCreateAppState,
+    CreatingApp,
+    // SaveApp,
     PostCreateApp,
     PostInstallApp,
   },

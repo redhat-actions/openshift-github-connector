@@ -1,52 +1,148 @@
 import express from "express";
-import { v4 as uuid } from "uuid";
 
-import { getClientUrl, getServerUrl } from "../util";
 import ApiEndpoints from "../../common/api-endpoints";
-import GitHubApp from "../lib/gh-app/app";
 import { send405, sendError } from "../util/send-error";
-import { CLIENT_CALLBACK_QUERYPARAM, exchangeCodeForAppConfig, getAppManifest } from "../lib/gh-app/app-config";
-import ApiResponses from "../../common/api-responses";
-import Log from "../logger";
+import { exchangeCodeForAppConfig } from "../lib/gh-app/app-config";
 import GitHubAppMemento from "../lib/gh-app/app-memento";
-import HttpConstants from "../../common/http-constants";
+import GitHubApp from "../lib/gh-app/app";
+import Log from "../logger";
+import { GitHubAppConfigWithSecrets } from "../../common/types/github-app";
 
 const router = express.Router();
 
 const STATE_TIME_LIMIT_MS = 5 * 60 * 1000;
 
-// maps state tokens to info about the in-progress app creation
-const creationsInProgress = new Map<string, { iat: number, sessionID: string }>();
+const creationsInProgress = new Map<string, { iat: number, state: string }>();
 
+router.route(ApiEndpoints.Setup.SetCreateAppState.path)
+// .get(async (req, res, next) => {
+//   const state = uuid();
+//   creationsInProgress.set(state, { iat: Date.now() /* sessionID: req.sessionID */ });
+//   const manifest = getAppManifest(getServerUrl(req, false), getClientUrl(req));
+
+//   const resBody: ApiResponses.CreateAppResponse = {
+//     manifest, state,
+//   };
+
+//   Log.info(`Heres the manifest`, manifest);
+
+  //   return res
+  //     // this page is not cached or you run into issues with state reuse if you use back/fwd buttons
+  //     .header(HttpConstants.Headers.CacheControl, "no-store")
+  //     .json(resBody);
+  // })
+  .post(async (req, res, next) => {
+    const state = req.body.state;
+    if (!state) {
+      return sendError(res, 400, `Required parameter "state" missing from request body`);
+    }
+
+    creationsInProgress.set(req.sessionID, { iat: Date.now(), state });
+
+    return res.json({ status: "Created" });
+  });
+
+router.route(ApiEndpoints.Setup.CreatingApp.path)
+  .get(async (req, res, next) => {
+    const memento = await GitHubAppMemento.tryLoad(req.sessionID);
+    if (!memento) {
+      return sendError(
+        res, 400,
+        `No GitHub app secret saved for your session. Please restart the app setup process.`
+      );
+    }
+
+    // const appWithoutInstallID = await GitHubApp.getApp(memento);
+    // const appConfig = await GitHubApp.getAppConfig(appWithoutInstallID);
+
+    const app = await GitHubApp.getAppForSession(req.sessionID);
+    if (!app) {
+      return sendError(
+        res, 400,
+        `No GitHub app secret saved for your session. Please restart the app setup process.`
+      );
+    }
+    const appConfig = app.config;
+
+    const appWithSecrets: GitHubAppConfigWithSecrets = {
+      ...appConfig,
+      pem: memento.privateKey,
+      webhook_secret: memento.webhookSecret,
+    };
+
+    if (req.headers.accept?.startsWith("application/json")) {
+      return res.json(appWithSecrets);
+    }
+
+    const filename = appConfig.slug + ".json";
+    // https://github.com/eligrey/FileSaver.js/wiki/Saving-a-remote-file#using-http-header
+    res.setHeader("Content-Type", "application/octet-stream; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"; filename*="${filename}"`);
+    const appConfigStr = JSON.stringify(app);
+    res.setHeader("Content-length", Buffer.byteLength(appConfigStr, "utf8"));
+
+    return res.send(appConfigStr);
+
+  })
+  .post(async (req, res, next) => {
+    const { code, state } = req.body;
+    if (!code) {
+      return sendError(res, 400, `Required parameter "code" missing from request body`);
+    }
+    if (!state) {
+      return sendError(res, 400, `Required parameter "state" missing from request body`);
+    }
+
+    const stateLookupResult = creationsInProgress.get(req.sessionID);
+    if (stateLookupResult == null) {
+      Log.info(`State "${state}" not found in state map`);
+      return sendError(res, 400, `State parameter "${state}" is invalid or expired`);
+    }
+
+    // creationsInProgress.delete(req.sessionID);
+
+    const isExpired = (Date.now() - stateLookupResult.iat) > STATE_TIME_LIMIT_MS;
+    if (isExpired) {
+      Log.info(`State "${state}" is expired`);
+      return sendError(res, 400, `State parameter "${state}" is invalid or expired`);
+    }
+
+    const appConfig = await exchangeCodeForAppConfig(code);
+
+    await GitHubAppMemento.save(req.sessionID, {
+      appId: appConfig.id.toString(),
+      privateKey: appConfig.pem,
+      webhookSecret: appConfig.webhook_secret,
+    });
+
+    return res.json(appConfig);
+  })
+  .all(send405([ "GET", "POST" ]));
+
+router.route(ApiEndpoints.Setup.PostInstallApp.path)
+  .post(async (req, res, next) => {
+    const { installationId } = req.body;
+    if (!installationId) {
+      return sendError(res, 400, `Required parameter "installationId" missing from request body`);
+    }
+
+    await GitHubAppMemento.savePostInstall(req.sessionID, installationId);
+
+    return res.status(201).json({ status: "Created" });
+  })
+  .all(send405([ "POST" ]));
+
+// NOTE THAT since post-create-app and post-install-app have their requests originate from github.com,
+// these requests have a DIFFERENT session ID cookie
+// so you CANNOT try and use it here to persist data.
+
+/*
 const CREATION_COOKIE_NAME = "creation_data";
 // Prefer to keep this short,
 // but we have to leave enough time for user to select all the repositories they want
 // and give them a way to recover from failing to do it in time without recreating the app
 const CREATION_COOKIE_EXPIRY = 15 * 60 * 1000;
 type CreationCookieData = Omit<GitHubAppMemento, "installationId"> & { sessionID: string };
-
-router.route(ApiEndpoints.Setup.CreateApp.path)
-  .get(async (req, res, next) => {
-    const state = uuid();
-    creationsInProgress.set(state, { iat: Date.now(), sessionID: req.sessionID });
-    const manifest = getAppManifest(getServerUrl(req, false), getClientUrl(req));
-
-    const resBody: ApiResponses.CreateAppResponse = {
-      manifest, state,
-    };
-
-    Log.info(`Heres the manifest`, manifest);
-
-    return res
-      // this page is not cached or you run into issues with state reuse if you use back/fwd buttons
-      .header(HttpConstants.Headers.CacheControl, "no-store")
-      .json(resBody);
-  })
-  .all(send405([ "GET" ]));
-
-// NOTE THAT since post-create-app and post-install-app have their requests originate from github.com,
-// these requests have a DIFFERENT session ID cookie
-// so you CANNOT try and use it here to persist data.
 
 router.route(ApiEndpoints.Setup.PostCreateApp.path)
   .get(async (req, res, next) => {
@@ -91,7 +187,7 @@ router.route(ApiEndpoints.Setup.PostCreateApp.path)
     const config = await exchangeCodeForAppConfig(code);
 
     const creationData: CreationCookieData = {
-      appId: config.id.toString(),
+      appId: config.id,
       privateKey: config.pem,
       sessionID: stateMapValue.sessionID,
     };
@@ -181,5 +277,6 @@ router.route(ApiEndpoints.Setup.PostInstallApp.path)
     return res.redirect(clientCallbackUrl);
   })
   .all(send405([ "GET" ]));
+*/
 
 export default router;

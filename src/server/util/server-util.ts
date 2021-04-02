@@ -1,6 +1,7 @@
 import express from "express";
 import os from "os";
 import { URL } from "url";
+import HttpStatusCodes from "http-status-codes";
 
 import Log from "../logger";
 
@@ -75,19 +76,10 @@ export function fromb64(data: string): string {
   return Buffer.from(data, "base64").toString("utf-8");
 }
 
-/**
- * Transform an HTTP error eg. from the K8s library into something readable.
- */
-export function getFriendlyHTTPError(err: { response?: any } & Error): string {
-  if (!err.response) {
-    return JSON.stringify(err);
-  }
-
-  const errRes = err.response;
-  return `${errRes.request.method} ${errRes.request.uri.href}: `
-        + `${errRes.statusCode} ${errRes.body.message || errRes.body.reason}`;
-}
-
 export function isInK8s(): boolean {
   return process.env.IN_K8S === "true";
+}
+
+export function sendStatusJSON(res: express.Response, statusCode: number): void {
+  res.status(statusCode).send({ statusCode, message: HttpStatusCodes.getStatusText(statusCode) });
 }

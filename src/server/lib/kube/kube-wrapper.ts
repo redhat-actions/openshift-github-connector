@@ -1,9 +1,19 @@
 import * as k8s from "@kubernetes/client-node";
 import ApiResponses from "../../../common/api-responses";
 import Log from "../../logger";
-import {
-	getFriendlyHTTPError
-} from "../../util";
+
+/**
+ * Transform an HTTP error eg. from the K8s library into something readable.
+ */
+ export function getFriendlyHTTPError(err: { message: string, response?: any }): string {
+  if (!err.response) {
+    return JSON.stringify(err);
+  }
+
+  const errRes = err.response;
+  return `${errRes.request.method} ${errRes.request.uri.href}: `
+        + `${errRes.statusCode} ${errRes.body.message || errRes.body.reason}`;
+}
 
 export default class KubeWrapper {
 	private static _instance: KubeWrapper | undefined;

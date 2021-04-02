@@ -4,7 +4,7 @@ import UrlPath from "../../common/types/url-path";
 import ClusterPage from "./cluster-page";
 import GitHubAppPage from "./gh-app-page";
 import HomePage from "./home-page";
-import SetupAppPage from "./setup/setup-gh-app-page";
+import * as SetupAppPages from "./setup/setup-gh-app-page";
 import SetupHomePage from "./setup/setup-home-page";
 import SetupSAPage from "./setup/setup-sa-page";
 
@@ -28,17 +28,26 @@ export class ClientPage extends UrlPath {
 const Home = new ClientPage(undefined, "/", HomePage);
 
 const Setup = new ClientPage(Home, "/setup", SetupHomePage);
-const SetupApp = new ClientPage(Setup, "/app", SetupAppPage);
-const SetupSA = new ClientPage(Setup, "/serviceaccount", SetupSAPage);
+const CreateApp = new ClientPage(Setup, "/create-app", SetupAppPages.CreateAppPage);
+const CreatingApp = new ClientPage(Setup, "/creating-app", SetupAppPages.CreatingAppPage);
+// const InstallingApp = new ClientPage(Setup, "/installing-app", SetupAppPages.InstallingAppPage);
+const InstalledApp = new ClientPage(Setup, "/installed-app", SetupAppPages.InstalledAppPage);
+const SetupSA = new ClientPage(Setup, "/service-account", SetupSAPage);
 
 const App = new ClientPage(Home, "/app", GitHubAppPage);
 const Cluster = new ClientPage(Home, "/cluster", ClusterPage);
 
 const ClientPages = {
   Home,
+
   Setup,
-  SetupApp,
+  CreateApp,
+  CreatingApp,
+  // InstallingApp,
+  InstalledApp,
+
   SetupSA,
+
   App,
   Cluster,
 };

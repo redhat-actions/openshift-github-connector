@@ -1,5 +1,5 @@
-import React from "react";
-import { Route } from "react-router-dom";
+import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 
 import AppPageCard from "../components/app-page-card";
 import DataFetcher from "../components/data-fetcher";
@@ -13,15 +13,32 @@ export default function GitHubAppPage() {
   const DOCS_ICON = "book";
   const EDIT_ICON = "cog";
 
+  const history = useHistory();
+
+  const [ countdown, setCountdown ] = useState(5000);
+
   return (
     <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.App.Root}>
       {(data: ApiResponses.GitHubAppState) => {
         if (!data.app) {
           return (
-            <Route render={ ({ history }) => {
-              history.replace(ClientPages.SetupApp.path);
-              return (<></>);
-            }} />
+            <React.Fragment>
+              <p>A GitHub App has not yet been added to the connector.</p>
+              <h2 className="my-3">
+                <a href={ClientPages.CreateApp.path}>Create an App</a>
+              </h2>
+              <p>You will be redirected in {Math.round(countdown / 1000)} ...</p>
+              <script>
+                {setInterval(() => {
+                  if (countdown <= 0) {
+                    history.replace(ClientPages.CreateApp.path);
+                  }
+                  else {
+                    setCountdown(countdown - 1000);
+                  }
+                }, 1000)}
+              </script>
+            </React.Fragment>
           );
         }
 

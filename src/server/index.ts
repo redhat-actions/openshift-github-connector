@@ -12,7 +12,7 @@ import { send405, sendError } from "./util/send-error";
 import Log, { getLoggingMiddleware } from "./logger";
 import { startup } from "./startup";
 import ApiEndpoints from "../common/api-endpoints";
-import { getAllowedOrigins, isInK8s } from "./util";
+import { getAllowedOrigins, isInK8s } from "./util/server-util";
 
 const app = express();
 

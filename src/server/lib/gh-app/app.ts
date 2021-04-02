@@ -28,36 +28,45 @@ class GitHubApp {
     }
 
     public static async getAppForSession(sessionID: string): Promise<GitHubApp | undefined> {
-
         const inMap = this.appsMap.get(sessionID);
         if (inMap) {
             return inMap;
         }
 
-        const inMemento = await GitHubAppMemento.tryLoad(sessionID);
-        if (inMemento) {
-            this.appsMap.set(sessionID, inMemento);
-            return inMemento;
+        const memento = await GitHubAppMemento.tryLoad(sessionID);
+        if (!memento) {
+            Log.info(`No app for session ${sessionID}`);
+            return undefined;
+        }
+        else if (!memento.installationId) {
+            Log.info(`App for session ${sessionID} has not been installed yet`);
+            return undefined;
         }
 
-        Log.info(`No app for session ${sessionID}`);
-        return undefined;
+        return this.create(sessionID, memento);
     }
 
-    public static async create(sessionID: string, memento: GitHubAppMemento, saveSecret: boolean): Promise<GitHubApp> {
-        const ghAppObj = new App({
+    private static async getApp(memento: GitHubAppMemento): Promise<App> {
+        return new App({
             appId: memento.appId,
             privateKey: memento.privateKey,
             // oauth: {
                 // clientId: appConfig.client_id,
                 // clientSecret: appConfig.client_secret,
             // },
-            // webhooks: {
-                // secret: appConfig.webhook_secret,
-            // },
+            webhooks: {
+                secret: memento.webhookSecret,
+            },
         });
+    }
 
-        const config = (await ghAppObj.octokit.request("GET /app")).data as GitHubAppConfig;
+    private static async getAppConfig(ghApp: App): Promise<GitHubAppConfig> {
+        return (await ghApp.octokit.request("GET /app")).data as GitHubAppConfig;
+    }
+
+    public static async create(sessionID: string, memento: GitHubAppMemento): Promise<GitHubApp> {
+        const ghAppObj = await this.getApp(memento);
+        const config = await this.getAppConfig(ghAppObj);
 
         const installationIdNum = Number(memento.installationId);
         const installOctokit = await ghAppObj.getInstallationOctokit(installationIdNum);
@@ -69,9 +78,6 @@ class GitHubApp {
             installationIdNum,
         );
 
-        if (saveSecret) {
-            await GitHubAppMemento.save(sessionID, memento);
-        }
         this.appsMap.set(sessionID, app);
 
         return app;

@@ -61,7 +61,7 @@ export function getLoggingMiddleware(): any {
     level: "auto",
     statusRules: [
       { from: 100, to: 399, level: "debug" },
-      { codes: [ 404 ], level: "warn" },
+      { from: 400, to: 499, level: "warn" },
     ],
     format: (req: express.Request, res: express.Response, format) => {
       let fmt = `:method :url :status`;
@@ -70,12 +70,16 @@ export function getLoggingMiddleware(): any {
       // save some space
       delete headers["user-agent"];
       // fmt += `\n${JSON.stringify(req.headers)}\n`;
-      fmt += `\ncookie: ${JSON.stringify(req.headers.cookie)}`;
+
+      if (Number(req.headers["content-length"]) > 0) {
+        fmt += ` CL=${req.headers["content-length"]}`;
+      }
 
       if (Object.keys(req.body).length > 0) {
         fmt += `\nReceived body:\n${JSON.stringify(req.body)}`;
       }
 
+      fmt += `\ncookie: ${JSON.stringify(req.headers.cookie)}`;
       return format(fmt);
     },
   });

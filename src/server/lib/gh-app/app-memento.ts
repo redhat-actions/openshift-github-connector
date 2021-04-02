@@ -2,16 +2,24 @@ import GitHubApp from "./app";
 
 import Log from "../../logger";
 import KubeWrapper from "../kube/kube-wrapper";
-import { fromb64, tob64 } from "../../util";
+import { fromb64, tob64 } from "../../util/server-util";
 
-type UninstalledGitHubAppMemento = {
+export type GitHubAppMementoBase = {
   appId: string,
   privateKey: string,
+  webhookSecret: string,
 }
 
-type GitHubAppMemento = UninstalledGitHubAppMemento & {
-  installationId: string
+export type GitHubAppMementoInstalled = GitHubAppMementoBase & {
+  installationId: string;
 }
+
+export type GitHubAppMementoNotInstalled = GitHubAppMementoBase & {
+  installationId?: string;
+}
+
+// don't export here since merged with namespace
+type GitHubAppMemento = GitHubAppMementoInstalled | GitHubAppMementoNotInstalled;
 
 namespace GitHubAppMemento {
   function getSecretName(sessionId: string): string {
@@ -19,37 +27,63 @@ namespace GitHubAppMemento {
     return SECRET_NAME + "-" + sessionId
   }
 
-  export async function save(sessionId: string, memento: GitHubAppMemento): Promise <void> {
+  export async function save(sessionId: string, memento: GitHubAppMemento): Promise<void> {
     try {
       await deleteSecret(sessionId);
     }
     catch (err) {
-      Log.debug(`Failed to clear existing GitHubAppMemento`, err);
+      // swallow
     }
 
     const data = {
-      appId: tob64(memento.appId.toString()),
+      appId: tob64(memento.appId),
       privateKey: tob64(memento.privateKey),
-      installationId: tob64(memento.installationId.toString()),
+      webhookSecret: tob64(memento.webhookSecret),
     };
+
+    if (memento.installationId) {
+      (data as any).installationId = tob64(memento.installationId);
+    }
+
+    const appName = "openshift-actions-connector";
 
     const secretResult = await KubeWrapper.instance.client.createNamespacedSecret(KubeWrapper.instance.ns, {
       type: "Opaque",
       metadata: {
         name: getSecretName(sessionId),
         labels: {
-          "app.kubernetes.io/part-of": "openshift-actions-connector"
-        }
+          app: appName,
+          "app.kubernetes.io/part-of": appName,
+        },
       },
       data,
     });
 
-    Log.info(`Saved app data into `
+    Log.info(`Saved INITIAL app data into `
       + `${secretResult.body.metadata?.namespace}/${secretResult.body.kind}/${secretResult.body.metadata?.name}`
     );
   }
 
-  export async function tryLoad(sessionId: string): Promise<GitHubApp | undefined> {
+  export async function savePostInstall(sessionId: string, installationId: string | number): Promise<void> {
+    const data = {
+      installationId: tob64(installationId.toString()),
+    };
+
+    const patchResult = await KubeWrapper.instance.client.patchNamespacedSecret(
+      getSecretName(sessionId),
+      KubeWrapper.instance.ns,
+      { data },
+      // seriously? https://github.com/kubernetes-client/javascript/issues/19#issuecomment-582886605
+      undefined, undefined, undefined, undefined,
+      { headers: { 'content-type': 'application/strategic-merge-patch+json' } }
+    );
+
+    Log.info(`Patched installation ID into `
+      + `${patchResult.body.metadata?.namespace}/${patchResult.body.kind}/${patchResult.body.metadata?.name}`
+    );
+  }
+
+  export async function tryLoad(sessionId: string): Promise<GitHubAppMemento | GitHubAppMementoNotInstalled | undefined> {
     const secretName = getSecretName(sessionId);
     Log.info(`Try to load app config from ${secretName}`);
 
@@ -69,10 +103,11 @@ namespace GitHubAppMemento {
     const appSecretData: GitHubAppMemento = {
       appId: fromb64(data.appId),
       privateKey: fromb64(data.privateKey),
-      installationId: fromb64(data.installationId),
+      webhookSecret: fromb64(data.webhookSecret),
+      installationId: data.installationId ? fromb64(data.installationId) : undefined,
     };
 
-    return GitHubApp.create(sessionId, { ...appSecretData }, false);
+    return appSecretData;
   }
 
   async function deleteSecret(sessionId: string): Promise<void> {
