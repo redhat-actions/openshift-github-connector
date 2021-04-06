@@ -52,7 +52,9 @@ router.route(ApiEndpoints.Cluster.ServiceAccount.path)
 
     const foundSA = await KubeWrapper.instance.verifyServiceAccount(serviceAccountName);
 
-    await GitHubAppMemento.saveServiceAccount(req.sessionID, serviceAccountName);
+    if (foundSA) {
+      await GitHubAppMemento.saveServiceAccount(req.sessionID, serviceAccountName);
+    }
 
     const resBody: ApiResponses.ServiceAccountFoundResponse = {
       found: foundSA,

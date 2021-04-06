@@ -52,6 +52,23 @@ export default class KubeWrapper {
 		return getFriendlyHTTPError(this._initError);
 	}
 
+	private static removeErrorGarbage(err_: any): Error {
+		const err = { ...err_ };
+
+		if (err.response) {
+			// delete http response data that results in a nasty long log
+			delete err.response._readableState;
+			delete err.response._events;
+			delete err.response_eventsCount;
+			delete err.response._eventsCount;
+			delete err.response.socket;
+			delete err.response.client;
+			delete err.response.req;
+		}
+
+		return err;
+	}
+
 	public static async initialize(): Promise <KubeWrapper> {
 		Log.info(`Configuring kube client...`);
 
@@ -64,6 +81,7 @@ export default class KubeWrapper {
 			Log.info(`Loaded k8s config from cluster`);
 			isInCluster = true;
 		} catch (err) {
+			err = this.removeErrorGarbage(err);
 			// when running in openshift this should be a real error
 			// Log.warn(`Failed to load config in-cluster`, err);
 			Log.warn(`Failed to load config in-cluster`, err);
@@ -74,6 +92,7 @@ export default class KubeWrapper {
 				await KubeWrapper.testConfig(tmpConfig);
 				Log.info(`Loaded k8s config from default`);
 			} catch (err2) {
+				err2 = this.removeErrorGarbage(err2);
 				Log.warn(`Failed to load default kubeconfig`, err2);
 				this._initError = err2;
 				throw err2;
@@ -140,8 +159,12 @@ export default class KubeWrapper {
 		const serviceAccountsRes = await this.client.listNamespacedServiceAccount(this.namespace);
 		const serviceAccounts = serviceAccountsRes.body.items;
 
+		Log.debug(`Checking if ${serviceAccountName} exists`);
 		const serviceAccountNames = serviceAccounts.map((sa) => sa.metadata?.name).filter((saName): saName is string => saName != null);
-		Log.debug(`service accounts: ${serviceAccountNames.join(", ")}`)
-		return serviceAccountNames.includes(serviceAccountName);
+		Log.debug(`service accounts: ${serviceAccountNames.join(", ")}`);
+
+		const exists = serviceAccountNames.includes(serviceAccountName);
+		Log.debug(`service account exists ? ${exists}`);
+		return exists;
 	}
 }

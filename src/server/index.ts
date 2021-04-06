@@ -71,21 +71,14 @@ app.route(ApiEndpoints.Health.path)
 app.use((req, res, next) => sendError(res, 404, `No route at ${req.url}`));
 
 // error handler
-app.use((err_: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const err = { ...err_ };
-
-  if (err.response) {
-    // delete http response data that results in a nasty long log
-    delete err.response._readableState;
-    delete err.response._events;
-    delete err.response_eventsCount;
-    delete err.response._eventsCount;
-    delete err.response.socket;
-    delete err.response.client;
-  }
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   Log.error(`Uncaught error:`, err);
 
-  const message = err.message || err.toString();
+  let message = err.message || err.toString();
+  if (message === "[object Object]") {
+    message = JSON.stringify(err);
+  }
+
   sendError(res, 500, message, "Error", false);
 });
 

@@ -19,6 +19,10 @@ a:focus, a:hover {
   color: #fff;
 }
 
+h1 h2 h3 h4 h5 {
+  font-weight: bold;
+}
+
 .navbar {
   color: white;
   background-color: var(--rh-gray-darkest);
@@ -45,26 +49,25 @@ main {
   color: white;
 }
 
+.b {
+  font-weight: bold;
+}
+
 .card {
   background-color: var(--rh-gray-dark);
   color: var(--fg-color);
   border-radius: 0.5rem;
   box-shadow: 0.1rem 0.1rem 0.1rem black;
+  margin-bottom: 2em;
 }
 
 .card-title {
   border-bottom: 2px solid var(--rh-gray);
-  padding: 1em;
+  padding: 1.25rem 1.25rem;
   margin-bottom: 0;
-}
 
-.card-title h4, .card-title h5 {
   font-weight: bold;
   margin: 0;
-}
-
-.card {
-  margin-bottom: 2em;
 }
 
 dl, ol, ul {
@@ -76,7 +79,35 @@ dl, ol, ul {
   max-height: 3em;
 }
 
+.btn-lg {
+  font-weight: bold;
+}
+
 .no-bullets {
   list-style-type: none;
   padding-left: 0;
+}
+
+input.errored, input.errored:focus {
+  border-color: #f00;
+  border-width: 3px;
+  border-style: solid;
+  box-shadow: none;
+}
+
+div.errored {
+  color: white;
+  background-color: var(--danger);
+}
+
+code, pre {
+  background-color: #111;
+  border-radius: 0.33em;
+  padding: 0.33em;
+  color: white;
+}
+
+pre {
+  margin: 1em 0;
+  padding: 1.5em;
 }

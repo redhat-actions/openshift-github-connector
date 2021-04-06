@@ -13,13 +13,12 @@ import { DocLink } from "../../components/doclink";
 import { fetchJSON } from "../../util/client-util";
 import getEndpointUrl from "../../util/get-endpoint-url";
 import ClientPages from "../client-pages";
-
-const saInputID = "serviceAccountName";
+import ErrorBanner from "../../components/error-banner";
+import InlineCode from "../../components/inline-code";
 
 type SAStatus = { ok: boolean, status: string };
 
-async function onSubmitServiceAccount(): Promise<SAStatus> {
-  const saName = (document.getElementById(saInputID) as HTMLInputElement).value;
+async function onSubmitServiceAccount(saName: string): Promise<SAStatus> {
   const reqBody: ApiRequests.SetServiceAccount = {
     serviceAccountName: saName,
   };
@@ -34,7 +33,10 @@ async function onSubmitServiceAccount(): Promise<SAStatus> {
       saStatus = { ok: true, status: `Successfully set up ${res.serviceAccountName} in ${res.namespace}` };
     }
     else {
-      saStatus = { ok: false, status: `${res.namespace}/serviceaccount/${res.serviceAccountName} does not exist.` };
+      saStatus = {
+        ok: false,
+        status: `${res.namespace}/serviceaccount/${res.serviceAccountName} does not exist. Create the Service Account and try again.`,
+      };
     }
   }
   catch (err) {
@@ -44,9 +46,9 @@ async function onSubmitServiceAccount(): Promise<SAStatus> {
   return saStatus;
 }
 
-function getCreateSACodeBlock(saName: string, namespace: string): string {
+function getCreateSACodeBlock(saName: string, saRole: string, namespace: string): string {
   return `oc create -n ${namespace} serviceaccount ${saName}
-oc policy -n ${namespace} add-role-to-user edit -z ${saName}`;
+oc policy -n ${namespace} add-role-to-user ${saRole} -z ${saName}`;
 }
 
 export default function SetupSAPage(): JSX.Element {
@@ -55,14 +57,16 @@ export default function SetupSAPage(): JSX.Element {
 
   const [ saName, setSaName ] = useState("github-actions-sa");
   const [ saStatus, setSaStatus ] = useState<SAStatus | undefined>();
+  const [ saRole, setSaRole ] = useState("edit");
   const [ saLoading, setSaLoading ] = useState(false);
+
+  const saNameInputID = "sa-name-input";
 
   return (
     <React.Fragment>
-      <h2></h2>
       <Card>
         <Card.Title>
-          <h4>Create a Service Account</h4>
+          Set up Service Account
         </Card.Title>
         <Card.Body>
           You have to create a Service Account which can act as your agent on the OpenShift cluster.
@@ -88,58 +92,38 @@ export default function SetupSAPage(): JSX.Element {
         </Card.Body>
       </Card>
 
-      {/* <div className="d-flex my-2">
-        <div className="align-self-center">The instructions below are for a <code>sh</code> shell, or similar.</div>
-        <div className="ml-auto"></div>
-        <button className="btn btn-light active mr-3" aria-pressed="true">
-          <FaBtnBody icon="terminal" text="Switch to sh/bash"/>
-        </button>
-        <button className="btn btn-light">
-          <FaBtnBody icon={[ "fab", "windows" ]} text="Switch to Powershell"/>
-        </button>
-      </div> */}
-
       <Card>
+        <Card.Title>
+          Service Account Name
+        </Card.Title>
         <Card.Body>
           <p className="">
-            Enter the name of the service account you would like to use.<br/>
+            Enter the name of the service account you would like to use. It is recommended to use a new service account.<br/>
           </p>
-          <input className="w-50 form-control font-weight-bold" id={saInputID} type="text"
+          <label className="b">Service Account Name</label>
+          <input
+            className={classnames("form-control w-50 b", {
+              errored: saStatus?.ok === false,
+            })}
+            id={saNameInputID} type="text"
             defaultValue={saName}
             onChange={(e) => setSaName(e.currentTarget.value)}
           />
-
-          <div className="mt-3">
-            <p>
-              It is recommended to create a new service account so permissions can be assigned minimally and individually.
-            </p>
-            <p>
-            The Service Account will usually need the <code>Edit</code> role, so it can
-            create and modify resources in its namespace.
-            </p>
-            <div>
-              <FontAwesomeIcon icon="book-open" className="mr-2"/>
-              <DocLink
-                text="OpenShift Roles"
-                href="https://docs.openshift.com/container-platform/4.7/authentication/using-rbac.html#default-roles_using-rbac"
-              />
-            </div>
-          </div>
         </Card.Body>
       </Card>
 
       <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root}>
         {
-          (data: ApiResponses.ClusterState) => {
-            if (!data.connected) {
+          (clusterData: ApiResponses.ClusterState) => {
+            if (!clusterData.connected) {
               return (
                 <React.Fragment>
                   <p className="text-danger">
                     Could not connect to the Kubernetes cluster:<br/>
-                    {data.error}
+                    {clusterData.error}
                   </p>
                   <p>
-                    <Link className="font-weight-bold" to={ClientPages.Cluster.path}>
+                    <Link className="b" to={ClientPages.Cluster.path}>
                       Go to the Cluster Page
                     </Link>
                   </p>
@@ -147,55 +131,104 @@ export default function SetupSAPage(): JSX.Element {
               );
             }
 
-            const ns = data.namespace;
-            const createSACodeBlock = getCreateSACodeBlock(saName, ns);
+            const ns = clusterData.namespace;
+            const createSACodeBlock = getCreateSACodeBlock(saName, saRole, ns);
 
             return (
-              <Card>
-                <Card.Body>
-                  <div className="d-flex align-items-center">
-                    The service account can be created as follows:
-                    <CopyToClipboardBtn
-                      className="ml-auto"
-                      copyLabel="Copy Code"
-                      textToCopy={createSACodeBlock}
-                    />
-                  </div>
-                  <pre className="bg-dark text-white mt-3 rounded p-3">
-                    {createSACodeBlock}
-                  </pre>
-
-                  <p>
-                    Once <span className="font-weight-bold">{saName}</span> has been created and assigned permissions, click the button below.
-                  </p>
-
-                  <Button className="btn-lg font-weight-bold" onClick={
-                    async () => {
-                      setSaLoading(true);
-                      try {
-                        const newSaStatus = await onSubmitServiceAccount();
-                        setSaStatus(newSaStatus);
-                        if (newSaStatus.ok) {
-                          history.push(ClientPages.Cluster.path);
-                        }
-                      }
-                      finally {
-                        setSaLoading(false);
-                      }
-                    }
-                  }>
-                    <div className="d-flex align-items-center">
-                      Proceed
-                      <FontAwesomeIcon className="mx-3" icon="arrow-right"/>
-                      <Spinner className={classnames({ "d-none": !saLoading })} animation="border"/>
+              <React.Fragment>
+                <Card>
+                  <Card.Title>
+                    Service Account Role
+                  </Card.Title>
+                  <Card.Body>
+                    <div>
+                      <p>
+                        The <code>edit</code> role is recommended, so the service account can
+                        create and modify resources in its namespace.<br/>
+                        The permissions given should be minimal. Do not give a service account administrative permissions. <br/>
+                      </p>
+                      <p>
+                        To list roles, run <InlineCode code={`oc get clusterrole -n ${clusterData.namespace}`}/>
+                      </p>
+                      <label className="b">Service Account Role</label>
+                      <input
+                        className={classnames("form-control w-50 b")}
+                        type="text"
+                        defaultValue={saRole}
+                        onChange={(e) => setSaRole(e.currentTarget.value)}
+                      />
+                      <div className="mt-3">
+                        <FontAwesomeIcon icon="book-open" className="mr-2"/>
+                        <DocLink
+                          text="OpenShift Roles"
+                          href="https://docs.openshift.com/container-platform/4.7/authentication/using-rbac.html#default-roles_using-rbac"
+                        />
+                      </div>
                     </div>
-                  </Button>
-                  <br/>
-                  <p className={classnames("mt-3", { "d-none": saStatus == null, "text-danger": saStatus && !saStatus.ok })}>
-                    {saStatus?.status || "Unknown error"}
-                  </p>
-                </Card.Body>
-              </Card>
+                  </Card.Body>
+                </Card>
+
+                <Card>
+                  <Card.Title>
+                    Create the Service Account
+                  </Card.Title>
+                  <Card.Body>
+                    <div className="d-flex align-items-center">
+                      <div>
+                        Paste these commands into a shell that is logged into your OpenShift cluster.
+                      </div>
+                      <CopyToClipboardBtn
+                        className="ml-auto"
+                        copyLabel="Copy Code"
+                        textToCopy={createSACodeBlock}
+                      />
+                    </div>
+                    <pre>
+                      {createSACodeBlock}
+                    </pre>
+
+                    <p>
+                      Once <code>{saName}</code> has been created and assigned permissions, click Proceed.
+                    </p>
+
+                    <div className="d-flex justify-content-center">
+                      <Button className="btn-lg" title="Proceed" onClick={
+                        async () => {
+                          setSaLoading(true);
+                          setSaStatus(undefined);
+                          try {
+                            const newSaStatus = await onSubmitServiceAccount(saName);
+                            setSaStatus(newSaStatus);
+                            if (newSaStatus.ok) {
+                              history.push(ClientPages.Cluster.path);
+                            }
+                            else {
+                              document.getElementById(saNameInputID)?.focus();
+                            }
+                          }
+                          finally {
+                            setSaLoading(false);
+                          }
+                        }
+                      }>
+                        <div className="d-flex align-items-center">
+                          Proceed
+                          <FontAwesomeIcon className="mx-3" icon="arrow-right"/>
+                        </div>
+                      </Button>
+                    </div>
+
+                    <div className="d-flex justify-content-center mt-3">
+                      <Spinner className={classnames({ "d-none": !saLoading })} animation="border"/>
+
+                      <ErrorBanner
+                        display={saStatus != null && !saStatus.ok}
+                        message={saStatus?.status || "Unknown error"}
+                      />
+                    </div>
+                  </Card.Body>
+                </Card>
+              </React.Fragment>
             );
           }
         }

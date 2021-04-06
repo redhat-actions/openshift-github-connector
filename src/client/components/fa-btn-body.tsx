@@ -9,11 +9,16 @@ export default function FaBtnBody(props: {
 
   const iconPosition = props.iconPosition || "left";
 
+  let marginClass = "";
+  if (props.text) {
+    marginClass = iconPosition === "left" ? "mr-2" : "ml-2";
+  }
+
   const iconElement = (
     <FontAwesomeIcon
       fixedWidth
       icon={props.icon}
-      className={iconPosition === "left" ? "mr-2" : "ml-2"}
+      className={marginClass}
       title={props.text}
     />
   );
