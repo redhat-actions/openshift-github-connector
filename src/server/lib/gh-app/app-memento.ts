@@ -3,11 +3,14 @@ import GitHubApp from "./app";
 import Log from "../../logger";
 import KubeWrapper from "../kube/kube-wrapper";
 import { fromb64, tob64 } from "../../util/server-util";
+import { V1Secret } from "@kubernetes/client-node";
 
 export type GitHubAppMementoBase = {
   appId: string,
   privateKey: string,
   webhookSecret: string,
+
+  serviceAccountName?: string;
 }
 
 export type GitHubAppMementoInstalled = GitHubAppMementoBase & {
@@ -35,14 +38,14 @@ namespace GitHubAppMemento {
       // swallow
     }
 
-    const data = {
+    const data: GitHubAppMemento = {
       appId: tob64(memento.appId),
       privateKey: tob64(memento.privateKey),
       webhookSecret: tob64(memento.webhookSecret),
     };
 
     if (memento.installationId) {
-      (data as any).installationId = tob64(memento.installationId);
+      data.installationId = tob64(memento.installationId);
     }
 
     const appName = "openshift-actions-connector";
@@ -69,8 +72,20 @@ namespace GitHubAppMemento {
       installationId: tob64(installationId.toString()),
     };
 
+    await patchSecret(getSecretName(sessionId), data);
+  }
+
+  export async function saveServiceAccount(sessionId: string, serviceAccountName: string): Promise<void> {
+    const data = {
+      serviceAccountName: tob64(serviceAccountName),
+    };
+
+    await patchSecret(getSecretName(sessionId), data);
+  }
+
+  async function patchSecret(secretName: string, data: Partial<GitHubAppMemento>): Promise<V1Secret> {
     const patchResult = await KubeWrapper.instance.client.patchNamespacedSecret(
-      getSecretName(sessionId),
+      secretName,
       KubeWrapper.instance.ns,
       { data },
       // seriously? https://github.com/kubernetes-client/javascript/issues/19#issuecomment-582886605
@@ -78,9 +93,11 @@ namespace GitHubAppMemento {
       { headers: { 'content-type': 'application/strategic-merge-patch+json' } }
     );
 
-    Log.info(`Patched installation ID into `
+    Log.info(`Patched key(s) "${Object.keys(data).join(", ")}" into `
       + `${patchResult.body.metadata?.namespace}/${patchResult.body.kind}/${patchResult.body.metadata?.name}`
     );
+
+    return patchResult.body;
   }
 
   export async function tryLoad(sessionId: string): Promise<GitHubAppMemento | GitHubAppMementoNotInstalled | undefined> {
@@ -105,6 +122,7 @@ namespace GitHubAppMemento {
       privateKey: fromb64(data.privateKey),
       webhookSecret: fromb64(data.webhookSecret),
       installationId: data.installationId ? fromb64(data.installationId) : undefined,
+      serviceAccountName: data.serviceAccountName ? fromb64(data.serviceAccountName) : undefined,
     };
 
     return appSecretData;

@@ -135,4 +135,13 @@ export default class KubeWrapper {
 		}
 		return this.config.makeApiClient(k8s.CoreV1Api);
 	}
+
+	public async verifyServiceAccount(serviceAccountName: string): Promise<boolean> {
+		const serviceAccountsRes = await this.client.listNamespacedServiceAccount(this.namespace);
+		const serviceAccounts = serviceAccountsRes.body.items;
+
+		const serviceAccountNames = serviceAccounts.map((sa) => sa.metadata?.name).filter((saName): saName is string => saName != null);
+		Log.debug(`service accounts: ${serviceAccountNames.join(", ")}`)
+		return serviceAccountNames.includes(serviceAccountName);
+	}
 }

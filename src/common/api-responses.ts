@@ -49,7 +49,7 @@ export namespace ApiResponses {
   export interface ClusterStateConnected {
     connected: true;
     clusterInfo: ClusterConfig;
-    namespace: string | undefined;
+    namespace: string;
   }
 
   export type ClusterState = ClusterStateDisconnected | ClusterStateConnected;
@@ -58,6 +58,9 @@ export namespace ApiResponses {
     serviceAccountSetup: true;
     serviceAccount: {
       name: string;
+      // exists: boolean;
+      // https://docs.openshift.com/container-platform/4.7/authentication/using-rbac.html#default-roles_using-rbac
+      // canCreateDeployment: boolean;
     };
   }
 
@@ -66,6 +69,12 @@ export namespace ApiResponses {
   }
 
   export type ServiceAccountState = ServiceAccountStateSetup | ServiceAccountStateNotSetup;
+
+  export type ServiceAccountFoundResponse = {
+    found: boolean;
+    namespace: string;
+    serviceAccountName: string;
+  };
 }
 
 export default ApiResponses;

@@ -4,6 +4,7 @@ import { Button } from "react-bootstrap";
 import FaBtnBody from "./fa-btn-body";
 
 interface CopyBtnProps extends React.HTMLAttributes<HTMLButtonElement> {
+  copyLabel?: string;
   textToCopy: string;
 }
 
@@ -34,13 +35,16 @@ export default class CopyToClipboardBtn extends React.Component<CopyBtnProps, Co
     }
     else {
       icon = "copy";
-      text = "Copy";
+      text = this.props.copyLabel ?? "Copy";
     }
+
+    const childBtnProps: Partial<CopyBtnProps> = { ...this.props };
+    delete childBtnProps.textToCopy;
 
     return (
       <Button
         style={{ minWidth: "12ch" }}
-        {...this.props}
+        {...childBtnProps}
         onClick={() => this.onCopy()}>
         <FaBtnBody icon={icon} text={text} />
       </Button>

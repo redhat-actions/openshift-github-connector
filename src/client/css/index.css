@@ -54,8 +54,17 @@ main {
 
 .card-title {
   border-bottom: 2px solid var(--rh-gray);
-  padding-bottom: 1em;
+  padding: 1em;
   margin-bottom: 0;
+}
+
+.card-title h4, .card-title h5 {
+  font-weight: bold;
+  margin: 0;
+}
+
+.card {
+  margin-bottom: 2em;
 }
 
 dl, ol, ul {
@@ -65,4 +74,9 @@ dl, ol, ul {
 
 .btn {
   max-height: 3em;
+}
+
+.no-bullets {
+  list-style-type: none;
+  padding-left: 0;
 }

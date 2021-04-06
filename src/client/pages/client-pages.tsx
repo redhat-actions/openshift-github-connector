@@ -20,7 +20,7 @@ export class ClientPage extends UrlPath {
 
   public get route(): JSX.Element {
     return (
-      <Route exact path={this.path} component={this.component} />
+      <Route key={this.path} exact path={this.path} component={this.component} />
     );
   }
 }

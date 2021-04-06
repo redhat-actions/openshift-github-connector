@@ -7,10 +7,10 @@ export default function appPageCard(props: {
     children: React.ReactNode,
 }): JSX.Element {
   return (
-    <div className="text-black card mb-4 p-3">
+    <div className="card">
       <div className="card-title d-flex justify-content-between">
         <div className="d-flex align-items-center">
-          <h4 className="font-weight-bold m-0">
+          <h4>
             {props.header}
           </h4>
         </div>
@@ -20,7 +20,7 @@ export default function appPageCard(props: {
           }
         </div>
       </div>
-      <div className="card-body">
+      <div className="card-body pb-3">
         {props.children}
       </div>
     </div>
