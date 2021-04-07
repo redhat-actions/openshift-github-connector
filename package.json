@@ -54,6 +54,7 @@
     "jquery": "^3.6.0",
     "log4js": "^6.3.0",
     "node-fetch": "^2.6.1",
+    "node-sass": "^5.0.0",
     "popper.js": "1",
     "react": "^17.0.1",
     "react-bootstrap": "^1.5.2",

@@ -36,7 +36,7 @@ export default function ClusterPage(): JSX.Element {
                   "Cluster Name": data.clusterInfo.name,
                   "Api Server": <a href={data.clusterInfo.server}>{data.clusterInfo.server}</a>,
                   User: data.clusterInfo.user,
-                  Namespace: (data.namespace ?? "None selected"),
+                  Namespace: data.namespace,
                 }).map(([ label, value ], i) => (
                   <tr key={i}>
                     <td className="font-weight-bold">

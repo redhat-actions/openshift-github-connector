@@ -46,7 +46,7 @@ module.exports = {
     rules: {
       "no-console": 0,
       "max-len": [ 2, 150 ],
-      "import/extensions": [ 2, { css: "always", json: "always" }],
+      "import/extensions": [ 2, { css: "always", json: "always", scss: "always" }],
       "@typescript-eslint/explicit-function-return-type": [ 0 ],
       "@typescript-eslint/explicit-module-boundary-types": [ 0 ],
       "@typescript-eslint/ban-types": [ 0 ],

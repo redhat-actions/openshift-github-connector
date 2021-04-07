@@ -38,6 +38,7 @@ export default class CopyToClipboardBtn extends React.Component<CopyBtnProps, Co
       text = this.props.copyLabel ?? "Copy";
     }
 
+    // note scss default width
     const childBtnProps: Partial<CopyBtnProps> = { ...this.props };
     delete childBtnProps.textToCopy;
 
@@ -46,6 +47,7 @@ export default class CopyToClipboardBtn extends React.Component<CopyBtnProps, Co
     return (
       <Button
         title="Copy"
+        className="copy-btn"
         {...childBtnProps}
         onClick={() => this.onCopy()}>
         <FaBtnBody icon={icon} text={renderText ? text : undefined} />

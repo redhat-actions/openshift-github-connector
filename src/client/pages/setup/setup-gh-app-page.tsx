@@ -10,13 +10,15 @@ import ClientPages from "../client-pages";
 import { GitHubAppConfigWithSecrets } from "../../../common/types/github-app";
 import DataFetcher from "../../components/data-fetcher";
 import { fetchJSON } from "../../util/client-util";
+import SetupPageHeader from "./setup-header";
+import { APP_IS_BEING_SETUP_QP } from "../gh-app-page";
 
 export function getAppManifest(appUrl: string): Record<string, unknown> {
   // the redirect url is the first one, which is redirected to after the app is created
-  const redirectUrl = appUrl + ClientPages.CreatingApp;
+  const redirectUrl = appUrl + ClientPages.SetupCreatingApp;
 
   // the callback url is the second one, which is redirect to after the app is installed
-  const callbackUrl = appUrl + ClientPages.InstalledApp;
+  const callbackUrl = appUrl + ClientPages.SetupInstalledApp;
   // eslint-disable-next-line camelcase
   // the setup url is redirected to after the app is updated
   const setupUrl = callbackUrl + "?reload=true";
@@ -59,6 +61,7 @@ export function CreateAppPage(): JSX.Element {
 
   return (
     <React.Fragment>
+      <SetupPageHeader pageIndex={0}/>
       <Jumbotron className="text-black">
         <h2 className="text-center">You have to create an app now</h2>
         <p className="text-center">This is a description of what creating an app means.</p>
@@ -128,31 +131,9 @@ export function CreatingAppPage() {
   );
 }
 
-/*
-export function InstallingAppPage(): JSX.Element {
-  return (
-    <React.Fragment>
-      <DataFetcher loadingDisplay="spinner" type="generic" fetchData={
-        async (): Promise<GitHubAppConfigWithSecrets> => {
-          return fetchJson("GET", ApiEndpoints.Setup.CreatingApp.path);
-        }
-      }>
-        {(data: GitHubAppConfigWithSecrets) => {
-          return (
-            <React.Fragment>
-              <p>GitHub app {data.name} has been created and saved.</p>
-              <p>Now you must install the app into your GitHub account.</p>
-              <a className="btn btn-primary" role="button" href={`https://github.com/settings/apps/${data.slug}/installations`}>
-                  Install App
-              </a>
-            </React.Fragment>
-          );
-        }}
-      </DataFetcher>
-    </React.Fragment>
-  );
+export function getAppPageUrlWithSetupQuery(): string {
+  return `${ClientPages.App.path}?${APP_IS_BEING_SETUP_QP}=true`;
 }
-*/
 
 export function InstalledAppPage(): JSX.Element {
   const history = useHistory();
@@ -173,11 +154,10 @@ export function InstalledAppPage(): JSX.Element {
         {() => (
           <p>
             Installed app successfully. Redirecting...
-            {history.replace(ClientPages.App.path)}
+            {history.replace(getAppPageUrlWithSetupQuery())}
           </p>
         )}
       </DataFetcher>
-
     </React.Fragment>
   );
 }

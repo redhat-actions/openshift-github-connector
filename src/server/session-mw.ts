@@ -17,6 +17,7 @@ const sessionMw = session({
   }),
   resave: false,
   saveUninitialized: true,
+  rolling: true,
   genid: (req): string => {
     const id = uuid();
     // since the session id is also used for the secret name,
@@ -30,7 +31,6 @@ const sessionMw = session({
     httpOnly: true,
     maxAge: dayMs,
     // name: ""
-    // sameSite: "lax",  // strict
     sameSite: "strict",
     // secure: "auto",
     secure: "auto",

@@ -9,7 +9,7 @@ import ApiResponses from "../../../common/api-responses";
 import DataFetcher from "../../components/data-fetcher";
 import ClientPages, { ClientPage } from "../client-pages";
 
-import "../../css/setup.css";
+import "../../css/setup.scss";
 
 function getStatusCells(success: boolean, btnLabels: {
   failure: string,
@@ -72,7 +72,7 @@ export default function SetupHomePage() {
                       failure: "Set up App",
                       success: "View App",
                     }, {
-                      failure: ClientPages.CreateApp,
+                      failure: ClientPages.SetupCreateApp,
                       success: ClientPages.App,
                     });
                   }
@@ -104,7 +104,7 @@ export default function SetupHomePage() {
                       failure: "Create Service Account",
                       success: "View Service Account",
                     }, {
-                      failure: ClientPages.SetupSA,
+                      failure: ClientPages.SetupServiceAccount,
                       success: ClientPages.Cluster,
                     });
                   }

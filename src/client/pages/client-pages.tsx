@@ -28,11 +28,11 @@ export class ClientPage extends UrlPath {
 const Home = new ClientPage(undefined, "/", HomePage);
 
 const Setup = new ClientPage(Home, "/setup", SetupHomePage);
-const CreateApp = new ClientPage(Setup, "/create-app", SetupAppPages.CreateAppPage);
-const CreatingApp = new ClientPage(Setup, "/creating-app", SetupAppPages.CreatingAppPage);
+const SetupCreateApp = new ClientPage(Setup, "/create-app", SetupAppPages.CreateAppPage);
+const SetupCreatingApp = new ClientPage(Setup, "/creating-app", SetupAppPages.CreatingAppPage);
 // const InstallingApp = new ClientPage(Setup, "/installing-app", SetupAppPages.InstallingAppPage);
-const InstalledApp = new ClientPage(Setup, "/installed-app", SetupAppPages.InstalledAppPage);
-const SetupSA = new ClientPage(Setup, "/service-account", SetupSAPage);
+const SetupInstalledApp = new ClientPage(Setup, "/installed-app", SetupAppPages.InstalledAppPage);
+const SetupServiceAccount = new ClientPage(Setup, "/service-account", SetupSAPage);
 
 const App = new ClientPage(Home, "/app", GitHubAppPage);
 const Cluster = new ClientPage(Home, "/cluster", ClusterPage);
@@ -41,12 +41,12 @@ const ClientPages = {
   Home,
 
   Setup,
-  CreateApp,
-  CreatingApp,
+  SetupCreateApp,
+  SetupCreatingApp,
   // InstallingApp,
-  InstalledApp,
+  SetupInstalledApp,
 
-  SetupSA,
+  SetupServiceAccount,
 
   App,
   Cluster,

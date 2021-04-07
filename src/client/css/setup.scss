@@ -1,0 +1,100 @@
+@import "./index.scss";
+@import "./colors.scss";
+
+.table td {
+    vertical-align: middle;
+}
+
+.table tr {
+    height: 4rem;
+}
+
+td .btn {
+    min-width: 15ch;
+}
+
+.setup-step-indicator {
+    padding: 0.5rem 1rem;
+
+    &.active {
+        background-color: white;
+        border: 1px solid white;
+        border-radius: 1em;
+
+        & a {
+            color: black;
+        }
+    }
+
+    & a {
+        color: var(--fg-color);
+        &:focus, &:hover {
+            text-decoration: none;
+        }
+    }
+}
+
+$header-top-height: 1rem;
+
+.setup-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    margin-bottom: 3rem;
+}
+
+.setup-header-wrapper {
+    position: relative;
+}
+
+.setup-header-background {
+    position: absolute;
+
+    background-color: var(--bg-color);
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.setup-header-body {
+    // top: $header-top-height;
+    top: $header-top-height;
+    // border-radius: 0 0 $card-border-radius $card-border-radius;
+    background-color: #1c343b;
+    padding: 0.5rem 0;
+}
+
+.setup-header-buttons {
+    padding: 0.5rem 1rem;
+}
+
+$setup-green: #4e4;
+$circle-size: 3rem;
+
+.setup-step-circle {
+    height: $circle-size;
+    width: $circle-size;
+
+    border-width: 0.2rem;
+    border-style: solid;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 100%;
+    font-size: 1.25rem;
+
+    border-color: $setup-green;
+
+    // see SetupStepState
+    &.passed, &.current {
+        color: black;
+        background-color: $setup-green;
+        border-color: $setup-green;
+    }
+
+    &.todo {
+        color: white;
+        background-color: "";
+    }
+}

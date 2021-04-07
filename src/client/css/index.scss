@@ -15,8 +15,15 @@ a {
   color: #8df;
 }
 
+.btn a {
+  color: white;
+  &:hover {
+    text-decoration: none;
+  }
+}
+
 a:focus, a:hover {
-  color: #fff;
+  color: white;
 }
 
 h1 h2 h3 h4 h5 {
@@ -53,21 +60,28 @@ main {
   font-weight: bold;
 }
 
+$card-border-radius: 0.5rem;
+$card-box-shadow: 0.1rem 0.1rem 0.1rem black;
+
 .card {
   background-color: var(--rh-gray-dark);
   color: var(--fg-color);
-  border-radius: 0.5rem;
-  box-shadow: 0.1rem 0.1rem 0.1rem black;
-  margin-bottom: 2em;
+  border-radius: $card-border-radius;
+  box-shadow: $card-box-shadow;
+  margin-bottom: 1.5em;
 }
 
 .card-title {
   border-bottom: 2px solid var(--rh-gray);
-  padding: 1.25rem 1.25rem;
-  margin-bottom: 0;
+  padding: 1rem 1.25rem;
 
-  font-weight: bold;
   margin: 0;
+  font-weight: bold;
+
+  & h4, & h5 {
+    margin: 0;
+    font-weight: bold;
+  }
 }
 
 dl, ol, ul {
@@ -83,6 +97,10 @@ dl, ol, ul {
   font-weight: bold;
 }
 
+.copy-btn {
+  min-width: 12ch;
+}
+
 .no-bullets {
   list-style-type: none;
   padding-left: 0;
@@ -93,6 +111,10 @@ input.errored, input.errored:focus {
   border-width: 3px;
   border-style: solid;
   box-shadow: none;
+}
+
+span.errored {
+  color: var(--danger);
 }
 
 div.errored {
@@ -110,4 +132,10 @@ code, pre {
 pre {
   margin: 1em 0;
   padding: 1.5em;
+}
+
+.push-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }

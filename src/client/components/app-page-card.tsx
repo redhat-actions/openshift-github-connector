@@ -8,12 +8,10 @@ export default function appPageCard(props: {
 }): JSX.Element {
   return (
     <div className="card">
-      <div className="card-title d-flex justify-content-between">
-        <div className="d-flex align-items-center">
-          <h4>
-            {props.header}
-          </h4>
-        </div>
+      <div className="card-title d-flex justify-content-between align-items-center">
+        <h4>
+          {props.header}
+        </h4>
         <div className="d-flex">
           {
             props.buttons.map((btnProps, i) => <LinkButton key={i} style={{ flexGrow: 1 }} {...btnProps}></LinkButton>)

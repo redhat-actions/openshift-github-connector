@@ -9,6 +9,9 @@ import ApiResponses from "../../common/api-responses";
 import ClientPages from "./client-pages";
 import getEndpointUrl from "../util/get-endpoint-url";
 import { fetchJSON } from "../util/client-util";
+import SetupPageHeader from "./setup/setup-header";
+
+export const APP_IS_BEING_SETUP_QP = "setup";
 
 export default function GitHubAppPage() {
   const DOCS_ICON = "book";
@@ -22,7 +25,7 @@ export default function GitHubAppPage() {
   useEffect(() => {
     countdownInterval = setInterval(() => {
       if (countdown <= 0) {
-        history.push(ClientPages.CreateApp.path);
+        history.push(ClientPages.SetupCreateApp.path);
       }
       else {
         setCountdown(countdown - 1000);
@@ -36,16 +39,18 @@ export default function GitHubAppPage() {
     };
   });
 
+  const qs = new URLSearchParams(window.location.search);
+
   return (
     <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.App.Root}>
       {(data: ApiResponses.GitHubAppState) => {
-        if (!data.app) {
+        if (data.app === false) {
           console.log(`render with countdown=${countdown}`);
           return (
             <React.Fragment>
               <p>A GitHub App has not yet been added to the connector.</p>
               <h2 className="my-3">
-                <a href={ClientPages.CreateApp.path}>Create an App</a>
+                <a href={ClientPages.SetupCreateApp.path}>Create an App</a>
               </h2>
               <p>You will be redirected in {Math.round(countdown / 1000)} ...</p>
             </React.Fragment>
@@ -56,6 +61,9 @@ export default function GitHubAppPage() {
 
         return (
           <React.Fragment>
+            {
+              qs.has(APP_IS_BEING_SETUP_QP) ? <SetupPageHeader pageIndex={1}/> : <></>
+            }
             <h2 className="d-flex font-weight-bold">
               <a className="text-white" href={data.appUrls.app}>{data.appConfig.name}</a>
               <div className="ml-auto"></div>
