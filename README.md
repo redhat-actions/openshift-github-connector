@@ -10,6 +10,11 @@ The structure is adapted from [this blog post](https://spin.atomicobject.com/202
 
 Run `yarn dev` to run the development server.
 
+### Debugging
+There are debug configurations in launch.json which should work with VS Code.
+
+If you want to use "Attach to Chrome" to debug the React you must launch chrome with `google-chrome --remote-debugging-port=9222`. This seems to cause VS Code to leak memory so you may have to restart Code every so often.
+
 ### Development gotchas
 CRA seems to have problems if you rename or delete a TypeScript file. It will keep trying to compile the old one. Restarting the development server fixes it.
 

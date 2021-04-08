@@ -10,10 +10,10 @@ const router = express.Router();
 export default router;
 
 async function getKubeClusterStatus(req: express.Request, res: express.Response): Promise<void> {
-  if (KubeWrapper.initErrorFriendly) {
+  if (KubeWrapper.initError) {
     const resBody: ApiResponses.ClusterStateDisconnected = {
       connected: false,
-      error: KubeWrapper.initErrorFriendly,
+      error: KubeWrapper.initError.message,
     };
 
     res.status(200).json(resBody);

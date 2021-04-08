@@ -43,10 +43,8 @@ export async function throwIfError(res: Response): Promise<void> {
   }
 }
 
-type Methods = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-
 export async function fetchJSON<T = void>(
-  method: Methods, url: string, options: RequestInit = {}
+  method: HttpConstants.Methods, url: string, options: RequestInit = {}
 ): Promise<T> {
 
   let headers: HeadersInit = {};

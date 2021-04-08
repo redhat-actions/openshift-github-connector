@@ -15,6 +15,7 @@ export function sendError(
   res.status(statusCode);
 
   const resBody: ApiResponses.Error = {
+    success: false,
     detail,
     status: statusCode,
     statusMessage,

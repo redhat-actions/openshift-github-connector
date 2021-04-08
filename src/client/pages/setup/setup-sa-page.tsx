@@ -13,34 +13,27 @@ import { DocLink } from "../../components/doclink";
 import { fetchJSON } from "../../util/client-util";
 import getEndpointUrl from "../../util/get-endpoint-url";
 import ClientPages from "../client-pages";
-import SetupPageHeader, { SubmitResult } from "./setup-header";
+import SetupPageHeader from "./setup-header";
+import Banner from "../../components/banner";
 
-async function onSubmitServiceAccount(saName: string): Promise<SubmitResult> {
+async function onSubmitServiceAccount(saName: string): Promise<ApiResponses.Result> {
   const reqBody: ApiRequests.SetServiceAccount = {
     serviceAccountName: saName,
   };
 
-  let saStatus: SubmitResult;
+  let createSaResult: ApiResponses.Result;
   try {
-    const res = await fetchJSON<ApiResponses.ServiceAccountFoundResponse>("POST", getEndpointUrl(ApiEndpoints.Cluster.ServiceAccount.path), {
+    const res = await fetchJSON<ApiResponses.ServiceAccountExists>("POST", getEndpointUrl(ApiEndpoints.Cluster.ServiceAccount.path), {
       body: JSON.stringify(reqBody),
     });
 
-    if (res.found) {
-      saStatus = { ok: true, message: `Successfully selected ${res.namespace}/${res.serviceAccountName}` };
-    }
-    else {
-      saStatus = {
-        ok: false,
-        message: `Service Account ${res.serviceAccountName} does not exist in namespace ${res.namespace}. Create the Service Account and try again.`,
-      };
-    }
+    return res;
   }
   catch (err) {
-    saStatus = { ok: false, message: err.message };
+    createSaResult = { success: false, message: err.message };
   }
 
-  return saStatus;
+  return createSaResult;
 }
 
 function getCreateSACodeBlock(saName: string, saRole: string, namespace: string): string {
@@ -52,27 +45,35 @@ export default function SetupSAPage(): JSX.Element {
 
   // const history = useHistory();
 
+  const saRole = "edit";
+
   const [ saName, setSaName ] = useState("github-actions-sa");
-  // const [ saStatus, setSaStatus ] = useState<SAStatus | undefined>();
-  const [ saRole /* , setSaRole */ ] = useState("edit");
-  // const [ saLoading, setSaLoading ] = useState(false);
+  const [ saError, setSaError ] = useState<string | undefined>(undefined);
 
   const saNameInputID = "sa-name-input";
 
   return (
     <React.Fragment>
-      <SetupPageHeader pageIndex={2} onSubmit={async () => {
+      <SetupPageHeader pageIndex={2} checkCanProceed={async () => {
+        setSaError(undefined);
         const saStatus = await onSubmitServiceAccount(saName);
-        if (!saStatus.ok) {
+        if (!saStatus.success) {
           document.getElementById(saNameInputID)?.focus();
+          setSaError(saStatus.message);
         }
-        return saStatus;
-      }
-      }/>
+        return saStatus.success;
+      }}/>
+
       <Card>
         <Card.Body>
-          You have to create a Service Account which can act as your agent on the OpenShift cluster.
-          The Service Account will create a token which can be used to authenticate into the cluster from GitHub Actions.
+          <p>
+            You have to create a Service Account which can act as your agent on the OpenShift cluster.
+            The Service Account will create a token which can be used to authenticate into the cluster from GitHub Actions.
+          </p>
+          <p>
+            The service account has to be created by a user,
+            since a service account is not allowed to create another service account.
+          </p>
           <div className="mt-3">
             <ul className="no-bullets">
               <li>
@@ -104,14 +105,16 @@ export default function SetupSAPage(): JSX.Element {
           </p>
           <label className="b">Service Account Name</label>
           <input
-            className={classnames("form-control w-50 b")}/* , {
-              errored: saStatus?.ok === false,
-            }
-            )} */
+            className={classnames("form-control w-50 b", {
+              errored: saError,
+            })}
             id={saNameInputID} type="text"
             defaultValue={saName}
             onChange={(e) => setSaName(e.currentTarget.value)}
           />
+          <Banner display={!!saError} isError={true}>
+            {saError || ""}
+          </Banner>
         </Card.Body>
       </Card>
 
@@ -177,8 +180,8 @@ export default function SetupSAPage(): JSX.Element {
                   </Card.Title>
                   <Card.Body>
                     <div>
-                      The commands below use the <code>edit</code> role for your service account,
-                      which will allow it to edit resources in its namespace.<br/>
+                      The commands below use the <code>{saRole}</code> role for your service account,
+                      which will allow it to create and edit resources in its namespace.
                       You may substitute another cluster role if you prefer.
                       <div className="mt-3">
                         <FontAwesomeIcon icon="book-open" className="mr-2"/>
@@ -196,13 +199,13 @@ export default function SetupSAPage(): JSX.Element {
                     Create the Service Account
                   </Card.Title>
                   <Card.Body>
-                    <div className="d-flex align-items-center">
+                    <div className="d-flex align-items-center justify-content-between">
                       <div>
                         Paste these commands into a shell that is logged into your OpenShift cluster.
                       </div>
                       <CopyToClipboardBtn
                         style={{ minWidth: "16ch" }}
-                        className="ml-auto"
+                        className="align-self-end ml-4"
                         copyLabel="Copy Code"
                         textToCopy={createSACodeBlock}
                       />

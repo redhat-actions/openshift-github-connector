@@ -4,6 +4,7 @@ import UrlPath from "../../common/types/url-path";
 import ClusterPage from "./cluster-page";
 import GitHubAppPage from "./gh-app-page";
 import HomePage from "./home-page";
+import SelectReposPage from "./setup/select-repos-page";
 import * as SetupAppPages from "./setup/setup-gh-app-page";
 import SetupHomePage from "./setup/setup-home-page";
 import SetupSAPage from "./setup/setup-sa-page";
@@ -33,6 +34,7 @@ const SetupCreatingApp = new ClientPage(Setup, "/creating-app", SetupAppPages.Cr
 // const InstallingApp = new ClientPage(Setup, "/installing-app", SetupAppPages.InstallingAppPage);
 const SetupInstalledApp = new ClientPage(Setup, "/installed-app", SetupAppPages.InstalledAppPage);
 const SetupServiceAccount = new ClientPage(Setup, "/service-account", SetupSAPage);
+const SetupRepos = new ClientPage(Setup, "/select-repos", SelectReposPage);
 
 const App = new ClientPage(Home, "/app", GitHubAppPage);
 const Cluster = new ClientPage(Home, "/cluster", ClusterPage);
@@ -47,6 +49,7 @@ const ClientPages = {
   SetupInstalledApp,
 
   SetupServiceAccount,
+  SetupRepos,
 
   App,
   Cluster,

@@ -6,9 +6,30 @@ html, body {
   color: var(--fg-color);
   background-color: var(--bg-color);
 
-  --navbar-height: 4rem;
+  line-height: 1.5em;
 
-  padding: 1rem 0;
+  --navbar-height: 4rem;
+}
+
+.navbar {
+  color: white;
+  background-color: var(--rh-gray-darkest);
+
+  height: var(--navbar-height);
+}
+
+.navbar img, .navbar i {
+  height: calc(var(--navbar-height) * 0.6);
+  font-size: calc(var(--navbar-height) * 0.6);
+}
+
+$main-vertical-padding: 2rem;
+
+main {
+  padding: $main-vertical-padding 0;
+  min-width: var(--breakpoint-sm);
+  width: 80%;
+  max-width: var(--breakpoint-lg);
 }
 
 a {
@@ -30,23 +51,6 @@ h1 h2 h3 h4 h5 {
   font-weight: bold;
 }
 
-.navbar {
-  color: white;
-  background-color: var(--rh-gray-darkest);
-
-  height: var(--navbar-height);
-}
-
-.navbar img, .navbar i {
-  height: calc(var(--navbar-height) * 0.6);
-  font-size: calc(var(--navbar-height) * 0.6);
-}
-
-main {
-  min-width: var(--breakpoint-sm);
-  width: 80%;
-  max-width: var(--breakpoint-lg);
-}
 
 .text-black {
   color: black;
@@ -93,10 +97,6 @@ dl, ol, ul {
   max-height: 3em;
 }
 
-.btn-lg {
-  font-weight: bold;
-}
-
 .copy-btn {
   min-width: 12ch;
 }
@@ -138,4 +138,20 @@ pre {
   display: flex;
   justify-content: flex-end;
   align-items: center;
+}
+
+.clickable:hover, .clickable:focus {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.jumbotron {
+  border-radius: $card-border-radius;
+  box-shadow: $card-box-shadow;
+
+  color: black;
+
+  & a {
+    color: black;
+  }
 }

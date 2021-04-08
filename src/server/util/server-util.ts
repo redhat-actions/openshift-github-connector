@@ -83,3 +83,37 @@ export function isInK8s(): boolean {
 export function sendStatusJSON(res: express.Response, statusCode: number): void {
   res.status(statusCode).send({ statusCode, message: HttpStatusCodes.getStatusText(statusCode) });
 }
+
+export function getFriendlyHTTPError(err: Error & { response?: any }): Error {
+  if (!err.response) {
+    return new Error(JSON.stringify(err));
+  }
+
+  const errRes = err.response;
+  const message = `${errRes.request.method} ${errRes.request.uri.href}: `
+        + `${errRes.statusCode} ${errRes.body.message || errRes.body.reason}`;
+
+  const newErr = new Error(message);
+  newErr.stack = err.stack;
+  return newErr;
+}
+
+/*
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function removeErrorGarbage(err_: any): Record<string, unknown> {
+  const err = { ...err_ };
+
+  if (err.response) {
+    // delete http response data that results in a nasty long log
+    delete err.response._readableState;
+    delete err.response._events;
+    delete err.response_eventsCount;
+    delete err.response._eventsCount;
+    delete err.response.socket;
+    delete err.response.client;
+    delete err.response.req;
+  }
+
+  return err;
+}
+*/

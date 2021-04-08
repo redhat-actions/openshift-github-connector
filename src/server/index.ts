@@ -10,7 +10,7 @@ import { send405, sendError } from "./util/send-error";
 import Log, { getLoggingMiddleware } from "./logger";
 import { startup } from "./startup";
 import ApiEndpoints from "../common/api-endpoints";
-import { getAllowedOrigins, isInK8s } from "./util/server-util";
+import { getAllowedOrigins, getFriendlyHTTPError, isInK8s } from "./util/server-util";
 
 const app = express();
 
@@ -71,7 +71,13 @@ app.route(ApiEndpoints.Health.path)
 app.use((req, res, next) => sendError(res, 404, `No route at ${req.url}`));
 
 // error handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err_: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  let err = err_;
+
+  if (err_.response) {
+    err = getFriendlyHTTPError(err_);
+  }
+
   Log.error(`Uncaught error:`, err);
 
   let message = err.message || err.toString();

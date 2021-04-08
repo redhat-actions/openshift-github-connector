@@ -11,6 +11,7 @@ const PostCreateApp = new UrlPath(Setup, "/post-create-app");
 const PostInstallApp = new UrlPath(Setup, "/post-install-app");
 
 const App = new UrlPath(Api, "/app");
+const AppRepos = new UrlPath(App, "/repos");
 
 const Cluster = new UrlPath(Api, "/cluster");
 const ServiceAccount = new UrlPath(Cluster, "/serviceaccount");
@@ -30,6 +31,7 @@ const ApiEndpoints = {
   },
   App: {
     Root: App,
+    Repos: AppRepos,
   },
   Cluster: {
     Root: Cluster,

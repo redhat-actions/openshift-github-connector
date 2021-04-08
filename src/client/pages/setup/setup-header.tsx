@@ -5,30 +5,39 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, Card, Spinner } from "react-bootstrap";
 
 import "../../css/setup.scss";
-import ClientPages from "../client-pages";
-import { getAppPageUrlWithSetupQuery } from "./setup-gh-app-page";
-import Banner from "../../components/banner";
+import ClientPages, { ClientPage } from "../client-pages";
+import FaBtnBody from "../../components/fa-btn-body";
 
-export type SubmitResult = { ok: boolean, message: string };
+export const SETUP_QUERY = "setup";
 
 type SetupPageProps = {
   pageIndex: number;
-  onSubmit?: () => Promise<SubmitResult>;
+  hideBtnBanner?: boolean;
+  /**
+   * has no effect if hideBtnBanner is "true"
+   */
+  checkCanProceed?: () => Promise<boolean>;
   // children: React.ReactNode
 };
 
 type SetupPageState = {
 };
 
-type SetupStepState = "passed" | "current" | "todo";
+type SetupStepType = "passed" | "current" | "todo";
+
+export function getSetupPath(clientPage: ClientPage): string {
+  return clientPage.path + `?${SETUP_QUERY}=true`;
+}
 
 export default function SetupPageHeader(props: SetupPageProps, _state: SetupPageState): JSX.Element {
   const SetupSteps = [
-    { title: "Create GitHub App", path: ClientPages.SetupCreateApp.path },
-    { title: "View GitHub App", path: getAppPageUrlWithSetupQuery() },
-    { title: "Create Service Account", path: ClientPages.SetupServiceAccount.path },
-    { title: "Select Repositories", path: "/setup/select-repos" },
+    { title: "Create GitHub App", path: getSetupPath(ClientPages.SetupCreateApp) },
+    { title: "View GitHub App", path: getSetupPath(ClientPages.App) },
+    { title: "Create Service Account", path: getSetupPath(ClientPages.SetupServiceAccount) },
+    { title: "Connect Repositories", path: getSetupPath(ClientPages.SetupRepos) },
   ];
+
+  const finishPage = ClientPages.Home.path;
 
   if (props.pageIndex > SetupSteps.length - 1 || props.pageIndex < 0) {
     return (
@@ -41,10 +50,9 @@ export default function SetupPageHeader(props: SetupPageProps, _state: SetupPage
   const history = useHistory();
 
   const [ loading, setLoading ] = useState(false);
-  const [ submitResult, setSubmitResult ] = useState<SubmitResult | undefined>(undefined);
 
   const nextBtnText = props.pageIndex === SetupSteps.length - 1 ? "Finish" : "Next";
-  const showBackBtn = props.pageIndex !== 0;
+  // const showBackBtn = props.pageIndex !== 0;
 
   return (
     <div className="setup-header">
@@ -55,83 +63,97 @@ export default function SetupPageHeader(props: SetupPageProps, _state: SetupPage
           <div className="d-flex justify-content-around">
             {SetupSteps.map((step, i) => {
               const isCurrentStep = i === props.pageIndex;
-              let state: SetupStepState;
+              let stepType: SetupStepType;
               if (isCurrentStep) {
-                state = "current";
+                stepType = "current";
               }
               else if (props.pageIndex > i) {
-                state = "passed";
+                stepType = "passed";
               }
               else {
-                state = "todo";
+                stepType = "todo";
               }
 
+              const clickable = stepType === "passed";
+
               return (
-                <div key={i} className={classNames("setup-step-indicator", { active: isCurrentStep })}>
-                  <a href={step.path}>
-                    <div key={i} style={{ textAlign: "center" }} className="mb-2 d-flex justify-content-center">
-                      <div className={`setup-step-circle ${state}`} {...props}>
-                        {(i + 1).toString()}
-                      </div>
+                <div key={i} className={classNames("setup-step", stepType, { clickable })} onClick={() => {
+                  if (!clickable) {
+                    return;
+                  }
+                  history.push(step.path);
+                }}>
+                  <div className="mb-2 d-flex justify-content-center">
+                    <div className={`setup-step-circle ${stepType}`} {...props}>
+                      {stepType === "passed" ? <FontAwesomeIcon icon="check-circle"/> : (i + 1).toString()}
                     </div>
-                    <span className={classNames({ b: isCurrentStep })}>{step.title}</span>
-                  </a>
+                  </div>
+                  <span className={classNames({ b: isCurrentStep })}>{step.title}</span>
                 </div>
               );
             })}
           </div>
-          <div className="setup-header-buttons d-flex align-items-center justify-content-between">
-            <Button className={classNames("btn-lg d-flex justify-content-center", { "d-none": showBackBtn })} title="Back">
-              <a href={SetupSteps[props.pageIndex - 1].path}>
-                <div className="d-flex align-items-center">
-                  <FontAwesomeIcon className="mr-3" icon="arrow-left"/>
+          <div className={
+            classNames("setup-header-buttons align-items-center justify-content-between", {
+              "d-flex": props.hideBtnBanner !== true,
+              "d-none": props.hideBtnBanner === true,
+            })}>
+
+            {/* showBackBtn
+              ? <Button className={classNames("btn-lg d-flex justify-content-center", { "d-none": showBackBtn })} title="Back">
+                <a href={SetupSteps[props.pageIndex - 1].path}>
+                  <div className="d-flex align-items-center">
+                    <FontAwesomeIcon className="mr-3" icon="arrow-left"/>
                 Back
-                </div>
-              </a>
-            </Button>
+                  </div>
+                </a>
+              </Button> : ""
+            */}
 
-            <div>
-              <Spinner className={classNames({ "d-none": !loading })} animation="border"/>
-
-              <Banner
-                display={submitResult != null}
-                // display={true}
-                isError={submitResult && !submitResult.ok}
-                message={submitResult?.message || "" }
-              />
+            <div className="d-flex justify-content-center flex-grow-1">
+              <Spinner className={classNames({ "d-none": !loading })} animation="border" variant="primary"/>
             </div>
 
-            <Button className={classNames("btn-lg d-flex justify-content-center", { disabled: loading })} title={nextBtnText} onClick={async () => {
-              const nextStep = SetupSteps[props.pageIndex + 1].path;
-              if (!props.onSubmit) {
-                history.push(nextStep);
-                return;
-              }
+            {!props.hideBtnBanner
+              ? <Button className={classNames("btn-lg d-flex justify-content-center", { disabled: loading })}
+                title={nextBtnText} onClick={async () => {
+                  let nextPage: string;
+                  if (props.pageIndex === SetupSteps.length - 1) {
+                    nextPage = finishPage;
+                  }
+                  else {
+                    nextPage = SetupSteps[props.pageIndex + 1].path;
+                  }
 
-              try {
-                setSubmitResult(undefined);
-                setLoading(true);
-                const result = await props.onSubmit();
-                setSubmitResult(result);
+                  if (!props.checkCanProceed) {
+                    history.push(nextPage);
+                    return;
+                  }
 
-                if (result.ok) {
-                  setTimeout(() => history.push(nextStep), 500);
-                }
-              }
-              catch (err) {
-                setSubmitResult({ ok: false, message: err.message });
-              }
-              finally {
-                setLoading(false);
-              }
-            }}>
-              <a>
-                <div className="d-flex align-items-center">
-                  {nextBtnText}
-                  <FontAwesomeIcon className="ml-3" icon="arrow-right"/>
-                </div>
-              </a>
-            </Button>
+                  try {
+                    setLoading(true);
+                    const canProceed = await props.checkCanProceed();
+
+                    if (canProceed) {
+                      history.push(nextPage);
+                    }
+                  }
+                  catch (err) {
+                    // setSubmitResult({ success: false, message: err.message });
+                    console.error(err);
+                  }
+                  finally {
+                    setLoading(false);
+                  }
+                }}
+              >
+                <a>
+                  <div className="d-flex align-items-center">
+                    <FaBtnBody icon="arrow-right" iconPosition="right" text={nextBtnText}/>
+                  </div>
+                </a>
+              </Button>
+              : ""}
           </div>
         </Card>
       </div>

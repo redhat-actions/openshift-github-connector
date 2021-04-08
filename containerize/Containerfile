@@ -32,11 +32,10 @@ ARG BUILD_DATE
 ARG VCS_REF
 
 LABEL org.label-schema.schema-version="1.0"
-LABEL org.label-schema.build-date=$BUILD_DATE
+# LABEL org.label-schema.build-date=$BUILD_DATE
 LABEL org.label-schema.name="redhat-actions/openshift-actions-connector"
 LABEL org.label-schema.url="https://github.com/redhat-actions/openshift-actions-connector"
-LABEL org.label-schema.vsc-ref=$VSC_REF
-LABEL org.label-schema.docker.cmd="docker run openshift-actions-connector:latest --name openshift-actions-connector -p 3000:3000 -p 3003:3003"
+# LABEL org.label-schema.vsc-ref=$VSC_REF
 
 # ARG USER=node
 ARG USER=1000

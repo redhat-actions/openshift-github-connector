@@ -50,7 +50,7 @@ namespace GitHubAppMemento {
 
     const appName = "openshift-actions-connector";
 
-    const secretResult = await KubeWrapper.instance.client.createNamespacedSecret(KubeWrapper.instance.ns, {
+    const secretResult = await KubeWrapper.instance.coreClient.createNamespacedSecret(KubeWrapper.instance.ns, {
       type: "Opaque",
       metadata: {
         name: getSecretName(sessionId),
@@ -84,7 +84,15 @@ namespace GitHubAppMemento {
   }
 
   async function patchSecret(secretName: string, data: Partial<GitHubAppMemento>): Promise<V1Secret> {
-    const patchResult = await KubeWrapper.instance.client.patchNamespacedSecret(
+    const secrets = await KubeWrapper.instance.coreClient.listNamespacedSecret(KubeWrapper.instance.ns);
+
+    const secretExists = secrets.body.items.find((secret) => secret.metadata?.name === secretName);
+
+    if (!secretExists) {
+      throw new Error(`Secret "${secretName}" not found in namespace "${KubeWrapper.instance.ns}"`);
+    }
+
+    const patchResult = await KubeWrapper.instance.coreClient.patchNamespacedSecret(
       secretName,
       KubeWrapper.instance.ns,
       { data },
@@ -104,7 +112,7 @@ namespace GitHubAppMemento {
     const secretName = getSecretName(sessionId);
     Log.info(`Try to load app config from ${KubeWrapper.instance.ns}/secret/${secretName}`);
 
-    const secretsList = await KubeWrapper.instance.client.listNamespacedSecret(KubeWrapper.instance.ns);
+    const secretsList = await KubeWrapper.instance.coreClient.listNamespacedSecret(KubeWrapper.instance.ns);
     const appSecret = secretsList.body.items.find((secret) => secret.metadata?.name === secretName);
     if (!appSecret) {
       return undefined;
@@ -133,7 +141,7 @@ namespace GitHubAppMemento {
 
     Log.info(`Trying to delete ${secretName}`);
     try {
-      await KubeWrapper.instance.client.deleteNamespacedSecret(secretName, KubeWrapper.instance.ns);
+      await KubeWrapper.instance.coreClient.deleteNamespacedSecret(secretName, KubeWrapper.instance.ns);
       Log.info(`Deleted ${secretName}`);
     }
     catch (err) {

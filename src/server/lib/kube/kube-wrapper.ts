@@ -1,19 +1,7 @@
 import * as k8s from "@kubernetes/client-node";
 import ApiResponses from "../../../common/api-responses";
 import Log from "../../logger";
-
-/**
- * Transform an HTTP error eg. from the K8s library into something readable.
- */
- export function getFriendlyHTTPError(err: { message: string, response?: any }): string {
-  if (!err.response) {
-    return JSON.stringify(err);
-  }
-
-  const errRes = err.response;
-  return `${errRes.request.method} ${errRes.request.uri.href}: `
-        + `${errRes.statusCode} ${errRes.body.message || errRes.body.reason}`;
-}
+import { getFriendlyHTTPError } from "../../util/server-util";
 
 export default class KubeWrapper {
 	private static _instance: KubeWrapper | undefined;
@@ -29,10 +17,11 @@ export default class KubeWrapper {
 	}
 
 	public static get instance(): KubeWrapper {
-		if (this._instance == null) {
-			throw new Error(`KubeWrapper requested before initialized`);
-		} else if (this.initError) {
+		if (this.initError) {
 			throw this.initError;
+		}
+		else if (this._instance == null) {
+			throw new Error(`KubeWrapper requested before initialized`);
 		}
 		return this._instance;
 	}
@@ -43,30 +32,6 @@ export default class KubeWrapper {
 
 	public static get initError(): Error | undefined {
 		return this._initError;
-	}
-
-	public static get initErrorFriendly(): string | undefined {
-		if (!this._initError) {
-			return undefined;
-		}
-		return getFriendlyHTTPError(this._initError);
-	}
-
-	private static removeErrorGarbage(err_: any): Error {
-		const err = { ...err_ };
-
-		if (err.response) {
-			// delete http response data that results in a nasty long log
-			delete err.response._readableState;
-			delete err.response._events;
-			delete err.response_eventsCount;
-			delete err.response._eventsCount;
-			delete err.response.socket;
-			delete err.response.client;
-			delete err.response.req;
-		}
-
-		return err;
 	}
 
 	public static async initialize(): Promise <KubeWrapper> {
@@ -81,7 +46,7 @@ export default class KubeWrapper {
 			Log.info(`Loaded k8s config from cluster`);
 			isInCluster = true;
 		} catch (err) {
-			err = this.removeErrorGarbage(err);
+			err = getFriendlyHTTPError(err);
 			// when running in openshift this should be a real error
 			// Log.warn(`Failed to load config in-cluster`, err);
 			Log.warn(`Failed to load config in-cluster`, err);
@@ -92,7 +57,7 @@ export default class KubeWrapper {
 				await KubeWrapper.testConfig(tmpConfig);
 				Log.info(`Loaded k8s config from default`);
 			} catch (err2) {
-				err2 = this.removeErrorGarbage(err2);
+				err2 = getFriendlyHTTPError(err2);
 				Log.warn(`Failed to load default kubeconfig`, err2);
 				this._initError = err2;
 				throw err2;
@@ -148,15 +113,12 @@ export default class KubeWrapper {
 		return this.namespace;
 	}
 
-	public get client() {
-		if (KubeWrapper.initError) {
-			throw new Error(KubeWrapper.initErrorFriendly);
-		}
+	public get coreClient() {
 		return this.config.makeApiClient(k8s.CoreV1Api);
 	}
 
-	public async verifyServiceAccount(serviceAccountName: string): Promise<boolean> {
-		const serviceAccountsRes = await this.client.listNamespacedServiceAccount(this.namespace);
+	public async doesServiceAccountExist(serviceAccountName: string): Promise<boolean> {
+		const serviceAccountsRes = await this.coreClient.listNamespacedServiceAccount(this.namespace);
 		const serviceAccounts = serviceAccountsRes.body.items;
 
 		Log.debug(`Checking if ${serviceAccountName} exists`);
@@ -165,6 +127,7 @@ export default class KubeWrapper {
 
 		const exists = serviceAccountNames.includes(serviceAccountName);
 		Log.debug(`service account exists ? ${exists}`);
+
 		return exists;
 	}
 }

@@ -1,5 +1,7 @@
 namespace HttpConstants {
 
+  export type Methods = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
   export namespace Headers {
     export const Accept = "Accept";
     export const ContentType = "Content-Type";

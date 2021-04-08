@@ -10,7 +10,7 @@ const sessionMw = session({
   // replace w/ set-once kube secret
   secret: "535ebab0-a31e-4e38-a3c8-dc4e844b3ab5",
   store: new FileStore({
-    logFn: Log.debug,
+    logFn: (args) => Log.debug(args),
     // replace w/ set-once kube secret
     secret: "1430e007-31a0-44ef-bf22-3f906e16da92",
     ttl: dayMs,

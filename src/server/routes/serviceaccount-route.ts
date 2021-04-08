@@ -44,22 +44,32 @@ router.route(ApiEndpoints.Cluster.ServiceAccount.path)
       ApiResponses.ServiceAccountState,
       ApiRequests.SetServiceAccount
     >,
-    res: express.Response<ApiResponses.ServiceAccountFoundResponse>,
+    res: express.Response<ApiResponses.ServiceAccountExists>,
     next
   ) => {
     const serviceAccountName = req.body.serviceAccountName;
     Log.info(`Set service account name to "${serviceAccountName}"`);
 
-    const foundSA = await KubeWrapper.instance.verifyServiceAccount(serviceAccountName);
+    const ns = KubeWrapper.instance.ns;
 
-    if (foundSA) {
-      await GitHubAppMemento.saveServiceAccount(req.sessionID, serviceAccountName);
+    const exists = await KubeWrapper.instance.doesServiceAccountExist(serviceAccountName);
+    if (!exists) {
+      const errBody = {
+        serviceAccountName,
+        success: false,
+        title: `Service Account does not exist`,
+        message: `Service Account "${serviceAccountName}" does not exist in namespace "${ns}". `
+          + `Create the Service Account and try again.`,
+      };
+      return res.json(errBody);
     }
 
-    const resBody: ApiResponses.ServiceAccountFoundResponse = {
-      found: foundSA,
+    await GitHubAppMemento.saveServiceAccount(req.sessionID, serviceAccountName);
+
+    const resBody: ApiResponses.ServiceAccountExists = {
+      success: true,
       serviceAccountName,
-      namespace: KubeWrapper.instance.ns,
+      message: `Successfully created Service Account ${serviceAccountName} in ${ns}`,
     };
 
     return res.json(resBody);

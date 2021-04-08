@@ -1,3 +1,5 @@
+import { components } from "@octokit/openapi-types/dist-types/index";
+
 import {
   GitHubAppConfig,
   GitHubAppManifest,
@@ -6,8 +8,17 @@ import {
 
 export namespace ApiResponses {
 
+  export type Result = { success: boolean, message: string };
+
+  export interface SimpleError {
+    success: false;
+    title: string;
+    message: string;
+  }
+
   // https://tools.ietf.org/html/rfc7807#section-3.1
   export interface Error {
+    success: false,
     detail: string,
     type?: string,
     title: string,
@@ -29,11 +40,20 @@ export namespace ApiResponses {
     app: true;
     appConfig: GitHubAppConfig,
     appUrls: GitHubAppUrls,
-    installations: any,
-    repositories: any,
+    installations: components["schemas"]["installation"][],
+    repositories: components["schemas"]["repository"][],
   }
 
   export type GitHubAppState = GitHubAppMissingState | GitHubAppReadyState;
+
+  /*
+  export type GitHubAppRepos = {
+    app: true;
+    repos: components["schemas"]["repository"][]
+  };
+
+  export type GitHubAppReposState = GitHubAppMissingState | GitHubAppRepos;
+  */
 
   export interface ClusterStateDisconnected {
     connected: false;
@@ -70,9 +90,7 @@ export namespace ApiResponses {
 
   export type ServiceAccountState = ServiceAccountStateSetup | ServiceAccountStateNotSetup;
 
-  export type ServiceAccountFoundResponse = {
-    found: boolean;
-    namespace: string;
+  export type ServiceAccountExists = Result & {
     serviceAccountName: string;
   };
 }

@@ -10,8 +10,7 @@ import ClientPages from "../client-pages";
 import { GitHubAppConfigWithSecrets } from "../../../common/types/github-app";
 import DataFetcher from "../../components/data-fetcher";
 import { fetchJSON } from "../../util/client-util";
-import SetupPageHeader from "./setup-header";
-import { APP_IS_BEING_SETUP_QP } from "../gh-app-page";
+import SetupPageHeader, { getSetupPath } from "./setup-header";
 
 export function getAppManifest(appUrl: string): Record<string, unknown> {
   // the redirect url is the first one, which is redirected to after the app is created
@@ -61,12 +60,12 @@ export function CreateAppPage(): JSX.Element {
 
   return (
     <React.Fragment>
-      <SetupPageHeader pageIndex={0}/>
-      <Jumbotron className="text-black">
-        <h2 className="text-center">You have to create an app now</h2>
-        <p className="text-center">This is a description of what creating an app means.</p>
+      <SetupPageHeader pageIndex={0} hideBtnBanner={true}/>
+      <Jumbotron className="text-black text-center">
+        <h2>You have to create an app now</h2>
+        <p className="my-3">This is a description of what creating an app means.</p>
 
-        <form className="row justify-content-center mt-5" method="post" action={githubManifestUrl} onSubmit={
+        <form className="row justify-content-center" method="post" action={githubManifestUrl} onSubmit={
           () => {
             fetchJSON("POST", ApiEndpoints.Setup.SetCreateAppState.path, {
               body: JSON.stringify({ state }),
@@ -82,6 +81,14 @@ export function CreateAppPage(): JSX.Element {
             </div>
           </Button>
         </form>
+
+        <div className="py-3"></div>
+        <h4>
+          <a href="https://github.com/settings/apps/">
+            View current apps
+            <FontAwesomeIcon icon="external-link-alt" className="ml-3"/>
+          </a>
+        </h4>
 
       </Jumbotron>
     </React.Fragment>
@@ -131,10 +138,6 @@ export function CreatingAppPage() {
   );
 }
 
-export function getAppPageUrlWithSetupQuery(): string {
-  return `${ClientPages.App.path}?${APP_IS_BEING_SETUP_QP}=true`;
-}
-
 export function InstalledAppPage(): JSX.Element {
   const history = useHistory();
 
@@ -154,7 +157,7 @@ export function InstalledAppPage(): JSX.Element {
         {() => (
           <p>
             Installed app successfully. Redirecting...
-            {history.replace(getAppPageUrlWithSetupQuery())}
+            {history.replace(getSetupPath(ClientPages.App))}
           </p>
         )}
       </DataFetcher>

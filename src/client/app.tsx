@@ -14,6 +14,10 @@ import ClientPages from "./pages/client-pages";
 import NotFound from "./pages/errors/404";
 
 export default function app(): JSX.Element {
+  // https://fontawesome.com/how-to-use/on-the-web/using-with/react
+  // if an icon is not showing up, make sure it exists in "solid" or "brands"
+  // https://fontawesome.com/cheatsheet
+  // beacuse we are not including the "regular" icons.
   library.add(fab, fas);
 
   return (

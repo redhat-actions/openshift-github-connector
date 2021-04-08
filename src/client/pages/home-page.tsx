@@ -12,12 +12,13 @@ export default function Homepage(): JSX.Element {
       <Jumbotron className="text-black">
         <h2 className="text-center">OpenShift GitHub Actions Connector</h2>
         <h5 className="text-center">
-                  OpenShift GitHub Actions Connector is designed to help you work seamlessly with
-                  Red Hat Developer tools and Openshift clusters.
+          OpenShift GitHub Actions Connector is designed to help you work seamlessly with
+          Red Hat Developer tools and Openshift clusters.
         </h5>
         <hr className="my-4" />
-        <p>This application can access your your GitHub org or personal account
-                  and authenticate against Openshift to enable default integrations.
+        <p>
+          This application can access your your GitHub org or personal account
+          and authenticate against Openshift to enable default integrations.
         </p>
         <ul>
           <li>Install and Configure OpenShift Clusters for use with Red Hat Actions</li>

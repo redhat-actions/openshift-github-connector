@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 
-import AppPageCard from "../components/app-page-card";
+import AppPageCard from "../components/gh-app-page-card";
 import DataFetcher from "../components/data-fetcher";
 import ApiEndpoints from "../../common/api-endpoints";
 import FaBtnBody from "../components/fa-btn-body";
@@ -9,9 +9,7 @@ import ApiResponses from "../../common/api-responses";
 import ClientPages from "./client-pages";
 import getEndpointUrl from "../util/get-endpoint-url";
 import { fetchJSON } from "../util/client-util";
-import SetupPageHeader from "./setup/setup-header";
-
-export const APP_IS_BEING_SETUP_QP = "setup";
+import SetupPageHeader, { SETUP_QUERY } from "./setup/setup-header";
 
 export default function GitHubAppPage() {
   const DOCS_ICON = "book";
@@ -45,7 +43,6 @@ export default function GitHubAppPage() {
     <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.App.Root}>
       {(data: ApiResponses.GitHubAppState) => {
         if (data.app === false) {
-          console.log(`render with countdown=${countdown}`);
           return (
             <React.Fragment>
               <p>A GitHub App has not yet been added to the connector.</p>
@@ -62,12 +59,12 @@ export default function GitHubAppPage() {
         return (
           <React.Fragment>
             {
-              qs.has(APP_IS_BEING_SETUP_QP) ? <SetupPageHeader pageIndex={1}/> : <></>
+              qs.has(SETUP_QUERY) ? <SetupPageHeader pageIndex={1}/> : <></>
             }
             <h2 className="d-flex font-weight-bold">
               <a className="text-white" href={data.appUrls.app}>{data.appConfig.name}</a>
               <div className="ml-auto"></div>
-              <button className="btn btn-lg btn-danger mr-4" title="Unbind" onClick={
+              <button className="btn btn-lg btn-danger" title="Unbind" onClick={
                 async () => {
                   await fetchJSON("DELETE", getEndpointUrl(ApiEndpoints.App.Root.path));
                   window.location.reload();
@@ -75,9 +72,9 @@ export default function GitHubAppPage() {
               }>
                 <FaBtnBody icon="times" text="Unbind"/>
               </button>
-              <button className="btn btn-lg btn-light" title="Refresh" onClick={() => window.location.reload()}>
+              {/* <button className="btn btn-lg btn-light" title="Refresh" onClick={() => window.location.reload()}>
                 <FaBtnBody icon="sync-alt" text="Refresh"/>
-              </button>
+              </button> */}
             </h2>
             <h4 className="mb-4">
               Created by <a href={data.appConfig.owner.html_url}>{data.appConfig.owner.login}</a>
@@ -118,24 +115,6 @@ export default function GitHubAppPage() {
                 {data.appConfig.events.map((event) => <li key={event}>{event}</li>)}
               </ul>
             </AppPageCard>
-            <AppPageCard header="Installations" buttons={[{
-              href: data.appUrls.install,
-              icon: EDIT_ICON,
-              label: "Install or Uninstall",
-              tooltip: "Install or Uninstall",
-            }]}>
-              <ul>
-                {data.installations.map((installation: any) => {
-                  return (
-                    <li key={installation.account.html_url}>
-                      <a href={installation.account.html_url}>
-                        {installation.account.login}
-                      </a>
-                    </li>
-                  );
-                })}
-              </ul>
-            </AppPageCard>
             <AppPageCard header="Repositories" buttons={[{
               href: data.appUrls.installationSettings,
               icon: EDIT_ICON,
@@ -148,6 +127,24 @@ export default function GitHubAppPage() {
                     <li key={repo.full_name}>
                       <a href={repo.html_url}>
                         {repo.full_name}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </AppPageCard>
+            <AppPageCard header="Installations" buttons={[{
+              href: data.appUrls.install,
+              icon: EDIT_ICON,
+              label: "Install or Uninstall",
+              tooltip: "Install or Uninstall",
+            }]}>
+              <ul>
+                {data.installations.map((installation: any) => {
+                  return (
+                    <li key={installation.account.html_url}>
+                      <a href={installation.account.html_url}>
+                        {installation.account.login}
                       </a>
                     </li>
                   );

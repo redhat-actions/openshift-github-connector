@@ -1,8 +1,8 @@
-import app from "./app-route";
+import app from "./gh-app-route";
 import cluster from "./cluster-route";
 import webhook from "./webhook-route";
-import appSetup from "./setup-app-route";
-import saSetup from "./setup-sa-route";
+import appSetup from "./setup-gh-app-route";
+import saSetup from "./serviceaccount-route";
 
 const Routes = {
   app, cluster, webhook, appSetup, saSetup,

@@ -13,30 +13,10 @@ td .btn {
     min-width: 15ch;
 }
 
-.setup-step-indicator {
-    padding: 0.5rem 1rem;
-
-    &.active {
-        background-color: white;
-        border: 1px solid white;
-        border-radius: 1em;
-
-        & a {
-            color: black;
-        }
-    }
-
-    & a {
-        color: var(--fg-color);
-        &:focus, &:hover {
-            text-decoration: none;
-        }
-    }
-}
-
 $header-top-height: 1rem;
 
 .setup-header {
+    margin-top: - $main-vertical-padding;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -67,9 +47,32 @@ $header-top-height: 1rem;
 
 .setup-header-buttons {
     padding: 0.5rem 1rem;
+    // enough vertical space so the error banner does not make the div grow
+    min-height: 6em;
 }
 
-$setup-green: #4e4;
+.setup-step {
+    padding: 0.5rem 1rem;
+
+    &.current {
+        background-color: white;
+        border: 1px solid white;
+        border-radius: 1em;
+
+        & span {
+            color: black;
+        }
+    }
+
+    & span {
+        color: var(--fg-color);
+        &:focus, &:hover {
+            text-decoration: none;
+        }
+    }
+}
+
+$setup-green: rgb(19, 161, 19);
 $circle-size: 3rem;
 
 .setup-step-circle {
@@ -86,15 +89,16 @@ $circle-size: 3rem;
 
     border-color: $setup-green;
 
+    color: white;
+
     // see SetupStepState
     &.passed, &.current {
-        color: black;
+        // color: black;
         background-color: $setup-green;
         border-color: $setup-green;
     }
 
     &.todo {
-        color: white;
         background-color: "";
     }
 }
