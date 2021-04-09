@@ -27,7 +27,7 @@ export default function Homepage(): JSX.Element {
         </ul>
 
         <div className="row justify-content-center">
-          <Link to={ClientPages.Setup.path}>
+          <Link to={ClientPages.SetupCreateApp.path}>
             <Button className="btn-primary btn-lg d-flex align-items-center mt-3 px-5">
               <div className="font-weight-bold align-self-center" title="Get Started">
                 Get Started

@@ -42,13 +42,12 @@ $header-top-height: 1rem;
     top: $header-top-height;
     // border-radius: 0 0 $card-border-radius $card-border-radius;
     background-color: #1c343b;
+
     padding: 0.5rem 0;
 }
 
 .setup-header-buttons {
-    padding: 0.5rem 1rem;
-    // enough vertical space so the error banner does not make the div grow
-    min-height: 6em;
+    padding: 1rem;
 }
 
 .setup-step {

@@ -11,6 +11,7 @@ import { GitHubAppConfigWithSecrets } from "../../../common/types/github-app";
 import DataFetcher from "../../components/data-fetcher";
 import { fetchJSON } from "../../util/client-util";
 import SetupPageHeader, { getSetupPath } from "./setup-header";
+import { ExternalLink } from "../../components/external-link";
 
 export function getAppManifest(appUrl: string): Record<string, unknown> {
   // the redirect url is the first one, which is redirected to after the app is created
@@ -34,7 +35,7 @@ export function getAppManifest(appUrl: string): Record<string, unknown> {
     hook_attributes: {
       url: incomingWebhookUrl,
     },
-    // request_oauth_on_install: true,
+    request_oauth_on_install: true,
     callback_url: callbackUrl,
     redirect_url: redirectUrl,
     setup_url: setupUrl,
@@ -84,10 +85,9 @@ export function CreateAppPage(): JSX.Element {
 
         <div className="py-3"></div>
         <h4>
-          <a href="https://github.com/settings/apps/">
+          <ExternalLink href="https://github.com/settings/apps/" showExternalLinkIcon={true}>
             View current apps
-            <FontAwesomeIcon icon="external-link-alt" className="ml-3"/>
-          </a>
+          </ExternalLink>
         </h4>
 
       </Jumbotron>

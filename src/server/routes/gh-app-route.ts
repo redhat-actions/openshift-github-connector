@@ -6,6 +6,7 @@ import ApiEndpoints from "../../common/api-endpoints";
 import ApiResponses from "../../common/api-responses";
 import GitHubAppMemento from "../lib/gh-app/app-memento";
 import Log from "../logger";
+import { sendStatusJSON } from "../util/server-util";
 
 const router = express.Router();
 
@@ -50,7 +51,7 @@ router.route(ApiEndpoints.App.Root.path)
   })
   .delete(async (req, res, next) => {
     await GitHubAppMemento.clear(req.sessionID);
-    res.status(204).send();
+    sendStatusJSON(res, 204);
   })
   .all(send405([ "GET", "DELETE" ]));
 

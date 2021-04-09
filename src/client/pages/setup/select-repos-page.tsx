@@ -3,7 +3,7 @@ import { Card } from "react-bootstrap";
 import ApiEndpoints from "../../../common/api-endpoints";
 import ApiResponses from "../../../common/api-responses";
 import DataFetcher from "../../components/data-fetcher";
-import { DocLink } from "../../components/doclink";
+import { ExternalLink } from "../../components/external-link";
 import ClientPages from "../client-pages";
 import SetupPageHeader from "./setup-header";
 
@@ -33,7 +33,9 @@ export default function SelectReposPage(): JSX.Element {
                   <Card.Body>
                     <p>
                       This step connects GitHub repositories to your OpenShift cluster by
-                      creating <DocLink text="encrypted secrets" href="https://docs.github.com/en/actions/reference/encrypted-secrets"/> in
+                      creating <ExternalLink href="https://docs.github.com/en/actions/reference/encrypted-secrets">
+                        encrypted secrets
+                      </ExternalLink> in
                       your repositories which you can then reference in your workflows.
                     </p>
                     <p>
@@ -46,7 +48,7 @@ export default function SelectReposPage(): JSX.Element {
                     Available Repositories
                   </Card.Title>
                   <Card.Body>
-                    <ul className="no-bullets pl-3">
+                    {/* <ul className="no-bullets pl-3">
                       {appData.repositories.map((repo) => {
                         const checkboxID = `check-${repo.full_name}`;
 
@@ -58,6 +60,17 @@ export default function SelectReposPage(): JSX.Element {
                                 {repo.full_name}
                               </a>
                             </label>
+                          </li>
+                        );
+                      })}
+                    </ul> */}
+                    <ul>
+                      {appData.repositories.map((repo) => {
+                        return (
+                          <li className="b" key={repo.full_name}>
+                            <a href={repo.url}>
+                              {repo.full_name}
+                            </a>
                           </li>
                         );
                       })}

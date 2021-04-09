@@ -9,12 +9,12 @@ import ApiRequests from "../../../common/api-requests";
 import ApiResponses from "../../../common/api-responses";
 import CopyToClipboardBtn from "../../components/copy-btn";
 import DataFetcher from "../../components/data-fetcher";
-import { DocLink } from "../../components/doclink";
 import { fetchJSON } from "../../util/client-util";
 import getEndpointUrl from "../../util/get-endpoint-url";
 import ClientPages from "../client-pages";
 import SetupPageHeader from "./setup-header";
 import Banner from "../../components/banner";
+import { ExternalLink } from "../../components/external-link";
 
 async function onSubmitServiceAccount(saName: string): Promise<ApiResponses.Result> {
   const reqBody: ApiRequests.SetServiceAccount = {
@@ -77,18 +77,18 @@ export default function SetupSAPage(): JSX.Element {
           <div className="mt-3">
             <ul className="no-bullets">
               <li>
-                <FontAwesomeIcon icon="book-open" className="mr-2"/>
-                <DocLink
-                  text="Service Accounts for GitHub Actions"
-                  href="https://github.com/redhat-actions/oc-login/wiki/Using-a-Service-Account-for-GitHub-Actions"
-                />
+                <ExternalLink href="https://github.com/redhat-actions/oc-login/wiki/Using-a-Service-Account-for-GitHub-Actions">
+                  <FontAwesomeIcon icon="book-open" className="mr-2"/>
+                  Service Accounts for GitHub Actions
+                </ExternalLink>
               </li>
               <li>
-                <FontAwesomeIcon icon="book-open" className="mr-2"/>
-                <DocLink
-                  text="OpenShift Service Accounts"
+                <ExternalLink
                   href="https://docs.openshift.com/container-platform/4.7/authentication/understanding-and-creating-service-accounts.html"
-                />
+                >
+                  <FontAwesomeIcon icon="book-open" className="mr-2"/>
+                  OpenShift Service Accounts
+                </ExternalLink>
               </li>
             </ul>
           </div>
@@ -184,11 +184,12 @@ export default function SetupSAPage(): JSX.Element {
                       which will allow it to create and edit resources in its namespace.
                       You may substitute another cluster role if you prefer.
                       <div className="mt-3">
-                        <FontAwesomeIcon icon="book-open" className="mr-2"/>
-                        <DocLink
-                          text="OpenShift Roles"
+                        <ExternalLink
                           href="https://docs.openshift.com/container-platform/4.7/authentication/using-rbac.html#default-roles_using-rbac"
-                        />
+                        >
+                          <FontAwesomeIcon icon="book-open" className="mr-2"/>
+                          OpenShift Roles
+                        </ExternalLink>
                       </div>
                     </div>
                   </Card.Body>

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
+import { Button } from "react-bootstrap";
+import classNames from "classnames";
 
 import AppPageCard from "../components/gh-app-page-card";
 import DataFetcher from "../components/data-fetcher";
@@ -17,7 +19,7 @@ export default function GitHubAppPage() {
 
   const history = useHistory();
 
-  const [ countdown, setCountdown ] = useState(3000);
+  const [ countdown, setCountdown ] = useState(3);
 
   let countdownInterval: NodeJS.Timeout | undefined;
   useEffect(() => {
@@ -26,7 +28,7 @@ export default function GitHubAppPage() {
         history.push(ClientPages.SetupCreateApp.path);
       }
       else {
-        setCountdown(countdown - 1000);
+        setCountdown(countdown - 1);
       }
     }, 1000);
 
@@ -38,6 +40,7 @@ export default function GitHubAppPage() {
   });
 
   const qs = new URLSearchParams(window.location.search);
+  const isSetup = qs.has(SETUP_QUERY);
 
   return (
     <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.App.Root}>
@@ -49,7 +52,7 @@ export default function GitHubAppPage() {
               <h2 className="my-3">
                 <a href={ClientPages.SetupCreateApp.path}>Create an App</a>
               </h2>
-              <p>You will be redirected in {Math.round(countdown / 1000)} ...</p>
+              <p>You will be redirected in {countdown} ...</p>
             </React.Fragment>
           );
         }
@@ -59,19 +62,19 @@ export default function GitHubAppPage() {
         return (
           <React.Fragment>
             {
-              qs.has(SETUP_QUERY) ? <SetupPageHeader pageIndex={1}/> : <></>
+              isSetup ? <SetupPageHeader pageIndex={1}/> : <></>
             }
             <h2 className="d-flex font-weight-bold">
               <a className="text-white" href={data.appUrls.app}>{data.appConfig.name}</a>
               <div className="ml-auto"></div>
-              <button className="btn btn-lg btn-danger" title="Unbind" onClick={
+              <Button className={classNames("btn-lg btn-danger", { disabled: isSetup })} onClick={
                 async () => {
                   await fetchJSON("DELETE", getEndpointUrl(ApiEndpoints.App.Root.path));
                   window.location.reload();
                 }
               }>
                 <FaBtnBody icon="times" text="Unbind"/>
-              </button>
+              </Button>
               {/* <button className="btn btn-lg btn-light" title="Refresh" onClick={() => window.location.reload()}>
                 <FaBtnBody icon="sync-alt" text="Refresh"/>
               </button> */}
