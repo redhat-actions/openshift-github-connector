@@ -1,6 +1,10 @@
 import ApiResponses from "../../common/api-responses";
 import HttpConstants from "../../common/http-constants";
 
+export function getSearchParam(param: string): string | null {
+  return new URLSearchParams(window.location.search).get(param);
+}
+
 export function isJsonContentType(res: Response): boolean {
   const contentType = res.headers.get(HttpConstants.Headers.ContentType);
 
@@ -16,9 +20,9 @@ export async function getHttpError(res: Response): Promise<string> {
   let statusMessage: string | undefined;
   if (isJsonContentType(res)) {
     const resBody = await res.json();
-    if (resBody.detail) {
+    if ((resBody as ApiResponses.Error).message) {
       const errorBody = resBody as ApiResponses.Error;
-      message = `${errorBody.title}: ${errorBody.detail}`;
+      message = `${errorBody.title}: ${errorBody.message}`;
       statusMessage = errorBody.statusMessage;
     }
     else {
@@ -43,26 +47,35 @@ export async function throwIfError(res: Response): Promise<void> {
   }
 }
 
-export async function fetchJSON<T = void>(
-  method: HttpConstants.Methods, url: string, options: RequestInit = {}
-): Promise<T> {
+export async function fetchJSON<
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  Req extends {} = {},
+  Res = void
+>(
+  method: HttpConstants.Methods, url: string, body?: Req, options: Omit<RequestInit, "body" | "method"> = {}
+): Promise<{ statusCode: number } & Res> {
 
-  let headers: HeadersInit = {};
+  const hasBody = body != null;
+  if (hasBody && method === "GET") {
+    // eslint-disable-next-line no-console
+    console.error(`GET request has body`);
+  }
 
-  const acceptTypes = [
-    HttpConstants.ContentTypes.Json, HttpConstants.ContentTypes.Problem,
-  ].join(",");
+  let stringifiedBody: string | undefined;
+  if (hasBody) {
+    stringifiedBody = JSON.stringify(body);
+  }
 
-  headers = {
-    [HttpConstants.Headers.Accept]: acceptTypes,
-    [HttpConstants.Headers.ContentType]: options.body != null ? HttpConstants.ContentTypes.Json : "",
+  const headers = {
     ...options.headers,
+    ...HttpConstants.getJSONContentHeaders(stringifiedBody),
   };
 
   const res = await fetch(url, {
+    ...options,
     method,
     headers,
-    ...options,
+    body: stringifiedBody,
   });
 
   await throwIfError(res);
@@ -72,5 +85,9 @@ export async function fetchJSON<T = void>(
       + `${res.headers.get(HttpConstants.Headers.ContentType)}`);
   }
 
-  return (await res.json()) as T;
+  const resBody = await res.json() as Res;
+  return {
+    statusCode: res.status,
+    ...resBody,
+  };
 }

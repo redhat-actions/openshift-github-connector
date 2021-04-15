@@ -47,7 +47,7 @@ export default function ClusterPage(): JSX.Element {
                     </td>
                   </tr>
                 ))}
-                <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.ServiceAccount} loadingDisplay="none">{
+                <DataFetcher type="api" endpoint={ApiEndpoints.User.ServiceAccount} loadingDisplay="none">{
                   (saData: ApiResponses.ServiceAccountState) => {
                     return (
                       <React.Fragment>
@@ -56,7 +56,7 @@ export default function ClusterPage(): JSX.Element {
                               Service Account
                           </td>
                           <td>
-                            {saData.serviceAccountSetup ? saData.serviceAccount.name : <span className="text-danger">None</span> }
+                            {saData.success ? saData.serviceAccountName : <span className="text-danger">None</span> }
                           </td>
                         </tr>
                       </React.Fragment>

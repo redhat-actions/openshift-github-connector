@@ -1,48 +1,28 @@
-export type GitHubAppManifest = Record<string, unknown>;
+import { components } from "@octokit/openapi-types/dist-types/index";
+
+export type GitHubUserData = NonNullable<components["schemas"]["simple-user"]>;
+
+// slug and owner types are optional in the Config type but always present, so we intersect to make them non-null.
+export type GitHubAppConfig = components["schemas"]["integration"] & { slug: string, owner: GitHubUserData };
 
 /* eslint-disable camelcase */
-export type GitHubAppConfig = Readonly<{
-  id: number,
-  slug: string,
-  node_id: string
-  owner: {
-    login: string,
-    id: number,
-    node_id: string,
-    avatar_url: string,
-    gravatar_id: string,
-    url: string,
-    html_url: string,
-    followers_url: string,
-    following_url: string,
-    gists_url: string,
-    starred_url: string,
-    subscriptions_url: string,
-    organizations_url: string,
-    repos_url: string,
-    events_url: string,
-    received_events_url: string,
-    type: string,
-    site_admin: boolean
-  },
-  name: string,
-  description: string,
-  external_url: string,
-  html_url: string,
-  created_at: string,     // iso date format
-  updated_at: string,     // iso date format
-  permissions: {
-    [key: string]: "read" | "write";
-  },
-  events: string[]
-}>;
-
 export type GitHubAppConfigSecrets = {
-  // client_id: string;
-  // client_secret: string;
+  client_id: string;
+  client_secret: string;
   pem: string;
   webhook_secret: string;
 };
+
+export type GitHubOAuthResponse = {
+  /* eslint-disable camelcase */
+  access_token: string,
+  expires_in: number,
+  refresh_token: string,
+  refresh_token_expires_in: number,
+  scope: string,
+  token_type: string
+};
+/* eslint-enable camelcase */
 
 export type GitHubAppConfigWithSecrets = GitHubAppConfig & GitHubAppConfigSecrets;
 

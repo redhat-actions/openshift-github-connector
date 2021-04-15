@@ -11,10 +11,12 @@ const PostCreateApp = new UrlPath(Setup, "/post-create-app");
 const PostInstallApp = new UrlPath(Setup, "/post-install-app");
 
 const App = new UrlPath(Api, "/app");
-const AppRepos = new UrlPath(App, "/repos");
+// const AppRepos = new UrlPath(App, "/repos");
 
 const Cluster = new UrlPath(Api, "/cluster");
-const ServiceAccount = new UrlPath(Cluster, "/serviceaccount");
+
+const User = new UrlPath(Api, "/user");
+const ServiceAccount = new UrlPath(User, "/serviceaccount");
 
 const Webhook = new UrlPath(Api, "/webhook");
 
@@ -29,13 +31,16 @@ const ApiEndpoints = {
     PostCreateApp,
     PostInstallApp,
   },
+  User: {
+    Root: User,
+    ServiceAccount,
+  },
   App: {
     Root: App,
-    Repos: AppRepos,
+    // Repos: AppRepos,
   },
   Cluster: {
     Root: Cluster,
-    ServiceAccount,
   },
   Webhook,
 };

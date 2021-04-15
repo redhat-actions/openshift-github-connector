@@ -97,10 +97,10 @@ export default function SetupHomePage() {
             </tr>
             <tr>
               <td>Service Account Bound</td>
-              <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.ServiceAccount} loadingDisplay={tdLoadingDisplay}>
+              <DataFetcher type="api" endpoint={ApiEndpoints.User.ServiceAccount} loadingDisplay={tdLoadingDisplay}>
                 {
                   (data: ApiResponses.ServiceAccountState) => {
-                    return getStatusCells(data.serviceAccountSetup, {
+                    return getStatusCells(data.success, {
                       failure: "Create Service Account",
                       success: "View Service Account",
                     }, {

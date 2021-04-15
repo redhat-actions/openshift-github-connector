@@ -13,13 +13,13 @@ export default function SelectReposPage(): JSX.Element {
     <React.Fragment>
       <SetupPageHeader pageIndex={3} />
 
-      <DataFetcher type="api" endpoint={ApiEndpoints.App.Root} loadingDisplay="text">
+      <DataFetcher type="api" endpoint={ApiEndpoints.App.Root} loadingDisplay="spinner">
         {
           (appData: ApiResponses.GitHubAppState): JSX.Element => {
 
             if (!appData.app) {
               return (
-                <span className="errored">
+                <span className="error">
                   Failed to load app.
                   <a href={ClientPages.SetupCreateApp.path}>
                     <h4 className="my-2">Create an App</h4>

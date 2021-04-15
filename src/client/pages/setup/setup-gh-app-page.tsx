@@ -1,17 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import { Jumbotron, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { v4 as uuid } from "uuid";
 import { useHistory } from "react-router-dom";
+import classNames from "classnames";
 
 import ApiEndpoints from "../../../common/api-endpoints";
 import getEndpointUrl from "../../util/get-endpoint-url";
 import ClientPages from "../client-pages";
-import { GitHubAppConfigWithSecrets } from "../../../common/types/github-app";
 import DataFetcher from "../../components/data-fetcher";
-import { fetchJSON } from "../../util/client-util";
-import SetupPageHeader, { getSetupPath } from "./setup-header";
+import { fetchJSON, getSearchParam } from "../../util/client-util";
+import SetupPageHeader, { getSetupPath, SETUP_QUERYPARAM } from "./setup-header";
 import { ExternalLink } from "../../components/external-link";
+import ApiRequests from "../../../common/api-requests";
+import Banner from "../../components/banner";
+import ApiResponses from "../../../common/api-responses";
 
 export function getAppManifest(appUrl: string): Record<string, unknown> {
   // the redirect url is the first one, which is redirected to after the app is created
@@ -28,6 +31,7 @@ export function getAppManifest(appUrl: string): Record<string, unknown> {
   // https://docs.github.com/en/developers/apps/creating-a-github-app-from-a-manifest#github-app-manifest-parameters
   // the following parameters can also be in this payload (though you wouldn't know from the manifest doc)
   // https://docs.github.com/en/developers/apps/creating-a-github-app-using-url-parameters#github-app-configuration-parameters
+  /* eslint-disable camelcase */
   return {
     name: "OpenShift Actions Connector",
     description: "Connect your OpenShift cluster to GitHub Actions",
@@ -49,29 +53,51 @@ export function getAppManifest(appUrl: string): Record<string, unknown> {
       "workflow_run",
     ],
   };
+  /* eslint-enable camelcase */
 }
 
 export function CreateAppPage(): JSX.Element {
+  const [ enterpriseChecked, setEnterpriseChecked ] = useState(false);
+  const [ error, setError ] = useState<string | undefined>(undefined);
+
   const state = uuid();
 
   const frontendUrl = window.location.protocol + "//" + window.location.host;
+
+  const manifestFormID = "manifest-form";
+  const enterpriseCheckboxId = "enterprise-checkbox";
 
   const appManifest = getAppManifest(frontendUrl);
   const githubManifestUrl = `https://github.com/settings/apps/new?state=${state}`;
 
   return (
     <React.Fragment>
-      <SetupPageHeader pageIndex={0} hideBtnBanner={true}/>
+      {getSearchParam(SETUP_QUERYPARAM) ? <SetupPageHeader pageIndex={0} hideBtnBanner={true}/> : ""}
       <Jumbotron className="text-black text-center">
         <h2>You have to create an app now</h2>
         <p className="my-3">This is a description of what creating an app means.</p>
 
-        <form className="row justify-content-center" method="post" action={githubManifestUrl} onSubmit={
-          () => {
-            fetchJSON("POST", ApiEndpoints.Setup.SetCreateAppState.path, {
-              body: JSON.stringify({ state }),
-            })
-              .catch((console.error));
+        <input type="checkbox"
+          className="form-check-input"
+          id={enterpriseCheckboxId}
+          checked={enterpriseChecked}
+          onClick={(e) => setEnterpriseChecked(e.currentTarget.checked)}
+        />
+        <label htmlFor={enterpriseCheckboxId}>I want to use GitHub Enterprise</label>
+        <p className={classNames({ "d-none": !enterpriseChecked })}>Too bad, {"that's"} not implemented yet.</p>
+
+        <form className="row justify-content-center" id={manifestFormID} method="post" action={githubManifestUrl} onSubmit={
+          async (e) => {
+            e.preventDefault();
+            try {
+              await fetchJSON<ApiRequests.InitCreateApp>("POST", ApiEndpoints.Setup.SetCreateAppState.path, {
+                state,
+              });
+              (document.getElementById(manifestFormID) as HTMLFormElement).submit();
+            }
+            catch (err) {
+              setError(`Failed to start creation flow: ${err.message}`);
+            }
           }
         }>
           <input className="d-none" name="manifest" type="manifest" readOnly={true} value={JSON.stringify(appManifest)} />
@@ -89,6 +115,10 @@ export function CreateAppPage(): JSX.Element {
             View current apps
           </ExternalLink>
         </h4>
+
+        <Banner display={error != null} severity="error">
+          {error ?? ""}
+        </Banner>
 
       </Jumbotron>
     </React.Fragment>
@@ -111,22 +141,32 @@ export function CreatingAppPage() {
   const code = searchParams.get("code");
   const state = searchParams.get("state");
 
+  if (!code) {
+    return (<p className="error">GitHub did not provide a {`"code"`} parameter in search query</p>);
+  }
+  if (!state) {
+    return (<p className="error">GitHub did not provide a {`"state"`} parameter in search query</p>);
+  }
+
   return (
     <React.Fragment>
       <DataFetcher loadingDisplay="spinner" type="generic" fetchData={
-        async (): Promise<GitHubAppConfigWithSecrets> => {
-          return fetchJSON("POST", ApiEndpoints.Setup.CreatingApp.path, {
-            body: JSON.stringify({ code, state }),
+        async () => {
+          return fetchJSON<ApiRequests.CreatingApp, ApiResponses.CreatingAppResponse>("POST", ApiEndpoints.Setup.CreatingApp.path, {
+            code, state,
           });
         }
       }>
-        {(data: GitHubAppConfigWithSecrets) => {
-          const installUrl = `https://github.com/settings/apps/${data.slug}/installations`;
+        {(data: ApiResponses.CreatingAppResponse) => {
+          const installUrl = data.appInstallUrl;
           console.log("Redirect to " + installUrl);
           return (
             <React.Fragment>
               <p>
-                Saved app successfully. Redirecting to install page...
+                {data.message}
+              </p>
+              <p>
+                Redirecting to install page...
                 {window.location.replace(installUrl)}
               </p>
               <a href={installUrl}>{installUrl}</a>
@@ -143,20 +183,29 @@ export function InstalledAppPage(): JSX.Element {
 
   const searchParams = new URLSearchParams(window.location.search);
   const installationId = searchParams.get("installation_id");
+  const oauthCode = searchParams.get("code");
   // const setupAction = searchParams.get("setup_action");
+
+  if (!installationId) {
+    throw new Error(`"installationId" missing from query string`);
+  }
+  if (!oauthCode) {
+    throw new Error(`"code" missing from query string`);
+  }
 
   return (
     <React.Fragment>
       <DataFetcher loadingDisplay="spinner" type="generic" fetchData={
-        async (): Promise<void> => {
-          return fetchJSON("POST", ApiEndpoints.Setup.PostInstallApp.path, {
-            body: JSON.stringify({ installationId }),
-          });
+        async (): Promise<ApiResponses.Result> => {
+          return fetchJSON<ApiRequests.PostInstall, ApiResponses.Result>(
+            "POST", ApiEndpoints.Setup.PostInstallApp.path,
+            { installationId, oauthCode },
+          );
         }
       }>
         {() => (
           <p>
-            Installed app successfully. Redirecting...
+            Installed app successfully. Redirecting to app page...
             {history.replace(getSetupPath(ClientPages.App))}
           </p>
         )}

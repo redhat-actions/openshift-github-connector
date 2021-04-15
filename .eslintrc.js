@@ -36,10 +36,16 @@ module.exports = {
     "@typescript-eslint/no-inferrable-types": [ 2, { ignoreParameters: true }],
     "@typescript-eslint/no-use-before-define": 2,
     "@typescript-eslint/explicit-function-return-type": [ 2, { allowExpressions: true }],
+    "@typescript-eslint/no-floating-promises": [ 2 ],
+    "@typescript-eslint/strict-boolean-expressions": [ 2,
+      { allowNumber: false, allowAny: true, allowNullableBoolean: true, allowNullableString: true }
+    ],
+
     "indent": [ 2, 2 ],
     "max-len": [ 2, 120, { ignoreUrls: true } ],
+    "camelcase": [ 2, { allow: [ "client_id", "client_secret", "webhook_secret" ]}],
 
-    "react/react-in-jsx-scope": [ 0 ]
+    "react/react-in-jsx-scope": [ 0 ],
   },
   overrides: [{
     files: [ "*.tsx" ],

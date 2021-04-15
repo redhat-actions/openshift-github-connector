@@ -6,6 +6,19 @@ import Log from "./logger";
 const dayMs = 1000 * 60 * 60 * 24;
 const FileStore = sessionFileStore(session);
 
+// Type of session data goes here
+declare module "express-session" {
+  interface SessionData {
+    setupData: {
+      githubAppId: string;
+    }
+    data: {
+      githubUserId: string;
+    }
+  }
+}
+
+// https://github.com/expressjs/session#options
 const sessionMw = session({
   // replace w/ set-once kube secret
   secret: "535ebab0-a31e-4e38-a3c8-dc4e844b3ab5",
@@ -32,8 +45,8 @@ const sessionMw = session({
     maxAge: dayMs,
     // name: ""
     sameSite: "strict",
-    // secure: "auto",
     secure: "auto",
+    signed: true,
   },
 });
 

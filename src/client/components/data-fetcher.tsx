@@ -47,7 +47,7 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
     try {
       let data: Data;
       if (this.props.type === "api") {
-        data = await fetchJSON("GET", this.props.endpoint.path);
+        data = await fetchJSON<{}, Data>("GET", this.props.endpoint.path);
       }
       else {
         data = await this.props.fetchData();
@@ -65,18 +65,18 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
     finally {
       // If you receive an error on this line "Objects are not valid as a React child"
       // It is not a problem with the DataFetcher - somewhere in a DataFetcher's child you have put an object in JSX that should be a string
-      // The browser console will contain a trace of the errored element
+      // The browser console will contain a trace of the error element
       this.setState({ loaded: true });
     }
   }
 
   public render() {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (!this.state || !this.state.loaded) {
-      const loadingDisplayType = this.props.loadingDisplay || "text";
+    if (this.state == null || !this.state.loaded) {
+      const loadingDisplayType = this.props.loadingDisplay ?? "text";
       if (loadingDisplayType === "text") {
         return (
-          <span style={this.props.loadingStyle} >Loading...</span>
+          <span style={this.props.loadingStyle}>Loading...</span>
         );
       }
       else if (loadingDisplayType === "spinner" || loadingDisplayType === "spinner-1em") {
@@ -98,16 +98,16 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
     }
     else if (this.state.loadingError) {
       return (
-        <span className="text-danger">
+        <p className="error">
           {this.state.loadingError.message}
-        </span>
+        </p>
       );
     }
     else if (this.state.data == null) {
       return (
-        <span className="text-danger">
-          Unknown error fetching data
-        </span>
+        <p className="error">
+          Data to fetch was {this.state.data}.
+        </p>
       );
     }
     return this.props.children(this.state.data);

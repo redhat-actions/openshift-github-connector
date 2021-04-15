@@ -7,7 +7,7 @@ import HomePage from "./home-page";
 import SelectReposPage from "./setup/select-repos-page";
 import * as SetupAppPages from "./setup/setup-gh-app-page";
 import SetupHomePage from "./setup/setup-home-page";
-import SetupSAPage from "./setup/setup-sa-page";
+import SetupSAPage from "./setup/setup-service-account-page";
 
 export class ClientPage extends UrlPath {
   constructor(

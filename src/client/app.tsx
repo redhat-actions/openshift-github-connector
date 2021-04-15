@@ -7,7 +7,6 @@ import { fab } from "@fortawesome/free-brands-svg-icons";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./css/colors.scss";
 import "./css/index.scss";
 
 import ClientPages from "./pages/client-pages";

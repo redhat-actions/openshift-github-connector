@@ -10,8 +10,8 @@ import FaBtnBody from "../components/fa-btn-body";
 import ApiResponses from "../../common/api-responses";
 import ClientPages from "./client-pages";
 import getEndpointUrl from "../util/get-endpoint-url";
-import { fetchJSON } from "../util/client-util";
-import SetupPageHeader, { SETUP_QUERY } from "./setup/setup-header";
+import { fetchJSON, getSearchParam } from "../util/client-util";
+import SetupPageHeader, { SETUP_QUERYPARAM } from "./setup/setup-header";
 
 export default function GitHubAppPage() {
   const DOCS_ICON = "book";
@@ -39,8 +39,7 @@ export default function GitHubAppPage() {
     };
   });
 
-  const qs = new URLSearchParams(window.location.search);
-  const isSetup = qs.has(SETUP_QUERY);
+  const isSetup = getSearchParam(SETUP_QUERYPARAM);
 
   return (
     <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.App.Root}>
@@ -64,12 +63,12 @@ export default function GitHubAppPage() {
             {
               isSetup ? <SetupPageHeader pageIndex={1}/> : <></>
             }
-            <h2 className="d-flex font-weight-bold">
+            <h2 className="d-flex align-items-center font-weight-bold my-4">
               <a className="text-white" href={data.appUrls.app}>{data.appConfig.name}</a>
               <div className="ml-auto"></div>
-              <Button className={classNames("btn-lg btn-danger", { disabled: isSetup })} onClick={
+              <Button className={classNames("btn-lg btn-danger", { "d-none": isSetup })} onClick={
                 async () => {
-                  await fetchJSON("DELETE", getEndpointUrl(ApiEndpoints.App.Root.path));
+                  await fetchJSON<{}, void>("DELETE", getEndpointUrl(ApiEndpoints.App.Root.path));
                   window.location.reload();
                 }
               }>
@@ -79,9 +78,6 @@ export default function GitHubAppPage() {
                 <FaBtnBody icon="sync-alt" text="Refresh"/>
               </button> */}
             </h2>
-            <h4 className="mb-4">
-              Created by <a href={data.appConfig.owner.html_url}>{data.appConfig.owner.login}</a>
-            </h4>
             <AppPageCard header="Permissions" buttons={[{
               href: "https://docs.github.com/en/developers/apps/creating-a-github-app-using-url-parameters#github-app-permissions",
               icon: DOCS_ICON,

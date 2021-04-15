@@ -1,0 +1,28 @@
+
+@import "node_modules/bootstrap/scss/bootstrap";
+// @import "node_modules/bootstrap/scss/bootstrap-grid";
+
+/* https://www.redhat.com/en/about/brand/standards/color */
+$rh-red: #e00;
+$rh-pink: #f5606d;
+$rh-light-pink: #fab6b6;
+$rh-deep-red: #be0000;
+$rh-dark-red: #5f0000;
+
+$rh-gray-light: #dedede;
+$rh-gray: #aaaaaa;
+$rh-gray-dark: #4d4d4d;
+$rh-gray-darker: #2d2d2d;
+$rh-gray-darkest: #151515;          /* from OpenShift console */
+
+// --w3-red: #f44336;
+
+/* match to index.html */
+$bg-color: $rh-gray-darkest;
+$fg-color: white;
+
+$breakpoint-xs: 0;
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;
+$breakpoint-xl: 1200px;

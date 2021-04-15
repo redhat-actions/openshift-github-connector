@@ -16,7 +16,7 @@ export function sendError(
 
   const resBody: ApiResponses.Error = {
     success: false,
-    detail,
+    message: detail,
     status: statusCode,
     statusMessage,
     title: title ?? "Error",

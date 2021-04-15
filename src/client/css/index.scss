@@ -1,35 +1,37 @@
+@import "./constants";
+
 html, body {
   margin: 0;
   width: 100%;
   height: 100%;
 
-  color: var(--fg-color);
-  background-color: var(--bg-color);
+  color: $fg-color;
+  background-color: $bg-color;
 
   line-height: 1.5em;
-
-  --navbar-height: 4rem;
 }
+
+$navbar-height: 4rem;
 
 .navbar {
   color: white;
-  background-color: var(--rh-gray-darkest);
+  background-color: $rh-gray-darkest;
 
-  height: var(--navbar-height);
+  height: $navbar-height;
 }
 
 .navbar img, .navbar i {
-  height: calc(var(--navbar-height) * 0.6);
-  font-size: calc(var(--navbar-height) * 0.6);
+  height: calc(#{$navbar-height} * 0.6);
+  font-size: calc(#{$navbar-height} * 0.6);
 }
 
 $main-vertical-padding: 2rem;
 
 main {
   padding: $main-vertical-padding 0;
-  min-width: var(--breakpoint-sm);
+  min-width: $breakpoint-sm;
   width: 80%;
-  max-width: var(--breakpoint-lg);
+  max-width: $breakpoint-lg;
 }
 
 a {
@@ -68,15 +70,15 @@ $card-border-radius: 0.5rem;
 $card-box-shadow: 0.1rem 0.1rem 0.1rem black;
 
 .card {
-  background-color: var(--rh-gray-dark);
-  color: var(--fg-color);
+  background-color: $rh-gray-dark;
+  color: $fg-color;
   border-radius: $card-border-radius;
   box-shadow: $card-box-shadow;
   margin-bottom: 1.5em;
 }
 
 .card-title {
-  border-bottom: 2px solid var(--rh-gray);
+  border-bottom: 2px solid $rh-gray;
   padding: 1rem 1.25rem;
 
   margin: 0;
@@ -95,6 +97,10 @@ dl, ol, ul {
 
 .btn {
   max-height: 3em;
+
+  &.disabled {
+    cursor: not-allowed;
+  }
 }
 
 .copy-btn {
@@ -106,27 +112,49 @@ dl, ol, ul {
   padding-left: 0;
 }
 
-input.errored, input.errored:focus {
-  border-color: #f00;
-  border-width: 3px;
-  border-style: solid;
-  box-shadow: none;
+.form-control {
+  &.error, &.error:focus, &.warning, &.warning:focus {
+    border-width: 3px;
+    border-style: solid;
+    box-shadow: none;
+
+    &.error {
+      border-color: $danger;
+    }
+    &.warning {
+      border-color: $warning;
+    }
+  }
 }
 
-span.errored {
-  color: var(--danger);
+p.error, span.error {
+  color: $danger;
 }
 
-div.errored {
-  color: white;
-  background-color: var(--danger);
+.banner {
+  &.error {
+    color: white;
+    background-color: $danger;
+  }
+
+  &.warn {
+    color: black;
+    background-color: $warning;
+  }
+
+  &.info {
+    color: white;
+    background-color: $info;
+  }
 }
 
 code, pre {
-  background-color: #111;
-  border-radius: 0.33em;
-  padding: 0.33em;
-  color: white;
+  &:not(.syntax-highlighted) {
+    background-color: #111;
+    color: white;
+    border-radius: 0.33em;
+    padding: 0.33em;
+  }
 }
 
 pre {
@@ -154,4 +182,9 @@ pre {
   & > a {
     color: black;
   }
+}
+
+textarea {
+  background-color: $bg-color;
+  color: $fg-color;
 }

@@ -1,5 +1,4 @@
-@import "./index.scss";
-@import "./colors.scss";
+@import "./index";
 
 .table td {
     vertical-align: middle;
@@ -30,7 +29,7 @@ $header-top-height: 1rem;
 .setup-header-background {
     position: absolute;
 
-    background-color: var(--bg-color);
+    background-color: $bg-color;
     top: 0;
     right: 0;
     height: 100%;
@@ -47,11 +46,11 @@ $header-top-height: 1rem;
 }
 
 .setup-header-buttons {
-    padding: 1rem;
+    padding: 1rem 1rem 0.5rem;
 }
 
 .setup-step {
-    padding: 0.5rem 1rem;
+    padding: 0.25rem 1rem;
 
     &.current {
         background-color: white;
@@ -64,7 +63,7 @@ $header-top-height: 1rem;
     }
 
     & span {
-        color: var(--fg-color);
+        color: $fg-color;
         &:focus, &:hover {
             text-decoration: none;
         }
@@ -72,7 +71,9 @@ $header-top-height: 1rem;
 }
 
 $setup-green: rgb(19, 161, 19);
-$circle-size: 3rem;
+
+$circle-size: 2.5rem;
+$circle-font-size: 1rem;
 
 .setup-step-circle {
     height: $circle-size;
@@ -84,7 +85,7 @@ $circle-size: 3rem;
     justify-content: center;
     align-items: center;
     border-radius: 100%;
-    font-size: 1.25rem;
+    font-size: $circle-font-size;
 
     border-color: $setup-green;
 

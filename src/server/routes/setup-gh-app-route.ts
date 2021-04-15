@@ -1,18 +1,26 @@
 import express from "express";
+import fetch from "node-fetch";
 
 import ApiEndpoints from "../../common/api-endpoints";
 import { send405, sendError } from "../util/send-error";
-import { exchangeCodeForAppConfig } from "../lib/gh-app/app-config";
-import GitHubAppMemento from "../lib/gh-app/app-memento";
-import GitHubApp from "../lib/gh-app/app";
+import { exchangeCodeForAppConfig } from "../lib/gh-app/gh-app-config";
+import GitHubAppMemento from "../lib/memento/app-memento";
 import Log from "../logger";
-import { GitHubAppConfigWithSecrets } from "../../common/types/github-app";
+import { sendSuccessStatusJSON, throwIfError } from "../util/server-util";
+import ApiRequests from "../../common/api-requests";
+import GitHubUserMemento from "../lib/memento/user-memento";
+import { GitHubOAuthResponse, GitHubUserData } from "../../common/types/github-app";
+import HttpConstants from "../../common/http-constants";
+import ApiResponses from "../../common/api-responses";
 
 const router = express.Router();
 
 const STATE_TIME_LIMIT_MS = 5 * 60 * 1000;
+// const INSTALL_TIME_LIMIT_MS = 15 * 60 * 1000;
 
-const creationsInProgress = new Map<string, { iat: number, state: string }>();
+const statesInProgress = new Map<string, { iat: number, state: string }>();
+
+// const appsInProgress = new Map<string, { iat: number, ownerId: string, appId: string }>();
 
 // .get(async (req, res, next) => {
 //   const state = uuid();
@@ -31,19 +39,24 @@ const creationsInProgress = new Map<string, { iat: number, state: string }>();
 //     .json(resBody);
 // })
 
+function isExpired(iat: number, limitMs: number): boolean {
+  return (Date.now() - iat) > limitMs;
+}
+
 router.route(ApiEndpoints.Setup.SetCreateAppState.path)
   .post(async (req, res, next) => {
-    const state = req.body.state;
+    const state: string | undefined = req.body.state;
     if (!state) {
       return sendError(res, 400, `Required parameter "state" missing from request body`);
     }
 
-    creationsInProgress.set(req.sessionID, { iat: Date.now(), state });
+    statesInProgress.set(req.sessionID, { iat: Date.now(), state });
 
-    return res.json({ status: "Created" });
+    return sendSuccessStatusJSON(res, 201);
   });
 
 router.route(ApiEndpoints.Setup.CreatingApp.path)
+  /*
   .get(async (req, res, next) => {
     const memento = await GitHubAppMemento.tryLoad(req.sessionID);
     if (!memento) {
@@ -67,8 +80,10 @@ router.route(ApiEndpoints.Setup.CreatingApp.path)
 
     const appWithSecrets: GitHubAppConfigWithSecrets = {
       ...appConfig,
+      client_id: memento.client_id,
+      client_secret: memento.client_secret,
       pem: memento.privateKey,
-      webhook_secret: memento.webhookSecret,
+      webhook_secret: memento.webhook_secret,
     };
 
     if (req.headers.accept?.startsWith("application/json")) {
@@ -77,16 +92,25 @@ router.route(ApiEndpoints.Setup.CreatingApp.path)
 
     const filename = appConfig.slug + ".json";
     // https://github.com/eligrey/FileSaver.js/wiki/Saving-a-remote-file#using-http-header
-    res.setHeader("Content-Type", "application/octet-stream; charset=utf-8");
-    res.setHeader("Content-Disposition", `attachment; filename="${filename}"; filename*="${filename}"`);
+    res.setHeader(HttpConstants.Headers.ContentType, "application/octet-stream; charset=utf-8");
+    res.setHeader(
+      HttpConstants.Headers.ContentDisposition,
+      `attachment; filename="${filename}"; filename*="${filename}"`
+    );
     const appWSecretsString = JSON.stringify(appWithSecrets);
-    res.setHeader("Content-length", Buffer.byteLength(appWSecretsString, "utf8"));
+    res.setHeader(HttpConstants.Headers.ContentLength, Buffer.byteLength(appWSecretsString, "utf8"));
 
     return res.send(appWSecretsString);
-
   })
-  .post(async (req, res, next) => {
-    const { code, state } = req.body;
+  */
+  .post(async (
+    req: express.Request<any, any, ApiRequests.CreatingApp>,
+    res: express.Response<ApiResponses.CreatingAppResponse>,
+    next
+  ) => {
+    const code: string | undefined = req.body.code;
+    const state: string | undefined = req.body.state;
+
     if (!code) {
       return sendError(res, 400, `Required parameter "code" missing from request body`);
     }
@@ -94,42 +118,181 @@ router.route(ApiEndpoints.Setup.CreatingApp.path)
       return sendError(res, 400, `Required parameter "state" missing from request body`);
     }
 
-    const stateLookupResult = creationsInProgress.get(req.sessionID);
-    if (stateLookupResult == null) {
+    const stateLookup = statesInProgress.get(req.sessionID);
+    if (stateLookup == null) {
       Log.info(`State "${state}" not found in state map`);
       return sendError(res, 400, `State parameter "${state}" is invalid or expired`);
     }
 
     // creationsInProgress.delete(req.sessionID);
 
-    const isExpired = (Date.now() - stateLookupResult.iat) > STATE_TIME_LIMIT_MS;
-    if (isExpired) {
+    if (isExpired(stateLookup.iat, STATE_TIME_LIMIT_MS)) {
       Log.info(`State "${state}" is expired`);
+      statesInProgress.delete(req.sessionID);
       return sendError(res, 400, `State parameter "${state}" is invalid or expired`);
     }
 
     const appConfig = await exchangeCodeForAppConfig(code);
 
-    await GitHubAppMemento.save(req.sessionID, {
-      appId: appConfig.id.toString(),
+    const appId = appConfig.id.toString();
+    const ownerId = appConfig.owner.id.toString();
+
+    req.session.setupData = {
+      githubAppId: appId,
+    };
+    Log.info(`Saving session data`);
+
+    await GitHubAppMemento.saveApp({
+      appId,
+      ownerId,
+
+      client_id: appConfig.client_id,
+      client_secret: appConfig.client_secret,
       privateKey: appConfig.pem,
-      webhookSecret: appConfig.webhook_secret,
+      webhook_secret: appConfig.webhook_secret,
     });
 
-    return res.json(appConfig);
+    Log.info(`Saved app ${appConfig.name} into secret`);
+
+    const appInstallUrl = `https://github.com/settings/apps/${appConfig.slug}/installations`;
+
+    // appsInProgress.set(req.sessionID, { iat: Date.now(), appId, ownerId });
+
+    return res.json({
+      success: true,
+      message: `Successfully saved ${appConfig.name}`,
+      appInstallUrl,
+    });
   })
-  .all(send405([ "GET", "POST" ]));
+  .all(send405([ /* "GET", */ "POST" ]));
+
+async function exchangeCodeForUserData(
+  client_id: string, client_secret: string, oauthCode: string
+): Promise<GitHubUserData> {
+  const githubReqBody = JSON.stringify({
+    client_id,
+    client_secret,
+    code: oauthCode,
+    // state ?
+  });
+
+  // https://docs.github.com/en/developers/apps/identifying-and-authorizing-users-for-github-apps#response
+  const oauthRes = await fetch("https://github.com/login/oauth/access_token", {
+    method: "POST",
+    headers: HttpConstants.getJSONContentHeaders(githubReqBody),
+    body: githubReqBody,
+  });
+
+  await throwIfError(oauthRes);
+
+  const oauthData: GitHubOAuthResponse = await oauthRes.json();
+
+  const userDataRes = await fetch(
+    "https://api.github.com/user",
+    { headers: { Authorization: `token ${oauthData.access_token} ` } }
+  );
+
+  if (!userDataRes.ok) {
+    // eslint-disable-next-line camelcase
+    const err = await userDataRes.json() as { message: string, documentation_url: string };
+    throw new Error(err.message);
+  }
+
+  const userData: GitHubUserData = await userDataRes.json();
+  return userData;
+}
 
 router.route(ApiEndpoints.Setup.PostInstallApp.path)
-  .post(async (req, res, next) => {
-    const { installationId } = req.body;
-    if (!installationId) {
+  .post(async (req: express.Request<any, any, ApiRequests.PostInstall>, res, next) => {
+    const {
+      // appId, ownerId,
+      installationId, oauthCode,
+    } = req.body;
+
+    // there must be a better typescript-y way
+    // if (!appId) {
+    //   return sendError(res, 400, `Required parameter "appId" missing from request body`);
+    // }
+    // else if (!ownerId) {
+    //    return sendError(res, 400, `Required parameter "ownerId" missing from request body`);
+    // }
+    /* else */ if (!installationId) {
       return sendError(res, 400, `Required parameter "installationId" missing from request body`);
     }
+    else if (!oauthCode) {
+      return sendError(res, 400, `Required parameter "oauthCode" missing from request body`);
+    }
 
-    await GitHubAppMemento.savePostInstall(req.sessionID, installationId);
+    // const appsInProgressLookup = appsInProgress.get(req.sessionID);
+    // if (appsInProgressLookup == null) {
+    //   return sendError(
+    //     res, 400, `App ID or Installation ID is invalid or expired.
+    //     Please restart the app creation process.`
+    //   );
+    // }
+    // appsInProgress.delete(req.sessionID);
 
-    return res.status(201).json({ status: "Created" });
+    // if (isExpired(appsInProgressLookup.iat, INSTALL_TIME_LIMIT_MS)) {
+    //   return sendError(
+    //     res, 400, `App ID or Installation ID is invalid or expired.
+    //     Please restart the app creation process.`
+    //   );
+    // }
+    // else if (appsInProgressLookup.appId !== appId) {
+    //   return sendError(
+    //     res, 400, `Saved App ID does not match query string.
+    //     Please restart the app creation process.`
+    //   );
+    // }
+    // else if (appsInProgressLookup.ownerId !== ownerId) {
+    //   return sendError(
+    //     res, 400, `Saved Owner ID does not match query string.
+    //     Please restart the app creation process.`
+    //   );
+    // }
+
+    if (!req.session.setupData) {
+      return sendError(res, 400, `Invalid cookie: missing required field. Please restart the app creation process.`);
+    }
+
+    const appId = req.session.setupData.githubAppId;
+
+    const appConfig = await GitHubAppMemento.loadApp(appId);
+
+    if (appConfig == null) {
+      return sendError(
+        res, 500,
+        `Failed to look up GitHub app for this session. Please restart the app setup process.`
+      );
+    }
+
+    const userData = await exchangeCodeForUserData(appConfig.client_id, appConfig.client_secret, oauthCode);
+    const userId = userData.id.toString();
+
+    if (userId !== appConfig.ownerId) {
+      // have to think about this one.
+      // there may be cases where this should be allowed (one user creates, another installs)
+      // what about the org case?
+      return sendError(
+        res, 400,
+        `Saved Owner ID does not match user who just installed. `
+        + `This should not be possible with a private app. Please restart the app creation process.`
+      );
+    }
+
+    req.session.setupData = undefined;
+
+    req.session.data = {
+      githubUserId: userId,
+    };
+
+    await GitHubUserMemento.saveUser({
+      appId,
+      installationId,
+      userId,
+    });
+
+    return sendSuccessStatusJSON(res, 201);
   })
   .all(send405([ "POST" ]));
 

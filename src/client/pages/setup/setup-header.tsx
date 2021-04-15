@@ -8,7 +8,7 @@ import "../../css/setup.scss";
 import ClientPages, { ClientPage } from "../client-pages";
 import FaBtnBody from "../../components/fa-btn-body";
 
-export const SETUP_QUERY = "setup";
+export const SETUP_QUERYPARAM = "setup";
 
 type SetupPageProps = {
   pageIndex: number;
@@ -26,7 +26,7 @@ type SetupPageState = {
 type SetupStepType = "passed" | "current" | "todo";
 
 export function getSetupPath(clientPage: ClientPage): string {
-  return clientPage.path + `?${SETUP_QUERY}=true`;
+  return clientPage.path + `?${SETUP_QUERYPARAM}=true`;
 }
 
 export default function SetupPageHeader(props: SetupPageProps, _state: SetupPageState): JSX.Element {
@@ -41,7 +41,7 @@ export default function SetupPageHeader(props: SetupPageProps, _state: SetupPage
 
   if (props.pageIndex > SetupSteps.length - 1 || props.pageIndex < 0) {
     return (
-      <span className="errored">
+      <span className="error">
         Invalid setup step index {`"${props.pageIndex}"`}
       </span>
     );
@@ -84,7 +84,7 @@ export default function SetupPageHeader(props: SetupPageProps, _state: SetupPage
                   history.push(step.path);
                 }}>
                   <div className="mb-2 d-flex justify-content-center">
-                    <div className={`setup-step-circle ${stepType}`} {...props}>
+                    <div className={`setup-step-circle ${stepType}`}>
                       {stepType === "passed" ? <FontAwesomeIcon icon="check-circle"/> : (i + 1).toString()}
                     </div>
                   </div>

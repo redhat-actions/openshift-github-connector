@@ -1,10 +1,15 @@
 import express from "express";
 import os from "os";
-import { URL } from "url";
 import HttpStatusCodes from "http-status-codes";
+import { Response } from "node-fetch";
 
 import Log from "../logger";
+import ApiResponses from "../../common/api-responses";
+import HttpConstants from "../../common/http-constants";
 
+export type Stringable = { toString(): string };
+
+/*
 export function getFrontendUrl(req: express.Request): string {
   const referrer = req.headers.referer;
   if (!referrer) {
@@ -18,6 +23,7 @@ export function getFrontendUrl(req: express.Request): string {
   Log.info(`Client URL is ${clientUrlStr}`);
   return clientUrlStr;
 }
+*/
 
 // These should be set by Containerfile in prod
 const FRONTEND_PROTOCOL_ENVVAR = "FRONTEND_PROTOCOL";
@@ -76,12 +82,39 @@ export function fromb64(data: string): string {
   return Buffer.from(data, "base64").toString("utf-8");
 }
 
+export function objValuesTob64<T extends Record<string, Stringable>>(obj: T): { [key in keyof T]: string } {
+  const result: Record<keyof T, string> = Object();
+  Object.entries(obj).forEach(([ k, v ]) => {
+    const key = k as keyof T;
+    result[key] = tob64(v.toString());
+  });
+
+  return result;
+}
+
+export function objValuesFromb64<T extends Record<string, string | undefined>>(obj: T): T {
+  const result: Record<string, string> = {};
+  Object.entries(obj).forEach(([ k, v ]) => {
+    if (v != null) {
+      result[k] = fromb64(v);
+    }
+  });
+
+  return result as T;
+}
+
 export function isInK8s(): boolean {
   return process.env.IN_K8S === "true";
 }
 
-export function sendStatusJSON(res: express.Response, statusCode: number): void {
-  res.status(statusCode).send({ statusCode, message: HttpStatusCodes.getStatusText(statusCode) });
+export function sendSuccessStatusJSON(res: express.Response, statusCode: number): void {
+  const resBody: ApiResponses.Result = {
+    message: statusCode + " " + HttpStatusCodes.getStatusText(statusCode),
+    // status: statusCode,
+    success: true,
+  };
+
+  res.status(statusCode).json(resBody);
 }
 
 export function getFriendlyHTTPError(err: Error & { response?: any }): Error {
@@ -96,6 +129,36 @@ export function getFriendlyHTTPError(err: Error & { response?: any }): Error {
   const newErr = new Error(message);
   newErr.stack = err.stack;
   return newErr;
+}
+
+export async function getHttpError(res: Response): Promise<string> {
+  let message: string;
+  let statusMessage: string | undefined;
+  if (res.headers.get(HttpConstants.Headers.ContentType)?.startsWith(HttpConstants.ContentTypes.Json)) {
+    const resBody = await res.json();
+    if (resBody.message) {
+      message = resBody.message;
+    }
+    else {
+      message = JSON.stringify(resBody);
+    }
+
+    if (message.startsWith("Error: ")) {
+      message = message.substring("Error: ".length, message.length);
+    }
+  }
+  else {
+    message = await res.text();
+  }
+
+  return `${res.url} responded ${res.status}${statusMessage ? " " + statusMessage : ""}: ${message}`;
+}
+
+export async function throwIfError(res: Response): Promise<void> {
+  if (res.status > 399) {
+    const errMsg = await getHttpError(res);
+    throw new Error(errMsg);
+  }
 }
 
 /*
@@ -117,3 +180,23 @@ export function removeErrorGarbage(err_: any): Record<string, unknown> {
   return err;
 }
 */
+
+// https://github.com/microsoft/TypeScript/issues/20965#issuecomment-354858633
+type ValuesOf<T extends any[]> = T[number];
+
+export function checkKeys<
+  T extends Record<string | number, any>
+>(obj: Partial<T>, ...keys: Array<keyof T>): obj is { [key in ValuesOf<typeof keys>]: any } {
+  const missingKeys = keys.filter((key) => {
+    const missing = obj[key] === undefined;
+    if (missing) {
+      Log.debug(`object is missing key "${key}"`);
+    }
+    return missing;
+  });
+
+  if (missingKeys.length > 0) {
+    return false;
+  }
+  return true;
+}

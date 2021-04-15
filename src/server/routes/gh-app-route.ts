@@ -1,17 +1,21 @@
 import express from "express";
 
-import GitHubApp from "../lib/gh-app/app";
-import { send405 } from "../util/send-error";
+import GitHubApp from "../lib/gh-app/gh-app";
+import { send405, sendError } from "../util/send-error";
 import ApiEndpoints from "../../common/api-endpoints";
 import ApiResponses from "../../common/api-responses";
-import GitHubAppMemento from "../lib/gh-app/app-memento";
+import GitHubAppMemento from "../lib/memento/app-memento";
 import Log from "../logger";
-import { sendStatusJSON } from "../util/server-util";
+import { sendSuccessStatusJSON } from "../util/server-util";
 
 const router = express.Router();
 
 async function getAppForSession(req: express.Request, res: express.Response): Promise<GitHubApp | undefined> {
-  const app = await GitHubApp.getAppForSession(req.sessionID);
+  if (!req.session.data) {
+    return undefined;
+  }
+
+  const app = await GitHubApp.getAppForSession(req.session.data.githubUserId);
   if (app) {
     return app;
   }
@@ -32,7 +36,7 @@ router.route(ApiEndpoints.App.Root.path)
       return;
     }
 
-    const octo = app.installationOctokit;
+    const octo = app.install.octokit;
     const installationsReq = octo.request("GET /app/installations");
     const repositoriesReq = octo.request("GET /installation/repositories");
 
@@ -50,8 +54,12 @@ router.route(ApiEndpoints.App.Root.path)
     res.json(resBody);
   })
   .delete(async (req, res, next) => {
-    await GitHubAppMemento.clear(req.sessionID);
-    sendStatusJSON(res, 204);
+    if (!req.session.data) {
+      return sendError(res, 400, `Failed to delete app: Invalid app or user data`);
+    }
+
+    await GitHubAppMemento.deleteApp(req.session.data.githubUserId);
+    return sendSuccessStatusJSON(res, 204);
   })
   .all(send405([ "GET", "DELETE" ]));
 
