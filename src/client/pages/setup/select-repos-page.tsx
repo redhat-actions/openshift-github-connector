@@ -11,7 +11,7 @@ export default function SelectReposPage(): JSX.Element {
 
   return (
     <React.Fragment>
-      <SetupPageHeader pageIndex={3} />
+      <SetupPageHeader pageIndex={2} />
 
       <DataFetcher type="api" endpoint={ApiEndpoints.App.Root} loadingDisplay="spinner">
         {

@@ -33,7 +33,7 @@ export default function SetupPageHeader(props: SetupPageProps, _state: SetupPage
   const SetupSteps = [
     { title: "Create GitHub App", path: getSetupPath(ClientPages.SetupCreateApp) },
     { title: "View GitHub App", path: getSetupPath(ClientPages.App) },
-    { title: "Create Service Account", path: getSetupPath(ClientPages.SetupServiceAccount) },
+    // { title: "Create Service Account", path: getSetupPath(ClientPages.SetupServiceAccount) },
     { title: "Connect Repositories", path: getSetupPath(ClientPages.SetupRepos) },
   ];
 

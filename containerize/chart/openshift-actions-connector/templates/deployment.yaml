@@ -12,6 +12,7 @@ spec:
       labels:
         {{- toYaml .Values.deploymentLabels | nindent 8 }}
     spec:
+      serviceAccountName: {{ .Values.serviceAccountName }}
       containers:
         - name: {{ .Values.appName }}-server
           imagePullPolicy: Always

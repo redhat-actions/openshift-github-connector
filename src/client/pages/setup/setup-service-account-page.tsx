@@ -1,3 +1,4 @@
+/*
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -282,7 +283,7 @@ export default function SetupSAPage(): JSX.Element {
                             <FontAwesomeIcon icon="book-open" className="mr-2"/>
                             <ExternalLink
                               // eslint-disable-next-line max-len
-                              href="https://github.com/redhat-actions/oc-login/wiki/Using-a-Service-Account-for-GitHub-Actions#creating-the-service-account">
+                      href="https://github.com/redhat-actions/oc-login/wiki/Using-a-Service-Account-for-GitHub-Actions#creating-the-service-account">
                               About this script
                             </ExternalLink>
                           </li>
@@ -351,3 +352,7 @@ export default function SetupSAPage(): JSX.Element {
     </React.Fragment>
   );
 }
+
+*/
+
+export {};

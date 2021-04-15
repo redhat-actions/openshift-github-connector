@@ -1,3 +1,4 @@
+/*
 import express from "express";
 
 import ApiEndpoints from "../../common/api-endpoints";
@@ -74,32 +75,9 @@ router.route(ApiEndpoints.User.ServiceAccount.path)
     };
 
     return res.json(resBody);
-
-    /*
-    Log.info(`Set service account name to "${serviceAccountSecretStr.}"`);
-
-    const ns = KubeWrapper.instance.ns;
-
-    const exists = await KubeWrapper.instance.doesServiceAccountExist(serviceAccountName);
-    if (!exists) {
-      const errBody = {
-        serviceAccountName,
-        success: false,
-        title: `Service Account does not exist`,
-        message: `Service Account "${serviceAccountName}" does not exist in namespace "${ns}". `
-          + `Create the Service Account and try again.`,
-      };
-      return res.json(errBody);
-    }
-
-    await GitHubAppMemento.saveServiceAccount(req.sessionID, serviceAccountName);
-
-    const resBody: ApiResponses.ServiceAccountSecretTestResult = {
-      success: true,
-      serviceAccountName,
-      message: `Successfully created Service Account ${serviceAccountName} in ${ns}`,
-    };
-    */
-
   })
   .all(send405([ "GET", "POST" ]));
+
+*/
+
+export {};

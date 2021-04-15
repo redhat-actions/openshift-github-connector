@@ -16,7 +16,7 @@ const App = new UrlPath(Api, "/app");
 const Cluster = new UrlPath(Api, "/cluster");
 
 const User = new UrlPath(Api, "/user");
-const ServiceAccount = new UrlPath(User, "/serviceaccount");
+// const ServiceAccount = new UrlPath(User, "/serviceaccount");
 
 const Webhook = new UrlPath(Api, "/webhook");
 
@@ -33,7 +33,7 @@ const ApiEndpoints = {
   },
   User: {
     Root: User,
-    ServiceAccount,
+    // ServiceAccount,
   },
   App: {
     Root: App,

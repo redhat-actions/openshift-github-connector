@@ -7,7 +7,7 @@ import HomePage from "./home-page";
 import SelectReposPage from "./setup/select-repos-page";
 import * as SetupAppPages from "./setup/setup-gh-app-page";
 import SetupHomePage from "./setup/setup-home-page";
-import SetupSAPage from "./setup/setup-service-account-page";
+// import SetupSAPage from "./setup/setup-service-account-page";
 
 export class ClientPage extends UrlPath {
   constructor(
@@ -33,7 +33,7 @@ const SetupCreateApp = new ClientPage(Setup, "/create-app", SetupAppPages.Create
 const SetupCreatingApp = new ClientPage(Setup, "/creating-app", SetupAppPages.CreatingAppPage);
 // const InstallingApp = new ClientPage(Setup, "/installing-app", SetupAppPages.InstallingAppPage);
 const SetupInstalledApp = new ClientPage(Setup, "/installed-app", SetupAppPages.InstalledAppPage);
-const SetupServiceAccount = new ClientPage(Setup, "/service-account", SetupSAPage);
+// const SetupServiceAccount = new ClientPage(Setup, "/service-account", SetupSAPage);
 const SetupRepos = new ClientPage(Setup, "/select-repos", SelectReposPage);
 
 const App = new ClientPage(Home, "/app", GitHubAppPage);
@@ -48,7 +48,7 @@ const ClientPages = {
   // InstallingApp,
   SetupInstalledApp,
 
-  SetupServiceAccount,
+  // SetupServiceAccount,
   SetupRepos,
 
   App,

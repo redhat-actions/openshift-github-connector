@@ -95,7 +95,7 @@ export default function SetupHomePage() {
                 }
               </DataFetcher>
             </tr>
-            <tr>
+            {/* <tr>
               <td>Service Account Bound</td>
               <DataFetcher type="api" endpoint={ApiEndpoints.User.ServiceAccount} loadingDisplay={tdLoadingDisplay}>
                 {
@@ -110,7 +110,7 @@ export default function SetupHomePage() {
                   }
                 }
               </DataFetcher>
-            </tr>
+            </tr> */}
           </tbody>
         </Table>
       </div>

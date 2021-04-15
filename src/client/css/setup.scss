@@ -36,11 +36,14 @@ $header-top-height: 1rem;
     width: 100%;
 }
 
+// $setup-banner-color: #0c8552;
+$setup-banner-color: #1c343b;
+
 .setup-header-body {
     // top: $header-top-height;
     top: $header-top-height;
     // border-radius: 0 0 $card-border-radius $card-border-radius;
-    background-color: #1c343b;
+    background-color: $setup-banner-color;
 
     padding: 0.5rem 0;
 }
@@ -50,12 +53,15 @@ $header-top-height: 1rem;
 }
 
 .setup-step {
-    padding: 0.25rem 1rem;
+    flex: 1;
+    text-align: center;
+    margin: 0 3rem;
+
+    padding: 0.5rem 2rem;
+    border-radius: 0.5em;
 
     &.current {
-        background-color: white;
-        border: 1px solid white;
-        border-radius: 1em;
+        background-color: $light;
 
         & span {
             color: black;
@@ -63,15 +69,14 @@ $header-top-height: 1rem;
     }
 
     & span {
-        color: $fg-color;
+        color: $light;
         &:focus, &:hover {
             text-decoration: none;
         }
     }
 }
 
-$setup-green: rgb(19, 161, 19);
-
+// $setup-green: rgb(19, 161, 19);
 $circle-size: 2.5rem;
 $circle-font-size: 1rem;
 
@@ -87,18 +92,21 @@ $circle-font-size: 1rem;
     border-radius: 100%;
     font-size: $circle-font-size;
 
-    border-color: $setup-green;
-
-    color: white;
+    color: $light;
 
     // see SetupStepState
-    &.passed, &.current {
-        // color: black;
-        background-color: $setup-green;
-        border-color: $setup-green;
+    &.passed {
+        background-color: $green;
+        border-color: $green;
+    }
+
+    &.current {
+        background-color: $green;
+        border-color: $green;
     }
 
     &.todo {
         background-color: "";
+        border-color: $yellow;
     }
 }

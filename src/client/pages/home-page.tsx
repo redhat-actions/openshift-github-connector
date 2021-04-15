@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import ApiEndpoints from "../../common/api-endpoints";
 import DataFetcher from "../components/data-fetcher";
 import ClientPages from "./client-pages";
+import { getSetupPath } from "./setup/setup-header";
 
 export default function Homepage(): JSX.Element {
   return (
@@ -27,7 +28,7 @@ export default function Homepage(): JSX.Element {
         </ul>
 
         <div className="row justify-content-center">
-          <Link to={ClientPages.SetupCreateApp.path}>
+          <Link to={getSetupPath(ClientPages.SetupCreateApp)}>
             <Button className="btn-primary btn-lg d-flex align-items-center mt-3 px-5">
               <div className="font-weight-bold align-self-center" title="Get Started">
                 Get Started

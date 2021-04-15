@@ -5,16 +5,19 @@ type GitHubUserMemento = {
   userId: string;
   appId: string;
   installationId: string;
-
-  serviceAccount?: GitHubUserMemento.ServiceAccount;
+  // serviceAccount?: GitHubUserMemento.ServiceAccount;
 }
+
+// type GitHubUserOptions = Partial<{
+//   reposToManage: number[];
+// }>
 
 namespace GitHubUserMemento {
 
-  export type ServiceAccount = {
-    serviceAccountName: string;
-    serviceAccountToken: string;
-  };
+  // export type ServiceAccount = {
+  //   serviceAccountName: string;
+  //   serviceAccountToken: string;
+  // };
 
   const cache = new Map<string, GitHubUserMemento>();
 
@@ -42,9 +45,9 @@ namespace GitHubUserMemento {
     return secret.data;
   }
 
-  export async function addServiceAccount(userId: string, serviceAccount: GitHubUserMemento.ServiceAccount): Promise<void> {
-    await MementoUtil.patchSecret(getUserSecretName(userId), serviceAccount);
-  }
+  // export async function addServiceAccount(userId: string, serviceAccount: GitHubUserMemento.ServiceAccount): Promise<void> {
+    // await MementoUtil.patchSecret(getUserSecretName(userId), serviceAccount);
+  // }
 }
 
 export default GitHubUserMemento;

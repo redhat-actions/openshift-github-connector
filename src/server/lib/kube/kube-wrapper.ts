@@ -236,7 +236,9 @@ export default class KubeWrapper {
 		return {
 			name: cluster.name,
 			server: cluster.server,
-			user: user.name,
+			user: {
+				name: user.name
+			},
 		};
 	}
 
@@ -248,6 +250,7 @@ export default class KubeWrapper {
 		return this.config.makeApiClient(k8s.CoreV1Api);
 	}
 
+	/*
 	public async doesServiceAccountExist(serviceAccountName: string): Promise<boolean> {
 		const serviceAccountsRes = await this.coreClient.listNamespacedServiceAccount(this.namespace);
 		const serviceAccounts = serviceAccountsRes.body.items;
@@ -261,4 +264,5 @@ export default class KubeWrapper {
 
 		return exists;
 	}
+	*/
 }

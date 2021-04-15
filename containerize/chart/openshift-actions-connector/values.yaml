@@ -14,6 +14,19 @@ securityContext:
 
 clusterDomain: apps.member.crt-stage.com
 
+serviceAccountName: github-actions
+# A (non-cluster) rolebinding is created with this role, allowing the application pod to
+# modify resources in the namespace
+serviceAccountRole: edit
+
+################################################################################
+
+commonLabels:
+  app: openshift-actions-connector
+
+deploymentLabels:
+  app: openshift-actions-connector
+
 ################################################################################
 
 serverReplicaCount: 1
@@ -25,13 +38,9 @@ serverServiceName: actions-connector-server-svc
 serverPort: 3003
 serverPortName: server-port
 
-deploymentLabels:
-  app: openshift-actions-connector
-  # tier: server
-
 ################################################################################
 
-clientReplicaCount: 1
+# clientReplicaCount: 1
 
 # clientImage: quay.io/tetchell/openshift-actions-connector-client
 # clientTag: latest
@@ -39,7 +48,3 @@ clientReplicaCount: 1
 clientServiceName: actions-connector-client-svc
 clientPort: 3000
 clientPortName: client-port
-
-# clientLabels:
-  # app: openshift-actions-connector
-  # tier: client

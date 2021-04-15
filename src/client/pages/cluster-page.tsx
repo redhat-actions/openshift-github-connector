@@ -47,7 +47,7 @@ export default function ClusterPage(): JSX.Element {
                     </td>
                   </tr>
                 ))}
-                <DataFetcher type="api" endpoint={ApiEndpoints.User.ServiceAccount} loadingDisplay="none">{
+                {/* <DataFetcher type="api" endpoint={ApiEndpoints.User.ServiceAccount} loadingDisplay="none">{
                   (saData: ApiResponses.ServiceAccountState) => {
                     return (
                       <React.Fragment>
@@ -63,7 +63,7 @@ export default function ClusterPage(): JSX.Element {
                     );
                   }
                 }
-                </DataFetcher>
+                </DataFetcher> */}
               </tbody>
             </Table>
           );

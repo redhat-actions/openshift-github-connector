@@ -62,7 +62,10 @@ export namespace ApiResponses {
 
   export interface ClusterConfig {
     name: string;
-    user: string;
+    user: {
+      name: string;
+      // roles: string;
+    };
     server: string;
   }
 
@@ -74,16 +77,16 @@ export namespace ApiResponses {
 
   export type ClusterState = ClusterStateDisconnected | ClusterStateConnected;
 
-  export interface ServiceAccountStateSetup extends Result {
-    success: true;
-    serviceAccountName: string
-  }
+  // export interface ServiceAccountStateSetup extends Result {
+  //   success: true;
+  //   serviceAccountName: string
+  // }
 
-  export interface ServiceAccountStateNotSetup extends Result {
-    success: false;
-  }
+  // export interface ServiceAccountStateNotSetup extends Result {
+  //   success: false;
+  // }
 
-  export type ServiceAccountState = ServiceAccountStateSetup | ServiceAccountStateNotSetup;
+  // export type ServiceAccountState = ServiceAccountStateSetup | ServiceAccountStateNotSetup;
 }
 
 export default ApiResponses;
