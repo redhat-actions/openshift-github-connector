@@ -11,7 +11,9 @@ const PostCreateApp = new UrlPath(Setup, "/post-create-app");
 const PostInstallApp = new UrlPath(Setup, "/post-install-app");
 
 const App = new UrlPath(Api, "/app");
-// const AppRepos = new UrlPath(App, "/repos");
+const AppRepos = new UrlPath(App, "/repos");
+const RepoSecrets = new UrlPath(AppRepos, "/secrets");
+const RepoSecretDefaults = new UrlPath(RepoSecrets, "/defaults");
 
 const Cluster = new UrlPath(Api, "/cluster");
 
@@ -37,7 +39,11 @@ const ApiEndpoints = {
   },
   App: {
     Root: App,
-    // Repos: AppRepos,
+    Repos: {
+      Root: AppRepos,
+      Secrets: RepoSecrets,
+      RepoSecretDefaults,
+    },
   },
   Cluster: {
     Root: Cluster,

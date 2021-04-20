@@ -6,7 +6,7 @@ import classNames from "classnames";
 import AppPageCard from "../components/gh-app-page-card";
 import DataFetcher from "../components/data-fetcher";
 import ApiEndpoints from "../../common/api-endpoints";
-import FaBtnBody from "../components/fa-btn-body";
+import BtnBody from "../components/fa-btn-body";
 import ApiResponses from "../../common/api-responses";
 import ClientPages from "./client-pages";
 import getEndpointUrl from "../util/get-endpoint-url";
@@ -61,7 +61,7 @@ export default function GitHubAppPage() {
         return (
           <React.Fragment>
             {
-              isSetup ? <SetupPageHeader pageIndex={1}/> : <></>
+              isSetup ? <SetupPageHeader pageIndex={1} canProceed={true}/> : <></>
             }
             <h2 className="d-flex align-items-center font-weight-bold my-4">
               <a className="text-white" href={data.appUrls.app}>{data.appConfig.name}</a>
@@ -72,7 +72,7 @@ export default function GitHubAppPage() {
                   window.location.reload();
                 }
               }>
-                <FaBtnBody icon="times" text="Unbind"/>
+                <BtnBody icon="times" text="Unbind"/>
               </Button>
               {/* <button className="btn btn-lg btn-light" title="Refresh" onClick={() => window.location.reload()}>
                 <FaBtnBody icon="sync-alt" text="Refresh"/>
@@ -81,14 +81,14 @@ export default function GitHubAppPage() {
             <AppPageCard header="Permissions" buttons={[{
               href: "https://docs.github.com/en/developers/apps/creating-a-github-app-using-url-parameters#github-app-permissions",
               icon: DOCS_ICON,
-              label: "Docs",
-              tooltip: "GitHub Documentation",
+              text: "Docs",
+              title: "GitHub Documentation",
               mr: true,
             }, {
               href: data.appUrls.permissions,
               icon: EDIT_ICON,
-              label: "Edit",
-              tooltip: "Edit Permissions",
+              text: "Edit",
+              title: "Edit Permissions",
             }]}>
               <ul>
                 {Object.entries(data.appConfig.permissions).map(([ key, value ]) => {
@@ -101,14 +101,14 @@ export default function GitHubAppPage() {
             <AppPageCard header="Event Subscriptions" buttons={[{
               href: "https://docs.github.com/en/developers/apps/creating-a-github-app-using-url-parameters#github-app-webhook-events",
               icon: DOCS_ICON,
-              label: "Docs",
-              tooltip: "GitHub Documentation",
+              text: "Docs",
+              title: "GitHub Documentation",
               mr: true,
             }, {
               href: data.appUrls.permissions,
               icon: EDIT_ICON,
-              label: "Edit",
-              tooltip: "Edit Events",
+              text: "Edit",
+              title: "Edit Events",
             }]}>
               <ul>
                 {data.appConfig.events.map((event) => <li key={event}>{event}</li>)}
@@ -117,11 +117,11 @@ export default function GitHubAppPage() {
             <AppPageCard header="Repositories" buttons={[{
               href: data.appUrls.installationSettings,
               icon: EDIT_ICON,
-              label: "Edit Installation",
-              tooltip: "Edit Installation",
+              text: "Edit Installation",
+              title: "Edit Installation",
             }]}>
               <ul>
-                {data.repositories.map((repo: any) => {
+                {data.repos.map((repo: any) => {
                   return (
                     <li key={repo.full_name}>
                       <a href={repo.html_url}>
@@ -135,8 +135,8 @@ export default function GitHubAppPage() {
             <AppPageCard header="Installations" buttons={[{
               href: data.appUrls.install,
               icon: EDIT_ICON,
-              label: "Install or Uninstall",
-              tooltip: "Install or Uninstall",
+              text: "Install or Uninstall",
+              title: "Install or Uninstall",
             }]}>
               <ul>
                 {data.installations.map((installation: any) => {

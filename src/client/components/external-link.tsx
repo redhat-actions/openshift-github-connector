@@ -1,24 +1,19 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
-export function ExternalLink(
-  { href, children, showExternalLinkIcon }:
-  { href: string, children: React.ReactNode, showExternalLinkIcon?: boolean }
-) {
+export function ExternalLink({
+  href, children, className, title,
+}: {
+    href: string,
+    children: React.ReactNode,
+    className?: string,
+    title?: string,
+  }) {
 
   return (
-    <a href={href} title={href}
+    <a href={href}
       target="_blank" rel="noopener noreferrer"
-      className="font-weight-bold"
+      className={"external-link font-weight-bold " + (className ?? "")}
+      title={title != null ? title : href}
     >
       {children}
-
-      {showExternalLinkIcon
-        ? <FontAwesomeIcon
-          fixedWidth
-          icon="external-link-alt"
-          className="mx-1"
-        /> : ""
-      }
     </a>
   );
 }

@@ -2,7 +2,7 @@ import { App } from "@octokit/app";
 import { Octokit } from "@octokit/core";
 
 import Log from "../../logger";
-import { GitHubAppUrls, GitHubAppConfig } from "../../../common/types/github-app";
+import { GitHubAppUrls, GitHubAppConfig, GitHubRepo } from "../../../common/types/github-types";
 import GitHubAppMemento from "../memento/app-memento";
 import GitHubUserMemento from "../memento/user-memento";
 
@@ -29,7 +29,7 @@ class GitHubApp {
         };
     }
 
-    public static async getAppForSession(userId: string): Promise<GitHubApp | undefined> {
+    public static async getAppForUser(userId: string): Promise<GitHubApp | undefined> {
         const userMemento = await GitHubUserMemento.loadUser(userId);
         if (!userMemento) {
             Log.info(`No user data for session`);
@@ -57,6 +57,7 @@ class GitHubApp {
             webhooks: {
                 secret: memento.webhook_secret,
             },
+            log: Log
         });
     }
 
@@ -83,6 +84,15 @@ class GitHubApp {
     }
 
     public static async delete() {
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public async getAccessibleRepos(): Promise<GitHubRepo[]> {
+        const repositoriesReq = this.install.octokit.request("GET /installation/repositories");
+        const repositories: GitHubRepo[] = (await repositoriesReq).data.repositories;
+
+        return repositories;
     }
 }
 

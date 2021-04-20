@@ -3,7 +3,7 @@ import { Button, Table } from "react-bootstrap";
 import ApiEndpoints from "../../common/api-endpoints";
 import ApiResponses from "../../common/api-responses";
 import DataFetcher from "../components/data-fetcher";
-import FaBtnBody from "../components/fa-btn-body";
+import BtnBody from "../components/fa-btn-body";
 import getEndpointUrl from "../util/get-endpoint-url";
 
 export default function ClusterPage(): JSX.Element {
@@ -16,7 +16,7 @@ export default function ClusterPage(): JSX.Element {
           await fetch(getEndpointUrl(ApiEndpoints.Cluster.Root.path), { method: "PUT" });
           window.location.reload();
         }}>
-          <FaBtnBody icon="sync-alt" text="Refresh" />
+          <BtnBody icon="sync-alt" text="Refresh" />
         </Button>
       </h1>
       <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root} loadingDisplay="spinner">{
@@ -35,7 +35,7 @@ export default function ClusterPage(): JSX.Element {
                 {Object.entries({
                   "Cluster Name": data.clusterInfo.name,
                   "Api Server": <a href={data.clusterInfo.server}>{data.clusterInfo.server}</a>,
-                  User: data.clusterInfo.user,
+                  User: data.clusterInfo.user.name,
                   Namespace: data.namespace,
                 }).map(([ label, value ], i) => (
                   <tr key={i}>

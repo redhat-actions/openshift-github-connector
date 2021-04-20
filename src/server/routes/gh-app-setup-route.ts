@@ -9,7 +9,7 @@ import Log from "../logger";
 import { sendSuccessStatusJSON, throwIfError } from "../util/server-util";
 import ApiRequests from "../../common/api-requests";
 import GitHubUserMemento from "../lib/memento/user-memento";
-import { GitHubOAuthResponse, GitHubUserData } from "../../common/types/github-app";
+import { GitHubOAuthResponse, GitHubUser } from "../../common/types/github-types";
 import HttpConstants from "../../common/http-constants";
 import ApiResponses from "../../common/api-responses";
 
@@ -124,8 +124,6 @@ router.route(ApiEndpoints.Setup.CreatingApp.path)
       return sendError(res, 400, `State parameter "${state}" is invalid or expired`);
     }
 
-    // creationsInProgress.delete(req.sessionID);
-
     if (isExpired(stateLookup.iat, STATE_TIME_LIMIT_MS)) {
       Log.info(`State "${state}" is expired`);
       statesInProgress.delete(req.sessionID);
@@ -168,7 +166,7 @@ router.route(ApiEndpoints.Setup.CreatingApp.path)
 
 async function exchangeCodeForUserData(
   client_id: string, client_secret: string, oauthCode: string
-): Promise<GitHubUserData> {
+): Promise<GitHubUser> {
   const githubReqBody = JSON.stringify({
     client_id,
     client_secret,
@@ -198,7 +196,7 @@ async function exchangeCodeForUserData(
     throw new Error(err.message);
   }
 
-  const userData: GitHubUserData = await userDataRes.json();
+  const userData: GitHubUser = await userDataRes.json();
   return userData;
 }
 
@@ -290,6 +288,7 @@ router.route(ApiEndpoints.Setup.PostInstallApp.path)
       appId,
       installationId,
       userId,
+      userName: userData.login,
     });
 
     return sendSuccessStatusJSON(res, 201);

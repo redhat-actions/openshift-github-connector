@@ -15,10 +15,10 @@ type RawServiceAccountToken = {
 }
 
 export type ServiceAccountToken = {
-	token: string;
 	namespace: string;
-	secretName: string;
 	serviceAccountName: string;
+	token: string;
+	tokenSecretName: string;
 }
 
 export default class KubeWrapper {
@@ -127,12 +127,13 @@ export default class KubeWrapper {
 
 		return {
 			namespace: decodedToken["kubernetes.io/serviceaccount/namespace"],
-			secretName: decodedToken["kubernetes.io/serviceaccount/secret.name"],
+			tokenSecretName: decodedToken["kubernetes.io/serviceaccount/secret.name"],
 			serviceAccountName: decodedToken["kubernetes.io/serviceaccount/service-account.name"],
 			token: serviceAccountToken,
 		};
 	}
 
+	/*
 	public static async loadForServiceAccount(serviceAccountTokenSecretStr: string): Promise<ServiceAccountToken> {
 		Log.info(`Creating kube context from service account token`);
 		// will throw if invalid
@@ -161,6 +162,7 @@ export default class KubeWrapper {
 
 		return decodedToken;
 	}
+	*/
 
 	public static async initialize(): Promise <KubeWrapper> {
 		Log.info(`Configuring kube client...`);
@@ -198,8 +200,6 @@ export default class KubeWrapper {
 		const currentNamespace = currentContext?.namespace;
 		Log.info(`Current namespace is ${currentNamespace}`);
 
-		KubeWrapper
-
 		if (!currentNamespace) {
 			const nsErr = new Error(
 				`Current context is not namespaced. ` +
@@ -216,7 +216,7 @@ export default class KubeWrapper {
 		return this._instance;
 	}
 
-	private static async testConfig(tmpConfig: k8s.KubeConfig): Promise <void> {
+	private static async testConfig(tmpConfig: k8s.KubeConfig): Promise<void> {
 		Log.info(`Testing kubeconfig for server ${tmpConfig.clusters[0].name}`)
 		const tmpClient = tmpConfig.makeApiClient(k8s.CoreV1Api);
 		await tmpClient.getAPIResources();
@@ -237,9 +237,31 @@ export default class KubeWrapper {
 			name: cluster.name,
 			server: cluster.server,
 			user: {
-				name: user.name
+				name: user.name,
 			},
 		};
+	}
+
+	public getPodSAToken(): ServiceAccountToken | undefined {
+		const cluster = this.config.getCurrentCluster();
+		if (!cluster) {
+			Log.error(`Failed to get cluster info, current cluster is undefined`);
+			return undefined;
+		}
+
+		const user = this.config.getCurrentUser();
+		if (!user) {
+			Log.error(`Failed to get current user, current user is undefined`);
+			return undefined;
+		}
+
+		if (!user.token) {
+			Log.error(`Failed to get current user's token, token is undefined or empty`);
+			return undefined;
+		}
+
+		const decodedToken = KubeWrapper.decodeServiceAccountToken(user.token);
+		return decodedToken;
 	}
 
 	public get ns() {
@@ -250,7 +272,6 @@ export default class KubeWrapper {
 		return this.config.makeApiClient(k8s.CoreV1Api);
 	}
 
-	/*
 	public async doesServiceAccountExist(serviceAccountName: string): Promise<boolean> {
 		const serviceAccountsRes = await this.coreClient.listNamespacedServiceAccount(this.namespace);
 		const serviceAccounts = serviceAccountsRes.body.items;
@@ -264,5 +285,4 @@ export default class KubeWrapper {
 
 		return exists;
 	}
-	*/
 }

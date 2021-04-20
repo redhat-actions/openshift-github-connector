@@ -6,8 +6,7 @@ import { Response } from "node-fetch";
 import Log from "../logger";
 import ApiResponses from "../../common/api-responses";
 import HttpConstants from "../../common/http-constants";
-
-export type Stringable = { toString(): string };
+import { Stringable } from "../../common/common-util";
 
 /*
 export function getFrontendUrl(req: express.Request): string {
@@ -199,4 +198,56 @@ export function checkKeys<
     return false;
   }
   return true;
+}
+
+/**
+ * @returns an error message describing why the name is invalid, or undefined if the name is valid.
+ */
+export function checkInvalidK8sName(name: string): string | undefined {
+  // https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#dns-subdomain-names
+
+  let subMsg;
+  if (name.length > 253) {
+    subMsg = `Too long.`;
+  }
+  else if (!name.match(/^[a-z0-9-_]*$/)) {
+    subMsg = `Can only contain lowercase letters, digits, '-' and '_'`;
+  }
+  else if (!name.match(/^[a-z0-9].*[a-z0-9]$/)) {
+    subMsg = `Must start and end with a lowercase letter or digit.`;
+  }
+
+  if (subMsg) {
+    return `Invalid resource name: ${subMsg}`;
+  }
+  return undefined;
+}
+
+/**
+ * Do our best to transform the given string into a valid k8s resource name.
+ * Note that since it strips characters, names that were unique before may not be unique after this change.
+ */
+export function toValidK8sName(rawName: string): string {
+  // https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#dns-subdomain-names
+
+  let cookedName = rawName;
+  const maxLength = 253;
+  if (rawName.length > maxLength) {
+    cookedName = rawName.substring(0, maxLength - 1);
+  }
+
+  cookedName = cookedName.replace(/[\s/.]/g, "-");
+  cookedName = cookedName.toLowerCase();
+  cookedName = cookedName.replace(/[^a-z0-9-_]/g, "");
+
+  const alphaNumRx = /[a-z0-9]/;
+
+  if (!alphaNumRx.test(cookedName[0])) {
+    cookedName = "0" + cookedName;
+  }
+  if (!alphaNumRx.test(cookedName[cookedName.length - 1])) {
+    cookedName += "0";
+  }
+
+  return cookedName;
 }

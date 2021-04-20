@@ -12,6 +12,7 @@ securityContext:
       drop:
         - ALL
 
+# https://github.com/helm/helm/issues/2055
 clusterDomain: apps.member.crt-stage.com
 
 serviceAccountName: github-actions

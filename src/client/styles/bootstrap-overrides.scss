@@ -1,0 +1,74 @@
+@use "~bootstrap/scss/bootstrap" as bs;
+@use "./constants" as c;
+
+$-card-border-radius: 0.5rem;
+$card-box-shadow: 0.1rem 0.1rem 0.1rem black;
+
+.card {
+  background-color: c.$rh-gray-darker;
+  color: c.$fg-color;
+  border-radius: $-card-border-radius;
+  box-shadow: $card-box-shadow;
+  margin-bottom: 1.5em;
+}
+
+$card-border: 2px solid c.$rh-gray;
+$card-limit-padding: 1rem 1.25rem;
+
+.card-title {
+  border-bottom: $card-border;
+  padding: $card-limit-padding;
+
+  display: flex;
+  align-items: center;
+
+  margin: 0;
+  font-weight: bold;
+
+  & h4, & h5 {
+    margin: 0;
+    font-weight: bold;
+  }
+}
+
+.card-footer {
+  border-top: $card-border;
+  padding: $card-limit-padding;
+  margin: 0;
+}
+
+
+.form-control {
+  &.error, &.error:focus, &.warning, &.warning:focus {
+    border-width: 3px;
+    border-style: solid;
+    box-shadow: none;
+
+    &.error {
+      border-color: bs.$danger;
+    }
+    &.warning {
+      border-color: bs.$warning;
+    }
+  }
+}
+
+.form-check-input {
+  // transform: scale(1.5);
+  cursor: pointer;
+}
+
+.jumbotron {
+  border-radius: $-card-border-radius;
+  box-shadow: $card-box-shadow;
+
+  color: black;
+
+  & > a {
+    color: black;
+  }
+}
+
+.table thead tr td {
+  border-top: none;
+}

@@ -6,8 +6,7 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import { fab } from "@fortawesome/free-brands-svg-icons";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 
-import "bootstrap/dist/css/bootstrap.min.css";
-import "./css/index.scss";
+import "./styles/index.scss";
 
 import ClientPages from "./pages/client-pages";
 import NotFound from "./pages/errors/404";

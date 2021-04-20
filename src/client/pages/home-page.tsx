@@ -3,9 +3,9 @@ import React from "react";
 import { Button, Jumbotron } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import ApiEndpoints from "../../common/api-endpoints";
+import ApiResponses from "../../common/api-responses";
 import DataFetcher from "../components/data-fetcher";
-import ClientPages from "./client-pages";
-import { getSetupPath } from "./setup/setup-header";
+import { getSetupSteps } from "./setup/setup-header";
 
 export default function Homepage(): JSX.Element {
   return (
@@ -28,7 +28,7 @@ export default function Homepage(): JSX.Element {
         </ul>
 
         <div className="row justify-content-center">
-          <Link to={getSetupPath(ClientPages.SetupCreateApp)}>
+          <Link to={getSetupSteps()[0].path}>
             <Button className="btn-primary btn-lg d-flex align-items-center mt-3 px-5">
               <div className="font-weight-bold align-self-center" title="Get Started">
                 Get Started
@@ -42,10 +42,10 @@ export default function Homepage(): JSX.Element {
           <div>
             Backend status:&nbsp;
             <DataFetcher type="api" endpoint={ApiEndpoints.Health}>
-              {(data: { status: string }) => (
+              {(data: ApiResponses.Result) => (
                 <React.Fragment>
-                  <span className={data.status === "OK" ? "text-success" : "text-danger"}>
-                    {data.status}
+                  <span className={data.message === "OK" ? "text-success" : "text-danger"}>
+                    {data.message}
                   </span>
                 </React.Fragment>
               )}

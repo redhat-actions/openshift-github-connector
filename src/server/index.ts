@@ -11,6 +11,7 @@ import Log, { getLoggingMiddleware } from "./logger";
 import { startup } from "./startup";
 import ApiEndpoints from "../common/api-endpoints";
 import { getAllowedOrigins, getFriendlyHTTPError, isInK8s } from "./util/server-util";
+import ApiResponses from "../common/api-responses";
 
 const app = express();
 
@@ -52,8 +53,8 @@ app.route(ApiEndpoints.Api.path)
   })
   .all(send405([ "GET" ]));
 
-const sendHealth = (res: express.Response): void => {
-  res.json({ status: "OK" });
+const sendHealth = (res: express.Response<ApiResponses.Result>): void => {
+  res.json({ success: true, message: "OK" });
 };
 
 app.route("/health")

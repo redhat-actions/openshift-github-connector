@@ -1,6 +1,7 @@
 import express from "express";
 import { getReasonPhrase, StatusCodes } from "http-status-codes";
 import ApiResponses from "../../common/api-responses";
+import HttpConstants from "../../common/http-constants";
 import Log from "../logger";
 
 export function sendError(
@@ -25,7 +26,7 @@ export function sendError(
   res.header("Content-Type", "application/problem+json").json(resBody);
 }
 
-export const send405 = (allowed: string[]) => (
+export const send405 = (allowed: HttpConstants.Methods[]) => (
   (req: express.Request, res: express.Response, _next: express.NextFunction): void => {
     const allowedStr = allowed.join(", ").toUpperCase();
 

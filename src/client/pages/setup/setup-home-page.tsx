@@ -9,14 +9,12 @@ import ApiResponses from "../../../common/api-responses";
 import DataFetcher from "../../components/data-fetcher";
 import ClientPages, { ClientPage } from "../client-pages";
 
-import "../../css/setup.scss";
-
 function getStatusCells(success: boolean, btnLabels: {
   failure: string,
-  success: string
+  success: string,
 }, btnLinks: {
   failure: ClientPage,
-  success: ClientPage
+  success: ClientPage,
 }) {
 
   const statusIcon = success

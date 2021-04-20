@@ -1,0 +1,178 @@
+@use "~bootstrap/scss/bootstrap" as bs;
+@use "./constants" as c;
+@use "./bootstrap-overrides";
+@use "./setup";
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+
+  color: c.$fg-color;
+  background-color: c.$bg-color;
+
+  line-height: 1.5em;
+}
+
+.navbar {
+  color: white;
+  background-color: c.$rh-gray-darkest;
+
+  height: c.$navbar-height;
+}
+
+.navbar img, .navbar i {
+  height: calc(#{c.$navbar-height} * 0.6);
+  font-size: calc(#{c.$navbar-height} * 0.6);
+}
+
+main {
+  padding: c.$main-vertical-padding 0;
+  min-width: c.$breakpoint-sm;
+  width: 80%;
+  max-width: c.$breakpoint-lg;
+}
+
+a {
+  color: #8df;
+  &:focus, &:hover {
+    color: white;
+  }
+}
+
+.btn {
+  max-height: 3em;
+
+  & a {
+    color: bs.$light;
+  }
+
+  &.btn-light, &.btn-outline-light {
+    &:hover a {
+      text-decoration: none;
+      color: bs.$dark;
+    }
+  }
+
+  &.btn-lg {
+    font-weight: bold;
+  }
+}
+
+.btn:disabled, button:disabled, [type="button"]:disabled {
+  cursor: not-allowed;
+}
+
+h1 h2 h3 h4 h5 {
+  font-weight: bold;
+}
+
+.text-black {
+  color: black;
+}
+
+.text-white {
+  color: white;
+}
+
+.b {
+  font-weight: bold;
+}
+
+dl, ol, ul {
+  padding-inline-start: 1em;
+}
+
+li {
+  line-height: 1.75em;
+}
+
+.w-66 {
+  width: 66%;
+}
+
+.copy-btn {
+  min-width: 12ch;
+}
+
+.no-bullets {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.bullets-disc {
+  list-style-type: disc;
+}
+
+p.error, span.error {
+  color: bs.$danger;
+}
+
+code, pre {
+  &:not(.syntax-highlighted) {
+    background-color: #111;
+    color: white;
+    border-radius: 0.33em;
+    padding: 0.33em;
+  }
+}
+
+pre {
+  margin: 1em 0;
+  padding: 1.5em;
+}
+
+input, .clickable {
+
+  &:hover, &:focus {
+    cursor: pointer;
+    text-decoration: underline;
+  }
+}
+
+@mixin font-lg {
+  font-size: 1.25em;
+}
+
+.font-lg {
+  @include font-lg;
+}
+
+@mixin font-md {
+  font-size: 1.1em;
+}
+
+.font-md {
+  @include font-md;
+}
+
+.repo-secrets-summary {
+  @include font-lg;
+  margin-bottom: 0;
+  // font-weight: bold;
+}
+
+.card-title {
+  min-height: 4em;
+}
+
+input[type=checkbox] {
+  // transform: scale(1.5);
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-right: 1em;
+}
+
+label {
+  margin: 0;
+}
+
+.card {
+  & .bg-darker {
+    background-color: c.$bg-color;
+  }
+
+  & .bg-lighter {
+    background-color: c.$rh-gray-dark;
+  }
+}

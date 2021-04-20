@@ -2,39 +2,70 @@ import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import classNames from "classnames";
+import { Spinner } from "react-bootstrap";
+import { Severity } from "../../common/common-util";
 
-type BannerProps = {
-  display: boolean,
-  severity: "info" | "warn" | "error",
-  children: string | React.ReactNode
-} & React.HTMLAttributes<HTMLDivElement>;
+namespace Banner {
+  export type Props = {
+    display: boolean,
+    severity?: Severity,
+    loading?: boolean,
+    title?: React.ReactNode,
+    children?: React.ReactNode,
+  } & React.HTMLAttributes<HTMLDivElement>;
+}
 
-export default function Banner(props: BannerProps): JSX.Element {
-  const divProps: Partial<BannerProps> = { ...props };
+export function Banner(props: Banner.Props): JSX.Element {
+  const divProps: Partial<Banner.Props> = { ...props };
   // delete divProps.message;
   delete divProps.display;
   delete divProps.severity;
+  delete divProps.loading;
+  delete divProps.title;
 
-  let icon: IconProp;
-  if (props.severity === "error") {
+  let icon: IconProp | undefined;
+  if (props.severity === "danger") {
     icon = "times-circle";
   }
-  else if (props.severity === "warn") {
+  else if (props.severity === "warning") {
     icon = "exclamation-triangle";
   }
-  else {
+  else if (props.severity === "info") {
     icon = "info-circle";
+  }
+  else if (props.severity === "success") {
+    icon = "check-circle";
   }
 
   return (
     <div {...divProps} className={classNames(
-      "banner py-2 px-3 my-3 rounded align-items-center", props.severity,
-      { "d-flex": props.display, "d-none": !props.display }
+      "banner rounded p-3",
+      "bg-" + props.severity,
+      "text-" + (props.severity === "warning" ? "black" : "white"),
+      { "d-none": !props.display }
     )}>
-      <div>
-        <FontAwesomeIcon icon={icon} className="fa-lg mr-3" />
+      <div className={classNames(
+        "banner-title flex-grow-1 d-flex align-items-center",
+      )}>
+        <div>
+          {icon != null
+            ? <FontAwesomeIcon icon={icon} className="fa-lg mr-3" />
+            : ("")
+          }
+        </div>
+        <div className="flex-grow-1">
+          {props.title}
+        </div>
+        <div className="ml-auto">
+          {props.loading
+            ? (<Spinner animation="border" style={{ height: "1.5em", width: "1.5em" }}/>)
+            : ("")
+          }
+        </div>
       </div>
       {props.children}
     </div>
   );
 }
+
+export default Banner;

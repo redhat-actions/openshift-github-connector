@@ -1,16 +1,19 @@
-import { components } from "@octokit/openapi-types/dist-types/index";
-
+import { Severity } from "./common-util";
 import {
   GitHubAppUrls,
   GitHubAppConfig,
-} from "./types/github-app";
+  GitHubAppInstallation,
+  GitHubRepo,
+  GitHubActionsSecret,
+  GitHubRepoId,
+} from "./types/github-types";
 
 export namespace ApiResponses {
 
-  export type Result = {
+  export interface Result {
     success: boolean,
-    message: string
-  };
+    message: string,
+  }
 
   // https://tools.ietf.org/html/rfc7807#section-3.1
   // but 'message' instead of 'detail'
@@ -29,50 +32,94 @@ export namespace ApiResponses {
   // }
 
   export interface CreatingAppResponse extends Result {
-    appInstallUrl: string;
+    appInstallUrl: string,
   }
 
-  export interface GitHubAppMissingState {
-    app: false;
+  export interface GitHubAppMissing {
+    app: false,
   }
 
-  export interface GitHubAppReadyState {
-    app: true;
+  export interface GitHubAppReady {
+    app: true,
     appConfig: GitHubAppConfig,
     appUrls: GitHubAppUrls,
-    installations: components["schemas"]["installation"][],
-    repositories: components["schemas"]["repository"][],
+    installations: GitHubAppInstallation[],
+    repos: GitHubRepo[],
   }
 
-  export type GitHubAppState = GitHubAppMissingState | GitHubAppReadyState;
+  export type GitHubAppState = GitHubAppMissing | GitHubAppReady;
 
-  /*
-  export type GitHubAppRepos = {
-    app: true;
-    repos: components["schemas"]["repository"][]
-  };
+  export interface GitHubAppRepos {
+    app: true,
+    repos: GitHubRepo[],
+  }
 
-  export type GitHubAppReposState = GitHubAppMissingState | GitHubAppRepos;
-  */
+  export type GitHubAppReposState = GitHubAppMissing | GitHubAppRepos;
+
+  export interface DefaultSecrets {
+    count: number,
+    defaultSecrets: {
+      clusterServerUrl: string,
+      token: string,
+    },
+  }
+
+  export interface RepoWithSecrets {
+    repo: GitHubRepo,
+    secrets: GitHubActionsSecret[],
+  }
+
+  export interface ReposWithSecrets {
+    // orgs: [{
+    //   org: GitHubOrg;
+    //   secrets: GitHubActionsOrgSecret[];
+    // }],
+    defaultSecretNames: DefaultSecrets,
+    repos: RepoWithSecrets[],
+    urls: GitHubAppUrls,
+  }
+
+  interface SingleRepoSecretCreationResult {
+    success: boolean,
+    repo: GitHubRepoId,
+    actionsSecretName?: string,
+    saTokenSecretName?: string,
+  }
+
+  export interface RepoSecretCreationSuccess extends SingleRepoSecretCreationResult {
+    success: true,
+    actionsSecretName: string,
+  }
+
+  export interface RepoSecretCreationFailure extends SingleRepoSecretCreationResult {
+    success: false,
+    err: string,
+  }
+
+  export interface RepoSecretsCreationSummary extends Result {
+    successes?: RepoSecretCreationSuccess[],
+    failures?: RepoSecretCreationFailure[],
+    severity: Severity,
+  }
 
   export interface ClusterStateDisconnected {
-    connected: false;
-    error: string;
+    connected: false,
+    error: string,
   }
 
   export interface ClusterConfig {
-    name: string;
+    name: string,
     user: {
-      name: string;
+      name: string,
       // roles: string;
-    };
-    server: string;
+    },
+    server: string,
   }
 
   export interface ClusterStateConnected {
-    connected: true;
-    clusterInfo: ClusterConfig;
-    namespace: string;
+    connected: true,
+    clusterInfo: ClusterConfig,
+    namespace: string,
   }
 
   export type ClusterState = ClusterStateDisconnected | ClusterStateConnected;

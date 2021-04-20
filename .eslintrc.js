@@ -26,24 +26,23 @@ module.exports = {
   },
   rules: {
     "@typescript-eslint/no-explicit-any": 0,
-    "padded-blocks": [ 0, ],
-    "lines-between-class-members": 0,
     "class-methods-use-this": 0,
     "no-use-before-define": 0,
-    "arrow-body-style": 0,
 
     "@typescript-eslint/no-unused-vars": [ 2, { argsIgnorePattern: "(^_|req|res|next)" } ],
-    "@typescript-eslint/no-inferrable-types": [ 2, { ignoreParameters: true }],
-    "@typescript-eslint/no-use-before-define": 2,
-    "@typescript-eslint/explicit-function-return-type": [ 2, { allowExpressions: true }],
-    "@typescript-eslint/no-floating-promises": [ 2 ],
-    "@typescript-eslint/strict-boolean-expressions": [ 2,
-      { allowNumber: false, allowAny: true, allowNullableBoolean: true, allowNullableString: true }
+    "@typescript-eslint/member-delimiter-style": [ 2, {
+        multiline: {
+          delimiter: "comma",
+        },
+        singleline: {
+          delimiter: "comma",
+        },
+      }
     ],
 
     "indent": [ 2, 2 ],
-    "max-len": [ 2, 120, { ignoreUrls: true } ],
-    "camelcase": [ 2, { allow: [ "client_id", "client_secret", "webhook_secret" ]}],
+    "max-len": [ 2, 120, 2, { ignoreUrls: true } ],
+    "camelcase": [ 2, { allow: [ "client_id", "client_secret", "webhook_secret", "key_id" ] } ],
 
     "react/react-in-jsx-scope": [ 0 ],
   },
@@ -51,11 +50,13 @@ module.exports = {
     files: [ "*.tsx" ],
     rules: {
       "no-console": 0,
-      "max-len": [ 2, 150 ],
+      "max-len": [ 2, 150, 2 ],
+      "operator-linebreak": [ 0 ],
       "import/extensions": [ 2, { css: "always", json: "always", scss: "always" }],
       "@typescript-eslint/explicit-function-return-type": [ 0 ],
       "@typescript-eslint/explicit-module-boundary-types": [ 0 ],
       "@typescript-eslint/ban-types": [ 0 ],
+      "@typescript-eslint/no-use-before-define": [ 0 ]
     },
   }]
 }

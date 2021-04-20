@@ -1,4 +1,5 @@
-@import "./index";
+@use "~bootstrap/scss/bootstrap" as bs;
+@use "./constants" as c;
 
 .table td {
     vertical-align: middle;
@@ -14,22 +15,22 @@ td .btn {
 
 $header-top-height: 1rem;
 
-.setup-header {
-    margin-top: - $main-vertical-padding;
+#setup-header {
+    margin-top: - c.$main-vertical-padding;
     position: sticky;
     top: 0;
     z-index: 100;
     margin-bottom: 3rem;
 }
 
-.setup-header-wrapper {
+#setup-header-wrapper {
     position: relative;
 }
 
-.setup-header-background {
+#setup-header-background {
     position: absolute;
 
-    background-color: $bg-color;
+    background-color: c.$bg-color;
     top: 0;
     right: 0;
     height: 100%;
@@ -39,7 +40,7 @@ $header-top-height: 1rem;
 // $setup-banner-color: #0c8552;
 $setup-banner-color: #1c343b;
 
-.setup-header-body {
+#setup-header-body {
     // top: $header-top-height;
     top: $header-top-height;
     // border-radius: 0 0 $card-border-radius $card-border-radius;
@@ -48,7 +49,7 @@ $setup-banner-color: #1c343b;
     padding: 0.5rem 0;
 }
 
-.setup-header-buttons {
+#setup-header-buttons {
     padding: 1rem 1rem 0.5rem;
 }
 
@@ -61,15 +62,15 @@ $setup-banner-color: #1c343b;
     border-radius: 0.5em;
 
     &.current {
-        background-color: $light;
+        background-color: bs.$light;
 
         & span {
-            color: black;
+            color: bs.$dark;
         }
     }
 
     & span {
-        color: $light;
+        color: bs.$light;
         &:focus, &:hover {
             text-decoration: none;
         }
@@ -92,21 +93,21 @@ $circle-font-size: 1rem;
     border-radius: 100%;
     font-size: $circle-font-size;
 
-    color: $light;
+    color: bs.$light;
 
     // see SetupStepState
     &.passed {
-        background-color: $green;
-        border-color: $green;
+        background-color: bs.$green;
+        border-color: bs.$green;
     }
 
     &.current {
-        background-color: $green;
-        border-color: $green;
+        background-color: bs.$green;
+        border-color: bs.$green;
     }
 
     &.todo {
         background-color: "";
-        border-color: $yellow;
+        border-color: bs.$yellow;
     }
 }

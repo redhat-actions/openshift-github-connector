@@ -4,28 +4,28 @@ import UrlPath from "../../common/types/url-path";
 import { fetchJSON } from "../util/client-util";
 
 interface BaseDataFetcherProps<Data> {
-    children: (data: Data) => React.ReactNode;
-    type: "generic" | "api";
-    loadingDisplay?: "text" | "spinner" | "spinner-1em" | "none" | JSX.Element;
-    loadingStyle?: React.CSSProperties;
+    children: (data: Data) => React.ReactNode,
+    type: "generic" | "api",
+    loadingDisplay?: "text" | "spinner" | "spinner-1em" | "none" | JSX.Element,
+    loadingStyle?: React.CSSProperties,
 }
 
 interface GenericDataFetcherProps<Data> extends BaseDataFetcherProps<Data> {
-    type: "generic";
-    fetchData: () => Promise<Data>;
+    type: "generic",
+    fetchData: () => Promise<Data>,
 }
 
 interface ApiDataFetcherProps<Data> extends BaseDataFetcherProps<Data> {
-    type: "api";
-    endpoint: UrlPath;
+    type: "api",
+    endpoint: UrlPath,
 }
 
 type DataFetcherProps<Data> = GenericDataFetcherProps<Data> | ApiDataFetcherProps<Data>;
 
 interface DataFetcherState<Data> {
-    data: Data | undefined;
-    loaded: boolean;
-    loadingError: Error | undefined;
+    data: Data | undefined,
+    loaded: boolean,
+    loadingError: Error | undefined,
 }
 
 // Heavily inspired by https://github.com/argoproj/argo-ui/blob/master/src/components/data-loader.tsx

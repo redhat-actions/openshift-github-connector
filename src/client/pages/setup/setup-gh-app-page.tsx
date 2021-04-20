@@ -10,7 +10,7 @@ import getEndpointUrl from "../../util/get-endpoint-url";
 import ClientPages from "../client-pages";
 import DataFetcher from "../../components/data-fetcher";
 import { fetchJSON, getSearchParam } from "../../util/client-util";
-import SetupPageHeader, { getSetupPath, SETUP_QUERYPARAM } from "./setup-header";
+import SetupPageHeader, { SETUP_QUERYPARAM } from "./setup-header";
 import { ExternalLink } from "../../components/external-link";
 import ApiRequests from "../../../common/api-requests";
 import Banner from "../../components/banner";
@@ -43,7 +43,7 @@ export function getAppManifest(appUrl: string): Record<string, unknown> {
     callback_url: callbackUrl,
     redirect_url: redirectUrl,
     setup_url: setupUrl,
-    setup_on_update: true,
+    // setup_on_update: true,
     public: false,
     default_permissions: {
       actions: "write",
@@ -111,7 +111,7 @@ export function CreateAppPage(): JSX.Element {
 
         <div className="py-3"></div>
         <h4>
-          <ExternalLink href="https://github.com/settings/apps/" showExternalLinkIcon={true}>
+          <ExternalLink href="https://github.com/settings/apps/">
             View current apps
           </ExternalLink>
         </h4>
@@ -206,7 +206,7 @@ export function InstalledAppPage(): JSX.Element {
         {() => (
           <p>
             Installed app successfully. Redirecting to app page...
-            {history.replace(getSetupPath(ClientPages.App))}
+            {history.replace(ClientPages.App.withQuery({ [SETUP_QUERYPARAM]: "true" }))}
           </p>
         )}
       </DataFetcher>

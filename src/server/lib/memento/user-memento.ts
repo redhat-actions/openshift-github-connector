@@ -1,8 +1,9 @@
 import Log from "../../logger";
-import MementoUtil from "./memento-util";
+import SecretUtil from "../kube/secret-util";
 
 type GitHubUserMemento = {
   userId: string;
+  userName: string;
   appId: string;
   installationId: string;
   // serviceAccount?: GitHubUserMemento.ServiceAccount;
@@ -26,7 +27,7 @@ namespace GitHubUserMemento {
   }
 
   export async function saveUser(userMemento: GitHubUserMemento): Promise<void> {
-    await MementoUtil.createSecret(getUserSecretName(userMemento.userId), userMemento, { subtype: "user" });
+    await SecretUtil.createSecret(getUserSecretName(userMemento.userId), userMemento, { subtype: "user" });
     Log.debug(`Update user data in cache`);
     cache.set(userMemento.userId, userMemento);
   }
@@ -37,11 +38,13 @@ namespace GitHubUserMemento {
       return cache.get(userId);
     }
 
-    const secret = await MementoUtil.loadFromSecret<GitHubUserMemento>(getUserSecretName(userId));
+    const secret = await SecretUtil.loadFromSecret<GitHubUserMemento>(getUserSecretName(userId));
     if (!secret) {
       return undefined;
     }
 
+    const userMemento = secret.data;
+    cache.set(userMemento.userId, userMemento);
     return secret.data;
   }
 

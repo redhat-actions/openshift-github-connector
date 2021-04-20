@@ -1,5 +1,5 @@
 import Log from "../../logger";
-import MementoUtil from "./memento-util";
+import SecretUtil from "../kube/secret-util";
 
 type GitHubAppMemento = {
   appId: string,
@@ -30,7 +30,7 @@ namespace GitHubAppMemento {
   }
 
   export async function saveApp(appMemento: GitHubAppMemento): Promise<void> {
-    await MementoUtil.createSecret(getAppSecretName(appMemento.appId), appMemento, { subtype: "app" });
+    await SecretUtil.createSecret(getAppSecretName(appMemento.appId), appMemento, { subtype: "app" });
     cache.set(appMemento.appId, appMemento);
   }
 
@@ -39,12 +39,13 @@ namespace GitHubAppMemento {
 
     let appMemento = cache.get(appId);
     if (!appMemento) {
-      const secret = await MementoUtil.loadFromSecret<GitHubAppMemento>(secretName);
+      const secret = await SecretUtil.loadFromSecret<GitHubAppMemento>(secretName);
       if (!secret) {
         return undefined;
       }
 
       appMemento = secret.data;
+      cache.set(appId, appMemento);
     }
     else {
       Log.debug(`Loaded app data from cache`);
@@ -65,7 +66,7 @@ namespace GitHubAppMemento {
     }
 
     cache.delete(appId);
-    await MementoUtil.deleteSecret(getAppSecretName(appId), true);
+    await SecretUtil.deleteSecret(getAppSecretName(appId), true);
   }
 }
 

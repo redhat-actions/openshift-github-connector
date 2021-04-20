@@ -1,15 +1,15 @@
 import React from "react";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { Button } from "react-bootstrap";
-import FaBtnBody from "./fa-btn-body";
+import BtnBody from "./fa-btn-body";
 
 interface CopyBtnProps extends React.HTMLAttributes<HTMLButtonElement> {
-  copyLabel?: string;
-  textToCopy: string;
+  copyLabel?: string,
+  textToCopy: string,
 }
 
 interface CopyBtnState {
-  copyState: "success" | "failed" | undefined;
+  copyState: "success" | "failed" | undefined,
 }
 
 export default class CopyToClipboardBtn extends React.Component<CopyBtnProps, CopyBtnState> {
@@ -51,7 +51,7 @@ export default class CopyToClipboardBtn extends React.Component<CopyBtnProps, Co
         className="copy-btn"
         {...childBtnProps}
         onClick={() => this.onCopy()}>
-        <FaBtnBody icon={icon} text={renderText ? text : undefined} />
+        <BtnBody icon={icon} text={renderText ? text : undefined} />
       </Button>
     );
   }

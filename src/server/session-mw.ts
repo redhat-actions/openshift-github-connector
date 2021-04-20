@@ -10,11 +10,11 @@ const FileStore = sessionFileStore(session);
 declare module "express-session" {
   interface SessionData {
     setupData: {
-      githubAppId: string;
-    }
+      githubAppId: string,
+    },
     data: {
-      githubUserId: string;
-    }
+      githubUserId: string,
+    },
   }
 }
 

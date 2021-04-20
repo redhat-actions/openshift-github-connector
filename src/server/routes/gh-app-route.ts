@@ -1,33 +1,13 @@
 import express from "express";
 
-import GitHubApp from "../lib/gh-app/gh-app";
 import { send405, sendError } from "../util/send-error";
 import ApiEndpoints from "../../common/api-endpoints";
 import ApiResponses from "../../common/api-responses";
 import GitHubAppMemento from "../lib/memento/app-memento";
-import Log from "../logger";
+import { getAppForSession } from "../lib/gh-app/gh-util";
 import { sendSuccessStatusJSON } from "../util/server-util";
 
 const router = express.Router();
-
-async function getAppForSession(req: express.Request, res: express.Response): Promise<GitHubApp | undefined> {
-  if (!req.session.data) {
-    return undefined;
-  }
-
-  const app = await GitHubApp.getAppForSession(req.session.data.githubUserId);
-  if (app) {
-    return app;
-  }
-
-  Log.info("App is not initialized");
-  const resBody: ApiResponses.GitHubAppState = {
-    app: false,
-  };
-
-  res.json(resBody);
-  return undefined;
-}
 
 router.route(ApiEndpoints.App.Root.path)
   .get(async (req, res, next) => {
@@ -38,17 +18,16 @@ router.route(ApiEndpoints.App.Root.path)
 
     const octo = app.install.octokit;
     const installationsReq = octo.request("GET /app/installations");
-    const repositoriesReq = octo.request("GET /installation/repositories");
 
     const installations = (await installationsReq).data;
-    const repositories = (await repositoriesReq).data.repositories;
+    const repositories = await app.getAccessibleRepos();
 
     const resBody: ApiResponses.GitHubAppState = {
       app: true,
       appConfig: app.config,
       appUrls: app.urls,
       installations,
-      repositories,
+      repos: repositories,
     };
 
     res.json(resBody);
@@ -71,7 +50,7 @@ router.route(ApiEndpoints.App.Repos.path)
       return;
     }
 
-    const octo = app.installationOctokit;
+    const octo = app.install.octokit;
     const repositoriesReq = octo.request("GET /installation/repositories");
 
     const repos = (await repositoriesReq).data.repositories;
@@ -81,6 +60,6 @@ router.route(ApiEndpoints.App.Repos.path)
     res.json(resBody);
   })
   .all(send405([ "GET", "DELETE" ]));
-*/
+  */
 
 export default router;

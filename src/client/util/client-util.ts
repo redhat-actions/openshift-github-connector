@@ -1,4 +1,5 @@
 import ApiResponses from "../../common/api-responses";
+import { Stringable } from "../../common/common-util";
 import HttpConstants from "../../common/http-constants";
 
 export function getSearchParam(param: string): string | null {
@@ -49,10 +50,10 @@ export async function throwIfError(res: Response): Promise<void> {
 
 export async function fetchJSON<
   // eslint-disable-next-line @typescript-eslint/ban-types
-  Req extends {} = {},
+  Req extends {} = never,
   Res = void
 >(
-  method: HttpConstants.Methods, url: string, body?: Req, options: Omit<RequestInit, "body" | "method"> = {}
+  method: HttpConstants.Methods, url: Stringable, body?: Req, options: Omit<RequestInit, "body" | "method"> = {}
 ): Promise<{ statusCode: number } & Res> {
 
   const hasBody = body != null;
@@ -71,7 +72,7 @@ export async function fetchJSON<
     ...HttpConstants.getJSONContentHeaders(stringifiedBody),
   };
 
-  const res = await fetch(url, {
+  const res = await fetch(url.toString(), {
     ...options,
     method,
     headers,

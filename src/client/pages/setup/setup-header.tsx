@@ -1,45 +1,42 @@
 import classNames from "classnames";
-import { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, Card, Spinner } from "react-bootstrap";
+import { Button, Card } from "react-bootstrap";
 
-import "../../css/setup.scss";
-import ClientPages, { ClientPage } from "../client-pages";
-import FaBtnBody from "../../components/fa-btn-body";
-
-export const SETUP_QUERYPARAM = "setup";
+import ClientPages from "../client-pages";
+import BtnBody from "../../components/fa-btn-body";
 
 type SetupPageProps = {
-  pageIndex: number;
-  hideBtnBanner?: boolean;
+  pageIndex: number,
+  hideBtnBanner?: boolean,
   /**
    * has no effect if hideBtnBanner is "true"
    */
-  checkCanProceed?: () => Promise<boolean>;
+  canProceed?: boolean,
   // children: React.ReactNode
-};
-
-type SetupPageState = {
 };
 
 type SetupStepType = "passed" | "current" | "todo";
 
-export function getSetupPath(clientPage: ClientPage): string {
-  return clientPage.path + `?${SETUP_QUERYPARAM}=true`;
+export const SETUP_QUERYPARAM = "setup";
+const query = { [SETUP_QUERYPARAM]: "true" };
+
+export function getSetupSteps() {
+  return [
+    { title: "Create GitHub App", path: ClientPages.SetupCreateApp.withQuery(query) },
+    { title: "View GitHub App", path: ClientPages.App.withQuery(query) },
+    // { title: "Create Service Account", path: getSetupPath(ClientPages.SetupServiceAccount) },
+    { title: "Connect Repositories", path: ClientPages.SetupRepos.withQuery(query) },
+  ];
 }
 
-export default function SetupPageHeader(props: SetupPageProps, _state: SetupPageState): JSX.Element {
-  const SetupSteps = [
-    { title: "Create GitHub App", path: getSetupPath(ClientPages.SetupCreateApp) },
-    { title: "View GitHub App", path: getSetupPath(ClientPages.App) },
-    // { title: "Create Service Account", path: getSetupPath(ClientPages.SetupServiceAccount) },
-    { title: "Connect Repositories", path: getSetupPath(ClientPages.SetupRepos) },
-  ];
+export default function SetupPageHeader(props: SetupPageProps): JSX.Element {
 
   const finishPage = ClientPages.Home.path;
 
-  if (props.pageIndex > SetupSteps.length - 1 || props.pageIndex < 0) {
+  const setupSteps = getSetupSteps();
+
+  if (props.pageIndex > setupSteps.length - 1 || props.pageIndex < 0) {
     return (
       <span className="error">
         Invalid setup step index {`"${props.pageIndex}"`}
@@ -49,19 +46,19 @@ export default function SetupPageHeader(props: SetupPageProps, _state: SetupPage
 
   const history = useHistory();
 
-  const [ loading, setLoading ] = useState(false);
+  // const [ loading, setLoading ] = useState(false);
 
-  const nextBtnText = props.pageIndex === SetupSteps.length - 1 ? "Finish" : "Next";
+  const nextBtnText = props.pageIndex === setupSteps.length - 1 ? "Finish" : "Next";
   // const showBackBtn = props.pageIndex !== 0;
 
   return (
-    <div className="setup-header">
-      <div className="setup-header-wrapper">
-        <div className="setup-header-background">
+    <div id="setup-header">
+      <div id="setup-header-wrapper">
+        <div id="setup-header-background">
         </div>
-        <Card className="setup-header-body">
+        <Card id="setup-header-body">
           <div className="d-flex justify-content-around">
-            {SetupSteps.map((step, i) => {
+            {setupSteps.map((step, i) => {
               const isCurrentStep = i === props.pageIndex;
               let stepType: SetupStepType;
               if (isCurrentStep) {
@@ -93,63 +90,35 @@ export default function SetupPageHeader(props: SetupPageProps, _state: SetupPage
               );
             })}
           </div>
-          <div className={
-            classNames("setup-header-buttons align-items-center justify-content-between", {
+          <div id="setup-header-buttons" className={
+            classNames("align-items-center justify-content-between", {
               "d-flex": props.hideBtnBanner !== true,
               "d-none": props.hideBtnBanner === true,
             })}>
 
-            {/* showBackBtn
-              ? <Button className={classNames("btn-lg d-flex justify-content-center", { "d-none": showBackBtn })} title="Back">
-                <a href={SetupSteps[props.pageIndex - 1].path}>
-                  <div className="d-flex align-items-center">
-                    <FontAwesomeIcon className="mr-3" icon="arrow-left"/>
-                Back
-                  </div>
-                </a>
-              </Button> : ""
-            */}
-
-            <div className="d-flex justify-content-center flex-grow-1">
-              <Spinner className={classNames({ "d-none": !loading })} animation="border" variant="primary"/>
-            </div>
-
             {!props.hideBtnBanner
-              ? <Button className={classNames("btn-lg d-flex justify-content-center", { disabled: loading })}
-                title={nextBtnText} onClick={async () => {
-                  let nextPage: string;
-                  if (props.pageIndex === SetupSteps.length - 1) {
-                    nextPage = finishPage;
-                  }
-                  else {
-                    nextPage = SetupSteps[props.pageIndex + 1].path;
-                  }
-
-                  if (!props.checkCanProceed) {
-                    history.push(nextPage);
+              ? <Button disabled={props.canProceed === false}
+                className={classNames("b btn-lg ml-auto d-flex justify-content-center")}
+                title={props.canProceed ? nextBtnText : "Complete this page to proceed"}
+                onClick={async () => {
+                  if (props.canProceed === false) {
                     return;
                   }
 
-                  try {
-                    setLoading(true);
-                    const canProceed = await props.checkCanProceed();
+                  let nextPage: string;
+                  if (props.pageIndex === setupSteps.length - 1) {
+                    nextPage = finishPage;
+                  }
+                  else {
+                    nextPage = setupSteps[props.pageIndex + 1].path;
+                  }
 
-                    if (canProceed) {
-                      history.push(nextPage);
-                    }
-                  }
-                  catch (err) {
-                    // setSubmitResult({ success: false, message: err.message });
-                    console.error(err);
-                  }
-                  finally {
-                    setLoading(false);
-                  }
+                  history.push(nextPage);
                 }}
               >
                 <a>
                   <div className="d-flex align-items-center">
-                    <FaBtnBody icon="arrow-right" iconPosition="right" text={nextBtnText}/>
+                    <BtnBody icon="arrow-right" iconPosition="right" text={nextBtnText}/>
                   </div>
                 </a>
               </Button>
