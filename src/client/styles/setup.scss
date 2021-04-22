@@ -30,7 +30,7 @@ $header-top-height: 1rem;
 #setup-header-background {
     position: absolute;
 
-    background-color: c.$bg-color;
+    background-color: c.$body-bg;
     top: 0;
     right: 0;
     height: 100%;
@@ -38,15 +38,20 @@ $header-top-height: 1rem;
 }
 
 // $setup-banner-color: #0c8552;
-$setup-banner-color: #1c343b;
+$setup-banner-color: #2a4a4a;
 
 #setup-header-body {
     // top: $header-top-height;
     top: $header-top-height;
     // border-radius: 0 0 $card-border-radius $card-border-radius;
     background-color: $setup-banner-color;
+    box-shadow: 0.1rem 0.25rem 0.25rem black;;
 
     padding: 0.5rem 0;
+}
+
+#setup-header-steps {
+    margin: 0 1rem;
 }
 
 #setup-header-buttons {
@@ -56,10 +61,11 @@ $setup-banner-color: #1c343b;
 .setup-step {
     flex: 1;
     text-align: center;
-    margin: 0 3rem;
+    margin: 0 0.2rem;
 
-    padding: 0.5rem 2rem;
+    padding: 0.5rem 0;
     border-radius: 0.5em;
+    border: 0.5px solid transparent;
 
     &.current {
         background-color: bs.$light;
@@ -69,11 +75,11 @@ $setup-banner-color: #1c343b;
         }
     }
 
-    & span {
-        color: bs.$light;
-        &:focus, &:hover {
-            text-decoration: none;
-        }
+    color: bs.$light;
+
+    &:focus, &:hover {
+        text-decoration: none !important;
+        border-color: c.$body-fg;
     }
 }
 
@@ -91,6 +97,7 @@ $circle-font-size: 1rem;
     justify-content: center;
     align-items: center;
     border-radius: 100%;
+
     font-size: $circle-font-size;
 
     color: bs.$light;

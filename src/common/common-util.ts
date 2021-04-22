@@ -3,6 +3,14 @@ export type Stringable = { toString(): string };
 // these map to Bootstrap colours
 export type Severity = "success" | "info" | "warning" | "danger";
 
+export const STARTER_WORKFLOW = {
+  raw: "https://raw.githubusercontent.com/actions/starter-workflows/main/ci/openshift.yml",
+  htmlFile: "https://github.com/actions/starter-workflows/blob/main/ci/openshift.yml",
+
+  blog: "https://www.openshift.com/blog/deploying-to-openshift-using-github-actions",
+  youtube: "https://www.youtube.com/watch?v=6hgBO-1pKho",
+};
+
 /**
  * Joins a string array into a user-friendly list.
  * Eg, `joinList([ "tim", "erin", "john" ], "and")` => "tim, erin and john"
@@ -58,7 +66,7 @@ function get24hTime(fromDate: Date): string {
 
 export function getFriendlyDateTime(dateToFormat: Date): string {
   let date: string;
-  let time;
+  let showTime = false;
 
   const today = new Date();
   if (dateToFormat.getDate() === today.getDate()) {
@@ -67,15 +75,16 @@ export function getFriendlyDateTime(dateToFormat: Date): string {
       + (today.getMinutes() - dateToFormat.getMinutes());
 
     if (minutesAgo === 0) {
-      return "Just now";
+      return `Just now at ${get24hTime(dateToFormat)}`;
     }
-    if (minutesAgo < 60) {
-      return `${minutesAgo} minute${minutesAgo === 1 ? "" : "s"} ago`;
+    else if (minutesAgo < 60) {
+      return `${minutesAgo} minute${minutesAgo === 1 ? "" : "s"} ago at ${get24hTime(dateToFormat)}`;
     }
+    showTime = true;
   }
   else if (dateToFormat.getDate() === today.getDate() - 1) {
     date = "Yesterday";
-    time = get24hTime(dateToFormat);
+    showTime = true;
   }
   else if (dateToFormat.getFullYear() === today.getFullYear()) {
     date = `${dateToFormat.getDate()} ${getMonthName(dateToFormat.getMonth(), false)}`;
@@ -84,8 +93,8 @@ export function getFriendlyDateTime(dateToFormat: Date): string {
     date = `${dateToFormat.getDate()} ${getMonthName(dateToFormat.getMonth(), false)}, ${dateToFormat.getFullYear()}`;
   }
 
-  if (time) {
-    return `${date} at ${time}`;
+  if (showTime) {
+    return `${date} at ${get24hTime(dateToFormat)}`;
   }
   return date;
 }

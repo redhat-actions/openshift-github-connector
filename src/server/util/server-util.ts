@@ -3,10 +3,10 @@ import os from "os";
 import HttpStatusCodes from "http-status-codes";
 import { Response } from "node-fetch";
 
-import Log from "../logger";
-import ApiResponses from "../../common/api-responses";
-import HttpConstants from "../../common/http-constants";
-import { Stringable } from "../../common/common-util";
+import Log from "server/logger";
+import ApiResponses from "common/api-responses";
+import HttpConstants from "common/http-constants";
+import { Stringable } from "common/common-util";
 
 /*
 export function getFrontendUrl(req: express.Request): string {
@@ -118,6 +118,9 @@ export function sendSuccessStatusJSON(res: express.Response, statusCode: number)
 
 export function getFriendlyHTTPError(err: Error & { response?: any }): Error {
   if (!err.response) {
+    if (err.message) {
+      return new Error(err.message);
+    }
     return new Error(JSON.stringify(err));
   }
 

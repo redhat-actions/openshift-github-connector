@@ -1,10 +1,10 @@
 import { App } from "@octokit/app";
 import { Octokit } from "@octokit/core";
 
-import Log from "../../logger";
-import { GitHubAppUrls, GitHubAppConfig, GitHubRepo } from "../../../common/types/github-types";
-import GitHubAppMemento from "../memento/app-memento";
-import GitHubUserMemento from "../memento/user-memento";
+import Log from "server/logger";
+import { GitHubAppUrls, GitHubAppConfig, GitHubRepo } from "common/types/github-types";
+import GitHubAppMemento from "server/lib/memento/app-memento";
+import GitHubUserMemento from "server/lib/memento/user-memento";
 
 const GITHUB_HOST = "github.com";
 
@@ -57,7 +57,12 @@ class GitHubApp {
             webhooks: {
                 secret: memento.webhook_secret,
             },
-            log: Log
+            log: {
+                debug: Log.debug,
+                error: Log.error,
+                info: Log.info,
+                warn: Log.warn,
+            },
         });
     }
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Jumbotron, Button } from "react-bootstrap";
+import { Button, Card } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { v4 as uuid } from "uuid";
 import { useHistory } from "react-router-dom";
@@ -15,6 +15,7 @@ import { ExternalLink } from "../../components/external-link";
 import ApiRequests from "../../../common/api-requests";
 import Banner from "../../components/banner";
 import ApiResponses from "../../../common/api-responses";
+import BtnBody from "../../components/fa-btn-body";
 
 export function getAppManifest(appUrl: string): Record<string, unknown> {
   // the redirect url is the first one, which is redirected to after the app is created
@@ -65,62 +66,77 @@ export function CreateAppPage(): JSX.Element {
   const frontendUrl = window.location.protocol + "//" + window.location.host;
 
   const manifestFormID = "manifest-form";
-  const enterpriseCheckboxId = "enterprise-checkbox";
+  // const enterpriseCheckboxId = "enterprise-checkbox";
 
   const appManifest = getAppManifest(frontendUrl);
   const githubManifestUrl = `https://github.com/settings/apps/new?state=${state}`;
 
   return (
     <React.Fragment>
-      {getSearchParam(SETUP_QUERYPARAM) ? <SetupPageHeader pageIndex={0} hideBtnBanner={true}/> : ""}
-      <Jumbotron className="text-black text-center">
-        <h2>You have to create an app now</h2>
-        <p className="my-3">This is a description of what creating an app means.</p>
+      {getSearchParam(SETUP_QUERYPARAM) ? <SetupPageHeader pageIndex={1} hideBtnBanner={true}/> : ""}
+      <Card>
+        <Card.Title>
+          You have to create an app now
+        </Card.Title>
+        <Card.Body>
 
-        <input type="checkbox"
-          className="form-check-input"
-          id={enterpriseCheckboxId}
-          checked={enterpriseChecked}
-          onClick={(e) => setEnterpriseChecked(e.currentTarget.checked)}
-        />
-        <label htmlFor={enterpriseCheckboxId}>I want to use GitHub Enterprise</label>
-        <p className={classNames({ "d-none": !enterpriseChecked })}>Too bad, {"that's"} not implemented yet.</p>
+          <p>This is a description of what creating an app means.</p>
 
-        <form className="row justify-content-center" id={manifestFormID} method="post" action={githubManifestUrl} onSubmit={
-          async (e) => {
-            e.preventDefault();
-            try {
-              await fetchJSON<ApiRequests.InitCreateApp>("POST", ApiEndpoints.Setup.SetCreateAppState.path, {
-                state,
-              });
-              (document.getElementById(manifestFormID) as HTMLFormElement).submit();
-            }
-            catch (err) {
-              setError(`Failed to start creation flow: ${err.message}`);
-            }
-          }
-        }>
-          <input className="d-none" name="manifest" type="manifest" readOnly={true} value={JSON.stringify(appManifest)} />
-          <Button className="btn-primary btn-lg d-flex px-5" type="submit">
-            <FontAwesomeIcon icon={[ "fab", "github" ]} className="fa-2x mr-3 text-black"/>
-            <div className="font-weight-bold align-self-center" title="Create your app">
-              Create your app
+          <label className="clickable d-flex align-items-center">
+            <input type="checkbox"
+              // className="form-check-input"
+              checked={enterpriseChecked}
+              onClick={(e) => setEnterpriseChecked(e.currentTarget.checked)}
+            />
+            <div>
+              I want to use GitHub Enterprise
             </div>
-          </Button>
-        </form>
+          </label>
+          <p className={classNames("my-2 text-danger", { "d-none": !enterpriseChecked })}>Too bad, {"that's"} not implemented yet.</p>
 
-        <div className="py-3"></div>
-        <h4>
-          <ExternalLink href="https://github.com/settings/apps/">
-            View current apps
-          </ExternalLink>
-        </h4>
+          <div className="d-flex flex-column align-items-center my-4">
+            <form className="" id={manifestFormID} method="post" action={githubManifestUrl} onSubmit={
+              async (e) => {
+                e.preventDefault();
+                try {
+                  await fetchJSON<ApiRequests.InitCreateApp>("POST", ApiEndpoints.Setup.SetCreateAppState.path, {
+                    state,
+                  });
+                  (document.getElementById(manifestFormID) as HTMLFormElement).submit();
+                }
+                catch (err) {
+                  setError(`Failed to start creation flow: ${err.message}`);
+                }
+              }
+            }>
+              <input className="d-none" name="manifest" type="manifest" readOnly={true} value={JSON.stringify(appManifest)} />
+            </form>
 
-        <Banner display={error != null} severity="error">
-          {error ?? ""}
-        </Banner>
+            <div className="btn-line flex-column">
+              <Button size="lg" type="submit" form={manifestFormID}>
+                <BtnBody icon={[ "fab", "github" ]} iconClasses="fa-2x text-black" text="Create a new app" />
+              </Button>
+              <h4 className="text-center">or</h4>
+              <Button size="lg" variant="primary" disabled>
+                <BtnBody icon={[ "fab", "github" ]} iconClasses="fa-2x text-black" text="Use an existing app" />
+              </Button>
+            </div>
 
-      </Jumbotron>
+            <div className="py-3"></div>
+            <h5>
+              <ExternalLink href="https://github.com/settings/apps/" >
+                View current apps
+                <FontAwesomeIcon icon="external-link-alt" fixedWidth className="ml-2"/>
+              </ExternalLink>
+            </h5>
+          </div>
+
+          <Banner display={error != null} severity="danger">
+            {error ?? ""}
+          </Banner>
+
+        </Card.Body>
+      </Card>
     </React.Fragment>
   );
 }

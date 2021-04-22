@@ -1,9 +1,9 @@
 import * as k8s from "@kubernetes/client-node";
 import jwt from "jsonwebtoken";
 
-import ApiResponses from "../../../common/api-responses";
-import Log from "../../logger";
-import { checkKeys, getFriendlyHTTPError } from "../../util/server-util";
+import ApiResponses from "common/api-responses";
+import Log from "server/logger";
+import { checkKeys, getFriendlyHTTPError } from "server/util/server-util";
 
 type RawServiceAccountToken = {
 	iss: string;
@@ -36,6 +36,7 @@ export default class KubeWrapper {
 
 	public static get instance(): KubeWrapper {
 		if (this.initError) {
+			Log.error(`KubeWrapper instance requested but it has an init error`, this.initError);
 			throw this.initError;
 		}
 		else if (this._instance == null) {

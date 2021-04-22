@@ -34,30 +34,12 @@ namespace ApiRequests {
     createSATokens: boolean,
   }
 
-  /*
-  export function checkMissingKeys<
-    ReqBody extends Record<string, unknown>, Keys extends Array<keyof ReqBody>
-  >(reqBody: ReqBody, keys: Keys): { [key: Keys]: unknown } {
-
-    const missingKeys: Keys = new Array<Keys>();
-
-    keys.forEach((key) => {
-      if (reqBody[key] == null) {
-        missingKeys.push(key);
-      }
-    });
-
-    if (missingKeys.length === 0) {
-      return reqBody;
-    }
-    else if (missingKeys.length === 1) {
-      throw new Error(`Request body missing required key "${missingKeys[0]}"`);
-    }
-    else {
-      throw new Error(`Request body missing required keys "${missingKeys.map((key) => `"${key}"`).join(", ")}`);
-    }
+  export interface CreateWorkflow {
+    repo: GitHubRepoId,
+    workflowFileName: string,
+    overwriteExisting: boolean,
+    // imageRegistry: ImageRegistryInfo,
   }
-  */
 }
 
 export default ApiRequests;

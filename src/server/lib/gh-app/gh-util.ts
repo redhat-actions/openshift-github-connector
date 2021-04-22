@@ -2,11 +2,11 @@ import express from "express";
 import { Octokit } from "@octokit/core";
 import sodium from "tweetsodium";
 
-import Log from "../../logger";
-import ApiResponses from "../../../common/api-responses";
-import { sendError } from "../../util/send-error";
+import Log from "server/logger";
+import ApiResponses from "common/api-responses";
+import { sendError } from "server/util/send-error";
 import GitHubApp from "./gh-app";
-import { GitHubRepoId, RepoSecretsPublicKey } from "../../../common/types/github-types";
+import { GitHubRepoId, RepoSecretsPublicKey } from "common/types/github-types";
 
 /**
  * Tries to get the GitHub App for the user bound to the given request's session.

@@ -14,6 +14,7 @@ const App = new UrlPath(Api, "/app");
 const AppRepos = new UrlPath(App, "/repos");
 const RepoSecrets = new UrlPath(AppRepos, "/secrets");
 const RepoSecretDefaults = new UrlPath(RepoSecrets, "/defaults");
+const Workflows = new UrlPath(App, "/workflows");
 
 const Cluster = new UrlPath(Api, "/cluster");
 
@@ -44,6 +45,7 @@ const ApiEndpoints = {
       Secrets: RepoSecrets,
       RepoSecretDefaults,
     },
+    Workflows,
   },
   Cluster: {
     Root: Cluster,

@@ -9,6 +9,13 @@
     ],
     "outDir": "../../dist",
 
+    // https://decembersoft.com/posts/say-goodbye-to-relative-paths-in-typescript-imports/
+    "baseUrl": "..",
+    "paths": {
+      "server/*": [ "server/*" ],
+      "common/*": [ "common/*" ]
+    },
+
     "module": "esnext",
     "moduleResolution": "node",
 

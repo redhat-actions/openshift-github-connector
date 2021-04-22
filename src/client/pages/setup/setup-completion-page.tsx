@@ -1,13 +1,46 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
-import {
-  Button, Spinner, Table,
-} from "react-bootstrap";
+import { Jumbotron } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import ApiEndpoints from "../../../common/api-endpoints";
-import ApiResponses from "../../../common/api-responses";
-import DataFetcher from "../../components/data-fetcher";
-import ClientPages, { ClientPage } from "../client-pages";
+import ClientPages from "../client-pages";
+import SetupPageHeader from "./setup-header";
+
+export default function SetupFinishedPage(): JSX.Element {
+  return (
+    <React.Fragment>
+      <SetupPageHeader pageIndex={4} canProceed={false} hideBtnBanner={true} />
+      <Jumbotron>
+        <h2>
+          <FontAwesomeIcon icon="check" className="text-success mr-4" />
+          Setup Complete
+        </h2>
+        <hr />
+        <h3>{"What's Next"}</h3>
+        <ul className="pl-4 b">
+          <li>
+            <Link to={ClientPages.AddWorkflows.path}>Add the OpenShift starter workflow</Link>
+          </li>
+          <li>
+            <Link to={ClientPages.NotImplemented.path}>Connect your OpenShift Image Registry</Link>
+          </li>
+          <li>
+            <Link to={ClientPages.NotImplemented.path}>Create Self-Hosted Runners</Link>
+          </li>
+        </ul>
+        <ul className="pl-4 b">
+          <li>
+            <Link to={ClientPages.App.path}>Return to the View GitHub App page</Link>
+          </li>
+          <li>
+            <Link to={ClientPages.ConnectRepos.path}>Return to the Connect Repositories page</Link>
+          </li>
+        </ul>
+      </Jumbotron>
+    </React.Fragment>
+  );
+}
+
+/*
 
 function getStatusCells(success: boolean, btnLabels: {
   failure: string,
@@ -92,26 +125,10 @@ export default function SetupHomePage() {
                   }
                 }
               </DataFetcher>
-            </tr>
-            {/* <tr>
-              <td>Service Account Bound</td>
-              <DataFetcher type="api" endpoint={ApiEndpoints.User.ServiceAccount} loadingDisplay={tdLoadingDisplay}>
-                {
-                  (data: ApiResponses.ServiceAccountState) => {
-                    return getStatusCells(data.success, {
-                      failure: "Create Service Account",
-                      success: "View Service Account",
-                    }, {
-                      failure: ClientPages.SetupServiceAccount,
-                      success: ClientPages.Cluster,
-                    });
-                  }
-                }
-              </DataFetcher>
-            </tr> */}
           </tbody>
         </Table>
       </div>
     </React.Fragment>
   );
 }
+*/

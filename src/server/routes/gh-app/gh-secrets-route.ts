@@ -1,29 +1,24 @@
 import express from "express";
 
-import { send405, sendError } from "../util/send-error";
-import ApiEndpoints from "../../common/api-endpoints";
-import ApiRequests from "../../common/api-requests";
-import ApiResponses from "../../common/api-responses";
-import { GitHubRepo, RepoSecretsPublicKey } from "../../common/types/github-types";
-import { getAppForSession, createSecret, getRepoSecretPublicKey } from "../lib/gh-app/gh-util";
-import KubeWrapper, { ServiceAccountToken } from "../lib/kube/kube-wrapper";
-import Log from "../logger";
-import SecretUtil from "../lib/kube/secret-util";
-import GitHubUserMemento from "../lib/memento/user-memento";
-import { Severity } from "../../common/common-util";
-
-// https://github.com/redhat-actions/common/wiki/Naming-Guidelines#secret-names
-const DEFAULT_SECRET_NAMES = {
-  clusterServerUrl: "OPENSHIFT_SERVER",
-  token: "OPENSHIFT_TOKEN",
-};
+import { send405, sendError } from "server/util/send-error";
+import ApiEndpoints from "common/api-endpoints";
+import ApiRequests from "common/api-requests";
+import ApiResponses from "common/api-responses";
+import { GitHubRepo, RepoSecretsPublicKey } from "common/types/github-types";
+import { getAppForSession, createSecret, getRepoSecretPublicKey } from "server/lib/gh-app/gh-util";
+import KubeWrapper, { ServiceAccountToken } from "server/lib/kube/kube-wrapper";
+import Log from "server/logger";
+import SecretUtil from "server/lib/kube/secret-util";
+import GitHubUserMemento from "server/lib/memento/user-memento";
+import { Severity } from "common/common-util";
+import { DEFAULT_SECRET_NAMES, getDefaultSecretNames } from "common/default-secret-names";
 
 const router = express.Router();
 
 router.route(ApiEndpoints.App.Repos.Secrets.path)
   .get(async (
-    req: express.Request<any, ApiResponses.ReposWithSecrets, void, ApiRequests.RepoIDsList>,
-    res: express.Response<ApiResponses.ReposWithSecrets>,
+    req: express.Request<any, ApiResponses.ReposSecretsStatus, void, ApiRequests.RepoIDsList>,
+    res: express.Response<ApiResponses.ReposSecretsStatus>,
     next
   ) => {
     const app = await getAppForSession(req, res);
@@ -46,16 +41,26 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
       }));
     }
 
-    const reposWithSecrets: ApiResponses.ReposWithSecrets["repos"] = await Promise.all(
-      repos.map(async (repo): Promise<ApiResponses.ReposWithSecrets["repos"][number]> => {
-        const repoSecrets = await app.install.octokit.request("GET /repos/{owner}/{repo}/actions/secrets", {
+    const reposWithSecrets: ApiResponses.ReposSecretsStatus["repos"] = await Promise.all(
+      repos.map(async (repo): Promise<ApiResponses.ReposSecretsStatus["repos"][number]> => {
+        const secretsResponse = await app.install.octokit.request("GET /repos/{owner}/{repo}/actions/secrets", {
           owner: repo.owner.login,
           repo: repo.name,
         });
 
+        const secrets = secretsResponse.data.secrets;
+        const secretNames = secrets.map((secret) => secret.name);
+
+        const hasClusterSecrets = secretNames.includes(DEFAULT_SECRET_NAMES.clusterServerUrl)
+          && secretNames.includes(DEFAULT_SECRET_NAMES.clusterToken);
+
+        const hasRegistrySecret = secretNames.includes(DEFAULT_SECRET_NAMES.registryPassword);
+
         return {
           repo,
-          secrets: repoSecrets.data.secrets,
+          hasClusterSecrets,
+          hasRegistrySecret,
+          secrets,
         };
       })
     );
@@ -79,8 +84,9 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
       getAppForSession(req, res),
       GitHubUserMemento.loadUser(req.session.data.githubUserId),
     ]);
+
     if (!app) {
-      return undefined;
+      return sendError(res, 400, "No app session is saved. Please connect to a GitHub App before proceeding.");
     }
 
     const serviceAccountName = process.env.DEV_OVERRIDE_SERVICEACCOUNT
@@ -188,7 +194,7 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
 
       const secretsToCreate: { name: string, plaintextValue: string }[] = [
         { name: DEFAULT_SECRET_NAMES.clusterServerUrl, plaintextValue: clusterServerUrl },
-        { name: DEFAULT_SECRET_NAMES.token, plaintextValue: saToken.token },
+        { name: DEFAULT_SECRET_NAMES.clusterToken, plaintextValue: saToken.token },
       ];
 
       Log.info(`Creating ${secretsToCreate.length} secrets into ${repo.owner}/${repo.name}`);
@@ -225,13 +231,15 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
       }));
     }));
 
-    successes = successes.sort((first, second) => first.repo.fullName.localeCompare(second.repo.fullName));
-    failures = failures.sort((first, second) => first.repo.fullName.localeCompare(second.repo.fullName));
+    successes = successes.sort((first, second) => first.repo.full_name.localeCompare(second.repo.full_name));
+    failures = failures.sort((first, second) => first.repo.full_name.localeCompare(second.repo.full_name));
 
     let message;
     let severity: Severity;
     if (failures.length === 0) {
-      message = `Successfully created Actions secrets in all ${repos.length} repositories.`;
+      message = `Successfully created Actions secrets in `
+        + ` ${repos.length !== 1 ? "all " : ""}${repos.length} repositor${repos.length === 1 ? "y" : "ies"}.`;
+
       severity = "success";
       Log.info(message);
     }
@@ -265,18 +273,10 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
   })
   .all(send405([ "GET", "POST" ]));
 
-function getDefaultSecretNames(): ApiResponses.DefaultSecrets {
-  const count = Object.keys(DEFAULT_SECRET_NAMES).length;
-  return {
-    count,
-    defaultSecrets: DEFAULT_SECRET_NAMES,
-  };
-}
-
 router.route(ApiEndpoints.App.Repos.RepoSecretDefaults.path)
   .get(async (
     req,
-    res: express.Response<ApiResponses.DefaultSecrets>,
+    res: express.Response<ApiResponses.DefaultSecretsResponse>,
     next
   ) => {
     return res.json(getDefaultSecretNames());

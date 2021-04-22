@@ -13,6 +13,25 @@ export type RepoSecretsPublicKey = components["schemas"]["actions-public-key"];
 // slug and owner types are optional in the Config type but always present, so we intersect to make them non-null.
 export type GitHubAppConfig = components["schemas"]["integration"] & { slug: string, owner: GitHubUser };
 
+// https://docs.github.com/en/rest/reference/repos#get-repository-content
+export type GitHubContentFile = components["schemas"]["content-file"];
+export type GitHubContentDirectory = components["schemas"]["content-directory"];
+export type GitHubContentSymlink = components["schemas"]["content-symlink"];
+export type GitHubContentSubmodule = components["schemas"]["content-submodule"];
+
+// This is the response type from GET /repos/{owner}/{repo}/contents/{path}
+export type GitHubContentType =
+  GitHubContentFile | GitHubContentDirectory | GitHubContentSymlink | GitHubContentSubmodule;
+
+export function isGitHubFileContentType(data: GitHubContentType): data is GitHubContentFile {
+  if (Array.isArray(data)) {
+    // exclude directory type which is an array
+    return false;
+  }
+
+  return data.type === "file";
+}
+
 // The API is structured as /repos/{owner}/{name}/<path>
 // so you can't just use the repo Id as a unique identifier, which is a bummer.
 export interface GitHubRepoId {
@@ -30,7 +49,7 @@ export interface GitHubRepoId {
    */
   name: string,
 
-  fullName: string,
+  full_name: string,
 }
 
 /* eslint-disable camelcase */

@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, Card } from "react-bootstrap";
 
@@ -23,16 +23,16 @@ const query = { [SETUP_QUERYPARAM]: "true" };
 
 export function getSetupSteps() {
   return [
+    { title: "Welcome", path: ClientPages.Welcome.withQuery(query) },
     { title: "Create GitHub App", path: ClientPages.SetupCreateApp.withQuery(query) },
     { title: "View GitHub App", path: ClientPages.App.withQuery(query) },
     // { title: "Create Service Account", path: getSetupPath(ClientPages.SetupServiceAccount) },
-    { title: "Connect Repositories", path: ClientPages.SetupRepos.withQuery(query) },
+    { title: "Connect Repositories", path: ClientPages.ConnectRepos.withQuery(query) },
+    { title: "Complete", path: ClientPages.SetupFinished.withQuery(query) },
   ];
 }
 
 export default function SetupPageHeader(props: SetupPageProps): JSX.Element {
-
-  const finishPage = ClientPages.Home.path;
 
   const setupSteps = getSetupSteps();
 
@@ -46,9 +46,8 @@ export default function SetupPageHeader(props: SetupPageProps): JSX.Element {
 
   const history = useHistory();
 
-  // const [ loading, setLoading ] = useState(false);
-
-  const nextBtnText = props.pageIndex === setupSteps.length - 1 ? "Finish" : "Next";
+  // const nextBtnText = props.pageIndex === setupSteps.length - 1 ? "Finish" : "Next";
+  const nextBtnText = "Next";
   // const showBackBtn = props.pageIndex !== 0;
 
   return (
@@ -57,7 +56,7 @@ export default function SetupPageHeader(props: SetupPageProps): JSX.Element {
         <div id="setup-header-background">
         </div>
         <Card id="setup-header-body">
-          <div className="d-flex justify-content-around">
+          <div id="setup-header-steps" className="d-flex justify-content-around">
             {setupSteps.map((step, i) => {
               const isCurrentStep = i === props.pageIndex;
               let stepType: SetupStepType;
@@ -71,22 +70,17 @@ export default function SetupPageHeader(props: SetupPageProps): JSX.Element {
                 stepType = "todo";
               }
 
-              const clickable = stepType === "passed";
+              // const clickable = stepType === "passed";
 
               return (
-                <div key={i} className={classNames("setup-step", stepType, { clickable })} onClick={() => {
-                  if (!clickable) {
-                    return;
-                  }
-                  history.push(step.path);
-                }}>
+                <Link to={step.path} key={i} className={classNames("setup-step", stepType)}>
                   <div className="mb-2 d-flex justify-content-center">
                     <div className={`setup-step-circle ${stepType}`}>
                       {stepType === "passed" ? <FontAwesomeIcon icon="check-circle"/> : (i + 1).toString()}
                     </div>
                   </div>
                   <span className={classNames({ b: isCurrentStep })}>{step.title}</span>
-                </div>
+                </Link>
               );
             })}
           </div>
@@ -105,14 +99,7 @@ export default function SetupPageHeader(props: SetupPageProps): JSX.Element {
                     return;
                   }
 
-                  let nextPage: string;
-                  if (props.pageIndex === setupSteps.length - 1) {
-                    nextPage = finishPage;
-                  }
-                  else {
-                    nextPage = setupSteps[props.pageIndex + 1].path;
-                  }
-
+                  const nextPage = setupSteps[props.pageIndex + 1].path;
                   history.push(nextPage);
                 }}
               >

@@ -74,7 +74,19 @@ export function getLoggingMiddleware(): any {
       }
 
       if (Object.keys(req.body).length > 0) {
-        fmt += `\nReceived body:\n${JSON.stringify(req.body)}`;
+        const dontLogKeys = [
+          "token",
+          "access_token",
+          "password",
+          "registryPassword",
+        ];
+
+        const bodyCopy = { ...req.body };
+        dontLogKeys.forEach((key) => {
+          delete bodyCopy[key];
+        });
+
+        fmt += `\nRequest body was:\n${JSON.stringify(bodyCopy)}`;
       }
 
       fmt += `\ncookie: ${JSON.stringify(req.headers.cookie)}`;

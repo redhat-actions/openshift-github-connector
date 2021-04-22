@@ -15,7 +15,7 @@ namespace Banner {
   } & React.HTMLAttributes<HTMLDivElement>;
 }
 
-export function Banner(props: Banner.Props): JSX.Element {
+function Banner(props: Banner.Props): JSX.Element {
   const divProps: Partial<Banner.Props> = { ...props };
   // delete divProps.message;
   delete divProps.display;
@@ -39,7 +39,7 @@ export function Banner(props: Banner.Props): JSX.Element {
 
   return (
     <div {...divProps} className={classNames(
-      "banner rounded p-3",
+      "banner rounded my-4 p-3",
       "bg-" + props.severity,
       "text-" + (props.severity === "warning" ? "black" : "white"),
       { "d-none": !props.display }

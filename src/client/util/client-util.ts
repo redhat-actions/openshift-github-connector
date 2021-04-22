@@ -1,5 +1,5 @@
 import ApiResponses from "../../common/api-responses";
-import { Stringable } from "../../common/common-util";
+import { Severity, Stringable } from "../../common/common-util";
 import HttpConstants from "../../common/http-constants";
 
 export function getSearchParam(param: string): string | null {
@@ -16,14 +16,16 @@ export function isJsonContentType(res: Response): boolean {
     );
 }
 
-export async function getHttpError(res: Response): Promise<string> {
+async function getHttpError(res: Response): Promise<Error> {
   let message: string;
   let statusMessage: string | undefined;
+  let severity: Severity | undefined;
   if (isJsonContentType(res)) {
     const resBody = await res.json();
     if ((resBody as ApiResponses.Error).message) {
       const errorBody = resBody as ApiResponses.Error;
-      message = `${errorBody.title}: ${errorBody.message}`;
+      message = `${errorBody.message}`;
+      severity = errorBody.severity;
       statusMessage = errorBody.statusMessage;
     }
     else {
@@ -38,13 +40,18 @@ export async function getHttpError(res: Response): Promise<string> {
     message = await res.text();
   }
 
-  return `${res.url} responded ${res.status}${statusMessage ? " " + statusMessage : ""}: ${message}`;
+  const err = new Error(`${res.url} responded ${res.status}${statusMessage ? " " + statusMessage : ""}: ${message}`);
+  (err as any).status = res.status;
+  if (severity) {
+    (err as any).severity = severity;
+  }
+  return err;
 }
 
 export async function throwIfError(res: Response): Promise<void> {
   if (res.status > 399) {
-    const errMsg = await getHttpError(res);
-    throw new Error(errMsg);
+    const err = await getHttpError(res);
+    throw err;
   }
 }
 

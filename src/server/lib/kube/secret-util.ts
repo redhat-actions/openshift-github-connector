@@ -1,10 +1,10 @@
 import { V1ObjectMeta, V1Secret } from "@kubernetes/client-node";
 
-import Log from "../../logger";
-import { Stringable } from "../../../common/common-util";
-import HttpConstants from "../../../common/http-constants";
-import { GitHubRepoId } from "../../../common/types/github-types";
-import { getFriendlyHTTPError, objValuesFromb64, objValuesTob64, toValidK8sName } from "../../util/server-util";
+import Log from "server/logger";
+import { Stringable } from "common/common-util";
+import HttpConstants from "common/http-constants";
+import { GitHubRepoId } from "common/types/github-types";
+import { getFriendlyHTTPError, objValuesFromb64, objValuesTob64, toValidK8sName } from "server/util/server-util";
 import KubeWrapper, { ServiceAccountToken } from "./kube-wrapper";
 
 const APP_NAME = "openshift-actions-connector";
@@ -200,18 +200,23 @@ namespace SecretUtil {
           }
         );
 
-        saTokenSecretBody = createSATokenRes.body;
         Log.info(
           `Created serviceaccount token secret `
-          + `${saTokenSecretBody.metadata?.namespace}/${saTokenSecretBody.kind}/${saTokenSecretBody.metadata?.name}`
+          + `${createSATokenRes.body.metadata?.namespace}/${createSATokenRes.body.kind}/${createSATokenRes.body.metadata?.name}`
         );
+
+        const newSecret = await SecretUtil.loadFromSecret(saTokenSecretName);
+        if (!newSecret) {
+          throw new Error(`Failed to load secret "${saTokenSecretName}" after it was just created`);
+        }
+        saTokenSecretBody = newSecret;
       }
       catch (err) {
         throw getFriendlyHTTPError(err);
       }
     }
 
-    Log.info(`SA Token secret data keys are "${Object.keys(saTokenSecretBody || {}).join(", ")}"`);
+    Log.info(`SA Token secret data keys are "${Object.keys(saTokenSecretBody.data || {}).join(", ")}"`);
 
     const token = saTokenSecretBody.data?.token;
     if (!token) {

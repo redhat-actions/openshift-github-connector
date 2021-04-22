@@ -1,6 +1,6 @@
 import express from "express";
-import { send405 } from "../util/send-error";
-import ApiEndpoints from "../../common/api-endpoints";
+import { send405 } from "server/util/send-error";
+import ApiEndpoints from "common/api-endpoints";
 
 const router = express.Router();
 export default router;

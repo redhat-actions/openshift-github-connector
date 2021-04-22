@@ -1,9 +1,9 @@
 import fetch from "node-fetch";
-import Log from "../../logger";
+import Log from "server/logger";
 import {
   GitHubAppConfigWithSecrets,
-} from "../../../common/types/github-types";
-import { getFriendlyHTTPError } from "../../util/server-util";
+} from "common/types/github-types";
+import { getFriendlyHTTPError } from "server/util/server-util";
 
 // https://stackoverflow.com/questions/42999983/typescript-removing-readonly-modifier
 // type Writeable<T> = { -readonly [K in keyof T]: T[K] };

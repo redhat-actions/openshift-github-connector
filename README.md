@@ -19,3 +19,14 @@ If you want to use "Attach to Chrome" to debug the React you must launch chrome 
 CRA seems to have problems if you rename or delete a TypeScript file. It will keep trying to compile the old one. Restarting the development server fixes it.
 
 Similarly, if you edit the ESLint config file, the change will not get picked up until a dev server restart.
+
+## Resources
+
+### Frontend
+https://react-bootstrap.github.io/components/alerts/
+https://getbootstrap.com/docs/4.0/getting-started/introduction/
+
+### Backend
+https://docs.github.com/en/developers/apps/creating-a-github-app-from-a-manifest
+https://docs.github.com/en/rest/reference
+https://docs.github.com/en/rest/reference/permissions-required-for-github-apps

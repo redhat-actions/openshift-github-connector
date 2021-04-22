@@ -1,4 +1,5 @@
 import { Severity } from "./common-util";
+import { DefaultSecrets } from "./default-secret-names";
 import {
   GitHubAppUrls,
   GitHubAppConfig,
@@ -6,24 +7,32 @@ import {
   GitHubRepo,
   GitHubActionsSecret,
   GitHubRepoId,
+  GitHubUser,
 } from "./types/github-types";
 
-export namespace ApiResponses {
+namespace ApiResponses {
 
   export interface Result {
     success: boolean,
     message: string,
   }
 
-  // https://tools.ietf.org/html/rfc7807#section-3.1
-  // but 'message' instead of 'detail'
-  export interface Error extends Result {
+  export interface ResultWithSeverity extends Result {
+    severity: Severity,
+  }
+
+  export interface ResultSuccess extends ResultWithSeverity {
+    success: true,
+  }
+
+  export interface ResultFailed extends ResultWithSeverity {
     success: false,
-    type?: string,
-    title: string,
+    severity: "warning" | "danger",
+  }
+
+  export interface Error extends ResultFailed {
     status: number,
     statusMessage: string,
-    // instance: string,
   }
 
   // export interface CreateAppResponse {
@@ -49,6 +58,13 @@ export namespace ApiResponses {
 
   export type GitHubAppState = GitHubAppMissing | GitHubAppReady;
 
+  // extending githubuser type here in case we want to add more fields to this response later
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  export interface GitHubUserResponse extends GitHubUser {
+
+  }
+
   export interface GitHubAppRepos {
     app: true,
     repos: GitHubRepo[],
@@ -56,20 +72,19 @@ export namespace ApiResponses {
 
   export type GitHubAppReposState = GitHubAppMissing | GitHubAppRepos;
 
-  export interface DefaultSecrets {
-    count: number,
-    defaultSecrets: {
-      clusterServerUrl: string,
-      token: string,
-    },
-  }
-
   export interface RepoWithSecrets {
     repo: GitHubRepo,
+    hasClusterSecrets: boolean,
+    hasRegistrySecret: boolean,
     secrets: GitHubActionsSecret[],
   }
 
-  export interface ReposWithSecrets {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  export interface DefaultSecretsResponse extends DefaultSecrets {
+
+  }
+
+  export interface ReposSecretsStatus {
     // orgs: [{
     //   org: GitHubOrg;
     //   secrets: GitHubActionsOrgSecret[];
@@ -96,11 +111,20 @@ export namespace ApiResponses {
     err: string,
   }
 
-  export interface RepoSecretsCreationSummary extends Result {
+  export interface RepoSecretsCreationSummary extends ResultWithSeverity {
+    // serviceAccountSecrets: {
+    //   secretName: string,
+    //   created: boolean,
+    // }[],
     successes?: RepoSecretCreationSuccess[],
     failures?: RepoSecretCreationFailure[],
-    severity: Severity,
   }
+
+  export interface WorkflowCreationResultSuccess extends ResultSuccess {
+    url: string,
+  }
+
+  export type WorkflowCreationResult = ResultFailed | WorkflowCreationResultSuccess;
 
   export interface ClusterStateDisconnected {
     connected: false,
@@ -124,16 +148,6 @@ export namespace ApiResponses {
 
   export type ClusterState = ClusterStateDisconnected | ClusterStateConnected;
 
-  // export interface ServiceAccountStateSetup extends Result {
-  //   success: true;
-  //   serviceAccountName: string
-  // }
-
-  // export interface ServiceAccountStateNotSetup extends Result {
-  //   success: false;
-  // }
-
-  // export type ServiceAccountState = ServiceAccountStateSetup | ServiceAccountStateNotSetup;
 }
 
 export default ApiResponses;

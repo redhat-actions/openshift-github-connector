@@ -17,7 +17,7 @@
             "webRoot": "${workspaceFolder}"
         },
         {
-            "name": "Debug server",
+            "name": "Attach to server",
             "type": "node",
             "request": "attach",
             "restart": true,

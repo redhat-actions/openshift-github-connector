@@ -4,14 +4,14 @@ import "express-async-errors";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
+import ApiEndpoints from "common/api-endpoints";
+import ApiResponses from "common/api-responses";
 import sessionMw from "./session-mw";
 import Routes from "./routes";
 import { send405, sendError } from "./util/send-error";
 import Log, { getLoggingMiddleware } from "./logger";
 import { startup } from "./startup";
-import ApiEndpoints from "../common/api-endpoints";
 import { getAllowedOrigins, getFriendlyHTTPError, isInK8s } from "./util/server-util";
-import ApiResponses from "../common/api-responses";
 
 const app = express();
 
@@ -86,7 +86,7 @@ app.use((err_: any, req: express.Request, res: express.Response, next: express.N
     message = JSON.stringify(err);
   }
 
-  sendError(res, 500, message, "Error", false);
+  sendError(res, 500, message, "danger", false);
 });
 
 // Start server once all middleware are in place //

@@ -12,6 +12,7 @@ import ClientPages from "./client-pages";
 import getEndpointUrl from "../util/get-endpoint-url";
 import { fetchJSON, getSearchParam } from "../util/client-util";
 import SetupPageHeader, { SETUP_QUERYPARAM } from "./setup/setup-header";
+import { ExternalLink } from "../components/external-link";
 
 export default function GitHubAppPage() {
   const DOCS_ICON = "book";
@@ -61,10 +62,12 @@ export default function GitHubAppPage() {
         return (
           <React.Fragment>
             {
-              isSetup ? <SetupPageHeader pageIndex={1} canProceed={true}/> : <></>
+              isSetup ? <SetupPageHeader pageIndex={2} canProceed={true}/> : <></>
             }
             <h2 className="d-flex align-items-center font-weight-bold my-4">
               <a className="text-white" href={data.appUrls.app}>{data.appConfig.name}</a>
+              {/* The app avatar can be fetched from /identicons/app/app/<slug> */}
+
               <div className="ml-auto"></div>
               <Button className={classNames("btn-lg btn-danger", { "d-none": isSetup })} onClick={
                 async () => {
@@ -78,6 +81,18 @@ export default function GitHubAppPage() {
                 <FaBtnBody icon="sync-alt" text="Refresh"/>
               </button> */}
             </h2>
+            <h5 className="my-3">
+              <DataFetcher type="api" endpoint={ApiEndpoints.User.Root} loadingDisplay="text">{
+                (userRes: ApiResponses.GitHubUserResponse) => {
+                  return (
+                    <React.Fragment>
+                      Logged in as {userRes.login}
+                    </React.Fragment>
+                  );
+                }
+              }
+              </DataFetcher>
+            </h5>
             <AppPageCard header="Permissions" buttons={[{
               href: "https://docs.github.com/en/developers/apps/creating-a-github-app-using-url-parameters#github-app-permissions",
               icon: DOCS_ICON,
@@ -121,12 +136,12 @@ export default function GitHubAppPage() {
               title: "Edit Installation",
             }]}>
               <ul>
-                {data.repos.map((repo: any) => {
+                {data.repos.map((repo) => {
                   return (
                     <li key={repo.full_name}>
-                      <a href={repo.html_url}>
+                      <ExternalLink href={repo.html_url}>
                         {repo.full_name}
-                      </a>
+                      </ExternalLink>
                     </li>
                   );
                 })}
@@ -139,12 +154,16 @@ export default function GitHubAppPage() {
               title: "Install or Uninstall",
             }]}>
               <ul>
-                {data.installations.map((installation: any) => {
+                {data.installations.map((installation) => {
+                  if (installation.account == null) {
+                    return (<li className="text-danger">Installation {installation.id} missing {`"account"`}</li>);
+                  }
+
                   return (
                     <li key={installation.account.html_url}>
-                      <a href={installation.account.html_url}>
+                      <ExternalLink href={installation.account.html_url ?? ""}>
                         {installation.account.login}
-                      </a>
+                      </ExternalLink>
                     </li>
                   );
                 })}

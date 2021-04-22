@@ -23,12 +23,12 @@ export default function appPageCard(props: {
         <h4>
           {props.header}
         </h4>
-        <div className="d-flex">
+        <div className="btn-line" style={{ width: "25ch" }}>
           {
             props.buttons.map((btnProps, i) => {
               return (
-                <Button variant="outline-light" key={i}
-                  className={classNames("flex-grow-1", { "mr-2": btnProps.mr })}
+                <Button variant="primary" key={i}
+                  className={classNames("flex-grow-1")}
                   title={btnProps.title}
                 >
                   <ExternalLink href={btnProps.href}>

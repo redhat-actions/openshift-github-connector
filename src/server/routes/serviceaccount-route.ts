@@ -1,12 +1,12 @@
 /*
 import express from "express";
 
-import ApiEndpoints from "../../common/api-endpoints";
-import ApiRequests from "../../common/api-requests";
-import ApiResponses from "../../common/api-responses";
-import KubeWrapper, { ServiceAccountToken as ServiceAccountTokenData } from "../lib/kube/kube-wrapper";
-import GitHubUserMemento from "../lib/memento/user-memento";
-import { send405, sendError } from "../util/send-error";
+import ApiEndpoints from "common/api-endpoints";
+import ApiRequests from "common/api-requests";
+import ApiResponses from "common/api-responses";
+import KubeWrapper, { ServiceAccountToken as ServiceAccountTokenData } from "server/lib/kube/kube-wrapper";
+import GitHubUserMemento from "server/lib/memento/user-memento";
+import { send405, sendError } from "server/util/send-error";
 
 const router = express.Router();
 export default router;

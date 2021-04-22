@@ -1,17 +1,12 @@
-import Log from "../../logger";
-import SecretUtil from "../kube/secret-util";
+import Log from "server/logger";
+import SecretUtil from "server/lib/kube/secret-util";
 
 type GitHubUserMemento = {
   userId: string;
   userName: string;
   appId: string;
   installationId: string;
-  // serviceAccount?: GitHubUserMemento.ServiceAccount;
 }
-
-// type GitHubUserOptions = Partial<{
-//   reposToManage: number[];
-// }>
 
 namespace GitHubUserMemento {
 

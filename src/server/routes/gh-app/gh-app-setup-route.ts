@@ -1,17 +1,17 @@
 import express from "express";
 import fetch from "node-fetch";
 
-import ApiEndpoints from "../../common/api-endpoints";
-import { send405, sendError } from "../util/send-error";
-import { exchangeCodeForAppConfig } from "../lib/gh-app/gh-app-config";
-import GitHubAppMemento from "../lib/memento/app-memento";
-import Log from "../logger";
-import { sendSuccessStatusJSON, throwIfError } from "../util/server-util";
-import ApiRequests from "../../common/api-requests";
-import GitHubUserMemento from "../lib/memento/user-memento";
-import { GitHubOAuthResponse, GitHubUser } from "../../common/types/github-types";
-import HttpConstants from "../../common/http-constants";
-import ApiResponses from "../../common/api-responses";
+import ApiEndpoints from "common/api-endpoints";
+import { send405, sendError } from "server/util/send-error";
+import { exchangeCodeForAppConfig } from "server/lib/gh-app/gh-app-config";
+import GitHubAppMemento from "server/lib/memento/app-memento";
+import Log from "server/logger";
+import { sendSuccessStatusJSON, throwIfError } from "server/util/server-util";
+import ApiRequests from "common/api-requests";
+import GitHubUserMemento from "server/lib/memento/user-memento";
+import { GitHubOAuthResponse, GitHubUser } from "common/types/github-types";
+import HttpConstants from "common/http-constants";
+import ApiResponses from "common/api-responses";
 
 const router = express.Router();
 

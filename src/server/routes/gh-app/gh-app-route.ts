@@ -1,11 +1,11 @@
 import express from "express";
 
-import { send405, sendError } from "../util/send-error";
-import ApiEndpoints from "../../common/api-endpoints";
-import ApiResponses from "../../common/api-responses";
-import GitHubAppMemento from "../lib/memento/app-memento";
-import { getAppForSession } from "../lib/gh-app/gh-util";
-import { sendSuccessStatusJSON } from "../util/server-util";
+import ApiEndpoints from "common/api-endpoints";
+import ApiResponses from "common/api-responses";
+import { send405, sendError } from "server/util/send-error";
+import GitHubAppMemento from "server/lib/memento/app-memento";
+import { getAppForSession } from "server/lib/gh-app/gh-util";
+import { sendSuccessStatusJSON } from "server/util/server-util";
 
 const router = express.Router();
 

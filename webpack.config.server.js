@@ -5,6 +5,11 @@ const nodeExternals = require("webpack-node-externals");
 
 const entry = { server: "./src/server/index.ts" };
 
+function srcPath(relPath) {
+  // https://decembersoft.com/posts/say-goodbye-to-relative-paths-in-typescript-imports/
+  return path.join(__dirname, "src", relPath);
+}
+
 module.exports = () => {
 
   // const bundleNodeModules = process.env.WEBPACK_NODE_MODULES === "true";
@@ -29,6 +34,12 @@ module.exports = () => {
       extensions: [ ".ts", ".tsx", ".js" ],
       // https://github.com/gr2m/universal-github-app-jwt/issues/38
       mainFields: [ "main", "module" ],
+
+      alias: {
+        // match server/tsconfig.json "paths"
+        server: srcPath("server"),
+        common: srcPath("common"),
+      }
     },
     externals: bundleNodeModules ? [
       // dependencies that webpack cannot resolve must go here

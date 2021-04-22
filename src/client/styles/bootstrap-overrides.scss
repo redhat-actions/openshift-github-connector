@@ -1,15 +1,51 @@
-@use "~bootstrap/scss/bootstrap" as bs;
 @use "./constants" as c;
+
+.btn {
+  max-height: 3em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  & a {
+    color: inherit;
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  &.btn-light, &.btn-outline-light {
+    &:hover a {
+      text-decoration: none;
+      color: c.$dark;
+    }
+  }
+
+  &.btn-lg {
+    font-weight: bold;
+  }
+}
+
+.btn:disabled, button:disabled, [type="button"]:disabled {
+  cursor: not-allowed;
+}
 
 $-card-border-radius: 0.5rem;
 $card-box-shadow: 0.1rem 0.1rem 0.1rem black;
 
 .card {
-  background-color: c.$rh-gray-darker;
-  color: c.$fg-color;
+  background-color: c.$card-bg;
+  color: c.$body-fg;
   border-radius: $-card-border-radius;
   box-shadow: $card-box-shadow;
   margin-bottom: 1.5em;
+
+  & .bg-darker {
+    background-color: c.$body-bg;
+  }
+
+  & .bg-lighter {
+    background-color: c.$rh-gray-dark;
+  }
 }
 
 $card-border: 2px solid c.$rh-gray;
@@ -38,17 +74,17 @@ $card-limit-padding: 1rem 1.25rem;
 }
 
 
-.form-control {
+input {
   &.error, &.error:focus, &.warning, &.warning:focus {
     border-width: 3px;
     border-style: solid;
     box-shadow: none;
 
     &.error {
-      border-color: bs.$danger;
+      border-color: c.$danger;
     }
     &.warning {
-      border-color: bs.$warning;
+      border-color: c.$warning;
     }
   }
 }
@@ -61,12 +97,9 @@ $card-limit-padding: 1rem 1.25rem;
 .jumbotron {
   border-radius: $-card-border-radius;
   box-shadow: $card-box-shadow;
+  padding: 3rem 3rem;
 
-  color: black;
-
-  & > a {
-    color: black;
-  }
+  background-color: c.$card-bg;
 }
 
 .table thead tr td {

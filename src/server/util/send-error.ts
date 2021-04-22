@@ -1,11 +1,11 @@
 import express from "express";
 import { getReasonPhrase, StatusCodes } from "http-status-codes";
-import ApiResponses from "../../common/api-responses";
-import HttpConstants from "../../common/http-constants";
-import Log from "../logger";
+import ApiResponses from "common/api-responses";
+import HttpConstants from "common/http-constants";
+import Log from "server/logger";
 
 export function sendError(
-  res: express.Response, statusCode: StatusCodes, detail: string, title?: string,
+  res: express.Response, statusCode: StatusCodes, detail: string, severity: "warning" | "danger" = "danger",
   log: boolean = true
 ): void {
   const statusMessage = getReasonPhrase(statusCode);
@@ -20,7 +20,7 @@ export function sendError(
     message: detail,
     status: statusCode,
     statusMessage,
-    title: title ?? "Error",
+    severity,
   };
 
   res.header("Content-Type", "application/problem+json").json(resBody);
@@ -31,6 +31,6 @@ export const send405 = (allowed: HttpConstants.Methods[]) => (
     const allowedStr = allowed.join(", ").toUpperCase();
 
     res.setHeader("Allow", allowedStr);
-    sendError(res, 405, `${req.method} ${req.url} not allowed. Allow ${allowedStr}`, "Not allowed");
+    sendError(res, 405, `${req.method} ${req.url} not allowed. Allow ${allowedStr}`);
   }
 );

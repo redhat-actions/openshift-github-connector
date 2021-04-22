@@ -1,12 +1,12 @@
 import React from "react";
-import { Spinner } from "react-bootstrap";
+import { Card, Spinner } from "react-bootstrap";
 import UrlPath from "../../common/types/url-path";
 import { fetchJSON } from "../util/client-util";
 
 interface BaseDataFetcherProps<Data> {
-    children: (data: Data) => React.ReactNode,
+    children: (data: Data, reload?: () => Promise<void>) => React.ReactNode,
     type: "generic" | "api",
-    loadingDisplay?: "text" | "spinner" | "spinner-1em" | "none" | JSX.Element,
+    loadingDisplay?: "text" | "spinner" | "spinner-1em" | "card" | "none" | JSX.Element,
     loadingStyle?: React.CSSProperties,
 }
 
@@ -36,6 +36,8 @@ interface DataFetcherState<Data> {
  */
 export default class DataFetcher<Data> extends React.Component<DataFetcherProps<Data>, DataFetcherState<Data>> {
 
+  private readonly eventTarget = new EventTarget();
+
   constructor(
     props: DataFetcherProps<Data>,
   ) {
@@ -44,6 +46,16 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
   }
 
   async componentDidMount(): Promise<void> {
+    await this.load();
+  }
+
+  async load(): Promise<void> {
+    this.setState({
+      data: undefined,
+      loadingError: undefined,
+      loaded: false,
+    });
+
     try {
       let data: Data;
       if (this.props.type === "api") {
@@ -91,6 +103,15 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
           <Spinner style={loadingStyle} animation="border" variant="primary"/>
         );
       }
+      else if (loadingDisplayType === "card") {
+        return (
+          <Card style={{ minHeight: "100px" }}>
+            <Card.Body className="d-flex justify-content-center align-items-center">
+              <Spinner style={this.props.loadingStyle ?? {}} animation="border" variant="primary"/>
+            </Card.Body>
+          </Card>
+        );
+      }
       else if (loadingDisplayType === "none") {
         return (<></>);
       }
@@ -98,18 +119,18 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
     }
     else if (this.state.loadingError) {
       return (
-        <p className="error">
+        <p className="text-danger">
           {this.state.loadingError.message}
         </p>
       );
     }
     else if (this.state.data == null) {
       return (
-        <p className="error">
+        <p className="text-danger">
           Data to fetch was {this.state.data}.
         </p>
       );
     }
-    return this.props.children(this.state.data);
+    return this.props.children(this.state.data, async () => { await this.load(); });
   }
 }
