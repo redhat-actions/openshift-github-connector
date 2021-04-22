@@ -1,24 +1,28 @@
-export const GHCR_HOSTNAME = "ghcr.io";
+namespace ImageRegistries {
+  export const GHCR_HOSTNAME = "ghcr.io";
 
-export const ImageRegistries = {
-  GHCR: {
-    description: "GitHub Container Registry",
-    enabled: true,
-  },
-  OPENSHIFT: {
-    description: "OpenShift Integrated Registry",
-    enabled: false,
+  export const Registries = {
+    GHCR: {
+      description: "GitHub Container Registry",
+      enabled: true,
+    },
+    OPENSHIFT: {
+      description: "OpenShift Integrated Registry",
+      enabled: false,
 
-  },
-  OTHER: {
-    description: "another image registry (DockerHub, Quay.io, etc)",
-    enabled: false,
-  },
-};
+    },
+    OTHER: {
+      description: "another image registry",
+      enabled: false,
+    },
+  };
 
-export type ImageRegistryType = keyof typeof ImageRegistries;
+  export type Type = keyof typeof Registries;
 
-export interface ImageRegistryInfo {
-  type: ImageRegistryType,
-  hostname: string,
+  export interface Info {
+    type: Type,
+    hostname: string,
+  }
 }
+
+export default ImageRegistries;

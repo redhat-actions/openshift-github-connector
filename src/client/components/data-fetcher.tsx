@@ -4,7 +4,7 @@ import UrlPath from "../../common/types/url-path";
 import { fetchJSON } from "../util/client-util";
 
 interface BaseDataFetcherProps<Data> {
-    children: (data: Data, reload?: () => Promise<void>) => React.ReactNode,
+    children: (data: Data, reload: () => Promise<void>) => React.ReactNode,
     type: "generic" | "api",
     loadingDisplay?: "text" | "spinner" | "spinner-1em" | "card" | "none" | JSX.Element,
     loadingStyle?: React.CSSProperties,

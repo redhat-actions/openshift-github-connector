@@ -43,14 +43,6 @@ h1 h2 h3 h4 h5 {
   font-weight: bold;
 }
 
-.text-black {
-  color: black;
-}
-
-.text-white {
-  color: white;
-}
-
 hr {
   border-color: c.$body-fg;
   margin: map-get(c.$spacers, 4) 0;

@@ -1,7 +1,7 @@
 import React from "react";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import classNames from "classnames";
-import { Button } from "react-bootstrap";
+import { Button, Card } from "react-bootstrap";
 
 import { ExternalLink } from "./external-link";
 import BtnBody from "./fa-btn-body";
@@ -18,12 +18,13 @@ export default function appPageCard(props: {
     children: React.ReactNode,
 }): JSX.Element {
   return (
-    <div className="card">
-      <div className="card-title d-flex justify-content-between align-items-center">
-        <h4>
+    <Card>
+      <Card.Title>
+        <div>
           {props.header}
-        </h4>
-        <div className="btn-line" style={{ width: "25ch" }}>
+        </div>
+        <div className="ml-auto"></div>
+        <div className="btn-line" style={{ width: "20ch" }}>
           {
             props.buttons.map((btnProps, i) => {
               return (
@@ -39,10 +40,10 @@ export default function appPageCard(props: {
             })
           }
         </div>
-      </div>
-      <div className="card-body pb-3">
+      </Card.Title>
+      <Card.Body>
         {props.children}
-      </div>
-    </div>
+      </Card.Body>
+    </Card>
   );
 }

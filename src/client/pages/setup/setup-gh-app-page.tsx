@@ -114,11 +114,11 @@ export function CreateAppPage(): JSX.Element {
 
             <div className="btn-line flex-column">
               <Button size="lg" type="submit" form={manifestFormID}>
-                <BtnBody icon={[ "fab", "github" ]} iconClasses="fa-2x text-black" text="Create a new app" />
+                <BtnBody icon={[ "fab", "github" ]} iconClasses="fa-2x text-dark" text="Create a new app" />
               </Button>
               <h4 className="text-center">or</h4>
               <Button size="lg" variant="primary" disabled>
-                <BtnBody icon={[ "fab", "github" ]} iconClasses="fa-2x text-black" text="Use an existing app" />
+                <BtnBody icon={[ "fab", "github" ]} iconClasses="fa-2x text-dark" text="Use an existing app" />
               </Button>
             </div>
 

@@ -7,14 +7,17 @@ import ApiRequests from "../../common/api-requests";
 import ApiResponses from "../../common/api-responses";
 import { STARTER_WORKFLOW } from "../../common/common-util";
 import { GitHubRepoId } from "../../common/types/github-types";
+import ImageRegistry from "../../common/types/image-registries";
 import Banner from "../components/banner";
 import DataFetcher from "../components/data-fetcher";
 import { ExternalLink } from "../components/external-link";
 import BtnBody from "../components/fa-btn-body";
 import { fetchJSON } from "../util/client-util";
 
+const defaultWorkflowFileBasename = "openshift";
+
 interface AddWorkflowsPageState {
-  // imageRegistry: ImageRegistryInfo,
+  imageRegistry: ImageRegistry.Info,
   repo?: GitHubRepoId,
   workflowFileName: {
     name?: string,
@@ -35,18 +38,16 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
   constructor(props: {}) {
     super(props);
     this.state = {
-      /*
       imageRegistry: {
         type: "GHCR",
-        hostname: GHCR_HOSTNAME,
+        hostname: ImageRegistry.GHCR_HOSTNAME,
       },
-      */
-      workflowFileName: {
-        name: "openshift.yml",
-      },
+      workflowFileName: {},
       overwriteExistingWorkflow: false,
       isSubmitting: false,
     };
+
+    this.setWorkflowFileName(defaultWorkflowFileBasename);
   }
 
   public render(): JSX.Element {
@@ -63,21 +64,35 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
             </p>
             <p>
               For more information about the starter workflow,
-              you can <ExternalLink href={STARTER_WORKFLOW.htmlFile}>
-                view it on GitHub
-              </ExternalLink>, <ExternalLink href={STARTER_WORKFLOW.blog}>
-                read the blog
-              </ExternalLink>, or <ExternalLink href={STARTER_WORKFLOW.youtube}>
-                watch the video.
-              </ExternalLink>
+              you can:
             </p>
+            <ul className="no-bullets">
+              <li>
+                <ExternalLink href={STARTER_WORKFLOW.htmlFile}>
+                  <FontAwesomeIcon fixedWidth icon={[ "fab", "github" ]} className="mr-2 text-light" />
+                  View it on GitHub
+                </ExternalLink>
+              </li>
+              <li>
+                <ExternalLink href={STARTER_WORKFLOW.blog}>
+                  <FontAwesomeIcon fixedWidth icon="book-open" className="mr-2 text-light" />
+                  Read the blog
+                </ExternalLink>
+              </li>
+              <li>
+                <ExternalLink href={STARTER_WORKFLOW.youtube}>
+                  <FontAwesomeIcon fixedWidth icon={[ "fab", "youtube" ]} className="mr-2 text-light" />
+                  Watch the video
+                </ExternalLink>
+              </li>
+            </ul>
           </Card.Body>
         </Card>
 
-        {/* <ContainerImageRegistryCard
+        <ContainerImageRegistryCard
           currentImageRegistry={this.state.imageRegistry}
-          setImageRegistry={(imageRegistry: ImageRegistryInfo) => this.setState({ imageRegistry })}
-        /> */}
+          setImageRegistry={(imageRegistry: ImageRegistry.Info) => this.setState({ imageRegistry })}
+        />
 
         <Card>
           <Card.Title>
@@ -94,7 +109,8 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                 style={{ width: "25ch" }}
                 isValid={this.state.workflowFileName.validationErr == null}
                 isInvalid={this.state.workflowFileName.validationErr != null}
-                defaultValue={this.state.workflowFileName.name} onChange={(e) => this.setWorkflowFileName(e.currentTarget.value)}
+                defaultValue={defaultWorkflowFileBasename}
+                onChange={(e) => this.setWorkflowFileName(e.currentTarget.value)}
               />
               <Form.Control style={{ width: "8ch" }} type="text" readOnly disabled value=".yml" />
 
@@ -234,10 +250,10 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
 
   private async submitCreateWorkflow(): Promise<void> {
     if (!this.state.repo) {
-      throw new Error("No repository selected");
+      throw new Error("No repository selected.");
     }
     else if (this.state.workflowFileName.validationErr || !this.state.workflowFileName.name) {
-      throw new Error("Invalid workflow filename");
+      throw new Error("Invalid workflow filename. Fix the workflow filename above.");
     }
 
     const reqBody: ApiRequests.CreateWorkflow = {
@@ -253,10 +269,9 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
   }
 }
 
-/*
 function ContainerImageRegistryCard(props: {
-  currentImageRegistry: ImageRegistryInfo,
-  setImageRegistry: (registry: ImageRegistryInfo) => void,
+  currentImageRegistry: ImageRegistry.Info,
+  setImageRegistry: (registry: ImageRegistry.Info) => void,
 }): JSX.Element {
 
   const registryRadioGroup = "image-registry-radiogroup";
@@ -287,20 +302,16 @@ function ContainerImageRegistryCard(props: {
           The GitHub registry is the default because it requires the least configuration.
         </p>
 
-        <p>
-          What if you want different registries for different repositories/workflows?
-        </p>
-
         <div className="b w-50">
           {
-            Object.keys(ImageRegistries).map((registry_) => {
-              const registryType = registry_ as ImageRegistryType;
-              const disabled = !ImageRegistries[registryType].enabled;
-              const text = `Use ${ImageRegistries[registryType].description}`;
+            Object.keys(ImageRegistry.Registries).map((registry_) => {
+              const registryType = registry_ as ImageRegistry.Type;
+              const disabled = !ImageRegistry.Registries[registryType].enabled;
+              const text = `Use ${ImageRegistry.Registries[registryType].description}`;
 
               return (
                 <label key={registryType}
-                  className={classNames("d-flex align-items-center clickable", { disabled })}
+                  className={classNames("d-flex align-items-center clickable py-1", { disabled })}
                   title={disabled ? "Not implemented" : text}
                 >
                   <input type="radio"
@@ -309,7 +320,7 @@ function ContainerImageRegistryCard(props: {
                     onChange={(_e) => {
                       props.setImageRegistry({
                         type: registryType,
-                        hostname: GHCR_HOSTNAME,
+                        hostname: ImageRegistry.GHCR_HOSTNAME,
                       });
                     }}
                     disabled={disabled}
@@ -321,27 +332,30 @@ function ContainerImageRegistryCard(props: {
           }
         </div>
         <div>
-          <Form>
+          <Form inline className="my-4">
             <Form.Group>
-              <label>
+              <Form.Label>
                 Image registry hostname:
-                <Form.Control type="text"
+                <Form.Control type="text" className="ml-3"
                   isValid={true}
                   isInvalid={false}
                   value={props.currentImageRegistry.hostname}
                   readOnly
                 />
-              </label>
+              </Form.Label>
               <Form.Control.Feedback>
               </Form.Control.Feedback>
             </Form.Group>
           </Form>
         </div>
+
+        <p>
+          (this setting has no effect)
+        </p>
       </Card.Body>
     </Card>
   );
 }
-*/
 
 function SubmissionStatusBanner(props: {
   bannerId: string,
