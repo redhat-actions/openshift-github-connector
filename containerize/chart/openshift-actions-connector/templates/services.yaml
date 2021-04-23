@@ -5,7 +5,7 @@ metadata:
 spec:
     type: ClusterIP
     selector:
-      {{ toYaml .Values.deploymentLabels | nindent 6}}
+      {{ toYaml .Values.deploymentLabels | nindent 6 }}
     ports:
     - port: 80
       targetPort: {{ .Values.serverPort }}

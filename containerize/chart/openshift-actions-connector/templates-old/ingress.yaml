@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.appName }}
+  labels:
+    {{- toYaml .Values.commonLabels | nindent 4 }}
+  annotations:
+    route.openshift.io/termination: edge
+spec:
+  defaultBackend:
+    service:
+      name: {{ .Values.clientServiceName }}
+      port:
+        name: {{ .Values.clientPortName }}
+  rules:
+    - host: "abc.com"
+      http:
+        paths:
+          # - pathType: Prefix
+          #   backend:
+
+
+          - path: "/api"
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.serverServiceName }}
+                port:
+                  name: {{ .Values.serverPortName }}
+  # tls:

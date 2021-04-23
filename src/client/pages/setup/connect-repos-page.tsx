@@ -598,11 +598,11 @@ function ShowSecretsButton(props: { noSecrets: number, isShowingSecrets: boolean
 
 function getSecretNameWarning(_secretNames: string[]): JSX.Element {
   // const msg = `Secret${secretNames.length === 1 ? "" : "s"} ${joinList(secretNames)} will be overwritten.`;
-  const msg = `Secret will be overwritten.`;
+  const msg = `Existing secret will be updated.`;
 
   return (
     <div>
-      <FontAwesomeIcon className="text-warning mr-2" icon="exclamation-triangle" title={msg} fixedWidth />
+      <FontAwesomeIcon className="mr-2" icon="info-circle" title={msg} fixedWidth />
       {msg}
     </div>
   );

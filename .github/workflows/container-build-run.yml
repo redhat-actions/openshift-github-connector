@@ -32,6 +32,8 @@ jobs:
             containerize/Containerfile
           layers: true
           oci: true
+          build-args:
+            VCS_REF=${{ steps.commit_data.outputs.short_sha }}
 
       - name: Run container
         run: |

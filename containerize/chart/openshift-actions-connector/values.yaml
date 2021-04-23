@@ -12,15 +12,16 @@ securityContext:
       drop:
         - ALL
 
+
+# REQUIRED VALUE:
+# This is the apps.<cluster url> subdomain.which may have been edited by the admin. There does not appear to be a user API to get this.
+# the easiest way to get this is to `oc expose <some service>` and then look at its subdomain
+# "$(oc whoami --show-server | cut -d'/' -f3 | cut -d':' -f1 | sed -e 's/api/apps/')"
 # https://github.com/helm/helm/issues/2055
-# Retrieve yours with "oc whoami --show-server", omitting protocol, and port if it's given (usually 6443)
-# and then use the apps subdomain instead of the api subdomain.
-# You can also do "oc expose <some service> and get the subdomain from the route that generates
-# I do not know how to find this domain programmatically
-clusterDomain: ""
+clusterAppsSubdomain: ""
 
 serviceAccountName: github-actions
-# A (non-cluster) rolebinding is created with this role, allowing the application pod to
+# A rolebinding is created with this role, allowing the application pod to
 # modify resources in the namespace
 serviceAccountRole: edit
 
