@@ -13,7 +13,11 @@ securityContext:
         - ALL
 
 # https://github.com/helm/helm/issues/2055
-clusterDomain: apps.member.crt-stage.com
+# Retrieve yours with "oc whoami --show-server", omitting protocol, and port if it's given (usually 6443)
+# and then use the apps subdomain instead of the api subdomain.
+# You can also do "oc expose <some service> and get the subdomain from the route that generates
+# I do not know how to find this domain programmatically
+clusterDomain: ""
 
 serviceAccountName: github-actions
 # A (non-cluster) rolebinding is created with this role, allowing the application pod to

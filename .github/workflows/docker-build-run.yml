@@ -1,4 +1,4 @@
-name: Docker build and run
+name: Container build and run
 on:
   push:
   workflow_dispatch:
@@ -11,35 +11,48 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - uses: redhat-actions/common/commit-data@v1
+        id: commit_data
+
       - name: Install
         run: |
           yarn --frozen-lockfile add wait-on
 
-      - name: Build in docker
+      - name: Build container
         run: |
-          yarn docker-build
+          yarn container-build
 
-      - name: Run in docker
+      - name: Run container
         run: |
           set -eEx
-          nohup yarn docker-run > out.log 2>&1 &
+          nohup yarn container-run > out.log 2>&1 &
           echo "View output in Logs step below"
           sleep 10
 
           yarn wait-on -l tcp:3000 -t 60000
           yarn wait-on -l tcp:3003 -t 60000
 
-      - name: Docker inspect
+      - name: Podman inspect
         run: |
-          docker inspect $(docker ps -q)
+          podman inspect $(podman ps -q)
 
       - name: Test
         shell: bash
         run: |
           set -eEx
-          docker ps
+          podman ps
           curl -sSf http://localhost:3000
           curl -sSf http://localhost:3003
+
+      - name: Push container image
+        if: ${{ steps.commit_data.outputs.is_pr }} == 'false'
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          registry: quay.io/tetchell
+          image: openshift-actions-connector
+          tags: latest ${{ steps.commit_data.outputs.branch }}
+          username: tetchell
+          password: ${{ secrets.QUAY_TOKEN }}
 
       - name: Logs
         if: always()
@@ -48,9 +61,9 @@ jobs:
           cat out.log
           echo "========== end nohup output =========="
           echo "=========== Container logs ==========="
-          docker logs $(docker ps -a -q)
+          podman logs $(podman ps -a -q)
 
       - name: Take down
         if: always()
         run: |
-          docker stop $(docker ps -q)
+          podman stop $(podman ps -q)
