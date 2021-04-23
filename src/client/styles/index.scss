@@ -1,5 +1,5 @@
 @use "./constants" as c;
-@use "./bootstrap-overrides";
+@use "./bs-component-styles";
 @use "./setup";
 
 html, body {
@@ -11,18 +11,6 @@ html, body {
   background-color: c.$body-bg;
 
   line-height: 1.5em;
-}
-
-.navbar {
-  color: white;
-  background-color: c.$rh-gray-darkest;
-
-  height: c.$navbar-height;
-}
-
-.navbar img, .navbar i {
-  height: calc(#{c.$navbar-height} * 0.6);
-  font-size: calc(#{c.$navbar-height} * 0.6);
 }
 
 main {
@@ -102,7 +90,7 @@ pre {
 }
 
 @mixin font-lg {
-  font-size: 1.25em;
+  font-size: 125%;
 }
 
 .font-lg {
@@ -110,7 +98,7 @@ pre {
 }
 
 @mixin font-md {
-  font-size: 1.1em;
+  font-size: 110%;
 }
 
 .font-md {

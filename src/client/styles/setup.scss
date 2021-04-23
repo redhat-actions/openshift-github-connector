@@ -1,86 +1,85 @@
-@use "~bootstrap/scss/bootstrap" as bs;
 @use "./constants" as c;
 
 .table td {
-    vertical-align: middle;
+  vertical-align: middle;
 }
 
 .table tr {
-    height: 4rem;
+  height: 4rem;
 }
 
 td .btn {
-    min-width: 15ch;
+  min-width: 15ch;
 }
 
 $header-top-height: 1rem;
 
 #setup-header {
-    margin-top: - c.$main-vertical-padding;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    margin-bottom: 3rem;
+  margin-top: - c.$main-vertical-padding;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  margin-bottom: 3rem;
 }
 
 #setup-header-wrapper {
-    position: relative;
+  position: relative;
 }
 
 #setup-header-background {
-    position: absolute;
+  position: absolute;
 
-    background-color: c.$body-bg;
-    top: 0;
-    right: 0;
-    height: 100%;
-    width: 100%;
+  background-color: c.$body-bg;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
 }
 
 // $setup-banner-color: #0c8552;
 $setup-banner-color: #2a4a4a;
 
 #setup-header-body {
-    // top: $header-top-height;
-    top: $header-top-height;
-    // border-radius: 0 0 $card-border-radius $card-border-radius;
-    background-color: $setup-banner-color;
-    box-shadow: 0.1rem 0.25rem 0.25rem black;;
+  // top: $header-top-height;
+  top: $header-top-height;
+  // border-radius: 0 0 $card-border-radius $card-border-radius;
+  background-color: $setup-banner-color;
+  box-shadow: 0.1rem 0.25rem 0.25rem black;
 
-    padding: 0.5rem 0;
+  padding: 0.5rem 0;
 }
 
 #setup-header-steps {
-    margin: 0 1rem;
+  margin: 0 1rem;
 }
 
 #setup-header-buttons {
-    padding: 1rem 1rem 0.5rem;
+  padding: 1rem 1rem 0.5rem;
 }
 
 .setup-step {
-    flex: 1;
-    text-align: center;
-    margin: 0 0.2rem;
+  flex: 1;
+  text-align: center;
+  margin: 0 0.2rem;
 
-    padding: 0.5rem 0;
-    border-radius: 0.5em;
-    border: 0.5px solid transparent;
+  padding: 0.5rem 0;
+  border-radius: 0.5em;
+  border: 0.5px solid transparent;
 
-    &.current {
-        background-color: bs.$light;
+  &.current {
+    background-color: c.$light;
 
-        & span {
-            color: bs.$dark;
-        }
+    & span {
+      color: c.$dark;
     }
+  }
 
-    color: bs.$light;
+  color: c.$light;
 
-    &:focus, &:hover {
-        text-decoration: none !important;
-        border-color: c.$body-fg;
-    }
+  &:focus, &:hover {
+    text-decoration: none !important;
+    border-color: c.$body-fg;
+  }
 }
 
 // $setup-green: rgb(19, 161, 19);
@@ -88,33 +87,46 @@ $circle-size: 2.5rem;
 $circle-font-size: 1rem;
 
 .setup-step-circle {
-    height: $circle-size;
-    width: $circle-size;
+  height: $circle-size;
+  width: $circle-size;
 
-    border-width: 0.2rem;
-    border-style: solid;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 100%;
+  border-width: 0.2rem;
+  border-style: solid;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 100%;
 
-    font-size: $circle-font-size;
+  font-size: $circle-font-size;
 
-    color: bs.$light;
+  color: c.$light;
 
-    // see SetupStepState
-    &.passed {
-        background-color: bs.$green;
-        border-color: bs.$green;
-    }
+  // see SetupStepState
+  &.passed {
+    background-color: c.$success;
+    border-color: c.$success;
+  }
 
-    &.current {
-        background-color: bs.$green;
-        border-color: bs.$green;
-    }
+  &.current {
+    background-color: c.$success;
+    border-color: c.$success;
+  }
 
-    &.todo {
-        background-color: "";
-        border-color: bs.$yellow;
-    }
+  &.todo {
+    background-color: "";
+    border-color: c.$warning;
+  }
+}
+
+
+.navbar {
+  color: white;
+  background-color: c.$rh-gray-darkest;
+
+  height: c.$navbar-height;
+}
+
+.navbar img, .navbar i {
+  height: calc(#{c.$navbar-height} * 0.6);
+  font-size: calc(#{c.$navbar-height} * 0.6);
 }
