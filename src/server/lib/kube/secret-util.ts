@@ -207,6 +207,8 @@ namespace SecretUtil {
 
         const newSecret = await SecretUtil.loadFromSecret(saTokenSecretName);
         if (!newSecret) {
+          // It appears there is a timing issue where the secret will not have data for a very short time after it is created.
+          // We will have to handle this with a delay or a retry.
           throw new Error(`Failed to load secret "${saTokenSecretName}" after it was just created`);
         }
         saTokenSecretBody = newSecret;

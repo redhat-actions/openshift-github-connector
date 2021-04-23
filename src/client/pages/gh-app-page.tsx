@@ -53,7 +53,7 @@ export default function GitHubAppPage() {
                   }>
                     <BtnBody icon="times" text="Unbind"/>
                   </Button>
-                  <Button size="lg" variant="light" onClick={reload}>
+                  <Button size="lg" onClick={reload}>
                     <BtnBody icon="sync-alt" text="Refresh"/>
                   </Button>
                 </div>

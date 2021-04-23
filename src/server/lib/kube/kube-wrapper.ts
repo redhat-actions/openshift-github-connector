@@ -1,4 +1,5 @@
 import * as k8s from "@kubernetes/client-node";
+import fs from "fs/promises";
 import jwt from "jsonwebtoken";
 
 import ApiResponses from "common/api-responses";
@@ -25,13 +26,16 @@ export default class KubeWrapper {
 	private static _instance: KubeWrapper | undefined;
 	private static _initError: Error | undefined;
 
+	private static readonly SA_ENVVAR = "CONNECTOR_SERVICEACCOUNT_NAME";
+
 	constructor(
 		private readonly config: k8s.KubeConfig,
 		public readonly namespace: string,
 		public readonly isInCluster: boolean,
+		public readonly serviceAccountName: string,
 	) {
 		// Log.info(`Created KubeWrapper for ${config.currentContext}`);
-		Log.info(`Created KubeWrapper`);
+		Log.info(`Created KubeWrapper in namespace ${namespace}. isInCluster=${isInCluster} and serviceAccountName=${serviceAccountName}`);
 	}
 
 	public static get instance(): KubeWrapper {
@@ -51,87 +55,6 @@ export default class KubeWrapper {
 
 	public static get initError(): Error | undefined {
 		return this._initError;
-	}
-
-	private static decodeServiceAccountToken(serviceAccountToken: string): ServiceAccountToken {
-
-		/*
-		const invalidMsg = `Invalid service account secret`;
-
-		let serviceAccountSecret;
-    try {
-      serviceAccountSecret = JSON.parse(serviceAccountToken);
-    }
-    catch (err) {
-			// err.message will be "Unexpected token <token> in JSON at position <position>"
-			throw new Error(`${invalidMsg}: ${err.message}`);
-    }
-
-		serviceAccountSecret = objValuesFromb64(serviceAccountSecret);
-
-    const checkMetadata = checkKeys(serviceAccountSecret, "metadata");
-    if (!checkMetadata) {
-      throw new Error(`${invalidMsg}: Missing "metadata" key`);
-    }
-		const annotations = checkKeys(checkMetadata.metadata, "annotations");
-		if (!annotations) {
-			throw new Error(`${invalidMsg}: Missing "metadata.annotations" key`);
-		}
-
-		const SA_NAME_ANNOTATION = "kubernetes.io/service-account.name";
-
-		const saNameAnnotation = checkKeys(annotations.annotations, SA_NAME_ANNOTATION);
-		if (!saNameAnnotation) {
-			throw new Error(`${invalidMsg}: Missing "metadata.annotations.${SA_NAME_ANNOTATION}" key`);
-		}
-		const saName = saNameAnnotation[SA_NAME_ANNOTATION];
-
-    const checkData = checkKeys(serviceAccountSecret, "data");
-    if (!checkData) {
-      throw new Error(`${invalidMsg}: Missing "data" key`);
-    }
-
-    const { data } = checkData.data;
-    const token = checkKeys(data, "token");
-    if (!token) {
-      throw new Error(`${invalidMsg}: Missing "data.token" key`);
-    }*/
-
-		// what keys are used to sign the SA token?
-		const decodedTokenUntested = jwt.decode(serviceAccountToken);
-		if (decodedTokenUntested == null) {
-			throw new Error(`Failed to decode service account token: returned null.`);
-		}
-		else if (typeof decodedTokenUntested === "string") {
-			throw new Error(`Failed to decode service account token: returned plain string.`);
-		}
-
-		const checkKeysResult = checkKeys<RawServiceAccountToken>(decodedTokenUntested,
-			"iss",
-			"kubernetes.io/serviceaccount/namespace",
-			"kubernetes.io/serviceaccount/secret.name",
-			"kubernetes.io/serviceaccount/service-account.name",
-			"kubernetes.io/serviceaccount/service-account.uid",
-			"sub"
-		);
-
-		if (!checkKeysResult) {
-			throw new Error(`Failed to decode service account token: Missing expected field`);
-		}
-
-		const decodedToken = decodedTokenUntested as RawServiceAccountToken;
-
-		Log.info(
-			`Successfully decoded Service Account token for Service Account `
-			+ decodedToken["kubernetes.io/serviceaccount/service-account.name"]
-		)
-
-		return {
-			namespace: decodedToken["kubernetes.io/serviceaccount/namespace"],
-			tokenSecretName: decodedToken["kubernetes.io/serviceaccount/secret.name"],
-			serviceAccountName: decodedToken["kubernetes.io/serviceaccount/service-account.name"],
-			token: serviceAccountToken,
-		};
 	}
 
 	/*
@@ -198,8 +121,13 @@ export default class KubeWrapper {
 		const currentContextName = tmpConfig.getCurrentContext();
 		Log.info(`Current context is ${currentContextName}`);
 		const currentContext = tmpConfig.getContextObject(currentContextName);
-		const currentNamespace = currentContext?.namespace;
-		Log.info(`Current namespace is ${currentNamespace}`);
+
+		let currentNamespace = currentContext?.namespace;
+		if (!currentNamespace && isInCluster) {
+			Log.debug("Load namespace from pod mount file");
+			currentNamespace = (await fs.readFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")).toString().trim();
+		}
+		Log.info(`Current namespace is "${currentNamespace}"`);
 
 		if (!currentNamespace) {
 			const nsErr = new Error(
@@ -211,7 +139,29 @@ export default class KubeWrapper {
 			throw nsErr;
 		}
 
-		this._instance = new KubeWrapper(tmpConfig, currentNamespace, isInCluster);
+		const serviceAccountName = process.env[KubeWrapper.SA_ENVVAR];
+		if (!serviceAccountName) {
+			const saError = new Error(`No service account name provided in environment: ${KubeWrapper.SA_ENVVAR} is not set.`);
+			this._initError = saError;
+			throw saError;
+		}
+
+		Log.info(`Service account name is ${serviceAccountName}`);
+
+		const saExists = await KubeWrapper.doesServiceAccountExist(
+			tmpConfig.makeApiClient(k8s.CoreV1Api), currentNamespace, serviceAccountName
+		);
+
+		if (!saExists) {
+			const saNotExistError = new Error(
+				`Service account "${serviceAccountName}" `
+				+ `provided in environment variable "${KubeWrapper.SA_ENVVAR}" does not exist in namespace ${currentNamespace}`
+			);
+			this._initError = saNotExistError;
+			throw saNotExistError;
+		}
+
+		this._instance = new KubeWrapper(tmpConfig, currentNamespace, isInCluster, serviceAccountName);
 		this._initError = undefined;
 
 		return this._instance;
@@ -240,6 +190,44 @@ export default class KubeWrapper {
 			user: {
 				name: user.name,
 			},
+		};
+	}
+
+	private static decodeServiceAccountToken(serviceAccountToken: string): ServiceAccountToken {
+		// what keys are used to sign the SA token?
+		const decodedTokenUntested = jwt.decode(serviceAccountToken);
+		if (decodedTokenUntested == null) {
+			throw new Error(`Failed to decode service account token: returned null.`);
+		}
+		else if (typeof decodedTokenUntested === "string") {
+			throw new Error(`Failed to decode service account token: returned plain string.`);
+		}
+
+		const checkKeysResult = checkKeys<RawServiceAccountToken>(decodedTokenUntested,
+			"iss",
+			"kubernetes.io/serviceaccount/namespace",
+			"kubernetes.io/serviceaccount/secret.name",
+			"kubernetes.io/serviceaccount/service-account.name",
+			"kubernetes.io/serviceaccount/service-account.uid",
+			"sub"
+		);
+
+		if (!checkKeysResult) {
+			throw new Error(`Failed to decode service account token: Missing expected field`);
+		}
+
+		const decodedToken = decodedTokenUntested as RawServiceAccountToken;
+
+		Log.info(
+			`Successfully decoded Service Account token for Service Account `
+			+ decodedToken["kubernetes.io/serviceaccount/service-account.name"]
+		)
+
+		return {
+			namespace: decodedToken["kubernetes.io/serviceaccount/namespace"],
+			tokenSecretName: decodedToken["kubernetes.io/serviceaccount/secret.name"],
+			serviceAccountName: decodedToken["kubernetes.io/serviceaccount/service-account.name"],
+			token: serviceAccountToken,
 		};
 	}
 
@@ -273,16 +261,16 @@ export default class KubeWrapper {
 		return this.config.makeApiClient(k8s.CoreV1Api);
 	}
 
-	public async doesServiceAccountExist(serviceAccountName: string): Promise<boolean> {
-		const serviceAccountsRes = await this.coreClient.listNamespacedServiceAccount(this.namespace);
+	public static async doesServiceAccountExist(client: k8s.CoreV1Api, namespace: string, serviceAccountName: string): Promise<boolean> {
+		const serviceAccountsRes = await client.listNamespacedServiceAccount(namespace);
 		const serviceAccounts = serviceAccountsRes.body.items;
 
-		Log.debug(`Checking if ${serviceAccountName} exists`);
+		Log.info(`Checking if service account ${serviceAccountName} exists`);
 		const serviceAccountNames = serviceAccounts.map((sa) => sa.metadata?.name).filter((saName): saName is string => saName != null);
 		Log.debug(`service accounts: ${serviceAccountNames.join(", ")}`);
 
 		const exists = serviceAccountNames.includes(serviceAccountName);
-		Log.debug(`service account exists ? ${exists}`);
+		Log.info(`service account exists ? ${exists}`);
 
 		return exists;
 	}

@@ -6,7 +6,7 @@ async function loadKube(): Promise<void> {
     await KubeWrapper.initialize();
   }
   catch (err) {
-    Log.warn(`Failed to initialize KubeWrapper`);
+    Log.error(`Failed to initialize KubeWrapper`, err);
   }
 }
 

@@ -10,9 +10,9 @@ export default function WelcomePage(): JSX.Element {
     <React.Fragment>
       <SetupPageHeader pageIndex={0} canProceed={true} />
       <Jumbotron>
-        <h2 >Welcome to the OpenShift GitHub Actions Connector</h2>
+        <h2>Welcome to the OpenShift GitHub Actions Connector</h2>
         <hr />
-        <h5>
+        <h5 className="my-3">
           This wizard will walk you through connecting this OpenShift cluster to your GitHub Actions.
         </h5>
         <ul>
@@ -40,7 +40,7 @@ export default function WelcomePage(): JSX.Element {
       <Card>
         <Card.Body>
           <div className="d-flex">
-            Backend status:&nbsp;
+            <b>Backend status:&nbsp;</b>
             <DataFetcher type="api" endpoint={ApiEndpoints.Health}>
               {(data: ApiResponses.Result) => (
                 <React.Fragment>
@@ -51,17 +51,45 @@ export default function WelcomePage(): JSX.Element {
               )}
             </DataFetcher>
           </div>
-          <div className="d-flex mt-2">
-            Kubernetes user:&nbsp;
-            <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root}>
-              {(data: ApiResponses.ClusterState) => (
-                <React.Fragment>
-                  <span className={data.connected ? "text-success" : "text-danger"}>
-                    {data.connected ? data.clusterInfo.user.name : "Error"}
-                  </span>
-                </React.Fragment>
-              )}
-            </DataFetcher>
+          <h5 className="mt-4 b">Cluster info:</h5>
+          <div className="">
+            <div className="d-flex mt-2">
+              <b>Namespace:&nbsp;</b>
+              <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root}>
+                {(data: ApiResponses.ClusterState) => (
+                  <React.Fragment>
+                    <span className={data.connected ? "text-success" : "text-danger"}>
+                      {data.connected ? data.namespace : "Error"}
+                    </span>
+                  </React.Fragment>
+                )}
+              </DataFetcher>
+            </div>
+            <div className="d-flex mt-2">
+              <b>User:&nbsp;</b>
+              <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root}>
+                {(data: ApiResponses.ClusterState) => (
+                  <React.Fragment>
+                    <span className={data.connected ? "text-success" : "text-danger"}>
+                      {data.connected ? data.clusterInfo.user.name : "Error"}
+                    </span>
+                  </React.Fragment>
+                )}
+              </DataFetcher>
+            </div>
+            <div className="d-flex mt-2">
+              <b>Service Account Name:&nbsp;</b>
+              <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root}>
+                {(data: ApiResponses.ClusterState) => (
+                  <React.Fragment>
+                    <span className={data.connected ? "text-success" : "text-danger"}>
+                      {data.connected ? data.serviceAccountName : "Error"}
+                    </span>
+                  </React.Fragment>
+                )}
+              </DataFetcher>
+            </div>
+
           </div>
         </Card.Body>
       </Card>

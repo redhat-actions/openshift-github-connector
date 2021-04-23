@@ -6,7 +6,6 @@ import { useHistory } from "react-router-dom";
 import classNames from "classnames";
 
 import ApiEndpoints from "../../../common/api-endpoints";
-import getEndpointUrl from "../../util/get-endpoint-url";
 import ClientPages from "../client-pages";
 import DataFetcher from "../../components/data-fetcher";
 import { fetchJSON, getSearchParam } from "../../util/client-util";
@@ -16,46 +15,7 @@ import ApiRequests from "../../../common/api-requests";
 import Banner from "../../components/banner";
 import ApiResponses from "../../../common/api-responses";
 import BtnBody from "../../components/fa-btn-body";
-
-export function getAppManifest(appUrl: string): Record<string, unknown> {
-  // the redirect url is the first one, which is redirected to after the app is created
-  const redirectUrl = appUrl + ClientPages.SetupCreatingApp;
-
-  // the callback url is the second one, which is redirect to after the app is installed
-  const callbackUrl = appUrl + ClientPages.SetupInstalledApp;
-  // eslint-disable-next-line camelcase
-  // the setup url is redirected to after the app is updated
-  const setupUrl = callbackUrl + "?reload=true";
-
-  const incomingWebhookUrl = appUrl + getEndpointUrl(ApiEndpoints.Webhook.path);
-
-  // https://docs.github.com/en/developers/apps/creating-a-github-app-from-a-manifest#github-app-manifest-parameters
-  // the following parameters can also be in this payload (though you wouldn't know from the manifest doc)
-  // https://docs.github.com/en/developers/apps/creating-a-github-app-using-url-parameters#github-app-configuration-parameters
-  /* eslint-disable camelcase */
-  return {
-    name: "OpenShift Actions Connector",
-    description: "Connect your OpenShift cluster to GitHub Actions",
-    url: "https://github.com/redhat-actions",
-    hook_attributes: {
-      url: incomingWebhookUrl,
-    },
-    request_oauth_on_install: true,
-    callback_url: callbackUrl,
-    redirect_url: redirectUrl,
-    setup_url: setupUrl,
-    // setup_on_update: true,
-    public: false,
-    default_permissions: {
-      actions: "write",
-      secrets: "write",
-    },
-    default_events: [
-      "workflow_run",
-    ],
-  };
-  /* eslint-enable camelcase */
-}
+import { getGitHubAppManifest } from "../../util/github-app-manifest";
 
 export function CreateAppPage(): JSX.Element {
   const [ enterpriseChecked, setEnterpriseChecked ] = useState(false);
@@ -68,7 +28,7 @@ export function CreateAppPage(): JSX.Element {
   const manifestFormID = "manifest-form";
   // const enterpriseCheckboxId = "enterprise-checkbox";
 
-  const appManifest = getAppManifest(frontendUrl);
+  const appManifest = getGitHubAppManifest(frontendUrl);
   const githubManifestUrl = `https://github.com/settings/apps/new?state=${state}`;
 
   return (

@@ -41,7 +41,7 @@ function Banner(props: Banner.Props): JSX.Element {
     <div {...divProps} className={classNames(
       "banner rounded my-4 p-3",
       "bg-" + props.severity,
-      "text-" + (props.severity === "warning" ? "black" : "white"),
+      "text-" + (props.severity === "warning" ? "black" : "light"),
       { "d-none": !props.display }
     )}>
       <div className={classNames(

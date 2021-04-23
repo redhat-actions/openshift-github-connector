@@ -29,6 +29,7 @@ async function getKubeClusterStatus(req: express.Request, res: express.Response)
     connected: true,
     clusterInfo,
     namespace: KubeWrapper.instance.namespace,
+    serviceAccountName: KubeWrapper.instance.serviceAccountName,
   };
 
   res.json(resBody);

@@ -89,19 +89,7 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
       return sendError(res, 400, "No app session is saved. Please connect to a GitHub App before proceeding.");
     }
 
-    const serviceAccountName = process.env.DEV_OVERRIDE_SERVICEACCOUNT
-      || KubeWrapper.instance.getClusterConfig().user.name;
-
-    const saExists = await KubeWrapper.instance.doesServiceAccountExist(serviceAccountName);
-
-    if (!saExists) {
-      return sendError(
-        res, 500,
-        `Current user "${serviceAccountName}" is not a service account in namespace "${KubeWrapper.instance.ns}"`
-      );
-    }
-
-    Log.info(`Using service account ${serviceAccountName}`);
+    const serviceAccountName = KubeWrapper.instance.serviceAccountName;
 
     const repos = req.body.repos;
 
@@ -117,7 +105,6 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
 
       saTokens = await Promise.all(repos.map(async (repo) => {
         try {
-          // TODO handle already exists
           const saTokenForRepo = await SecretUtil.createSAToken(serviceAccountName, repo, {
             createdByApp: app.config.name,
             createdByAppId: app.config.id.toString(),

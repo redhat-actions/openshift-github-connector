@@ -31,3 +31,7 @@ spec:
             requests:
               cpu: 100m
               memory: 512Mi
+
+          env:
+            - name: CONNECTOR_SERVICEACCOUNT_NAME
+              value: {{ .Values.serviceAccountName }}

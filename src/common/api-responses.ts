@@ -144,6 +144,7 @@ namespace ApiResponses {
     connected: true,
     clusterInfo: ClusterConfig,
     namespace: string,
+    serviceAccountName: string,
   }
 
   export type ClusterState = ClusterStateDisconnected | ClusterStateConnected;

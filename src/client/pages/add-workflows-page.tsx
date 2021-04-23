@@ -42,7 +42,9 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
         type: "GHCR",
         hostname: ImageRegistry.GHCR_HOSTNAME,
       },
-      workflowFileName: {},
+      workflowFileName: {
+        name: defaultWorkflowFileBasename,
+      },
       overwriteExistingWorkflow: false,
       isSubmitting: false,
     };
@@ -56,7 +58,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
       <React.Fragment>
         <Card>
           <Card.Title>
-            Add (Starter) Workflow to Repostory
+            Add Starter Workflow to Repository
           </Card.Title>
           <Card.Body>
             <p>
@@ -391,8 +393,7 @@ function SubmissionStatusBanner(props: {
           <div className="d-flex align-items-center justify-content-end">
             <Button variant="info" size="lg">
               <ExternalLink href={props.submissionResult.url}>
-                <FontAwesomeIcon icon={[ "fab", "github" ]} fixedWidth className="fa-2x mr-2" />
-                View in GitHub
+                <BtnBody icon={[ "fab", "github" ]} iconClasses="text-black" text="View in GitHub"/>
               </ExternalLink>
             </Button>
           </div>
