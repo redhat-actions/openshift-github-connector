@@ -3,6 +3,11 @@ on:
   push:
   workflow_dispatch:
 
+env:
+  IMAGE_NAME: openshift-actions-connector
+  REGISTRY_HOSTNAME: quay.io
+  REGISTRY_USER: tetchell
+
 jobs:
   ci:
     name: CI
@@ -19,8 +24,14 @@ jobs:
           yarn --frozen-lockfile add wait-on
 
       - name: Build container
-        run: |
-          yarn container-build
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: ${{ env.IMAGE_NAME }}
+          tags: latest ${{ steps.commit_data.outputs.branch }}
+          dockerfiles:
+            containerize/Containerfile
+          layers: true
+          oci: true
 
       - name: Run container
         run: |
@@ -48,10 +59,10 @@ jobs:
         if: ${{ steps.commit_data.outputs.is_pr }} == 'false'
         uses: redhat-actions/push-to-registry@v2
         with:
-          registry: quay.io/tetchell
-          image: openshift-actions-connector
+          registry: ${{ env.REGISTRY_HOSTNAME }}/${{ env.REGISTRY_USER }}
+          image:  ${{ env.IMAGE_NAME }}
           tags: latest ${{ steps.commit_data.outputs.branch }}
-          username: tetchell
+          username: ${{ env.REGISTRY_USER }}
           password: ${{ secrets.QUAY_TOKEN }}
 
       - name: Logs
