@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import yaml from "yaml";
 
 import ApiEndpoints from "common/api-endpoints";
 import ApiRequests from "common/api-requests";
@@ -8,6 +9,8 @@ import Log from "server/logger";
 import { getAppForSession } from "server/lib/gh-app/gh-util";
 import { getFriendlyHTTPError, tob64 } from "server/util/server-util";
 import { sendError } from "server/util/send-error";
+import KubeWrapper from "server/lib/kube/kube-wrapper";
+import { GitHubContentFile } from "common/types/github-types";
 
 const router = express.Router();
 export default router;
@@ -54,7 +57,7 @@ router.route(ApiEndpoints.App.Workflows.path)
 
     Log.info(`Create workflow file into "${req.body.repo.full_name}"`);
 
-    const workflowFilePath = path.join(WORKFLOWS_DIR, req.body.workflowFileName);
+    const workflowFilePath = path.join(WORKFLOWS_DIR, req.body.workflowFileName + ".yml");
     Log.info(`Workflow file path is ${workflowFilePath}`);
 
     const repoMeta = await app.install.octokit.request("GET /repos/{owner}/{repo}", {
@@ -65,11 +68,11 @@ router.route(ApiEndpoints.App.Workflows.path)
     const defaultBranch = repoMeta.data.default_branch;
     Log.info(`Default branch is ${defaultBranch}`);
 
+    let existingWorkflowSha: string | undefined;
     try {
       // https://docs.github.com/en/rest/reference/repos#get-repository-content
 
-      // const existingFileRes =
-      await app.install.octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
+      const existingFileRes = await app.install.octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
         owner: req.body.repo.owner,
         repo: req.body.repo.name,
         path: workflowFilePath,
@@ -78,6 +81,8 @@ router.route(ApiEndpoints.App.Workflows.path)
           format: "json",
         },
       });
+
+      existingWorkflowSha = (existingFileRes.data as GitHubContentFile).sha;
 
       Log.info(`${workflowFilePath} already exists`);
 
@@ -126,8 +131,11 @@ router.route(ApiEndpoints.App.Workflows.path)
 
     Log.info(`Starter workflow file starts with "${workflowFileDecoded.substring(0, 16)}"`);
 
-    // const workflowEdited = editWorkflow(req.body, [ defaultBranch ], workflowFileDecoded);
-    const workflowEdited = workflowFileDecoded.replace("$default-branch", defaultBranch);
+    const namespace = KubeWrapper.instance.namespace;
+    req.body.namespace = namespace;
+
+    const workflowEdited = editWorkflow(req.body, [ defaultBranch ], workflowFileDecoded);
+    // const workflowEdited = workflowFileDecoded.replace("$default-branch", defaultBranch);
 
     // https://docs.github.com/en/rest/reference/repos#create-or-update-file-contents
     const writeRes = await app.install.octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
@@ -137,7 +145,7 @@ router.route(ApiEndpoints.App.Workflows.path)
       // branch defaults to repo's default branch
       message: "Add OpenShift Starter Workflow",
       content: tob64(workflowEdited),
-      // sha
+      sha: existingWorkflowSha,
       branch: defaultBranch,
       committer: {
         name: app.config.name,
@@ -158,30 +166,57 @@ router.route(ApiEndpoints.App.Workflows.path)
     return res.json(resBody);
   });
 
-/*
-function editWorkflow(req.body: ApiRequests.CreateWorkflow, branches: string[], workflowFileContents: string): string {
-  const workflowNullable = jsYaml.load(workflowFileContents);
-  if (workflowNullable == null) {
-    throw new Error(`Failed to parse workflow file as YAML`);
-  }
+const ENV_SECTION = "env";
 
-  const workflow = workflowNullable as Workflow;
+enum ENV_VARS {
+  REGISTRY = "REGISTRY",
+  REGISTRY_USER = "REGISTRY_USER",
+  REGISTRY_PASSWORD = "REGISTRY_PASSWORD",
+  NAMESPACE = "OPENSHIFT_NAMESPACE",
+}
+
+const JOB_NAME = "openshift-ci-cd";
+
+function editWorkflow(reqBody: ApiRequests.CreateWorkflow, branches: string[], workflowFile: string): string {
+  // use the 'document' yaml api to preserve comments & whitespace
+  // https://eemeli.org/yaml/#documents
+  // however, we lose the ability to 'as' the file with a TypeScript type from the schema
+  // since we can't treat the parsed contents as JSON.
+
+  const workflowParsed = yaml.parseDocument(workflowFile);
 
   // https://github.com/actions/starter-workflows/blob/main/ci/openshift.yml
   // we have to edit a couple of the top-level sections based on the user-selected settings
 
-  if (!workflow.env) {
-    workflow.env = {};
+  const env = workflowParsed.get(ENV_SECTION);
+  if (env === undefined) {
+    workflowParsed.set(ENV_SECTION, {});
   }
 
   // edit registry, app port, namespace here
 
-  workflow.on = {
-    push: {
-      branches,
-    },
-  };
+  // if (reqBody.imageRegistry.type === "GHCR") {
+  //   /* eslint-disable no-template-curly-in-string */
+  //   workflowParsed.setIn([ ENV_SECTION, ENV_VARS.REGISTRY ], "ghcr.io/${{ github.actor }}");
+  //   workflowParsed.setIn([ ENV_SECTION, ENV_VARS.REGISTRY_USER ], "${{ github.actor }}");
+  //   // workflowParsed.deleteIn([ ENV_SECTION, ENV_VARS.REGISTRY_USER ]);
+  //   workflowParsed.setIn([ ENV_SECTION, ENV_VARS.REGISTRY_PASSWORD ], "${{ github.token }}");
+  //   /* eslint-enable no-template-curly-in-string */
+  // }
+  // else {
+  //   throw new Error("Sorry, you can't use that image registry yet :(");
+  // }
 
-  return jsYaml.dump(workflow);
+  if (reqBody.namespace) {
+    workflowParsed.setIn([ ENV_SECTION, ENV_VARS.NAMESPACE ], reqBody.namespace);
+  }
+
+  workflowParsed.setIn([ "on", "push", "branches" ], branches);
+  // workflowParsed.setIn([ "on", "workflow_dispatch" ], undefined);
+
+  const firstStepPath = [ "jobs", JOB_NAME, "steps", 0 ];
+  workflowParsed.deleteIn(firstStepPath);
+  workflowParsed.getIn(firstStepPath).spaceBefore = false;
+
+  return workflowParsed.toString();
 }
-*/

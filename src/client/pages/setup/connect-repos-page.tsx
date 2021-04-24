@@ -157,7 +157,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
         <Card>
           <Card.Title>
             <div>
-                  Secrets
+              Secrets
             </div>
           </Card.Title>
           <Card.Body>
@@ -252,12 +252,10 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                       </Card.Title>
                       <Card.Body>
                         <p>
-                          <p>
-                            Select the repositories to create secrets in, so workflows can log into this OpenShift cluster.
-                          </p>
-                          <p>
-                            Then, click <b>Create Secrets</b>.
-                          </p>
+                          Select the repositories to create secrets in, so workflows can log into this OpenShift cluster.
+                        </p>
+                        <p>
+                          Then, click <b>Create Secrets</b>.
                         </p>
                         <div className="font-md my-4 btn-line">
                           <Button variant="light"

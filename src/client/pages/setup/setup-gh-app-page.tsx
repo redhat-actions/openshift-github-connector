@@ -46,7 +46,7 @@ export function CreateAppPage(): JSX.Element {
             <input type="checkbox"
               // className="form-check-input"
               checked={enterpriseChecked}
-              onClick={(e) => setEnterpriseChecked(e.currentTarget.checked)}
+              onChange={(e) => setEnterpriseChecked(e.currentTarget.checked)}
             />
             <div>
               I want to use GitHub Enterprise
@@ -102,17 +102,6 @@ export function CreateAppPage(): JSX.Element {
 }
 
 export function CreatingAppPage() {
-
-  // async postAppData(appData: GitHubAppConfigWithSecrets): Promise<void> {
-  //   const res = await fetchJson(ApiEndpoints.Setup.CreatingApp.path, {
-  //     headers: { [HttpConstants.Headers.ContentType]: HttpConstants.ContentTypes.Json },
-  //     method: "POST",
-  //     body: JSON.stringify(appData),
-  //   });
-
-  //   await throwIfError(res);
-  // }
-
   const searchParams = new URLSearchParams(window.location.search);
   const code = searchParams.get("code");
   const state = searchParams.get("state");

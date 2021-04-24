@@ -46,6 +46,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
         name: defaultWorkflowFileBasename,
       },
       overwriteExistingWorkflow: false,
+      // overwriteExistingWorkflow: true,
       isSubmitting: false,
     };
 
@@ -243,7 +244,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
         throw new Error(`Illegal character in filename.`);
       }
 
-      this.setState({ workflowFileName: { name: basename + ".yml", validationErr: undefined } });
+      this.setState({ workflowFileName: { name: basename, validationErr: undefined } });
     }
     catch (err) {
       this.setState({ workflowFileName: { name: undefined, validationErr: err.message } });
@@ -262,7 +263,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
       repo: this.state.repo,
       workflowFileName: this.state.workflowFileName.name,
       overwriteExisting: this.state.overwriteExistingWorkflow,
-      // imageRegistry: this.state.imageRegistry,
+      imageRegistry: this.state.imageRegistry,
     };
 
     const res = await fetchJSON<typeof reqBody, ApiResponses.WorkflowCreationResult>("POST", ApiEndpoints.App.Workflows, reqBody);

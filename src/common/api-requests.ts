@@ -1,4 +1,5 @@
 import { GitHubRepoId } from "./types/github-types";
+import ImageRegistries from "./types/image-registries";
 
 namespace ApiRequests {
   export interface InitCreateApp {
@@ -36,9 +37,10 @@ namespace ApiRequests {
 
   export interface CreateWorkflow {
     repo: GitHubRepoId,
-    workflowFileName: string,
+    namespace?: string,
     overwriteExisting: boolean,
-    // imageRegistry: ImageRegistryInfo,
+    workflowFileName: string,
+    imageRegistry: ImageRegistries.Info,
   }
 }
 
