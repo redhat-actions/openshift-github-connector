@@ -1,6 +1,9 @@
+import express from "express";
 import session from "express-session";
 import sessionFileStore from "session-file-store";
 import { v4 as uuid } from "uuid";
+import { tmpdir } from "os";
+
 import Log from "./logger";
 
 const dayMs = 1000 * 60 * 60 * 24;
@@ -18,36 +21,66 @@ declare module "express-session" {
   }
 }
 
-// https://github.com/expressjs/session#options
-const sessionMw = session({
-  // replace w/ set-once kube secret
-  secret: "535ebab0-a31e-4e38-a3c8-dc4e844b3ab5",
-  store: new FileStore({
-    logFn: (args) => Log.debug(args),
-    // replace w/ set-once kube secret
-    secret: "1430e007-31a0-44ef-bf22-3f906e16da92",
-    ttl: dayMs,
-  }),
-  resave: false,
-  saveUninitialized: true,
-  rolling: true,
-  genid: (req): string => {
-    const id = uuid();
-    // since the session id is also used for the secret name,
-    // we have to transform it so it can be part of a k8s resource name
-    // https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#dns-subdomain-names
+const SECRET_NAME = "SESSION_SECRET";
+const STORE_SECRET_NAME = "SESSION_STORE_SECRET";
+const STORE_PATH = "SESSION_STORE_PATH";
 
-    // uuid v4 is safe to use without modification.
-    return id;
-  },
-  cookie: {
-    httpOnly: true,
-    maxAge: dayMs,
-    // name: ""
-    sameSite: "strict",
-    secure: "auto",
-    signed: true,
-  },
-});
+function getSessionMw(): express.RequestHandler {
+  // the secrets are created by the helm chart
+  let secret = process.env[SECRET_NAME];
+  if (!secret) {
+    Log.error(`Session secret "${SECRET_NAME}" is not set in the environment!`);
+    // sessions will expire on server restart :(
+    secret = uuid();
+  }
+  else {
+    Log.info(`Loaded session secret`);
+  }
 
-export default sessionMw;
+  let storeSecret = process.env[STORE_SECRET_NAME];
+  if (!storeSecret) {
+    Log.error(`Session store secret "${STORE_SECRET_NAME}" is not set in the environment!`);
+    storeSecret = uuid();
+  }
+  else {
+    Log.info(`Loaded session store secret`);
+  }
+
+  let storePath = process.env[STORE_PATH];
+  if (!storePath) {
+    Log.error(`Session store path "${STORE_PATH} is not set in the environment!`);
+    storePath = tmpdir();
+  }
+  Log.info(`Session store path is "${storePath}"`);
+
+  // https://github.com/expressjs/session#options
+  const sessionMw = session({
+    secret,
+    store: new FileStore({
+      logFn: (args) => Log.debug(args),
+      path: storePath,
+      secret: storeSecret,
+      ttl: dayMs,
+    }),
+    resave: false,
+    saveUninitialized: true,
+    rolling: true,
+    genid: (req): string => {
+      const id = uuid();
+      return id;
+    },
+    cookie: {
+      httpOnly: true,
+      maxAge: dayMs,
+      // name: ""
+      sameSite: "strict",
+      secure: "auto",
+      signed: true,
+    },
+  });
+
+  Log.info(`Created session middleware`);
+  return sessionMw;
+}
+
+export default getSessionMw;

@@ -15,11 +15,15 @@ helm upgrade --install actions-connector \
 
 ## Developing locally
 
+### Log in and set namespace
+
 You have to be logged into a cluster and have your current context's namespace set:
 
 ```sh
 oc config set-context $(kubectl config current-context) --namespace="$namespace"
 ```
+
+### Set up a service account
 
 When running locally you have to create, configure, and link a service account to the app (in OpenShift this is done by the helm chart) as per [the wiki](https://github.com/redhat-actions/oc-login/wiki/Using-a-Service-Account-for-GitHub-Actions).
 
@@ -28,7 +32,23 @@ then
 ```sh
 oc create sa github-actions
 oc policy add-role-to-user edit -z github-actions -z
-export CONNECTOR_SERVICEACCOUNT_NAME=github-actions
+```
+
+### Set up the environment
+If you haven't yet, run `yarn install`.
+
+Create a file called `.env.local` next to the existing `.env`. This is environment variables that will be loaded at server startup, and will not be committed to SCM.
+
+Set the session secrets to two different UUIDs. You can generate them using:
+```sh
+node -e 'const uuid = require("uuid"); console.log(`SESSION_SECRET=${uuid.v4()}\nSESSION_STORE_SECRET=${uuid.v4()}`)'
+```
+
+Your .env.local should look like this:
+```
+SESSION_SECRET=<uuid>
+SESSION_STORE_SECRET=<another uuid>
+CONNECTOR_SERVICEACCOUNT_NAME=<service account from above>
 ```
 
 Then run `yarn dev` to run the development server.

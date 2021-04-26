@@ -6,7 +6,7 @@ appName: actions-connector
 
 securityContext:
   securityContext:
-    # readOnlyRootFilesystem: true
+    readOnlyRootFilesystem: true
     runAsNonRoot: true
     capabilities:
       drop:
@@ -20,6 +20,8 @@ securityContext:
 # https://github.com/helm/helm/issues/2055
 clusterAppsSubdomain: ""
 
+################################################################################
+
 serviceAccountName: github-actions
 # A rolebinding is created with this role, allowing the application pod to
 # modify resources in the namespace
@@ -27,11 +29,16 @@ serviceAccountRole: edit
 
 ################################################################################
 
+sessionSecretName: connector-session-secrets
+sessionSecretKeyName: session-secret
+sessionStoreKeyName: session-store-secret
+
+################################################################################
+
 commonLabels:
   app: openshift-actions-connector
 
 deploymentLabels:
-  app: openshift-actions-connector
 
 ################################################################################
 

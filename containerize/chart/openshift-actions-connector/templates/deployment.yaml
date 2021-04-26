@@ -2,17 +2,22 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.appName }}
+  labels:
+    {{- toYaml .Values.commonLabels | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      {{- toYaml .Values.deploymentLabels | nindent 6 }}
+      {{- toYaml .Values.commonLabels | nindent 6 }}
   replicas: {{ .Values.serverReplicaCount }}
   template:
     metadata:
       labels:
-        {{- toYaml .Values.deploymentLabels | nindent 8 }}
+        {{- toYaml .Values.commonLabels | nindent 8 }}
     spec:
       serviceAccountName: {{ .Values.serviceAccountName }}
+      volumes:
+        - emptyDir: {}
+          name: tmp
       containers:
         - name: {{ .Values.appName }}-server
           imagePullPolicy: Always
@@ -32,6 +37,25 @@ spec:
               cpu: 100m
               memory: 512Mi
 
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+
           env:
             - name: CONNECTOR_SERVICEACCOUNT_NAME
               value: {{ .Values.serviceAccountName }}
+
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sessionSecretName }}
+                  key: {{ .Values.sessionSecretKeyName }}
+
+            - name: SESSION_STORE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sessionSecretName }}
+                  key: {{ .Values.sessionStoreKeyName }}
+
+            - name: SESSION_STORE_PATH
+              value: /tmp/sessions

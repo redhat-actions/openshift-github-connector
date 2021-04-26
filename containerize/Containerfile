@@ -8,7 +8,7 @@ RUN yarn install --frozen-lockfile --no-cache
 
 # note: eslintrc must be copied
 # https://github.com/facebook/create-react-app/issues/9791
-COPY tsconfig.json webpack.config.server.js .eslintrc.js README.md ./
+COPY tsconfig.json webpack.config.server.js .eslintrc.js ./
 COPY public/ ./public
 COPY src/ ./src
 
@@ -23,6 +23,8 @@ RUN mv -v build/ server/
 
 RUN yarn build:client
 RUN mv -v build/ client/
+
+COPY README.md ./
 
 ##################################################
 

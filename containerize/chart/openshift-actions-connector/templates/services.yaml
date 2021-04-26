@@ -2,10 +2,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.serverServiceName }}
+  labels:
+    {{- toYaml .Values.commonLabels | nindent 4}}
 spec:
     type: ClusterIP
     selector:
-      {{ toYaml .Values.deploymentLabels | nindent 6 }}
+      {{- toYaml .Values.commonLabels | nindent 6 }}
     ports:
     - port: 80
       targetPort: {{ .Values.serverPort }}
@@ -15,10 +17,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.clientServiceName }}
+  labels:
+    {{- toYaml .Values.commonLabels | nindent 4}}
 spec:
     type: ClusterIP
     selector:
-      {{ toYaml .Values.deploymentLabels | nindent 6 }}
+      {{ toYaml .Values.commonLabels | nindent 6 }}
     ports:
     - port: 80
       targetPort: {{ .Values.clientPort }}

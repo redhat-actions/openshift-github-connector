@@ -1,5 +1,7 @@
 import express from "express";
 import log4js from "log4js";
+import path from "path";
+import { tmpdir } from "os";
 
 let _logger: log4js.Logger | undefined;
 
@@ -18,6 +20,8 @@ function getLogger(): log4js.Logger {
     pattern: `%[%-5p %d %${FILENAME_LEN}f{1}:%3l%] | %m`,
   };
 
+  const logFilePath = path.join(tmpdir(), "server.log");
+
   const config = {
     appenders: {
       out: {
@@ -32,7 +36,7 @@ function getLogger(): log4js.Logger {
           type: loggerLayout.type,
           layout: loggerLayout.pattern.replace(/%\[/g, "").replace(/%\]/g, ""),
         },
-        filename: "server.log",
+        filename: logFilePath,
         maxLogSize: 1024 * 1024,
         keepFileExt: true,
         // flags: "w",   // write instead of append
@@ -52,6 +56,7 @@ function getLogger(): log4js.Logger {
   _logger.level = "debug";
 
   _logger.info("Logger initialized");
+  _logger.info(`Logging to "${logFilePath}"`);
   return _logger;
 }
 

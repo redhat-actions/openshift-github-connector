@@ -7,3 +7,4 @@ out*.log
 client.out
 server.out
 sessions/
+.env.local

@@ -102,9 +102,11 @@ export function objValuesFromb64<T extends Record<string, string | undefined>>(o
   return result as T;
 }
 
+/*
 export function isInK8s(): boolean {
   return process.env.IN_K8S === "true";
 }
+*/
 
 export function sendSuccessStatusJSON(res: express.Response, statusCode: number): void {
   const resBody: ApiResponses.Result = {
