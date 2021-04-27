@@ -5,7 +5,6 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./client/app";
 import reportWebVitals from "./client/reportWebVitals";
 
-console.log("LOAD REACT APP");
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>

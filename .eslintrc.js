@@ -43,20 +43,18 @@ module.exports = {
     "indent": [ 2, 2 ],
     "max-len": [ 2, 120, 2, { ignoreUrls: true } ],
     "camelcase": [ 2, { allow: [ "client_id", "client_secret", "webhook_secret", "key_id", "full_name" ] } ],
-
-    "react/react-in-jsx-scope": [ 0 ],
   },
   overrides: [{
     files: [ "*.tsx" ],
     rules: {
       "no-console": 0,
-      "max-len": [ 2, 150, 2 ],
+      "max-len": [ 2, 150, 2, { ignoreUrls: true } ],
       "operator-linebreak": [ 0 ],
       "import/extensions": [ 2, { css: "always", json: "always", scss: "always" }],
       "@typescript-eslint/explicit-function-return-type": [ 0 ],
       "@typescript-eslint/explicit-module-boundary-types": [ 0 ],
       "@typescript-eslint/ban-types": [ 0 ],
-      "@typescript-eslint/no-use-before-define": [ 0 ]
+      "react/react-in-jsx-scope": [ 0 ],
     },
   }]
 }

@@ -3,13 +3,14 @@
 Coming soon...
 
 ## Installing on OpenShift
-The one required input is the cluster domain. It is described in `values.yaml`.
+See [./containerize/chart/openshift-actions-connector](the chart).
+The one required input is the cluster apps subdomain. It is described in [`values.yaml`](./containerize/chart/openshift-actions-connector/values.yaml).
 
 Install from the root of the repo as follows:
 ```sh
 helm upgrade --install actions-connector \
   containerize/chart/openshift-actions-connector \
-  --set clusterAppsSubdomain=apps.sandbox-m2.ll9k.p1.openshiftapps.com
+  --set clusterAppsSubdomain=apps.<your-openshift-server>.com
 ```
 
 
@@ -41,10 +42,16 @@ Create a file called `.env.local` next to the existing `.env`. This is environme
 
 Set the session secrets to two different UUIDs. You can generate them using:
 ```sh
-node -e 'const uuid = require("uuid"); console.log(`SESSION_SECRET=${uuid.v4()}\nSESSION_STORE_SECRET=${uuid.v4()}`)'
+node -e \
+'const uuid = require("uuid");
+console.log(
+  `SESSION_SECRET=${uuid.v4()}
+SESSION_STORE_SECRET=${uuid.v4()}`
+)'
+
 ```
 
-Your .env.local should look like this:
+Your `.env.local` should look like this:
 ```
 SESSION_SECRET=<uuid>
 SESSION_STORE_SECRET=<another uuid>
@@ -53,6 +60,8 @@ CONNECTOR_SERVICEACCOUNT_NAME=<service account from above>
 
 Then run `yarn dev` to run the development server.
 
+---
+
 There is no story for live reload on OpenShift yet.
 
 To build and push the container images you can use the scripts in `package.json`, though I haven't added a way to override the registry user or path.
@@ -60,6 +69,8 @@ To build and push the container images you can use the scripts in `package.json`
 ### Project Structure
 
 The backend is in Express, and the frontend is in React using create-react-app (CRA). Code can be shared across the stack from the `common/` directory.
+
+Be careful about adding package dependencies here because they will be webpacked separately into the frontend and backend. Modules must be compatible with both and should not be large.
 
 The structure is adapted from [this blog post](https://spin.atomicobject.com/2020/08/17/cra-express-share-code), and the boilerplate code is in [this repository](https://github.com/gvanderclay/cra-express).
 
@@ -79,10 +90,10 @@ If the CRA server is not restarting because a file is errored, you have to edit 
 ## Resources
 
 ### Frontend
-https://react-bootstrap.github.io/components/alerts/
-https://getbootstrap.com/docs/4.0/getting-started/introduction/
+- https://react-bootstrap.github.io/components/alerts/
+- https://getbootstrap.com/docs/4.0/getting-started/introduction/
 
 ### Backend
-https://docs.github.com/en/developers/apps/creating-a-github-app-from-a-manifest
-https://docs.github.com/en/rest/reference
-https://docs.github.com/en/rest/reference/permissions-required-for-github-apps
+- https://docs.github.com/en/developers/apps/creating-a-github-app-from-a-manifest
+- https://docs.github.com/en/rest/reference
+- https://docs.github.com/en/rest/reference/permissions-required-for-github-apps
