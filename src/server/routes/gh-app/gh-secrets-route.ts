@@ -4,46 +4,51 @@ import { send405, sendError } from "server/util/send-error";
 import ApiEndpoints from "common/api-endpoints";
 import ApiRequests from "common/api-requests";
 import ApiResponses from "common/api-responses";
-import { GitHubRepo, RepoSecretsPublicKey } from "common/types/github-types";
-import { getAppForSession, createSecret, getRepoSecretPublicKey } from "server/lib/gh-app/gh-util";
+import { RepoSecretsPublicKey } from "common/types/github-types";
+import { createSecret, getRepoSecretPublicKey } from "server/lib/github/gh-util";
 import KubeWrapper, { ServiceAccountToken } from "server/lib/kube/kube-wrapper";
 import Log from "server/logger";
 import SecretUtil from "server/lib/kube/secret-util";
-import GitHubUserMemento from "server/lib/memento/user-memento";
 import { Severity } from "common/common-util";
 import { DEFAULT_SECRET_NAMES, getDefaultSecretNames } from "common/default-secret-names";
+import User from "server/lib/user";
 
 const router = express.Router();
 
 router.route(ApiEndpoints.App.Repos.Secrets.path)
   .get(async (
-    req: express.Request<any, ApiResponses.ReposSecretsStatus, void, ApiRequests.RepoIDsList>,
+    req: express.Request<any, ApiResponses.ReposSecretsStatus, void /* ApiRequests.RepoIDsList */>,
     res: express.Response<ApiResponses.ReposSecretsStatus>,
     next
   ) => {
-    const app = await getAppForSession(req, res);
-    if (!app) {
+
+    const installation = await User.getInstallationForSession(req, res);
+    if (!installation) {
       return undefined;
     }
 
+    /*
     const reposListQueryParam = req.query.repos;
     let repos: GitHubRepo[] = [];
     if (!reposListQueryParam) {
-      repos = await app.getAccessibleRepos();
+      repos = await installation.getRepos();
     }
     else {
       const repoIds = reposListQueryParam.split(",").map((s) => Number(s.trim()));
 
       repos = await Promise.all(repoIds.map(async (id) => {
       // https://github.com/octokit/rest.js/issues/163#issuecomment-450007728
-        const repo = await app.install.octokit.request("GET /repositories/{id}", { id });
+        const repo = await installation.octokit.request("GET /repositories/{id}", { id });
         return repo.data;
       }));
     }
+    */
+
+    const repos = await installation.getRepos();
 
     const reposWithSecrets: ApiResponses.ReposSecretsStatus["repos"] = await Promise.all(
       repos.map(async (repo): Promise<ApiResponses.ReposSecretsStatus["repos"][number]> => {
-        const secretsResponse = await app.install.octokit.request("GET /repos/{owner}/{repo}/actions/secrets", {
+        const secretsResponse = await installation.octokit.request("GET /repos/{owner}/{repo}/actions/secrets", {
           owner: repo.owner.login,
           repo: repo.name,
         });
@@ -68,7 +73,7 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
     return res.json({
       defaultSecretNames: getDefaultSecretNames(),
       repos: reposWithSecrets,
-      urls: app.urls,
+      urls: installation.urls,
     });
   })
   .post(async (
@@ -76,17 +81,20 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
     res: express.Response<ApiResponses.RepoSecretsCreationSummary>,
     next
   ) => {
-    if (!req.session.data?.githubUserId) {
+    if (req.session.data?.githubUserId == null) {
       return sendError(res, 400, `Missing user info in cookie`);
     }
 
-    const [ app, user ] = await Promise.all([
-      getAppForSession(req, res),
-      GitHubUserMemento.loadUser(req.session.data.githubUserId),
+    const [ installation, user ] = await Promise.all([
+      User.getInstallationForSession(req, res),
+      User.getUserForSession(req, res),
     ]);
 
-    if (!app) {
+    if (!installation) {
       return sendError(res, 400, "No app session is saved. Please connect to a GitHub App before proceeding.");
+    }
+    else if (!user) {
+      return sendError(res, 400, "No user session is saved. Please start the setup again.");
     }
 
     const serviceAccountName = KubeWrapper.instance.serviceAccountName;
@@ -106,10 +114,10 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
       saTokens = await Promise.all(repos.map(async (repo) => {
         try {
           const saTokenForRepo = await SecretUtil.createSAToken(serviceAccountName, repo, {
-            createdByApp: app.config.name,
-            createdByAppId: app.config.id.toString(),
-            createdByUser: user?.userName ?? "Unknown",
-            createdByUserId: user?.userId ?? "Unknown",
+            createdByApp: installation.app.config.name,
+            createdByAppId: installation.app.config.id.toString(),
+            createdByUser: user.userName,
+            createdByUserId: user.userId.toString(),
           });
 
           return {
@@ -159,7 +167,7 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
       let repoPublicKey: RepoSecretsPublicKey;
 
       try {
-        repoPublicKey = await getRepoSecretPublicKey(app.install.octokit, repo);
+        repoPublicKey = await getRepoSecretPublicKey(installation.octokit, repo);
       }
       catch (err) {
         Log.error(`Failed to obtain secret public key for ${repo.owner}/${repo.name}`, err);
@@ -191,7 +199,7 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
       await Promise.all(secretsToCreate.map(async (secretToCreate): Promise<void> => {
         try {
           await createSecret(
-            app.install.octokit,
+            installation.octokit,
             repo, repoPublicKey,
             secretToCreate.name,
             secretToCreate.plaintextValue,

@@ -7,11 +7,15 @@ import { GitHubRepoId } from "common/types/github-types";
 import { getFriendlyHTTPError, objValuesFromb64, objValuesTob64, toValidK8sName } from "server/util/server-util";
 import KubeWrapper, { ServiceAccountToken } from "./kube-wrapper";
 
+type SecretSubtypes = "app" | "user" | "repo-serviceaccount-token";
+
 const APP_NAME = "openshift-actions-connector";
 
 const ANNOTATION_CREATED_AT = "created-at";
 const ANNOTATION_UPDATED_AT = "updated-at";
 const ANNOTATION_SERVICEACCOUNT_NAME = "kubernetes.io/service-account.name";
+
+export type SimpleValue = number | string | boolean | undefined;
 
 namespace SecretUtil {
   const SECRET_LABELS = {
@@ -20,12 +24,14 @@ namespace SecretUtil {
   };
 
   export async function createSecret(
-    secretName: string, data: Record<string, Stringable>,
-    labels: { [key: string]: string, subtype: string }
+    secretName: string, data: Record<string, SimpleValue>,
+    labels: { [key: string]: string, subtype: SecretSubtypes }
   ): Promise<void> {
     await SecretUtil.deleteSecret(secretName, false);
 
     Log.info(`Creating secret ${secretName}`);
+
+    const now = new Date().toISOString();
 
     const secretResult = await KubeWrapper.instance.coreClient.createNamespacedSecret(KubeWrapper.instance.ns, {
       type: "Opaque",
@@ -33,8 +39,8 @@ namespace SecretUtil {
         name: secretName,
         creationTimestamp: new Date(),
         annotations: {
-          [ANNOTATION_CREATED_AT]: new Date().toISOString(),
-          [ANNOTATION_UPDATED_AT]: new Date().toISOString(),
+          [ANNOTATION_CREATED_AT]: now,
+          [ANNOTATION_UPDATED_AT]: now,
           // ...annotations,
         },
         labels: {
@@ -42,13 +48,13 @@ namespace SecretUtil {
           ...labels,
         },
       },
-      data: objValuesTob64(data),
+      data: objValuesTob64(data, false),
     });
 
     Log.info(`Created ${secretResult.body.metadata?.namespace}/${secretResult.body.kind}/${secretResult.body.metadata?.name}`);
   }
 
-  export async function patchSecret(secretName: string, data: Record<string, Stringable>): Promise<V1Secret> {
+  export async function patchSecret(secretName: string, data: Record<string, SimpleValue>): Promise<V1Secret> {
     const secrets = await KubeWrapper.instance.coreClient.listNamespacedSecret(KubeWrapper.instance.ns);
 
     const secretExists = secrets.body.items.find((secret) => secret.metadata?.name === secretName);
@@ -63,7 +69,7 @@ namespace SecretUtil {
         metadata: {
           [ANNOTATION_UPDATED_AT]: new Date().toISOString(),
         },
-        data: objValuesTob64(data),
+        data: objValuesTob64(data, true),
       },
       // seriously? https://github.com/kubernetes-client/javascript/issues/19#issuecomment-582886605
       undefined, undefined, undefined, undefined,
@@ -77,7 +83,7 @@ namespace SecretUtil {
     return patchResult.body;
   }
 
-  export async function loadFromSecret<T extends Record<string, any>>(
+  export async function loadFromSecret<T extends Record<string | number, SimpleValue>>(
     secretName: string
   ): Promise<({ data: T, metadata: V1ObjectMeta }) | undefined> {
 
@@ -155,6 +161,8 @@ namespace SecretUtil {
   ): Promise<ServiceAccountToken> {
 		const saTokenSecretName = toValidK8sName(`${serviceAccountName}-token-${repo.id}`);
 
+    const subtype: SecretSubtypes = "repo-serviceaccount-token";
+
     const labels = {
       ...SECRET_LABELS,
       [LABEL_CREATED_FOR_REPO_ID]: repo.id.toString(),
@@ -163,7 +171,7 @@ namespace SecretUtil {
       "created-by-github-app": toValidK8sName(meta.createdByApp),
       "created-by-github-user-id": meta.createdByUserId,
       "created-by-github-user": toValidK8sName(meta.createdByUser),
-      subtype: "repo-serviceaccount-token",
+      subtype,
     };
 
     let saTokenSecretBody;
@@ -250,7 +258,7 @@ namespace SecretUtil {
       serviceAccountName,
       namespace,
       tokenSecretName: saTokenSecretName,
-      token,
+      token: token.toString(),
     };
 	}
 }

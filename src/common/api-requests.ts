@@ -23,12 +23,12 @@ namespace ApiRequests {
     oauthCode: string,
   }
 
-  export type RepoIDsList = {
-    /**
-     * command-separated repo IDs
-     */
-    repos: string,
-  };
+  /**
+   * command-separated repo IDs
+   */
+  // export type RepoIDsList = {
+  //   repos: string,
+  // };
 
   export interface CreateActionsSecrets {
     repos: GitHubRepoId[],

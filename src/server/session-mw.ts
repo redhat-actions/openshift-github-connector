@@ -13,10 +13,10 @@ const FileStore = sessionFileStore(session);
 declare module "express-session" {
   interface SessionData {
     setupData: {
-      githubAppId: string,
+      githubAppId: number,
     },
     data: {
-      githubUserId: string,
+      githubUserId: number,
     },
   }
 }
@@ -48,7 +48,7 @@ function getSessionMw(): express.RequestHandler {
 
   let storePath = process.env[STORE_PATH];
   if (!storePath) {
-    Log.error(`Session store path "${STORE_PATH} is not set in the environment!`);
+    Log.error(`Session store path "${STORE_PATH}" is not set in the environment!`);
     storePath = tmpdir();
   }
   Log.info(`Session store path is "${storePath}"`);

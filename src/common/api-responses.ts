@@ -1,13 +1,15 @@
 import { Severity } from "./common-util";
 import { DefaultSecrets } from "./default-secret-names";
 import {
-  GitHubAppUrls,
-  GitHubAppConfig,
-  GitHubAppInstallation,
+  GitHubAppOwnerUrls,
+  GitHubAppInstallationData,
   GitHubRepo,
   GitHubActionsSecret,
   GitHubRepoId,
-  GitHubUser,
+  GitHubUserData,
+  GitHubAppInstallationUrls,
+  GitHubAppPublicData,
+  GitHubAppConfigNoSecrets,
 } from "./types/github-types";
 
 namespace ApiResponses {
@@ -44,24 +46,59 @@ namespace ApiResponses {
     appInstallUrl: string,
   }
 
-  export interface GitHubAppMissing {
-    app: false,
+  export interface GitHubAppMissing extends Result {
+    success: false,
   }
 
-  export interface GitHubAppReady {
-    app: true,
-    appConfig: GitHubAppConfig,
-    appUrls: GitHubAppUrls,
-    installations: GitHubAppInstallation[],
+  export interface GitHubAppSetup {
+    // discriminators
+    success: true,
+    installed: boolean,
+    owned: boolean,
+
+    appData: GitHubAppPublicData,
+  }
+
+  export interface GitHubAppOwnedData {
+    appConfig: GitHubAppConfigNoSecrets,
+    ownerUrls: GitHubAppOwnerUrls,
+    installations: GitHubAppInstallationData[],
+  }
+
+  export interface GitHubAppOwned extends GitHubAppSetup {
+    owned: true,
+    installed: false,
+
+    ownedAppData: GitHubAppOwnedData,
+  }
+
+  export interface GitHubAppInstalledData {
+    installation: GitHubAppInstallationData,
+    installUrls: GitHubAppInstallationUrls,
     repos: GitHubRepo[],
   }
 
-  export type GitHubAppState = GitHubAppMissing | GitHubAppReady;
+  export interface GitHubAppInstalled extends GitHubAppSetup {
+    installed: true,
+    owned: false,
+
+    installedAppData: GitHubAppInstalledData,
+  }
+
+  export interface GitHubAppOwnedAndInstalled extends GitHubAppSetup {
+    installed: true,
+    owned: true,
+
+    installedAppData: GitHubAppInstalledData,
+    ownedAppData: GitHubAppOwnedData,
+  }
+
+  export type GitHubAppState = GitHubAppMissing | GitHubAppOwned | GitHubAppInstalled | GitHubAppOwnedAndInstalled;
 
   // extending githubuser type here in case we want to add more fields to this response later
 
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  export interface GitHubUserResponse extends GitHubUser {
+  export interface GitHubUserResponse extends GitHubUserData {
 
   }
 
@@ -91,7 +128,7 @@ namespace ApiResponses {
     // }],
     defaultSecretNames: DefaultSecrets,
     repos: RepoWithSecrets[],
-    urls: GitHubAppUrls,
+    urls: GitHubAppInstallationUrls,
   }
 
   interface SingleRepoSecretCreationResult {

@@ -5,33 +5,13 @@ import sodium from "tweetsodium";
 import Log from "server/logger";
 import ApiResponses from "common/api-responses";
 import { sendError } from "server/util/send-error";
-import GitHubApp from "./gh-app";
-import { GitHubRepoId, RepoSecretsPublicKey } from "common/types/github-types";
+import { GitHubOAuthResponse, GitHubRepoId, GitHubUserData, RepoSecretsPublicKey } from "common/types/github-types";
+import HttpConstants from "common/http-constants";
+import fetch from "node-fetch";
+import { throwIfError } from "server/util/server-util";
 
-/**
- * Tries to get the GitHub App for the user bound to the given request's session.
- * If it fails, sends a 400 response and returns undefined.
- * In the failure case, the caller should exit the request handler since a response has been sent.
- */
-export async function getAppForSession(req: express.Request, res: express.Response): Promise<GitHubApp | undefined> {
-  if (!req.session.data?.githubUserId) {
-    sendError(res, 400, "No session cookie provided");
-    return undefined;
-  }
-
-  const app = await GitHubApp.getAppForUser(req.session.data.githubUserId);
-  if (app) {
-    return app;
-  }
-
-  Log.info("App is not initialized");
-
-  const resBody: ApiResponses.GitHubAppState = {
-    app: false,
-  };
-
-  res.json(resBody);
-  return undefined;
+export async function getGitHubHostname(): Promise<string> {
+  return "github.com";
 }
 
 export async function getRepoSecretPublicKey(installOctokit: Octokit, repo: GitHubRepoId): Promise<RepoSecretsPublicKey> {
@@ -78,4 +58,40 @@ export async function createSecret(
   );
 
   Log.info(`Successfully created ${secretName} in ${repo.owner}/${repo.name}`);
+}
+
+export async function exchangeCodeForUserData(
+  client_id: string, client_secret: string, oauthCode: string
+): Promise<GitHubUserData> {
+  const githubReqBody = JSON.stringify({
+    client_id,
+    client_secret,
+    code: oauthCode,
+    // state ?
+  });
+
+  // https://docs.github.com/en/developers/apps/identifying-and-authorizing-users-for-github-apps#response
+  const oauthRes = await fetch("https://github.com/login/oauth/access_token", {
+    method: "POST",
+    headers: HttpConstants.getJSONContentHeaders(githubReqBody),
+    body: githubReqBody,
+  });
+
+  await throwIfError(oauthRes);
+
+  const oauthData: GitHubOAuthResponse = await oauthRes.json();
+
+  const userDataRes = await fetch(
+    "https://api.github.com/user",
+    { headers: { Authorization: `token ${oauthData.access_token} ` } }
+  );
+
+  if (!userDataRes.ok) {
+    // eslint-disable-next-line camelcase
+    const err = await userDataRes.json() as { message: string, documentation_url: string };
+    throw new Error(err.message);
+  }
+
+  const userData: GitHubUserData = await userDataRes.json();
+  return userData;
 }

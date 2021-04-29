@@ -99,7 +99,8 @@ export default class KubeWrapper {
 			await KubeWrapper.testConfig(tmpConfig);
 			Log.info(`Loaded k8s config from cluster`);
 			isInCluster = true;
-		} catch (err) {
+		}
+		catch (err) {
 			err = getFriendlyHTTPError(err);
 			// when running in openshift this should be a real error
 			// Log.warn(`Failed to load config in-cluster`, err);
@@ -110,7 +111,8 @@ export default class KubeWrapper {
 				tmpConfig.loadFromDefault();
 				await KubeWrapper.testConfig(tmpConfig);
 				Log.info(`Loaded k8s config from default`);
-			} catch (err2) {
+			}
+			catch (err2) {
 				err2 = getFriendlyHTTPError(err2);
 				Log.warn(`Failed to load default kubeconfig`, err2);
 				this._initError = err2;

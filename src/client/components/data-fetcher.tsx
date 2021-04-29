@@ -131,6 +131,9 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
         </p>
       );
     }
-    return this.props.children(this.state.data, async () => { await this.load(); });
+    return this.props.children(this.state.data, async () => {
+      console.log("DataFetcher reload");
+      await this.load();
+    });
   }
 }

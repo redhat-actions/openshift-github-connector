@@ -81,11 +81,27 @@ export function fromb64(data: string): string {
   return Buffer.from(data, "base64").toString("utf-8");
 }
 
-export function objValuesTob64<T extends Record<string, Stringable>>(obj: T): { [key in keyof T]: string } {
-  const result: Record<keyof T, string> = Object();
+// https://www.typescriptlang.org/docs/handbook/2/functions.html#function-overloads
+// basically, if T includes undefined values, AND keepUndefined, the return type will, too.
+export function objValuesTob64<T>(obj: T, keepUndefined: true): { [key in keyof T]: string | undefined };
+export function objValuesTob64<T>(obj: T, keepUndefined: false): { [key in keyof T]: string };
+
+export function objValuesTob64<T extends Record<string, Stringable | undefined>>(
+  obj: Record<string, Stringable | undefined>, keepUndefined: boolean
+): { [key in keyof T]: string | undefined } {
+
+  const result: Record<keyof T, string | undefined> = Object();
   Object.entries(obj).forEach(([ k, v ]) => {
     const key = k as keyof T;
-    result[key] = tob64(v.toString());
+    if (v === undefined) {
+      if (keepUndefined) {
+        result[key] = undefined;
+      }
+      // else, ignore
+    }
+    else {
+      result[key] = tob64(v.toString());
+    }
   });
 
   return result;
@@ -120,19 +136,16 @@ export function sendSuccessStatusJSON(res: express.Response, statusCode: number)
 
 export function getFriendlyHTTPError(err: Error & { response?: any }): Error {
   if (!err.response) {
-    if (err.message) {
-      return new Error(err.message);
-    }
-    return new Error(JSON.stringify(err));
+    return err;
   }
 
   const errRes = err.response;
-  const message = `${errRes.request.method} ${errRes.request.uri.href}: `
+  const betterMessage = `${errRes.request.method} ${errRes.request.uri.href}: `
         + `${errRes.statusCode} ${errRes.body.message || errRes.body.reason}`;
 
-  const newErr = new Error(message);
-  newErr.stack = err.stack;
-  return newErr;
+  const betterError = new Error(betterMessage);
+  betterError.stack = err.stack?.replace(err.message, betterMessage);
+  return betterError;
 }
 
 export async function getHttpError(res: Response): Promise<string> {
@@ -255,4 +268,12 @@ export function toValidK8sName(rawName: string): string {
   }
 
   return cookedName;
+}
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+export function deleteKey<T extends Record<string, unknown>, K extends string>(obj: T, key: K): Omit<T, K> {
+  const partial: Partial<T> = obj;
+  delete partial[key];
+
+  return partial as Omit<T, typeof key>;
 }

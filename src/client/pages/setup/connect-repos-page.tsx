@@ -57,6 +57,10 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
     };
   }
 
+  public async componentDidMount() {
+    await this.loadReposSecrets();
+  }
+
   private async loadReposSecrets(): Promise<void> {
     try {
       this.setState({ reposSecretsData: undefined });
@@ -77,10 +81,6 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
     catch (err) {
       this.setState({ loadingErr: err.message });
     }
-  }
-
-  public async componentDidMount() {
-    await this.loadReposSecrets();
   }
 
   private setAllChecked(newIsChecked: boolean) {
@@ -115,6 +115,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
     this.setState({ repoCheckedMap: repoCheckedMapCopy });
   }
 
+  // eslint-disable-next-line @typescript-eslint/member-ordering
   public render(): JSX.Element {
     return (
       <React.Fragment>

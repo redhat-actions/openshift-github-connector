@@ -11,9 +11,7 @@ export default function appPageCard(props: {
     buttons: {
       href: string,
       icon: IconProp,
-      mr?: boolean,
       text: string,
-      title: string,
     }[],
     children: React.ReactNode,
 }): JSX.Element {
@@ -30,7 +28,7 @@ export default function appPageCard(props: {
               return (
                 <Button variant="primary" key={i}
                   className={classNames("flex-grow-1")}
-                  title={btnProps.title}
+                  title={btnProps.text}
                 >
                   <ExternalLink href={btnProps.href}>
                     <BtnBody icon={btnProps.icon} text={btnProps.text}></BtnBody>

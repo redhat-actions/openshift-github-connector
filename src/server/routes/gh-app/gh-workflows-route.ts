@@ -6,11 +6,11 @@ import ApiEndpoints from "common/api-endpoints";
 import ApiRequests from "common/api-requests";
 import ApiResponses from "common/api-responses";
 import Log from "server/logger";
-import { getAppForSession } from "server/lib/gh-app/gh-util";
 import { getFriendlyHTTPError, tob64 } from "server/util/server-util";
 import { sendError } from "server/util/send-error";
 import KubeWrapper from "server/lib/kube/kube-wrapper";
 import { GitHubContentFile } from "common/types/github-types";
+import User from "server/lib/user";
 
 const router = express.Router();
 export default router;
@@ -18,17 +18,6 @@ export default router;
 const WORKFLOWS_DIR = `.github/workflows/`;
 
 router.route(ApiEndpoints.App.Workflows.path)
-// .get(async (
-//   req: express.Request,
-//   res: express.Response,
-//   next
-// ) => {
-//   const app = await getAppForSession(req, res);
-//   if (!app) {
-//     return undefined;
-//   }
-
-  // })
   .post(async (
     req: express.Request<any, void, ApiRequests.CreateWorkflow>,
     res: express.Response<ApiResponses.WorkflowCreationResult>,
@@ -50,8 +39,8 @@ router.route(ApiEndpoints.App.Workflows.path)
     // workflow permission scope exists in edit app page but not in documentation
     // https://docs.github.com/en/rest/reference/permissions-required-for-github-apps#permission-on-single-file
 
-    const app = await getAppForSession(req, res);
-    if (!app) {
+    const appInstallation = await User.getInstallationForSession(req, res);
+    if (!appInstallation) {
       return undefined;
     }
 
@@ -60,7 +49,7 @@ router.route(ApiEndpoints.App.Workflows.path)
     const workflowFilePath = path.join(WORKFLOWS_DIR, req.body.workflowFileName + ".yml");
     Log.info(`Workflow file path is ${workflowFilePath}`);
 
-    const repoMeta = await app.install.octokit.request("GET /repos/{owner}/{repo}", {
+    const repoMeta = await appInstallation.octokit.request("GET /repos/{owner}/{repo}", {
       owner: req.body.repo.owner,
       repo: req.body.repo.name,
     });
@@ -72,7 +61,7 @@ router.route(ApiEndpoints.App.Workflows.path)
     try {
       // https://docs.github.com/en/rest/reference/repos#get-repository-content
 
-      const existingFileRes = await app.install.octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
+      const existingFileRes = await appInstallation.octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
         owner: req.body.repo.owner,
         repo: req.body.repo.name,
         path: workflowFilePath,
@@ -102,7 +91,7 @@ router.route(ApiEndpoints.App.Workflows.path)
       // the file does not exist
     }
 
-    const workflowFileContentRes = await app.install.octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
+    const workflowFileContentRes = await appInstallation.octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
       owner: "actions",
       repo: "starter-workflows",
       path: "ci/openshift.yml",
@@ -138,7 +127,7 @@ router.route(ApiEndpoints.App.Workflows.path)
     // const workflowEdited = workflowFileDecoded.replace("$default-branch", defaultBranch);
 
     // https://docs.github.com/en/rest/reference/repos#create-or-update-file-contents
-    const writeRes = await app.install.octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
+    const writeRes = await appInstallation.octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
       owner: req.body.repo.owner,
       repo: req.body.repo.name,
       path: workflowFilePath,
@@ -148,8 +137,8 @@ router.route(ApiEndpoints.App.Workflows.path)
       sha: existingWorkflowSha,
       branch: defaultBranch,
       committer: {
-        name: app.config.name,
-        email: "no-email-here@github.com",
+        name: appInstallation.app.config.name,
+        email: "noreply@github.com",
       },
     });
 
