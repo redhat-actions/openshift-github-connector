@@ -1,6 +1,6 @@
-import { GitHubAppConfig } from "common/types/github-types";
 import fetch from "node-fetch";
 import Log from "server/logger";
+import { GitHubAppConfig } from "common/types/github-types";
 import { getFriendlyHTTPError } from "server/util/server-util";
 
 // https://stackoverflow.com/questions/42999983/typescript-removing-readonly-modifier

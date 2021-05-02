@@ -30,7 +30,7 @@ export default class UserInstallation {
       log: Log,
     });
 
-    const installOctokit = await appObj.getInstallationOctokit(installationId);
+    const installOctokit = await appObj.getInstallationOctokit(Number(installationId));
 
     return new this(app, installationId, installOctokit);
   }
@@ -43,7 +43,10 @@ export default class UserInstallation {
   }
 
   public async getInstallation(): Promise<GitHubAppInstallationData> {
-    const installationReq = await this.app.octokit.request("GET /app/installations/{installation_id}", { installation_id: this.installationId });
+    const installationReq = await this.app.octokit.request(
+      "GET /app/installations/{installation_id}", {
+      installation_id: Number(this.installationId)
+    });
 
     return installationReq.data;
   }

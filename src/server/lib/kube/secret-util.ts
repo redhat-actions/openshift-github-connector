@@ -1,4 +1,4 @@
-import { V1ObjectMeta, V1Secret } from "@kubernetes/client-node";
+import { V1ObjectMeta, V1Secret, V1SecretList } from "@kubernetes/client-node";
 
 import Log from "server/logger";
 import { Stringable } from "common/common-util";
@@ -6,8 +6,6 @@ import HttpConstants from "common/http-constants";
 import { GitHubRepoId } from "common/types/github-types";
 import { getFriendlyHTTPError, objValuesFromb64, objValuesTob64, toValidK8sName } from "server/util/server-util";
 import KubeWrapper, { ServiceAccountToken } from "./kube-wrapper";
-
-type SecretSubtypes = "app" | "user" | "repo-serviceaccount-token";
 
 const APP_NAME = "openshift-actions-connector";
 
@@ -18,6 +16,12 @@ const ANNOTATION_SERVICEACCOUNT_NAME = "kubernetes.io/service-account.name";
 export type SimpleValue = number | string | boolean | undefined;
 
 namespace SecretUtil {
+  export enum Subtype {
+    APP = "app",
+    USER = "user",
+    SA_TOKEN = "repo-serviceaccount-token",
+  }
+
   const SECRET_LABELS = {
     app: APP_NAME,
     "app.kubernetes.io/part-of": APP_NAME,
@@ -25,7 +29,7 @@ namespace SecretUtil {
 
   export async function createSecret(
     secretName: string, data: Record<string, SimpleValue>,
-    labels: { [key: string]: string, subtype: SecretSubtypes }
+    labels: { [key: string]: string, subtype: Subtype }
   ): Promise<void> {
     await SecretUtil.deleteSecret(secretName, false);
 
@@ -83,7 +87,7 @@ namespace SecretUtil {
     return patchResult.body;
   }
 
-  export async function loadFromSecret<T extends Record<string | number, SimpleValue>>(
+  export async function loadFromSecret<T extends Record<string, string | undefined>>(
     secretName: string
   ): Promise<({ data: T, metadata: V1ObjectMeta }) | undefined> {
 
@@ -139,6 +143,16 @@ namespace SecretUtil {
     }
   }
 
+  export async function getSecretsMatchingSelector(labelSelector: string): Promise<V1SecretList> {
+    const secrets = await KubeWrapper.instance.coreClient.listNamespacedSecret(
+      KubeWrapper.instance.ns,
+      undefined, undefined, undefined, undefined,
+      labelSelector,
+    );
+
+    return secrets.body;
+  }
+
   /*
   function toLabelSelector(labels: Record<string, string>): string {
     let selector = Object.entries(labels).reduce((prev, [ k, v ]) => { return `${prev},${k}=${v}`; }, "")
@@ -161,7 +175,7 @@ namespace SecretUtil {
   ): Promise<ServiceAccountToken> {
 		const saTokenSecretName = toValidK8sName(`${serviceAccountName}-token-${repo.id}`);
 
-    const subtype: SecretSubtypes = "repo-serviceaccount-token";
+    const subtype: Subtype = Subtype.SA_TOKEN;
 
     const labels = {
       ...SECRET_LABELS,

@@ -24,7 +24,7 @@ const query = { [SETUP_QUERYPARAM]: "true" };
 export function getSetupSteps() {
   return [
     { title: "Welcome", path: ClientPages.Welcome.withQuery(query) },
-    { title: "Create GitHub App", path: ClientPages.SetupCreateApp.withQuery(query) },
+    { title: "Setup GitHub App", path: ClientPages.SetupCreateApp.withQuery(query) },
     { title: "View GitHub App", path: ClientPages.App.withQuery(query) },
     // { title: "Create Service Account", path: getSetupPath(ClientPages.SetupServiceAccount) },
     { title: "Connect Repositories", path: ClientPages.ConnectRepos.withQuery(query) },

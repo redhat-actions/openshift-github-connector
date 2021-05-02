@@ -46,11 +46,32 @@ namespace ApiResponses {
     appInstallUrl: string,
   }
 
+  export interface ExistingAppData {
+    // client_id: string,
+    appId: number,
+    appUrl: string,
+    avatarUrl: string,
+    created_at: string,
+    name: string,
+    newInstallationUrl: string,
+    owner: {
+      avatar_url: string,
+      login: string,
+      html_url: string,
+    },
+  }
+
+  export type AllAppsState = {
+    success: true,
+    totalCount: number,
+    visibleApps: ExistingAppData[],
+  } | ResultFailed;
+
   export interface GitHubAppMissing extends Result {
     success: false,
   }
 
-  export interface GitHubAppSetup {
+  export interface UserAppExists {
     // discriminators
     success: true,
     installed: boolean,
@@ -59,41 +80,41 @@ namespace ApiResponses {
     appData: GitHubAppPublicData,
   }
 
-  export interface GitHubAppOwnedData {
+  export interface UserOwnedAppData {
     appConfig: GitHubAppConfigNoSecrets,
     ownerUrls: GitHubAppOwnerUrls,
     installations: GitHubAppInstallationData[],
   }
 
-  export interface GitHubAppOwned extends GitHubAppSetup {
+  export interface UserAppOwned extends UserAppExists {
     owned: true,
     installed: false,
 
-    ownedAppData: GitHubAppOwnedData,
+    ownedAppData: UserOwnedAppData,
   }
 
-  export interface GitHubAppInstalledData {
+  export interface UserAppInstalledData {
     installation: GitHubAppInstallationData,
     installUrls: GitHubAppInstallationUrls,
     repos: GitHubRepo[],
   }
 
-  export interface GitHubAppInstalled extends GitHubAppSetup {
+  export interface UserAppInstalled extends UserAppExists {
     installed: true,
     owned: false,
 
-    installedAppData: GitHubAppInstalledData,
+    installedAppData: UserAppInstalledData,
   }
 
-  export interface GitHubAppOwnedAndInstalled extends GitHubAppSetup {
+  export interface UserAppOwnedAndInstalled extends UserAppExists {
     installed: true,
     owned: true,
 
-    installedAppData: GitHubAppInstalledData,
-    ownedAppData: GitHubAppOwnedData,
+    installedAppData: UserAppInstalledData,
+    ownedAppData: UserOwnedAppData,
   }
 
-  export type GitHubAppState = GitHubAppMissing | GitHubAppOwned | GitHubAppInstalled | GitHubAppOwnedAndInstalled;
+  export type UseAppState = GitHubAppMissing | UserAppOwned | UserAppInstalled | UserAppOwnedAndInstalled;
 
   // extending githubuser type here in case we want to add more fields to this response later
 

@@ -42,7 +42,7 @@ module.exports = {
 
     "indent": [ 2, 2 ],
     "max-len": [ 2, 120, 2, { ignoreUrls: true } ],
-    "camelcase": [ 2, { allow: [ "client_id", "client_secret", "webhook_secret", "key_id", "full_name", "html_url" ] } ],
+    "camelcase": [ 0 ],
 
     "@typescript-eslint/member-ordering": [ 2 ]
   },

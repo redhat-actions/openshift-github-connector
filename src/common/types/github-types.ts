@@ -97,6 +97,11 @@ export interface GitHubAppOwnerUrls {
    * The public facing page describing the app
    */
   readonly app: string,
+  readonly avatar: string,
+  /**
+   * The page from which anyone can install a public app
+   */
+  readonly newInstallation: string,
   /**
    * The app settings page (eg change permissions, webhooks)
    */
@@ -108,7 +113,7 @@ export interface GitHubAppOwnerUrls {
   /**
    * The page from which the creator can manage installations
    */
-  readonly installations: string,
+  readonly ownerInstallations: string,
 }
 
 export interface GitHubAppInstallationUrls extends Pick<GitHubAppOwnerUrls, "app"> {

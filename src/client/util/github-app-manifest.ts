@@ -2,13 +2,16 @@ import ApiEndpoints from "../../common/api-endpoints";
 import ClientPages from "../pages/client-pages";
 import getEndpointUrl from "./get-endpoint-url";
 
-export function getGitHubAppManifest(appUrl: string): Record<string, unknown> {
+interface ManifestSettings {
+  public: boolean,
+}
+
+export function getGitHubAppManifest(appUrl: string, manifestSettings: ManifestSettings): Record<string, unknown> {
   // the redirect url is the first one, which is redirected to after the app is created
   const redirectUrl = appUrl + ClientPages.SetupCreatingApp;
 
   // the callback url is the second one, which is redirect to after the app is installed
   const callbackUrl = appUrl + ClientPages.SetupInstalledApp;
-  // eslint-disable-next-line camelcase
   // the setup url is redirected to after the app is updated
   const setupUrl = callbackUrl + "?reload=true";
 
@@ -29,8 +32,8 @@ export function getGitHubAppManifest(appUrl: string): Record<string, unknown> {
     callback_url: callbackUrl,
     redirect_url: redirectUrl,
     setup_url: setupUrl,
-    // setup_on_update: true,
-    public: false,
+    setup_on_update: true,
+    public: manifestSettings.public,
     default_permissions: {
       actions: "write",
       secrets: "write",

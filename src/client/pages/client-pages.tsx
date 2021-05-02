@@ -5,7 +5,8 @@ import ClusterPage from "./cluster-page";
 import GitHubAppPage from "./gh-app-page";
 import SetupWelcomePage from "./setup/welcome-page";
 import SelectReposPage from "./setup/connect-repos-page";
-import * as SetupAppPages from "./setup/setup-gh-app-page";
+import SetupAppPage from "./setup/gh-app/setup-app";
+import * as PostCreateAppPages from "./setup/gh-app/post-create-app";
 import HomePage from "./home-page";
 import SetupFinishedPage from "./setup/setup-completion-page";
 import AddWorkflowsPage from "./add-workflows-page";
@@ -36,9 +37,10 @@ const Home = new ClientPage(undefined, "/", HomePage);
 
 const Setup = new ClientPage(Home, "/setup", () => (<Redirect to={SetupWelcome.path} />));
 const SetupWelcome = new ClientPage(Setup, "/welcome", SetupWelcomePage);
-const SetupCreateApp = new ClientPage(Setup, "/create-app", SetupAppPages.CreateAppPage);
-const SetupCreatingApp = new ClientPage(Setup, "/creating-app", SetupAppPages.CreatingAppPage);
-const SetupInstalledApp = new ClientPage(Setup, "/installed-app", SetupAppPages.InstalledAppPage);
+const SetupCreateApp = new ClientPage(Setup, "/app", SetupAppPage);
+const SetupCreatingApp = new ClientPage(Setup, "/creating-app", PostCreateAppPages.CreatingAppPage);
+// const SetupPostOAuth = new ClientPage(Setup, "/oauth-callback", PostOAuthPage);
+const SetupInstalledApp = new ClientPage(Setup, "/installed-app", PostCreateAppPages.InstalledAppPage);
 const SetupFinished = new ClientPage(Setup, "/done", SetupFinishedPage);
 
 const AddWorkflows = new ClientPage(Home, "/add-workflows", AddWorkflowsPage);
@@ -57,6 +59,7 @@ const ClientPages = {
   Setup,
   SetupCreateApp,
   SetupCreatingApp,
+  // SetupPostOAuth,
   SetupInstalledApp,
   SetupFinished,
   ConnectRepos,

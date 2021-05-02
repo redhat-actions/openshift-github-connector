@@ -88,6 +88,14 @@ export async function fetchJSON<
 
   await throwIfError(res);
 
+  if (res.status === 204) {
+    const resBody = {} as Res;
+    return {
+      statusCode: res.status,
+      ...resBody,
+    };
+  }
+
   if (!isJsonContentType(res)) {
     throw new Error(`Received unexpected non-JSON Content-Type from "${url}": `
       + `${res.headers.get(HttpConstants.Headers.ContentType)}`);
@@ -98,4 +106,8 @@ export async function fetchJSON<
     statusCode: res.status,
     ...resBody,
   };
+}
+
+export function getWindowLocationNoPath(): string {
+  return window.location.protocol + "//" + window.location.host;
 }

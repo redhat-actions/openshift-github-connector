@@ -26,10 +26,9 @@ export default function GitHubAppPage() {
       {
         isSetup ? <SetupPageHeader pageIndex={2} canProceed={true}/> : <></>
       }
-      <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.App.Root}>
+      <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.User.App}>
         {
-          (data: ApiResponses.GitHubAppState, reload) => {
-            console.log("RENDER OUTER");
+          (data: ApiResponses.UseAppState, reload) => {
             return (
               <GitHubAppPageBody data={data} reload={reload} isSetup />
             );
@@ -43,7 +42,7 @@ export default function GitHubAppPage() {
 function GitHubAppPageBody({
   data, reload, isSetup,
 }: {
-  data: ApiResponses.GitHubAppState, reload: () => Promise<void>, isSetup: boolean,
+  data: ApiResponses.UseAppState, reload: () => Promise<void>, isSetup: boolean,
 }): JSX.Element {
   if (!data.success) {
     return (
@@ -95,7 +94,7 @@ function GitHubAppPageBody({
             (userRes: ApiResponses.GitHubUserResponse) => {
               return (
                 <React.Fragment>
-                  Logged in as {userRes.login}
+                  Logged in as <ExternalLink href={userRes.html_url}>{userRes.login}</ExternalLink>
                 </React.Fragment>
               );
             }
@@ -141,7 +140,7 @@ function SwitchViewButton(props: { currentView: ViewType | undefined, onSwitchVi
   );
 }
 
-function AppOwnerCards(props: ApiResponses.GitHubAppOwnedData): JSX.Element {
+function AppOwnerCards(props: ApiResponses.UserOwnedAppData): JSX.Element {
   return (
     <React.Fragment>
       <AppPageCard header="App Permissions" buttons={[{
@@ -175,7 +174,7 @@ function AppOwnerCards(props: ApiResponses.GitHubAppOwnedData): JSX.Element {
         </ul>
       </AppPageCard>
       <AppPageCard header="User Installations" buttons={[{
-        href: props.ownerUrls.installations,
+        href: props.ownerUrls.ownerInstallations,
         icon: EDIT_ICON,
         text: "Manage Installations",
       }]}>
@@ -199,7 +198,7 @@ function AppOwnerCards(props: ApiResponses.GitHubAppOwnedData): JSX.Element {
   );
 }
 
-function AppInstalledCards(props: ApiResponses.GitHubAppInstalledData): JSX.Element {
+function AppInstalledCards(props: ApiResponses.UserAppInstalledData): JSX.Element {
 
   return (
     <React.Fragment>

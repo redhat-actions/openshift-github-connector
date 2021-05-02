@@ -6,7 +6,7 @@ import { fetchJSON } from "../util/client-util";
 interface BaseDataFetcherProps<Data> {
     children: (data: Data, reload: () => Promise<void>) => React.ReactNode,
     type: "generic" | "api",
-    loadingDisplay?: "text" | "spinner" | "spinner-1em" | "card" | "none" | JSX.Element,
+    loadingDisplay?: "text" | "spinner" | "spinner-1em" | "card" | "card-body" | "none" | JSX.Element,
     loadingStyle?: React.CSSProperties,
 }
 
@@ -110,6 +110,13 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
               <Spinner style={this.props.loadingStyle ?? {}} animation="border" variant="primary"/>
             </Card.Body>
           </Card>
+        );
+      }
+      else if (loadingDisplayType === "card-body") {
+        return (
+          <Card.Body className="d-flex justify-content-center align-items-center">
+            <Spinner style={this.props.loadingStyle ?? {}} animation="border" variant="primary"/>
+          </Card.Body>
         );
       }
       else if (loadingDisplayType === "none") {

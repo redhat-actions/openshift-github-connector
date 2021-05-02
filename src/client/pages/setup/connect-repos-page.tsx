@@ -191,14 +191,14 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
           </Card.Body>
         </Card>
 
-        <Card style={{ minHeight: "400px" }}>
+        <Card>
           {/* eslint-disable-next-line no-nested-ternary */}
           {this.state.loadingErr != null
             // Failed to load
             ? (
               <React.Fragment>
                 <Card.Title>
-                    Error loading repositories
+                  Repositories
                 </Card.Title>
                 <Card.Body>
                   <Banner severity="danger" display={true}
@@ -214,7 +214,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                   ? (
                     <React.Fragment>
                       <Card.Title>
-                    Repositories
+                        Repositories
                       </Card.Title>
                       <Card.Body >
                         <div className="d-flex justify-content-center">
@@ -258,7 +258,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                         <p>
                           Then, click <b>Create Secrets</b>.
                         </p>
-                        <div className="font-md my-4 btn-line">
+                        <div className="text-md my-4 btn-line">
                           <Button variant="light"
                             onClick={(_e) => {
                               this.setAllChecked(true);
@@ -427,7 +427,7 @@ function RepoWithSecretsItem({
     >
       <div className={
         classNames(
-          "font-lg b rounded",
+          "text-lg b rounded",
           "d-flex align-items-center justify-content-between",
         )
       }>
@@ -502,7 +502,8 @@ function RepoWithSecretsItem({
       </div>
       {/* https://react-bootstrap.github.io/utilities/transitions/ */}
       <Collapse in={isShowingSecrets}>
-        <div className="pt-3">
+        {/* Do not put padding or margin on this div as it will mess up the collapse transition */}
+        <div>
           {
             repoWithSecrets.secrets.length === 0
               ? <p>This repository has no Actions secrets.</p>

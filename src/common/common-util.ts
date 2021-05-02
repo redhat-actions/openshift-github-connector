@@ -56,7 +56,6 @@ function getMonthName(monthOneBasedIndex: number, shortForm: boolean): string {
 }
 
 function get24hTime(fromDate: Date): string {
-
   let minutes = fromDate.getMinutes().toString();
   if (minutes.length === 1) {
     minutes = "0" + minutes;
@@ -64,9 +63,9 @@ function get24hTime(fromDate: Date): string {
   return fromDate.getHours() + ":" + minutes;
 }
 
-export function getFriendlyDateTime(dateToFormat: Date): string {
+export function getFriendlyDateTime(dateToFormat: Date, showTime_: boolean = false): string {
   let date: string;
-  let showTime = false;
+  let showTime = showTime_;
 
   const today = new Date();
   if (dateToFormat.getDate() === today.getDate()) {

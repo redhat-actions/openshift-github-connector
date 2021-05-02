@@ -3,11 +3,12 @@ import Cluster from "server/routes/cluster-route";
 import Webhook from "server/routes/webhook-route";
 import AppSetup from "server/routes/gh-app/gh-app-setup-route";
 import Secrets from "server/routes/gh-app/gh-secrets-route";
-import User from "server/routes/user-route";
 import Workflows from "server/routes/gh-app/gh-workflows-route";
+import User from "server/routes/user-route";
+import UserApp from "server/routes/gh-app/user-app";
 
 const Routes = {
-  App, Cluster, Webhook, AppSetup, Secrets, User, Workflows,
+  App, Cluster, Webhook, AppSetup, Secrets, User, UserApp, Workflows,
 };
 
 export default Routes;

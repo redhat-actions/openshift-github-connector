@@ -5,7 +5,7 @@ import Log from "server/logger";
 import { GitHubAppOwnerUrls, GitHubAppConfig, GitHubAppInstallationData, GitHubAppConfigNoSecrets } from "common/types/github-types";
 import SecretUtil from "server/lib/kube/secret-util";
 import { getGitHubHostname } from "./gh-util";
-import { toValidK8sName } from "server/util/server-util";
+import { fromb64, toValidK8sName } from "server/util/server-util";
 
 /**
  * The data we must save in order to be able to reconstruct this GitHub app.
@@ -14,6 +14,8 @@ import { toValidK8sName } from "server/util/server-util";
  */
 interface AppMemento {
   appId: number,
+  // appName: string,
+  // appSlug: string,
 
   client_id: string,
   client_secret: string,
@@ -24,8 +26,17 @@ interface AppMemento {
 /**
  * A version of the AppMemento that we end up actually saving into the secret
  */
-interface AppMementoSaveable extends AppMemento {
-  [key: string]: string | number,
+interface AppMementoSaveable {
+  [key: string]: string,
+
+  appId: string,
+  // appName: string,
+  // appSlug: string,
+
+  client_id: string,
+  client_secret: string,
+  pem: string,
+  webhook_secret: string,
 
   // ownerId: number,
   authorizedUsers: string,
@@ -44,9 +55,11 @@ class GitHubApp {
   ) {
     this.urls = {
       app: config.html_url,
+      avatar: `https://${githubHostname}/identicons/app/app/${config.slug}`,
+      newInstallation: config.html_url + "/installations/new",
       settings: `https://${githubHostname}/settings/apps/${config.slug}`,
       permissions: `https://${githubHostname}/settings/apps/${config.slug}/permissions`,
-      installations: `https://${githubHostname}/settings/apps/${config.slug}/installations`,
+      ownerInstallations: `https://${githubHostname}/settings/apps/${config.slug}/installations`,
     };
 
     this.authorizedUsers = [this.config.owner.id];
@@ -56,10 +69,10 @@ class GitHubApp {
     return new App({
       appId: appData.appId,
       privateKey: appData.pem,
-      // oauth: {
-      // clientId: appConfig.client_id,
-      // clientSecret: appConfig.client_secret,
-      // },
+      oauth: {
+        clientId: appData.client_id,
+        clientSecret: appData.client_secret,
+      },
       webhooks: {
         secret: appData.webhook_secret,
       },
@@ -93,23 +106,28 @@ class GitHubApp {
   }
 
   public async save(): Promise<void> {
+    const appId = this.config.id;
+
     const memento: AppMementoSaveable = {
-      appId: this.config.id,
+      authorizedUsers: JSON.stringify(this.authorizedUsers),
+      appId: appId.toString(),
+      // appName: this.config.name,
+      // appSlug: this.config.slug,
+      ownerId: this.config.owner.id.toString(),
+
       client_id: this.config.client_id,
       client_secret: this.config.client_secret,
       pem: this.config.pem,
       webhook_secret: this.config.webhook_secret,
-      ownerId: this.config.owner.id,
-      authorizedUsers: JSON.stringify(this.authorizedUsers),
     };
 
-    await SecretUtil.createSecret(GitHubApp.getAppSecretName(memento.appId), memento, {
+    await SecretUtil.createSecret(GitHubApp.getAppSecretName(appId), memento, {
       appSlug: toValidK8sName(this.config.slug),
-      subtype: "app"
+      subtype: SecretUtil.Subtype.APP,
     });
 
     Log.info(`Saving app ${this.config.name} into cache after creating`);
-    GitHubApp.cache.set(memento.appId, this);
+    GitHubApp.cache.set(appId, this);
   }
 
   public static async load(appId: number): Promise<GitHubApp | undefined> {
@@ -126,6 +144,7 @@ class GitHubApp {
       const authorizedUsers = JSON.parse(secret.data.authorizedUsers);
       const memento = {
         ...secret.data,
+        appId: Number(secret.data.appId),
         authorizedUsers,
       };
 
@@ -139,6 +158,45 @@ class GitHubApp {
     }
 
     return app;
+  }
+
+  public static async loadAll(): Promise<GitHubApp[] | undefined> {
+    const selector = "subtype=" + SecretUtil.Subtype.APP;
+    const matchingSecrets = await SecretUtil.getSecretsMatchingSelector(selector);
+
+    if (matchingSecrets.items.length === 0) {
+      return undefined;
+    }
+
+    const appIds = matchingSecrets.items.map((appSecret) => {
+      const appId = appSecret?.data?.appId;
+
+      if (appId) {
+        const asNumber = Number(fromb64(appId));
+        if (isNaN(asNumber)) {
+          return undefined;
+        }
+        return asNumber;
+      }
+      return undefined;
+    }).reduce((result: number[], appId: number | undefined) => {
+        // remove undefined
+        if (appId != null) {
+          result.push(appId);
+        }
+        return result;
+      }, []);
+
+    const apps = (await Promise.all(appIds.map((appId) => this.load(appId))))
+      .reduce((result: GitHubApp[], app: GitHubApp | undefined) => {
+        // remove undefined
+        if (app != null) {
+          result.push(app);
+        }
+        return result;
+      }, [])
+
+    return apps;
   }
 
   public async getInstallations(): Promise<GitHubAppInstallationData[]> {

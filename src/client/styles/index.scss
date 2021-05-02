@@ -31,7 +31,12 @@ a {
   color: black;
 }
 
-p .error {
+p {
+  margin-top: map-get(c.$spacers, 2);
+  margin-bottom: map-get(c.$spacers, 2);
+}
+
+.error {
   color: c.$danger;
 }
 
@@ -83,11 +88,11 @@ pre {
   padding: 1.5em;
 }
 
-.clickable {
+input[type=checkbox], input[type=radio], .clickable {
   &:hover, &:focus {
     &:not(:disabled), &:not(.disabled) {
       cursor: pointer;
-      text-decoration: underline;
+      // text-decoration: underline;
     }
 
     &:disabled, &.disabled {
@@ -97,24 +102,24 @@ pre {
   }
 }
 
-@mixin font-lg {
+@mixin text-lg {
   font-size: 125%;
 }
 
-.font-lg {
-  @include font-lg;
+.text-lg {
+  @include text-lg;
 }
 
-@mixin font-md {
+@mixin text-md {
   font-size: 110%;
 }
 
-.font-md {
-  @include font-md;
+.text-md {
+  @include text-md;
 }
 
 .repo-secrets-summary {
-  @include font-lg;
+  @include text-lg;
   margin-bottom: 0;
   // font-weight: bold;
 }
@@ -145,14 +150,39 @@ label {
   }
 
   &.flex-column {
-    & > :not(:last-child) {
+    & > :not(:last-child).btn {
       margin-bottom: map-get(c.$spacers, 3);
     }
   }
 
   &:not(.flex-column) {
-    & > :not(:last-child) {
+    & > :not(:last-child).btn {
       margin-right: map-get(c.$spacers, 3);
     }
+  }
+}
+
+.btn-body {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  font-weight: bold;
+
+  min-width: 1.6rem;
+  min-height: 1.6rem;
+
+  & svg, .spinner-border {
+    &:first-child {
+      margin-right: .75em;
+    }
+
+    &:last-child {
+      margin-left: .75em;
+    }
+  }
+
+  & .spinner-border {
+    width: 1em;
+    height: 1em;
   }
 }

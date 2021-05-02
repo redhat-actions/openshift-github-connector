@@ -2,19 +2,28 @@ import express from "express";
 
 import Log from "server/logger";
 import { sendError } from "server/util/send-error";
-import SecretUtil, { SimpleValue } from "./kube/secret-util";
+import SecretUtil from "./kube/secret-util";
 import UserInstallation from "./github/gh-app-installation";
 import GitHubApp from "./github/gh-app";
 
 type UserMemento = {
-  [key: string]: SimpleValue,
-  [key: number]: SimpleValue,
+  [key: string]: number | string | undefined,
 
   userId: number,
   userName: string,
 
   appId?: number,
   installationId?: number,
+}
+
+type UserMementoSaveable = {
+  [key: string]: string | undefined,
+
+  userId: string,
+  userName: string,
+
+  appId?: string,
+  installationId?: string,
 }
 
 export default class User {
@@ -32,7 +41,8 @@ export default class User {
     private _installation?: UserInstallation,
   ) {
 
-    if (_installation && _installation.app.config.owner.id === userId) {
+    const ownerId = _installation?.app.config.owner.id;
+    if (_installation && ownerId === userId) {
       this.ownsAppId = _installation.app.config.id;
     }
   }
@@ -40,6 +50,7 @@ export default class User {
   public static async getUserForSession(req: express.Request, res: express.Response): Promise<User | undefined> {
     // this could probably be a middleware that attaches the user to the request obj
     if (!req.session.data?.githubUserId) {
+      Log.warn(`No user session`)
       sendError(res, 400, "No user session provided");
       return undefined;
     }
@@ -53,7 +64,14 @@ export default class User {
       return undefined;
     }
 
-    return user.installation;
+    const installation = user.installation;
+
+    if (!installation) {
+      sendError(res, 400, `User "${user.userName}" does not have an app installed.`);
+      return undefined;
+    }
+
+    return installation;
   }
 
   public get installation(): UserInstallation | undefined {
@@ -67,17 +85,17 @@ export default class User {
   }
 
   public async save(): Promise<void> {
-    const memento: NonNullable<UserMemento> = {
-      userId: this.userId,
+    const memento: NonNullable<UserMementoSaveable> = {
+      userId: this.userId.toString(),
       userName: this.userName,
     }
 
     if (this._installation) {
-      memento.appId = this._installation.app.config.id;
-      memento.installationId = this._installation.installationId;
+      memento.appId = this._installation.app.config.id.toString();
+      memento.installationId = this._installation.installationId.toString();
     }
 
-    await SecretUtil.createSecret(User.getUserSecretName(this.userId), memento, { subtype: "user" });
+    await SecretUtil.createSecret(User.getUserSecretName(this.userId), memento, { subtype: SecretUtil.Subtype.USER });
     Log.info(`Update user data in cache`);
     User.cache.set(this.userId, this);
   }
@@ -101,15 +119,25 @@ export default class User {
   }
 
   private static async loadMemento(userId: number): Promise<UserMemento | undefined> {
-    const secret = await SecretUtil.loadFromSecret<UserMemento>(User.getUserSecretName(userId));
+    const secret = await SecretUtil.loadFromSecret<UserMementoSaveable>(User.getUserSecretName(userId));
     if (!secret) {
       return undefined;
     }
 
-    const memento = secret.data;
+    const memento: UserMemento = {
+      userId: Number(secret.data.userId),
+      userName: secret.data.userName,
+      appId: secret.data.appId ? Number(secret.data.appId) : undefined,
+      installationId: secret.data.installationId ? Number(secret.data.installationId) : undefined,
+    };
+
+    Object.entries(memento).forEach(([ k, v ]) => {
+      if (Number.isNaN(v)) {
+        Log.error(`After loading secret for user "${memento.userName}", entry "${k}" is NaN!`);
+      }
+    });
 
     return memento;
-
   }
 
   private static getUserSecretName(userId: number) {

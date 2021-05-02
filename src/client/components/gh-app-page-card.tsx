@@ -31,7 +31,7 @@ export default function appPageCard(props: {
                   title={btnProps.text}
                 >
                   <ExternalLink href={btnProps.href}>
-                    <BtnBody icon={btnProps.icon} text={btnProps.text}></BtnBody>
+                    <BtnBody icon={btnProps.icon} text={btnProps.text} />
                   </ExternalLink>
                 </Button>
               );

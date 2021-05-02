@@ -62,11 +62,11 @@ Object.values(Routes).map((router) => app.use(router));
 
 app.route("/")
   .get((req, res, next) => {
-    res.send(`Hello! This is the app root. The API is at ${ApiEndpoints.Api.path}`);
+    res.send(`Hello! This is the app root. The API is at ${ApiEndpoints.Root.path}`);
   })
   .all(send405([ "GET" ]));
 
-app.route(ApiEndpoints.Api.path)
+app.route(ApiEndpoints.Root.path)
   .get((req, res, next) => {
     res.send(`Hello! This is the API root.`);
   })

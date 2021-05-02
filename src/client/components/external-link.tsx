@@ -1,11 +1,21 @@
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 export function ExternalLink({
-  href, children, className, title,
+  href, children, className, title, icon,
 }: {
     href: string,
     children: React.ReactNode,
     className?: string,
     title?: string,
+
+    icon?: {
+      position: "left" | "right",
+      icon: IconProp,
+    },
   }) {
+
+  const marginSize = "0.5em";
 
   return (
     <a href={href}
@@ -13,7 +23,9 @@ export function ExternalLink({
       className={"external-link font-weight-bold " + (className ?? "")}
       title={title != null ? title : href}
     >
+      {icon?.position === "left" ? <FontAwesomeIcon icon={icon.icon} className="text-light" style={{ marginRight: marginSize }} /> : ("")}
       {children}
+      {icon?.position === "right" ? <FontAwesomeIcon icon={icon.icon} className="text-light" style={{ marginLeft: marginSize }} /> : ("")}
     </a>
   );
 }

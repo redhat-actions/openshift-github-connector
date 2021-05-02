@@ -2,11 +2,15 @@ import { GitHubRepoId } from "./types/github-types";
 import ImageRegistries from "./types/image-registries";
 
 namespace ApiRequests {
-  export interface InitCreateApp {
+  export interface CreateCallbackState {
     state: string,
   }
 
-  export interface CreatingApp {
+  export interface PreInstallApp {
+    appId: number,
+  }
+
+  export interface OAuthCallbackData {
     code: string,
     state: string,
   }
@@ -17,10 +21,11 @@ namespace ApiRequests {
   }
 
   export interface PostInstall {
-    // appId: string;
+    // appId: string,
     // ownerId: string;
     installationId: string,
     oauthCode: string,
+    setupAction: string,
   }
 
   /**
