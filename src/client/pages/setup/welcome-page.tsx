@@ -25,6 +25,21 @@ export default function WelcomePage(): JSX.Element {
           Click <b>Next</b> in the banner above to get started.
         </p>
 
+        <div className="d-flex">
+          <div className="ml-auto">
+            <b>Backend status:&nbsp;</b>
+            <DataFetcher type="api" endpoint={ApiEndpoints.Health}>
+              {(data: ApiResponses.Result) => (
+                <React.Fragment>
+                  <span className={data.message === "OK" ? "text-success" : "text-danger"}>
+                    {data.message}
+                  </span>
+                </React.Fragment>
+              )}
+            </DataFetcher>
+          </div>
+        </div>
+
         {/* <div className="row justify-content-center">
           <Link to={getSetupSteps()[0].path}>
             <Button className="btn-primary btn-lg d-flex align-items-center mt-3 px-5">
@@ -38,59 +53,34 @@ export default function WelcomePage(): JSX.Element {
 
       </Jumbotron>
       <Card>
+        <Card.Title>
+          Cluster info
+        </Card.Title>
         <Card.Body>
-          <div className="d-flex">
-            <b>Backend status:&nbsp;</b>
-            <DataFetcher type="api" endpoint={ApiEndpoints.Health}>
-              {(data: ApiResponses.Result) => (
-                <React.Fragment>
-                  <span className={data.message === "OK" ? "text-success" : "text-danger"}>
-                    {data.message}
+          <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root} loadingDisplay="card-body">
+            {(data: ApiResponses.ClusterState) => (
+              <div className="">
+                <p>
+                  <b>Namespace:&nbsp;</b>
+                  <span className={data.connected ? "text-success" : "text-danger"}>
+                    {data.connected ? data.namespace : "Error"}
                   </span>
-                </React.Fragment>
-              )}
-            </DataFetcher>
-          </div>
-          <h5 className="mt-4 b">Cluster info:</h5>
-          <div className="">
-            <div className="d-flex mt-2">
-              <b>Namespace:&nbsp;</b>
-              <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root}>
-                {(data: ApiResponses.ClusterState) => (
-                  <React.Fragment>
-                    <span className={data.connected ? "text-success" : "text-danger"}>
-                      {data.connected ? data.namespace : "Error"}
-                    </span>
-                  </React.Fragment>
-                )}
-              </DataFetcher>
-            </div>
-            <div className="d-flex mt-2">
-              <b>User:&nbsp;</b>
-              <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root}>
-                {(data: ApiResponses.ClusterState) => (
-                  <React.Fragment>
-                    <span className={data.connected ? "text-success" : "text-danger"}>
-                      {data.connected ? data.clusterInfo.user.name : "Error"}
-                    </span>
-                  </React.Fragment>
-                )}
-              </DataFetcher>
-            </div>
-            <div className="d-flex mt-2">
-              <b>Service Account Name:&nbsp;</b>
-              <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root}>
-                {(data: ApiResponses.ClusterState) => (
-                  <React.Fragment>
-                    <span className={data.connected ? "text-success" : "text-danger"}>
-                      {data.connected ? data.serviceAccountName : "Error"}
-                    </span>
-                  </React.Fragment>
-                )}
-              </DataFetcher>
-            </div>
-
-          </div>
+                </p>
+                <p>
+                  <b>User:&nbsp;</b>
+                  <span className={data.connected ? "text-success" : "text-danger"}>
+                    {data.connected ? data.clusterInfo.user.name : "Error"}
+                  </span>
+                </p>
+                <p>
+                  <b>Service Account Name:&nbsp;</b>
+                  <span className={data.connected ? "text-success" : "text-danger"}>
+                    {data.connected ? data.serviceAccountName : "Error"}
+                  </span>
+                </p>
+              </div>
+            )}
+          </DataFetcher>
         </Card.Body>
       </Card>
 

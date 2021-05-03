@@ -1,6 +1,5 @@
 import ApiEndpoints from "../../common/api-endpoints";
 import ClientPages from "../pages/client-pages";
-import getEndpointUrl from "./get-endpoint-url";
 
 interface ManifestSettings {
   public: boolean,
@@ -15,7 +14,7 @@ export function getGitHubAppManifest(appUrl: string, manifestSettings: ManifestS
   // the setup url is redirected to after the app is updated
   const setupUrl = callbackUrl + "?reload=true";
 
-  const incomingWebhookUrl = appUrl + getEndpointUrl(ApiEndpoints.Webhook.path);
+  const incomingWebhookUrl = appUrl + ApiEndpoints.Webhook.path;
 
   // https://docs.github.com/en/developers/apps/creating-a-github-app-from-a-manifest#github-app-manifest-parameters
   // the following parameters can also be in this payload (though you wouldn't know from the manifest doc)

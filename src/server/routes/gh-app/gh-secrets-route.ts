@@ -116,8 +116,8 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
           const saTokenForRepo = await SecretUtil.createSAToken(serviceAccountName, repo, {
             createdByApp: installation.app.config.name,
             createdByAppId: installation.app.config.id.toString(),
-            createdByUser: user.userName,
-            createdByUserId: user.userId.toString(),
+            createdByUser: user.name,
+            createdByUserId: user.id.toString(),
           });
 
           return {

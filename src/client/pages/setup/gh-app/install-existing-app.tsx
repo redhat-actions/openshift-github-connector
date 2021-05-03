@@ -95,7 +95,7 @@ function InstallAppSection({ selectedApp }: { selectedApp: ApiResponses.Existing
   const btnText = `Install ${selectedApp.name}`;
 
   const btnBody = (
-    <div className="btn-body" title={btnText}>
+    <div className="btn-body btn-body-icon btn-body-text" title={btnText}>
       <FontAwesomeIcon icon={[ "fab", "github" ]} className="text-black" />
       {btnText}
       <Spinner className={classNames({ "d-none": !isLoading })} variant="light" animation="border" />

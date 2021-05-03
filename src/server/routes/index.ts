@@ -5,7 +5,7 @@ import AppSetup from "server/routes/gh-app/gh-app-setup-route";
 import Secrets from "server/routes/gh-app/gh-secrets-route";
 import Workflows from "server/routes/gh-app/gh-workflows-route";
 import User from "server/routes/user-route";
-import UserApp from "server/routes/gh-app/user-app";
+import UserApp from "server/routes/gh-app/user-app-route";
 
 const Routes = {
   App, Cluster, Webhook, AppSetup, Secrets, User, UserApp, Workflows,

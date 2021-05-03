@@ -10,7 +10,7 @@ import GitHubApp from "server/lib/github/gh-app";
 const router = express.Router();
 
 router.route(ApiEndpoints.User.App.path)
-  .get(async (req, res: express.Response<ApiResponses.UseAppState>, next) => {
+  .get(async (req, res: express.Response<ApiResponses.UserAppState>, next) => {
     const user = await User.getUserForSession(req, res);
     if (!user) {
       return undefined;
@@ -49,7 +49,7 @@ router.route(ApiEndpoints.User.App.path)
     // owned
       const ownedApp = await GitHubApp.load(user.ownsAppId);
       if (!ownedApp) {
-        throw new Error(`User "${user.userName} owns app ${user.ownsAppId} but that app was not found`);
+        throw new Error(`User "${user.name} owns app ${user.ownsAppId} but that app was not found`);
       }
 
       const appData = {
@@ -100,7 +100,7 @@ router.route(ApiEndpoints.User.App.path)
     // neither owned nor installed
 
       const resBody: ApiResponses.GitHubAppMissing = {
-        message: `User "${user.userName} does not own an app, or have an app installed.`,
+        message: `User "${user.name} does not own an app, or have an app installed.`,
         success: false,
       };
 
@@ -110,6 +110,25 @@ router.route(ApiEndpoints.User.App.path)
     // not owned, but installed
     return res.json(installedAppResponse);
   })
-  .all(send405([ "GET" ]));
+  .delete(async (
+    req, res: express.Response<ApiResponses.RemovalResult>, next
+  ) => {
+    const user = await User.getUserForSession(req, res);
+    if (!user) {
+      return undefined;
+    }
+
+    const removed = await user.removeInstallation();
+    const message = removed
+      ? `Removed app installation from ${user.name}"`
+      : `No installation was found for ${user.name}`;
+
+    return res.json({
+      success: true,
+      message,
+      removed,
+    });
+  })
+  .all(send405([ "GET", "DELETE" ]));
 
 export default router;

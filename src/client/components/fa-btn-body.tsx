@@ -1,5 +1,6 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import classNames from "classnames";
 
 export default function BtnBody(props: {
   icon?: IconProp,
@@ -24,7 +25,7 @@ export default function BtnBody(props: {
   }
 
   return (
-    <div className="btn-body"
+    <div className={classNames("btn-body", { "btn-body-icon": props.icon != null, "btn-body-text": props.text != null })}
       title={props.text}
     >
       {iconPosition === "left" ? iconElement : ""}

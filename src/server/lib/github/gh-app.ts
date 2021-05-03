@@ -6,6 +6,7 @@ import { GitHubAppOwnerUrls, GitHubAppConfig, GitHubAppInstallationData, GitHubA
 import SecretUtil from "server/lib/kube/secret-util";
 import { getGitHubHostname } from "./gh-util";
 import { fromb64, toValidK8sName } from "server/util/server-util";
+import User from "../user";
 
 /**
  * The data we must save in order to be able to reconstruct this GitHub app.
@@ -13,23 +14,10 @@ import { fromb64, toValidK8sName } from "server/util/server-util";
  * from the app api endpoint.
  */
 interface AppMemento {
-  appId: number,
-  // appName: string,
-  // appSlug: string,
-
-  client_id: string,
-  client_secret: string,
-  pem: string,
-  webhook_secret: string,
-}
-
-/**
- * A version of the AppMemento that we end up actually saving into the secret
- */
-interface AppMementoSaveable {
   [key: string]: string,
 
-  appId: string,
+  id: string,
+  name: string,
   // appName: string,
   // appSlug: string,
 
@@ -65,9 +53,9 @@ class GitHubApp {
     this.authorizedUsers = [this.config.owner.id];
   }
 
-  private static async getApp(appData: AppMemento): Promise<App> {
+  private static async getApp(appData: Omit<AppMemento, "authorizedUsers">): Promise<App> {
     return new App({
-      appId: appData.appId,
+      appId: appData.id,
       privateKey: appData.pem,
       oauth: {
         clientId: appData.client_id,
@@ -84,7 +72,7 @@ class GitHubApp {
     return (await ghApp.octokit.request("GET /app")).data as GitHubAppConfigNoSecrets;
   }
 
-  public static async create(appData: AppMemento): Promise<GitHubApp> {
+  public static async create(appData: Omit<AppMemento, "authorizedUsers">): Promise<GitHubApp> {
     const ghAppObj = await this.getApp(appData);
     const configNoSecrets = await this.getAppConfig(ghAppObj);
     const config = {
@@ -108,10 +96,10 @@ class GitHubApp {
   public async save(): Promise<void> {
     const appId = this.config.id;
 
-    const memento: AppMementoSaveable = {
+    const memento: AppMemento = {
       authorizedUsers: JSON.stringify(this.authorizedUsers),
-      appId: appId.toString(),
-      // appName: this.config.name,
+      id: appId.toString(),
+      name: this.config.name,
       // appSlug: this.config.slug,
       ownerId: this.config.owner.id.toString(),
 
@@ -135,7 +123,7 @@ class GitHubApp {
 
     let app = GitHubApp.cache.get(appId);
     if (!app) {
-      const secret = await SecretUtil.loadFromSecret<AppMementoSaveable>(secretName);
+      const secret = await SecretUtil.loadFromSecret<AppMemento>(secretName);
       if (!secret) {
         Log.warn(`Tried to load app ${appId} from secret but it was not found`);
         return undefined;
@@ -144,7 +132,6 @@ class GitHubApp {
       const authorizedUsers = JSON.parse(secret.data.authorizedUsers);
       const memento = {
         ...secret.data,
-        appId: Number(secret.data.appId),
         authorizedUsers,
       };
 
@@ -169,7 +156,8 @@ class GitHubApp {
     }
 
     const appIds = matchingSecrets.items.map((appSecret) => {
-      const appId = appSecret?.data?.appId;
+      const data = appSecret.data as AppMemento;
+      const appId = data.id;
 
       if (appId) {
         const asNumber = Number(fromb64(appId));
@@ -199,6 +187,16 @@ class GitHubApp {
     return apps;
   }
 
+  public async delete(requestingUser: User): Promise<void> {
+    if (requestingUser.ownsAppId !== this.id) {
+      throw new Error(`User ${requestingUser} does not own app ${this.config.name}, and so cannot delete it.`);
+    }
+
+    GitHubApp.cache.delete(this.id);
+    await SecretUtil.deleteSecret(GitHubApp.getAppSecretName(this.id), true);
+    // delete all installations, somehow
+  }
+
   public async getInstallations(): Promise<GitHubAppInstallationData[]> {
     const installationsReq = this.octokit.request("GET /app/installations");
     const installations = (await installationsReq).data;
@@ -215,16 +213,6 @@ class GitHubApp {
 
   public isUserAuthorized(userId: number): boolean {
     return this.authorizedUsers.includes(userId);
-  }
-
-  public async delete(): Promise<void> {
-    // const app = GitHubApp.load();
-    // if (!app) {
-    //   return;
-    // }
-
-    // GitHubApp.cache.delete(appId);
-    // await SecretUtil.deleteSecret(getAppSecretName(appId), true);
   }
 
   private static getAppSecretName(appId: number) {

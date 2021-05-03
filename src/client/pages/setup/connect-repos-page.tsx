@@ -587,10 +587,12 @@ function ShowSecretsButton(props: { noSecrets: number, isShowingSecrets: boolean
         <span className="mx-2">
           {text}
         </span>
-        {props.noSecrets > 0 ?
-          <Badge variant="info">{props.noSecrets}</Badge>
-          : ("")
-        }
+        <div>
+          {props.noSecrets > 0 ?
+            <Badge variant="info">{props.noSecrets}</Badge>
+            : ("")
+          }
+        </div>
       </Button>
     </React.Fragment>
   );
@@ -602,7 +604,7 @@ function getSecretNameWarning(_secretNames: string[]): JSX.Element {
 
   return (
     <div>
-      <FontAwesomeIcon className="mr-2" icon="info-circle" title={msg} fixedWidth />
+      <FontAwesomeIcon className="mr-2 text-success" icon="info-circle" title={msg} fixedWidth />
       {msg}
     </div>
   );

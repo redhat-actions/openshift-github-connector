@@ -10,8 +10,8 @@ import ApiResponses from "common/api-responses";
 import GitHubApp from "server/lib/github/gh-app";
 import User from "server/lib/user";
 import { exchangeCodeForUserData } from "server/lib/github/gh-util";
-import UserInstallation from "server/lib/github/gh-app-installation";
 import StateCache from "server/lib/state-cache";
+import { GitHubUserType } from "common/types/github-types";
 
 const router = express.Router();
 
@@ -127,13 +127,7 @@ router.route(ApiEndpoints.Setup.CreatingApp.path)
 
     createSessionSetupData(req, appConfig.id);
 
-    await GitHubApp.create({
-      appId: appConfig.id,
-      client_id: appConfig.client_id,
-      client_secret: appConfig.client_secret,
-      pem: appConfig.pem,
-      webhook_secret: appConfig.webhook_secret,
-    });
+    await GitHubApp.create(appConfig);
 
     Log.info(`Saved app ${appConfig.name} into secret`);
 
@@ -162,7 +156,7 @@ router.route(ApiEndpoints.Setup.PostInstallApp.path)
     // const appIdStr = req.body.appId;
     const installationIdStr = req.body.installationId;
     const oauthCode = req.body.oauthCode;
-    const setupAction = req.body.setupAction;
+    // const setupAction = req.body.setupAction;
 
     const installationId = Number(installationIdStr);
     if (Number.isNaN(installationId)) {
@@ -174,7 +168,7 @@ router.route(ApiEndpoints.Setup.PostInstallApp.path)
       return sendError(res, 400, `No App ID for session. Please restart the app setup process.`);
     }
 
-    const appInstalled = (await GitHubApp.load(appId));
+    const appInstalled = await GitHubApp.load(appId);
 
     if (appInstalled == null) {
       return sendError(
@@ -195,8 +189,14 @@ router.route(ApiEndpoints.Setup.PostInstallApp.path)
       githubUserId: userData.id,
     };
 
-    const userInstallation = await UserInstallation.create(appInstalled, installationId);
-    await User.create(userData.id, userData.login, userInstallation);
+    await User.create({
+      id: userData.id,
+      name: userData.login,
+      type: userData.type as GitHubUserType,
+    }, {
+      appId,
+      installationId,
+    });
 
     return sendSuccessStatusJSON(res, 201);
   })

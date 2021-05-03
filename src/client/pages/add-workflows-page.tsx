@@ -209,7 +209,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                             banner?.scrollIntoView();
                           }
                         }}>
-                        <BtnBody text="Create Workflow" />
+                        <BtnBody icon="plus" text="Create Workflow" />
                       </Button>
                     </div>
 
@@ -369,6 +369,7 @@ function SubmissionStatusBanner(props: {
   if (props.isSubmitting) {
     return (
       <Banner id={props.bannerId}
+        className="my-3"
         display={props.isSubmitting}
         severity={"info"}
         loading={props.isSubmitting}
@@ -383,6 +384,7 @@ function SubmissionStatusBanner(props: {
   return (
     <React.Fragment>
       <Banner
+        className="my-3"
         id={props.bannerId}
         display={true}
         severity={props.submissionResult.severity}

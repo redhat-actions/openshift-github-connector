@@ -1,50 +1,43 @@
-import express from "express";
+import express, { application } from "express";
 
 import Log from "server/logger";
 import { sendError } from "server/util/send-error";
 import SecretUtil from "./kube/secret-util";
-import UserInstallation from "./github/gh-app-installation";
+import UserInstallation from "./github/user-app-installation";
 import GitHubApp from "./github/gh-app";
-
-type UserMemento = {
-  [key: string]: number | string | undefined,
-
-  userId: number,
-  userName: string,
-
-  appId?: number,
-  installationId?: number,
-}
+import { GitHubUserType } from "common/types/github-types";
 
 type UserMementoSaveable = {
-  [key: string]: string | undefined,
+  id: string,
+  name: string,
+  type: GitHubUserType,
 
-  userId: string,
-  userName: string,
-
-  appId?: string,
+  installedAppId?: string,
   installationId?: string,
 }
 
+type UserMemento = Omit<UserMementoSaveable, "id" | "appId" | "installationId"> & {
+  id: number,
+
+  installationInfo?: {
+    appId: number,
+    installationId: number,
+  },
+};
+
 export default class User {
-
-  // [key: string]: number | string | {} | undefined;
-
   private static readonly cache = new Map<number, User>();
 
-  public readonly ownsAppId?: number;
+  private _installation: UserInstallation | undefined;
+  private _ownsAppId: number | undefined;
 
   private constructor(
-    public readonly userId: number,
-    public readonly userName: string,
-
-    private _installation?: UserInstallation,
+    public readonly id: number,
+    public readonly name: string,
+    public readonly type: GitHubUserType,
   ) {
 
-    const ownerId = _installation?.app.config.owner.id;
-    if (_installation && ownerId === userId) {
-      this.ownsAppId = _installation.app.config.id;
-    }
+    Log.info(`Creating ${type} reference to ${name}`);
   }
 
   public static async getUserForSession(req: express.Request, res: express.Response): Promise<User | undefined> {
@@ -67,40 +60,87 @@ export default class User {
     const installation = user.installation;
 
     if (!installation) {
-      sendError(res, 400, `User "${user.userName}" does not have an app installed.`);
+      sendError(res, 400, `User "${user.name}" does not have an app installed.`);
       return undefined;
     }
 
     return installation;
   }
 
-  public get installation(): UserInstallation | undefined {
-    return this._installation;
-  }
+  public static async create(
+    userInfo: { name: string, id: number, type: GitHubUserType },
+    installationInfo?: { appId: number, installationId: number }
+  ): Promise<User> {
 
-  public static async create(userId: number, userName: string, installation?: UserInstallation): Promise<User> {
-    const user = new User(userId, userName, installation);
+    const user = new this(userInfo.id, userInfo.name, userInfo.type);
+    if (installationInfo) {
+      const app = await GitHubApp.load(installationInfo.appId);
+      if (!app) {
+        throw new Error(`User "${userInfo.name}" has app ${installationInfo.appId} installed, but that app could not be loaded`);
+      }
+      else {
+        user.addInstallation(app, installationInfo.installationId, false);
+      }
+    }
+
+    const apps = await GitHubApp.loadAll();
+
+    if (apps == null) {
+      Log.error(`${userInfo.name} just installed an app, but loading apps returned undefined`);
+    }
+    else if (apps.length === 0) {
+      Log.error(`${userInfo.name} just installed an app, but 0 apps were loaded`);
+    }
+
+    apps?.forEach((app) => {
+      if (app.ownerId === user.id) {
+        Log.info(`${this.name} owns ${app.config.name}`);
+        user._ownsAppId = app.id;
+      }
+    });
+
     await user.save();
     return user;
   }
 
-  public async save(): Promise<void> {
-    const memento: NonNullable<UserMementoSaveable> = {
-      userId: this.userId.toString(),
-      userName: this.userName,
+  private async addInstallation(app: GitHubApp, installationId: number, save: boolean): Promise<void> {
+    Log.info(`Add installation of ${app.config.name} to user ${this.name}`);
+    this._installation = await UserInstallation.create(this, app, installationId);
+
+    if (save) {
+      await this.save();
+    }
+  }
+
+  public async removeInstallation(): Promise<boolean> {
+    if (this.installation) {
+      Log.info(`Remove installation of ${this.installation.app.config.name} from ${this.name}`);
+      this._installation = undefined;
+      await this.save();
+      return true;
+    }
+    return false;
+  }
+
+  private async save(): Promise<void> {
+    Log.info(`Saving user ${this.name}`);
+    const memento: UserMementoSaveable = {
+      id: this.id.toString(),
+      name: this.name,
+      type: this.type,
     }
 
     if (this._installation) {
-      memento.appId = this._installation.app.config.id.toString();
+      memento.installedAppId = this._installation.app.config.id.toString();
       memento.installationId = this._installation.installationId.toString();
     }
 
-    await SecretUtil.createSecret(User.getUserSecretName(this.userId), memento, { subtype: SecretUtil.Subtype.USER });
-    Log.info(`Update user data in cache`);
-    User.cache.set(this.userId, this);
+    await SecretUtil.createSecret(User.getUserSecretName(this.id), memento, { subtype: SecretUtil.Subtype.USER });
+    Log.info(`Update user ${this.name} data in cache`);
+    User.cache.set(this.id, this);
   }
 
-  public static async loadUser(userId: number): Promise<User | undefined> {
+  private static async loadUser(userId: number): Promise<User | undefined> {
     if (User.cache.has(userId)) {
       Log.debug(`Loaded user data from cache`);
       return User.cache.get(userId);
@@ -111,67 +151,47 @@ export default class User {
       return undefined;
     }
 
-    const userApp = await this.getAppForUser(memento);
-    const user = new User(memento.userId, memento.userName, userApp);
-    Log.info(`Loaded user ${memento.userName}`);
+    const user = await this.create(memento, memento.installationInfo);
+
+    Log.info(`Loaded user ${memento.name}`);
     User.cache.set(userId, user);
     return user;
   }
 
-  private static async loadMemento(userId: number): Promise<UserMemento | undefined> {
+  private static async loadMemento(
+    userId: number
+  ): Promise<UserMemento | undefined> {
+
     const secret = await SecretUtil.loadFromSecret<UserMementoSaveable>(User.getUserSecretName(userId));
     if (!secret) {
       return undefined;
     }
 
-    const memento: UserMemento = {
-      userId: Number(secret.data.userId),
-      userName: secret.data.userName,
-      appId: secret.data.appId ? Number(secret.data.appId) : undefined,
-      installationId: secret.data.installationId ? Number(secret.data.installationId) : undefined,
+    const result: UserMemento = {
+      id: Number(secret.data.id),
+      name: secret.data.name,
+      type: secret.data.type,
     };
 
-    Object.entries(memento).forEach(([ k, v ]) => {
-      if (Number.isNaN(v)) {
-        Log.error(`After loading secret for user "${memento.userName}", entry "${k}" is NaN!`);
+    if (secret.data.installedAppId != null && secret.data.installationId != null) {
+      result.installationInfo = {
+        appId: Number(secret.data.installedAppId),
+        installationId: Number(secret.data.installationId),
       }
-    });
+    }
 
-    return memento;
+    return result;
   }
 
   private static getUserSecretName(userId: number) {
     return `github-user-${userId}`;
   }
 
-  private static async getAppForUser(userMemento: UserMemento): Promise<UserInstallation | undefined> {
-    const user = await User.loadMemento(userMemento.userId);
-    if (!user) {
-      Log.info(`No user data for session`);
-      return undefined;
-    }
-    else if (!user.appId) {
-      Log.info(`User has no app bound`);
-      return undefined;
-    }
-    else if (!user.installationId) {
-      Log.info(`User has app bound, but not installed`);
-      return undefined;
-    }
+  public get installation(): UserInstallation | undefined {
+    return this._installation;
+  }
 
-    const app = await GitHubApp.load(user.appId);
-
-    if (!app) {
-      Log.warn(`User ${user.userId} tried to load app ${user.appId} but it was not found`);
-      return undefined;
-    }
-    else if (!app.isUserAuthorized(user.userId)) {
-      Log.warn(`User ${user.userId} is not authorized to access app ${app.config.id}`);
-      return undefined;
-    }
-
-    const appInstallation = await UserInstallation.create(app, user.installationId);
-    Log.info(`Successfully created app installation instance for ${userMemento.userName}`);
-    return appInstallation;
+  public get ownsAppId(): number | undefined {
+    return this._ownsAppId;
   }
 }

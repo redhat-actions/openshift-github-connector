@@ -8,7 +8,6 @@ import ApiEndpoints from "../../common/api-endpoints";
 import BtnBody from "../components/fa-btn-body";
 import ApiResponses from "../../common/api-responses";
 import ClientPages from "./client-pages";
-import getEndpointUrl from "../util/get-endpoint-url";
 import { fetchJSON, getSearchParam } from "../util/client-util";
 import SetupPageHeader, { SETUP_QUERYPARAM } from "./setup/setup-header";
 import { ExternalLink } from "../components/external-link";
@@ -28,7 +27,7 @@ export default function GitHubAppPage() {
       }
       <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.User.App}>
         {
-          (data: ApiResponses.UseAppState, reload) => {
+          (data: ApiResponses.UserAppState, reload) => {
             return (
               <GitHubAppPageBody data={data} reload={reload} isSetup />
             );
@@ -42,7 +41,7 @@ export default function GitHubAppPage() {
 function GitHubAppPageBody({
   data, reload, isSetup,
 }: {
-  data: ApiResponses.UseAppState, reload: () => Promise<void>, isSetup: boolean,
+  data: ApiResponses.UserAppState, reload: () => Promise<void>, isSetup: boolean,
 }): JSX.Element {
   if (!data.success) {
     return (
@@ -76,7 +75,7 @@ function GitHubAppPageBody({
         <div className="btn-line even">
           <Button variant="danger" className={classNames({ "d-none": isSetup })} onClick={
             async () => {
-              await fetchJSON<{}, void>("DELETE", getEndpointUrl(ApiEndpoints.App.Root.path));
+              await fetchJSON<{}, void>("DELETE", ApiEndpoints.App.Root.path);
               await reload();
             }
           }>
@@ -106,7 +105,6 @@ function GitHubAppPageBody({
             data.installed && data.owned ?
               <SwitchViewButton currentView={viewType} onSwitchViewType={(newViewType) => {
                 setViewType(newViewType);
-                console.log("NEW VIEW TYPE " + newViewType);
               }}/>
               : ("")
           }

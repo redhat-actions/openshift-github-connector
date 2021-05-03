@@ -114,7 +114,11 @@ namespace ApiResponses {
     ownedAppData: UserOwnedAppData,
   }
 
-  export type UseAppState = GitHubAppMissing | UserAppOwned | UserAppInstalled | UserAppOwnedAndInstalled;
+  export type UserAppState = GitHubAppMissing | UserAppOwned | UserAppInstalled | UserAppOwnedAndInstalled;
+
+  export interface RemovalResult extends Result {
+    removed: boolean,
+  }
 
   // extending githubuser type here in case we want to add more fields to this response later
 

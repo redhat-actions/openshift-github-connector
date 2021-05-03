@@ -138,7 +138,7 @@ router.route(ApiEndpoints.App.Workflows.path)
       branch: defaultBranch,
       committer: {
         name: appInstallation.app.config.name,
-        email: "noreply@github.com",
+        email: `no-email-here@github.com`,
       },
     });
 

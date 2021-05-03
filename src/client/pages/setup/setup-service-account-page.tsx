@@ -17,7 +17,6 @@ import ApiResponses from "../../../common/api-responses";
 import CopyToClipboardBtn from "../../components/copy-btn";
 import DataFetcher from "../../components/data-fetcher";
 import { fetchJSON } from "../../util/client-util";
-import getEndpointUrl from "../../util/get-endpoint-url";
 import ClientPages from "../client-pages";
 import SetupPageHeader from "./setup-header";
 import Banner from "../../components/banner";
@@ -47,7 +46,7 @@ async function onSubmitServiceAccountToken(saToken: string): Promise<ApiResponse
     const res = await fetchJSON<
       ApiRequests.SetServiceAccount,
       ApiResponses.ServiceAccountState
-    >("POST", getEndpointUrl(ApiEndpoints.User.ServiceAccount.path), {
+    >("POST", ApiEndpoints.User.ServiceAccount.path, {
       serviceAccountToken: saToken,
     });
 

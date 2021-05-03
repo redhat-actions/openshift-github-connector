@@ -11,6 +11,7 @@ namespace Banner {
     severity?: Severity,
     loading?: boolean,
     title?: React.ReactNode,
+    className?: string,
     children?: React.ReactNode,
   } & React.HTMLAttributes<HTMLDivElement>;
 }
@@ -39,6 +40,7 @@ function Banner(props: Banner.Props): JSX.Element {
 
   return (
     <div {...divProps} className={classNames(
+      props.className,
       "banner rounded p-3",
       "bg-" + props.severity,
       "text-" + (props.severity === "warning" ? "black" : "light"),

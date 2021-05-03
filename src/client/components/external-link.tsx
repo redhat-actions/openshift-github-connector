@@ -15,7 +15,7 @@ export function ExternalLink({
     },
   }) {
 
-  const marginSize = "0.5em";
+  const marginSize = "0.6em";
 
   return (
     <a href={href}
@@ -23,9 +23,9 @@ export function ExternalLink({
       className={"external-link font-weight-bold " + (className ?? "")}
       title={title != null ? title : href}
     >
-      {icon?.position === "left" ? <FontAwesomeIcon icon={icon.icon} className="text-light" style={{ marginRight: marginSize }} /> : ("")}
+      {icon?.position === "left" ? <FontAwesomeIcon icon={icon.icon} style={{ marginRight: marginSize }} /> : ("")}
       {children}
-      {icon?.position === "right" ? <FontAwesomeIcon icon={icon.icon} className="text-light" style={{ marginLeft: marginSize }} /> : ("")}
+      {icon?.position === "right" ? <FontAwesomeIcon icon={icon.icon} style={{ marginLeft: marginSize }} /> : ("")}
     </a>
   );
 }

@@ -25,9 +25,8 @@ function getServerUrl(): string {
 }
 */
 
-export default function getEndpointUrl(endpointPath: string): string {
-  // this isn't used anymore, but we'll leave this useless function in for now... just in case
-
+/*
+export default function endpointPath: string: string {
   // const endpointUrl = getServerUrl() + endpointPath;
 
   // eslint-disable-next-line no-console
@@ -35,3 +34,6 @@ export default function getEndpointUrl(endpointPath: string): string {
 
   return endpointPath;
 }
+*/
+
+export default {};

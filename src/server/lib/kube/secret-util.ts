@@ -25,6 +25,7 @@ namespace SecretUtil {
   const SECRET_LABELS = {
     app: APP_NAME,
     "app.kubernetes.io/part-of": APP_NAME,
+    "app.kubernetes.io/managed-by": APP_NAME,
   };
 
   export async function createSecret(

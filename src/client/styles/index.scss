@@ -171,13 +171,15 @@ label {
   min-width: 1.6rem;
   min-height: 1.6rem;
 
-  & svg, .spinner-border {
-    &:first-child {
-      margin-right: .75em;
-    }
+  &.btn-body-text {
+    & svg, .spinner-border {
+      &:first-child {
+        margin-right: .75em;
+      }
 
-    &:last-child {
-      margin-left: .75em;
+      &:last-child {
+        margin-left: .75em;
+      }
     }
   }
 

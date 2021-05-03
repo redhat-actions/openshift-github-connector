@@ -30,6 +30,12 @@ export default function CreateAppCard(): JSX.Element {
       <Card>
         <Card.Title>
           {CREATE_NEW_TITLE}
+
+          <Button variant="info" className="ml-auto">
+            <ExternalLink href="https://github.com/settings/apps/" icon={{ icon: [ "fab", "github" ], position: "left" }} >
+              View your apps
+            </ExternalLink>
+          </Button>
         </Card.Title>
         <Card.Body>
           <div className="border-bottom px-2">
@@ -49,7 +55,7 @@ export default function CreateAppCard(): JSX.Element {
             <p>
               You can change this later in the GitHub app settings.
             </p>
-            <p>
+            <p className="my-3">
               <ExternalLink href="https://docs.github.com/en/developers/apps/making-a-github-app-public-or-private"
                 icon={{ icon: "book-open", position: "left" }}
               >
@@ -86,12 +92,6 @@ export default function CreateAppCard(): JSX.Element {
               <BtnBody icon="plus" text={CREATE_NEW_TITLE} />
             </Button>
 
-            <div className="py-3"></div>
-            <h5>
-              <ExternalLink href="https://github.com/settings/apps/" icon={{ icon: [ "fab", "github" ], position: "left" }} >
-                View current apps
-              </ExternalLink>
-            </h5>
           </div>
 
           <Banner title={error ?? ""} display={error != null} severity="danger" />
