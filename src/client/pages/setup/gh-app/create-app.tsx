@@ -15,6 +15,7 @@ export const CREATE_NEW_TITLE = "Create New App";
 
 export default function CreateAppCard(): JSX.Element {
   const [ publicChecked, setPublicChecked ] = useState(true);
+  const [ isLoading, setIsLoading ] = useState(false);
   const [ error, setError ] = useState<string | undefined>(undefined);
 
   const state = uuid();
@@ -68,6 +69,7 @@ export default function CreateAppCard(): JSX.Element {
             <form className="" id={manifestFormId} method="post" action={githubManifestUrl} onSubmit={
               async (e) => {
                 e.preventDefault();
+                setIsLoading(true);
                 try {
                   const appManifest = getGitHubAppManifest(getWindowLocationNoPath(), { public: publicChecked });
                   const manifestInput = document.getElementById(manifestInputId) as HTMLInputElement;
@@ -83,13 +85,16 @@ export default function CreateAppCard(): JSX.Element {
                 catch (err) {
                   setError(`Failed to start creation flow: ${err.message}`);
                 }
+                finally {
+                  setTimeout(() => setIsLoading(false), 500);
+                }
               }
             }>
               <input id={manifestInputId} className="d-none" name="manifest" type="manifest" readOnly={true} />
             </form>
 
             <Button size="lg" type="submit" form={manifestFormId}>
-              <BtnBody icon="plus" text={CREATE_NEW_TITLE} />
+              <BtnBody icon="plus" text={CREATE_NEW_TITLE} isLoading={isLoading} />
             </Button>
 
           </div>

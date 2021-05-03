@@ -48,7 +48,8 @@ export default class User {
       return undefined;
     }
 
-    return this.loadUser(req.session.data.githubUserId);
+    const user = this.loadUser(req.session.data.githubUserId);
+    return user;
   }
 
   public static async getInstallationForSession(req: express.Request, res: express.Response): Promise<UserInstallation | undefined> {

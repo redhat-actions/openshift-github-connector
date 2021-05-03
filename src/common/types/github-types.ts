@@ -45,7 +45,7 @@ export type GitHubAppPublicData = {
 };
 
 export function deleteSecrets(config: GitHubAppConfig): GitHubAppConfigNoSecrets {
-  const cfg: Partial<GitHubAppConfig> = config;
+  const cfg: Partial<GitHubAppConfig> = { ...config };
   delete cfg.client_id;
   delete cfg.client_secret;
   delete cfg.pem;

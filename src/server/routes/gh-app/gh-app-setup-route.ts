@@ -49,7 +49,7 @@ router.route(ApiEndpoints.Setup.SetCreateAppState.path)
   });
 
 function createSessionSetupData(req: express.Request, appId: number): void {
-  Log.info(`Saving session data`);
+  Log.info(`Saving session setup data appId=${appId}`);
 
   req.session.setupData = {
     githubAppId: appId,
@@ -158,6 +158,8 @@ router.route(ApiEndpoints.Setup.PostInstallApp.path)
     const oauthCode = req.body.oauthCode;
     // const setupAction = req.body.setupAction;
 
+    Log.info(`Post-install`);
+
     const installationId = Number(installationIdStr);
     if (Number.isNaN(installationId)) {
       return sendError(res, 400, `Installation ID "${installationId}" is not a number`);
@@ -168,6 +170,8 @@ router.route(ApiEndpoints.Setup.PostInstallApp.path)
       return sendError(res, 400, `No App ID for session. Please restart the app setup process.`);
     }
 
+    Log.info(`Post install is for app ${appId}`);
+
     const appInstalled = await GitHubApp.load(appId);
 
     if (appInstalled == null) {
@@ -175,6 +179,10 @@ router.route(ApiEndpoints.Setup.PostInstallApp.path)
         res, 500,
         `Failed to look up GitHub app "${appId}". Please restart the app setup process.`
       );
+    }
+
+    if (!appInstalled.config.client_id || !appInstalled.config.client_secret) {
+      throw new Error(`Failed to load OAuth data for app ${appInstalled.config.name}`);
     }
 
     const userData = await exchangeCodeForUserData(

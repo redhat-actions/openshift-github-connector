@@ -1,11 +1,13 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
+import { Spinner } from "react-bootstrap";
 
 export default function BtnBody(props: {
   icon?: IconProp,
   iconPosition?: "left" | "right",
   iconClasses?: string,
+  isLoading?: boolean,
   text?: string,
 }): JSX.Element {
 
@@ -24,11 +26,16 @@ export default function BtnBody(props: {
     );
   }
 
+  const loadingElement = props.isLoading ? (
+    <Spinner className={classNames({ "d-none": !props.isLoading })} variant="light" animation="border" />
+  ) : ("");
+
   return (
     <div className={classNames("btn-body", { "btn-body-icon": props.icon != null, "btn-body-text": props.text != null })}
       title={props.text}
     >
       {iconPosition === "left" ? iconElement : ""}
+      {iconPosition === "left" ? "" : loadingElement}
       {
         props.text
           ? <span className="" title={props.text}>
@@ -37,6 +44,7 @@ export default function BtnBody(props: {
           : ""
       }
       {iconPosition === "right" ? iconElement : ""}
+      {iconPosition === "right" ? "" : loadingElement}
     </div>
   );
 }

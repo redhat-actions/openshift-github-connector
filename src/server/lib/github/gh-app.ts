@@ -109,8 +109,10 @@ class GitHubApp {
       webhook_secret: this.config.webhook_secret,
     };
 
+    // Log.debug("APP MEMENTO", memento);
+
     await SecretUtil.createSecret(GitHubApp.getAppSecretName(appId), memento, {
-      appSlug: toValidK8sName(this.config.slug),
+      "app.github.com/slug": toValidK8sName(this.config.slug),
       subtype: SecretUtil.Subtype.APP,
     });
 
@@ -119,6 +121,7 @@ class GitHubApp {
   }
 
   public static async load(appId: number): Promise<GitHubApp | undefined> {
+    Log.info(`Load app ID ${appId}`);
     const secretName = GitHubApp.getAppSecretName(appId)
 
     let app = GitHubApp.cache.get(appId);

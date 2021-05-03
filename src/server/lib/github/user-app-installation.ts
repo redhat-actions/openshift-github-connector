@@ -33,6 +33,10 @@ export default class UserInstallation {
   public static async create(user: User, app: GitHubApp, installationId: number): Promise<UserInstallation> {
     const appObj = new App({
       appId: app.config.id,
+      // oauth: {
+        // clientId: app.config.client_id,
+        // clientSecret: app.config.client_secret,
+      // },
       privateKey: app.config.pem,
       log: Log,
     });

@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import {
-  Button, Card, Spinner,
+  Button, Card,
 } from "react-bootstrap";
-import classNames from "classnames";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import ApiEndpoints from "../../../../common/api-endpoints";
 import ApiRequests from "../../../../common/api-requests";
@@ -13,6 +11,7 @@ import Banner from "../../../components/banner";
 import DataFetcher from "../../../components/data-fetcher";
 import { ExternalLink } from "../../../components/external-link";
 import { getFriendlyDateTime } from "../../../../common/common-util";
+import BtnBody from "../../../components/fa-btn-body";
 
 export const USE_EXISTING_TITLE = "Use Existing App";
 
@@ -95,11 +94,7 @@ function InstallAppSection({ selectedApp }: { selectedApp: ApiResponses.Existing
   const btnText = `Install ${selectedApp.name}`;
 
   const btnBody = (
-    <div className="btn-body btn-body-icon btn-body-text" title={btnText}>
-      <FontAwesomeIcon icon={[ "fab", "github" ]} className="text-black" />
-      {btnText}
-      <Spinner className={classNames({ "d-none": !isLoading })} variant="light" animation="border" />
-    </div>
+    <BtnBody text={btnText} icon={[ "fab", "github" ]} iconClasses="text-black" isLoading={isLoading}/>
   );
 
   // if (props.selectedApp == null) {
