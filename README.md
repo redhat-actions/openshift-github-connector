@@ -3,7 +3,7 @@
 Coming soon...
 
 ## Installing on OpenShift
-See [./containerize/chart/openshift-actions-connector](the chart).
+See [the chart](./containerize/chart/openshift-actions-connector).
 The one required input is the cluster apps subdomain. It is described in [`values.yaml`](./containerize/chart/openshift-actions-connector/values.yaml).
 
 Install from the root of the repo as follows:
@@ -13,6 +13,7 @@ helm upgrade --install actions-connector \
   --set clusterAppsSubdomain=apps.<your-openshift-server>.com
 ```
 
+You do not need any permissions other than in your own namespace.
 
 ## Developing locally
 
@@ -88,6 +89,8 @@ CRA seems to have problems if you rename or delete a TypeScript file. It will ke
 Similarly, if you edit the ESLint config file, the change will not get picked up until a dev server restart.
 
 If the CRA server is not restarting because a file is errored, you have to edit the file that it thinks is errored and save it, even if the fix for the error is in another file.
+
+The `tsconfig.json` in the root of the repository is used for the client (this is the directory structure CRA expects). The server `tsconfig` is `src/server/tsconfig.json`, while the webpack config for the server is at the repository root.
 
 ## Resources
 

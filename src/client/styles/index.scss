@@ -174,11 +174,11 @@ label {
   &.btn-body-text {
     & svg, .spinner-border {
       &:first-child {
-        margin-right: .75em;
+        margin-right: 1ch;
       }
 
       &:last-child {
-        margin-left: .75em;
+        margin-left: 1ch;
       }
     }
   }

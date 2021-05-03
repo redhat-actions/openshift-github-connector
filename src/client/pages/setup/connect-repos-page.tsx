@@ -23,6 +23,7 @@ import { fetchJSON, getSearchParam } from "../../util/client-util";
 import Banner from "../../components/banner";
 import { GitHubRepoId } from "../../../common/types/github-types";
 import DataFetcher from "../../components/data-fetcher";
+import FormInputCheck from "../../components/form-input-check";
 
 type ConnectReposPageProps = {};
 
@@ -125,6 +126,9 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
             : ""
         }
         <Card>
+          <Card.Title>
+            Connect GitHub Repositories
+          </Card.Title>
           <Card.Body>
             <p>
               This step connects GitHub repositories to your OpenShift cluster by
@@ -134,6 +138,19 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
               your repositories which you can then reference in your workflows.
             </p>
             <p>
+              A Service Account Token will be created for each repository that you connect.
+              This way, you can revoke a single {`repository's`} access by deleting its token without affecting other repositories.
+            </p>
+            <p className="my-3">
+              <ExternalLink
+                href={"https://github.com/redhat-actions/oc-login/wiki/Using-a-Service-Account-for-GitHub-Actions"}
+              >
+                <FontAwesomeIcon fixedWidth icon="book-open" className="text-light mr-2" />
+                Read More about using a service account for GitHub Actions
+              </ExternalLink>.
+            </p>
+
+            {/* <p>
               It is recommended to create a new Service Account Token for each repository that you will connect.
               See <ExternalLink
                 href={"https://github.com/redhat-actions/oc-login/wiki/Using-a-Service-Account-for-GitHub-Actions"}
@@ -142,7 +159,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
               </ExternalLink> for more information about authenticating with a Service Account.
             </p>
             <p>
-            This way, you can revoke a single {`repository's`} access by deleting its token without affecting other repositories.
+
             </p>
             <div className="d-flex align-items-center">
               <input type="checkbox"
@@ -152,7 +169,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                 onChange={(e) => this.setState({ createSATokens: e.currentTarget.checked })}
               />
               <label htmlFor={this.createSATokensId} className="b clickable">Create Service Account Tokens</label>
-            </div>
+            </div> */}
           </Card.Body>
         </Card>
         <Card>
@@ -416,7 +433,6 @@ function RepoWithSecretsItem({
   repoWithSecrets,
 }: RepoItemProps): JSX.Element {
 
-  const checkboxId = `check-${repoWithSecrets.repo.full_name}`;
   const [ isShowingSecrets, setIsShowingSecrets ] = useState(false);
 
   const isEven = i % 2 === 0;
@@ -427,7 +443,7 @@ function RepoWithSecretsItem({
     >
       <div className={
         classNames(
-          "text-lg b rounded",
+          "b rounded",
           "d-flex align-items-center justify-content-between",
         )
       }>
@@ -437,24 +453,14 @@ function RepoWithSecretsItem({
             classNames("flex-grow-1 d-flex justify-content-between align-items-center")
           }
         >
-          <div className="w-50">
-            <input
-              id={checkboxId}
-              // className="form-check-input"
-              type="checkbox" checked={checked}
-              onChange={(e) => {
-                const newChecked = e.currentTarget.checked;
-                onCheckChanged(newChecked);
-              }}
-            />
-            <label
-              htmlFor={checkboxId}
-              className="flex-grow-1 m-0 clickable"
-              title="Click to toggle"
-            >
-              {repoWithSecrets.repo.full_name}
-            </label>
-          </div>
+          <FormInputCheck checked={checked} type="checkbox"
+            className={"flex-grow-1 m-0 clickable"}
+            title="Click to toggle"
+            onChange={(newChecked) => {
+              onCheckChanged(newChecked);
+            }}>
+            {repoWithSecrets.repo.full_name}
+          </FormInputCheck>
 
           <div className="mr-4">
             <ShowSecretsButton

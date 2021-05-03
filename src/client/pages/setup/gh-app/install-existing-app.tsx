@@ -112,12 +112,13 @@ function InstallAppSection({ selectedApp }: { selectedApp: ApiResponses.Existing
 
   const createdAt = new Date(selectedApp.created_at);
   const friendlyCreatedAt = getFriendlyDateTime(createdAt, true);
+  const appAvatarSize = "3rem";
 
   return (
     <React.Fragment>
       <div className="d-flex align-items-center justify-content-center">
         <div className="d-flex align-items-center">
-          <img style={{ width: "3rem", height: "3rem" }}
+          <img style={{ width: appAvatarSize, height: appAvatarSize }}
             className="mr-4"
             src={selectedApp.avatarUrl}
             alt={selectedApp.name + " avatar"}
