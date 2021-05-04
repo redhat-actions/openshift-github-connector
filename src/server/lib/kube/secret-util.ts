@@ -3,7 +3,7 @@ import { V1ObjectMeta, V1Secret, V1SecretList } from "@kubernetes/client-node";
 import Log from "server/logger";
 import { Stringable } from "common/common-util";
 import HttpConstants from "common/http-constants";
-import { GitHubRepoId } from "common/types/github-types";
+import { GitHubRepoId } from "common/types/gh-types";
 import { getFriendlyHTTPError, objValuesFromb64, objValuesTob64, toValidK8sName } from "server/util/server-util";
 import KubeWrapper, { ServiceAccountToken } from "./kube-wrapper";
 

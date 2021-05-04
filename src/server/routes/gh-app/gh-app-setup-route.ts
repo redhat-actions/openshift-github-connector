@@ -11,7 +11,7 @@ import GitHubApp from "server/lib/github/gh-app";
 import User from "server/lib/user";
 import { exchangeCodeForUserData } from "server/lib/github/gh-util";
 import StateCache from "server/lib/state-cache";
-import { GitHubUserType } from "common/types/github-types";
+import { GitHubUserType } from "common/types/gh-types";
 
 const router = express.Router();
 

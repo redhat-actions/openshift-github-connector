@@ -21,7 +21,7 @@ import BtnBody from "../../components/fa-btn-body";
 import { getFriendlyDateTime } from "../../../common/common-util";
 import { fetchJSON, getSearchParam } from "../../util/client-util";
 import Banner from "../../components/banner";
-import { GitHubRepoId } from "../../../common/types/github-types";
+import { GitHubRepoId } from "../../../common/types/gh-types";
 import DataFetcher from "../../components/data-fetcher";
 import FormInputCheck from "../../components/form-input-check";
 
@@ -293,7 +293,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                             <BtnBody icon="minus-square" text="Deselect All"/>
                           </Button>
                         </div>
-                        <div className="">
+                        <div className="long-content">
                           {
                             this.state.reposSecretsData.repos.length === 0
                               ? (

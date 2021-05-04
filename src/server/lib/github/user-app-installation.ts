@@ -1,9 +1,12 @@
-import { App } from "@octokit/app";
+
 import { Octokit } from "@octokit/core";
-import { GitHubAppInstallationData, GitHubAppInstallationUrls, GitHubRepo, GitHubUserType } from "common/types/github-types";
+import { paginateRest, PaginateInterface } from "@octokit/plugin-paginate-rest";
+
+import { GitHubAppInstallationData, GitHubAppInstallationUrls, GitHubRepo, GitHubUserType } from "common/types/gh-types";
 import GitHubApp from "server/lib/github/gh-app";
 import Log from "server/logger";
 import User from "../user";
+import { getAppOctokit } from "./gh-util";
 
 export default class UserInstallation {
 
@@ -13,7 +16,7 @@ export default class UserInstallation {
     public readonly user: User,
     public readonly app: GitHubApp,
     public readonly installationId: number,
-    public readonly octokit: Octokit,
+    public readonly octokit: Octokit & { paginate: PaginateInterface },
   ) {
 
     let installationSettingsUrl;
@@ -31,25 +34,13 @@ export default class UserInstallation {
   }
 
   public static async create(user: User, app: GitHubApp, installationId: number): Promise<UserInstallation> {
-    const appObj = new App({
-      appId: app.config.id,
-      // oauth: {
-        // clientId: app.config.client_id,
-        // clientSecret: app.config.client_secret,
-      // },
-      privateKey: app.config.pem,
-      log: Log,
-    });
+    const octokit = getAppOctokit(app.config, installationId);
 
-    const installOctokit = await appObj.getInstallationOctokit(Number(installationId));
-
-    return new this(user, app, installationId, installOctokit);
+    return new this(user, app, installationId, octokit);
   }
 
   public async getRepos(): Promise<GitHubRepo[]> {
-    const repositoriesReq = this.octokit.request("GET /installation/repositories");
-    const repositories: GitHubRepo[] = (await repositoriesReq).data.repositories;
-
+    const repositories: GitHubRepo[] = await this.octokit.paginate("GET /installation/repositories", { per_page: 100 });
     return repositories;
   }
 

@@ -1,4 +1,4 @@
-import { GitHubRepoId } from "./types/github-types";
+import { GitHubRepoId } from "./types/gh-types";
 import ImageRegistries from "./types/image-registries";
 
 namespace ApiRequests {

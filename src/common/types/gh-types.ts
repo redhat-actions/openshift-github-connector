@@ -13,12 +13,16 @@ export type GitHubActionsSecret = components["schemas"]["actions-secret"];
 export type GitHubActionsOrgSecret = components["schemas"]["organization-actions-secret"];
 export type RepoSecretsPublicKey = components["schemas"]["actions-public-key"];
 
-export type GitHubAppConfigSecrets = {
+export interface GitHubAppConfigSecrets {
   client_id: string,
   client_secret: string,
   pem: string,
   webhook_secret: string,
-};
+}
+
+export interface GitHubAppAuthData extends GitHubAppConfigSecrets {
+  id: number,
+}
 
 export type GitHubOAuthResponse = {
   access_token: string,

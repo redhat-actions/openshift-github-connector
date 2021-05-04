@@ -5,7 +5,7 @@ import { sendError } from "server/util/send-error";
 import SecretUtil from "./kube/secret-util";
 import UserInstallation from "./github/user-app-installation";
 import GitHubApp from "./github/gh-app";
-import { GitHubUserType } from "common/types/github-types";
+import { GitHubUserType } from "common/types/gh-types";
 
 type UserMementoSaveable = {
   id: string,

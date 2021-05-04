@@ -1,10 +1,9 @@
-import { App } from "@octokit/app";
 import { Octokit } from "@octokit/core";
 
 import Log from "server/logger";
-import { GitHubAppOwnerUrls, GitHubAppConfig, GitHubAppInstallationData, GitHubAppConfigNoSecrets } from "common/types/github-types";
+import { GitHubAppOwnerUrls, GitHubAppConfig, GitHubAppInstallationData, GitHubAppConfigNoSecrets, GitHubAppAuthData } from "common/types/gh-types";
 import SecretUtil from "server/lib/kube/secret-util";
-import { getGitHubHostname } from "./gh-util";
+import { getAppOctokit, getGitHubHostname } from "./gh-util";
 import { fromb64, toValidK8sName } from "server/util/server-util";
 import User from "../user";
 
@@ -53,30 +52,16 @@ class GitHubApp {
     this.authorizedUsers = [this.config.owner.id];
   }
 
-  private static async getApp(appData: Omit<AppMemento, "authorizedUsers">): Promise<App> {
-    return new App({
-      appId: appData.id,
-      privateKey: appData.pem,
-      oauth: {
-        clientId: appData.client_id,
-        clientSecret: appData.client_secret,
-      },
-      webhooks: {
-        secret: appData.webhook_secret,
-      },
-      log: Log,
-    });
+  private static async getAppConfig(octokit: Octokit): Promise<GitHubAppConfigNoSecrets> {
+    return (await octokit.request("GET /app")).data as GitHubAppConfigNoSecrets;
   }
 
-  private static async getAppConfig(ghApp: App): Promise<GitHubAppConfigNoSecrets> {
-    return (await ghApp.octokit.request("GET /app")).data as GitHubAppConfigNoSecrets;
-  }
+  public static async create(authData: GitHubAppAuthData): Promise<GitHubApp> {
+    const octokit = getAppOctokit(authData);
 
-  public static async create(appData: Omit<AppMemento, "authorizedUsers">): Promise<GitHubApp> {
-    const ghAppObj = await this.getApp(appData);
-    const configNoSecrets = await this.getAppConfig(ghAppObj);
+    const configNoSecrets = await this.getAppConfig(octokit);
     const config = {
-      ...appData,
+      ...authData,
       ...configNoSecrets
     };
 
@@ -85,7 +70,7 @@ class GitHubApp {
     const app = new GitHubApp(
       githubHostname,
       config,
-      ghAppObj.octokit,
+      octokit,
     );
 
     await app.save();
@@ -135,6 +120,7 @@ class GitHubApp {
       const authorizedUsers = JSON.parse(secret.data.authorizedUsers);
       const memento = {
         ...secret.data,
+        id: Number(secret.data.id),
         authorizedUsers,
       };
 

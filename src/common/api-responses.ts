@@ -10,7 +10,7 @@ import {
   GitHubAppInstallationUrls,
   GitHubAppPublicData,
   GitHubAppConfigNoSecrets,
-} from "./types/github-types";
+} from "./types/gh-types";
 
 namespace ApiResponses {
 

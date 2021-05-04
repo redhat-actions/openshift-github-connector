@@ -1,17 +1,51 @@
-import express from "express";
 import { Octokit } from "@octokit/core";
+import { createAppAuth } from "@octokit/auth-app";
+import { paginateRest, PaginateInterface } from "@octokit/plugin-paginate-rest";
 import sodium from "tweetsodium";
 
 import Log from "server/logger";
-import ApiResponses from "common/api-responses";
-import { sendError } from "server/util/send-error";
-import { GitHubOAuthResponse, GitHubRepoId, GitHubUserData, RepoSecretsPublicKey } from "common/types/github-types";
+import { GitHubAppAuthData, GitHubOAuthResponse, GitHubRepoId, GitHubUserData, RepoSecretsPublicKey } from "common/types/gh-types";
 import HttpConstants from "common/http-constants";
 import fetch from "node-fetch";
 import { throwIfError } from "server/util/server-util";
+import { AuthenticationApi } from "@kubernetes/client-node";
 
 export async function getGitHubHostname(): Promise<string> {
   return "github.com";
+}
+
+export function getAppOctokit(appAuth: GitHubAppAuthData, installationId?: number): Octokit & {
+  paginate: PaginateInterface,
+} {
+
+  Log.info(`Creating octokit for app ID ${appAuth.id}${installationId != null ? ` with installation ID ${installationId}`: ""}`);
+
+  // the auth library uses different naming than the REST api :)
+  const auth: Record<string, unknown> = {
+    appId: appAuth.id,
+    oauth: {
+      clientId: appAuth.client_id,
+      clientSecret: appAuth.client_secret
+    },
+    privateKey: appAuth.pem,
+    webhooks: {
+      secret: appAuth.webhook_secret,
+    },
+  };
+
+  if (installationId) {
+    auth.installationId = installationId;
+  }
+
+  // https://github.com/octokit/plugin-paginate-rest.js/
+  const PaginateOctokit = Octokit.plugin(paginateRest);
+  const octokit = new PaginateOctokit({
+    authStrategy: createAppAuth,
+    auth,
+    log: Log,
+  });
+
+  return octokit;
 }
 
 export async function getRepoSecretPublicKey(installOctokit: Octokit, repo: GitHubRepoId): Promise<RepoSecretsPublicKey> {

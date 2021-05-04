@@ -188,3 +188,14 @@ label {
     height: 1em;
   }
 }
+
+.centers {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.long-content {
+  max-height: 500px;
+  overflow-y: auto;
+}

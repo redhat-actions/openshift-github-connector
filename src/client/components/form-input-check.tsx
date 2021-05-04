@@ -15,14 +15,16 @@ interface FormButtonProps {
 export default function FormInputCheck(props: FormButtonProps): JSX.Element {
 
   return (
-    <label className={classNames("d-flex align-items-center clickable py-1 b", props.className, { disabled: props.disabled })}>
+    <label
+      className={classNames("d-flex align-items-center clickable py-1 b", props.className, { disabled: props.disabled })}
+      title={props.title}
+    >
       <input
         type={props.type}
         checked={props.checked}
         onChange={(e) => props.onChange(e.currentTarget.checked)}
         disabled={props.disabled}
         className={classNames("clickable")}
-        title={props.title}
         {...(props.inputProps ?? {})}
       />
       <div>

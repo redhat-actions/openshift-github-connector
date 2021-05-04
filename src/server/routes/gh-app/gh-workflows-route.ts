@@ -9,7 +9,7 @@ import Log from "server/logger";
 import { getFriendlyHTTPError, tob64 } from "server/util/server-util";
 import { sendError } from "server/util/send-error";
 import KubeWrapper from "server/lib/kube/kube-wrapper";
-import { GitHubContentFile } from "common/types/github-types";
+import { GitHubContentFile } from "common/types/gh-types";
 import User from "server/lib/user";
 
 const router = express.Router();

@@ -4,7 +4,7 @@ import { send405, sendError } from "server/util/send-error";
 import ApiEndpoints from "common/api-endpoints";
 import ApiRequests from "common/api-requests";
 import ApiResponses from "common/api-responses";
-import { RepoSecretsPublicKey } from "common/types/github-types";
+import { RepoSecretsPublicKey } from "common/types/gh-types";
 import { createSecret, getRepoSecretPublicKey } from "server/lib/github/gh-util";
 import KubeWrapper, { ServiceAccountToken } from "server/lib/kube/kube-wrapper";
 import Log from "server/logger";

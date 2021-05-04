@@ -6,12 +6,13 @@ import ApiEndpoints from "../../common/api-endpoints";
 import ApiRequests from "../../common/api-requests";
 import ApiResponses from "../../common/api-responses";
 import { STARTER_WORKFLOW } from "../../common/common-util";
-import { GitHubRepoId } from "../../common/types/github-types";
+import { GitHubRepoId } from "../../common/types/gh-types";
 import ImageRegistry from "../../common/types/image-registries";
 import Banner from "../components/banner";
 import DataFetcher from "../components/data-fetcher";
 import { ExternalLink } from "../components/external-link";
 import BtnBody from "../components/fa-btn-body";
+import FormInputCheck from "../components/form-input-check";
 import { fetchJSON } from "../util/client-util";
 
 const defaultWorkflowFileBasename = "openshift";
@@ -151,18 +152,23 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                     </div>
                   </Card.Title>
                   <Card.Body>
-                    {
-                      reposWithSecrets.repos.map((repo, i) => {
-                        const isEven = i % 2 === 0;
+                    <div className="long-content">
+                      {
+                        reposWithSecrets.repos.map((repo, i) => {
+                          const isEven = i % 2 === 0;
 
-                        return (
-                          <div key={repo.repo.id}
-                            className={classNames("d-flex align-items-center b p-3 rounded", { "bg-darker": isEven, "bg-lighter": !isEven })}
-                          >
-                            <label className="flex-grow-1 d-flex align-items-center clickable">
-                              <input type="radio"
-                                name={this.repoGroupName}
-                                onChange={(_e) => {
+                          return (
+                            <div key={repo.repo.id}
+                              className={classNames(
+                                "row m-0 p-3 rounded",
+                                { "bg-darker": isEven, "bg-lighter": !isEven }
+                              )}
+                            >
+                              <FormInputCheck
+                                className="col-6"
+                                checked={this.state.repo?.id === repo.repo.id}
+                                type="radio"
+                                onChange={(_checked: boolean) => {
                                   this.setState({
                                     repo: {
                                       id: repo.repo.id,
@@ -173,27 +179,43 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                                   });
                                 }}
                                 disabled={!repo.hasClusterSecrets}
-                              />
-                              {repo.repo.full_name}
-                            </label>
-
-                            <Button variant="light"
-                              title="GitHub Repository"
-                            >
-                              <ExternalLink
-                                href={repo.repo.html_url}
+                                title={repo.hasClusterSecrets ? repo.repo.full_name : "Cannot select - Missing required secrets"}
                               >
-                                <BtnBody icon={[ "fab", "github" ]} />
-                              </ExternalLink>
-                            </Button>
-                          </div>
-                        );
-                      })
-                    }
+
+                                {repo.repo.full_name}
+                              </FormInputCheck>
+
+                              <div className="col-4 centers">
+                                { repo.hasClusterSecrets ? "" :
+                                  <div>
+                                    <FontAwesomeIcon className="text-warning mr-2" fixedWidth icon="exclamation-triangle" />
+                                  Missing cluster secrets
+                                  </div>
+                                }
+                              </div>
+
+                              <div className="col-2 d-flex align-items-center justify-content-end">
+                                <Button
+                                  variant="light"
+                                  title={repo.repo.html_url}
+                                >
+                                  <ExternalLink
+                                    href={repo.repo.html_url}
+                                  >
+                                    <BtnBody icon={[ "fab", "github" ]} />
+                                  </ExternalLink>
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        })
+                      }
+                    </div>
 
                     <div className="mt-4 mb-2 d-flex justify-content-end align-items-center">
                       <Button size="lg"
                         disabled={this.state.repo == null}
+                        title={this.state.repo == null ? "Select a repository to proceed" : "Create Workflow"}
                         onClick={async (_e) => {
                           this.setState({ isSubmitting: true, submissionResult: undefined });
                           try {
@@ -276,9 +298,6 @@ function ContainerImageRegistryCard(props: {
   currentImageRegistry: ImageRegistry.Info,
   setImageRegistry: (registry: ImageRegistry.Info) => void,
 }): JSX.Element {
-
-  const registryRadioGroup = "image-registry-radiogroup";
-
   return (
     <Card>
       <Card.Title>
@@ -313,23 +332,21 @@ function ContainerImageRegistryCard(props: {
               const text = `Use ${ImageRegistry.Registries[registryType].description}`;
 
               return (
-                <label key={registryType}
-                  className={classNames("d-flex align-items-center clickable py-1", { disabled })}
+                <FormInputCheck
+                  type="radio"
+                  checked={props.currentImageRegistry.type === registryType}
+                  key={registryType}
+                  disabled={disabled}
                   title={disabled ? "Not implemented" : text}
+                  onChange={(_checked) => {
+                    props.setImageRegistry({
+                      type: registryType,
+                      hostname: ImageRegistry.GHCR_HOSTNAME,
+                    });
+                  }}
                 >
-                  <input type="radio"
-                    name={registryRadioGroup}
-                    defaultChecked={props.currentImageRegistry.type === registryType}
-                    onChange={(_e) => {
-                      props.setImageRegistry({
-                        type: registryType,
-                        hostname: ImageRegistry.GHCR_HOSTNAME,
-                      });
-                    }}
-                    disabled={disabled}
-                  />
                   {text}
-                </label>
+                </FormInputCheck>
               );
             })
           }
