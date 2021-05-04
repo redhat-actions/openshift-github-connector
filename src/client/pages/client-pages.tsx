@@ -10,6 +10,7 @@ import * as PostCreateAppPages from "./setup/gh-app/post-create-app";
 import HomePage from "./home-page";
 import SetupFinishedPage from "./setup/setup-completion-page";
 import AddWorkflowsPage from "./add-workflows-page";
+import ImageRegistriesPage from "./image-registries-page";
 
 export class ClientPage extends UrlPath {
   constructor(
@@ -48,6 +49,8 @@ const App = new ClientPage(Home, "/app", GitHubAppPage);
 const ConnectRepos = new ClientPage(Home, "/connect-repos", SelectReposPage);
 const Cluster = new ClientPage(Home, "/cluster", ClusterPage);
 
+const ImageRegistries = new ClientPage(Home, "/image-registries", ImageRegistriesPage);
+
 const NotImplemented = new ClientPage(Home, "/not-implemented", (() => {
   return (<h2>This page {"doesn't"} exist yet</h2>);
 }));
@@ -67,6 +70,8 @@ const ClientPages = {
   App,
   Cluster,
   AddWorkflows,
+
+  ImageRegistries,
 
   NotImplemented,
 };

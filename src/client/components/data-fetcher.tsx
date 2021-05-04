@@ -45,6 +45,10 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
     this.state = { data: undefined, loadingError: undefined, loaded: false };
   }
 
+  static getDerivedStateFromError(error: any) {
+    return { loadingError: error };
+  }
+
   async componentDidMount(): Promise<void> {
     await this.load();
   }

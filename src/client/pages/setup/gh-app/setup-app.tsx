@@ -7,10 +7,9 @@ import ApiEndpoints from "../../../../common/api-endpoints";
 import ApiResponses from "../../../../common/api-responses";
 import DataFetcher from "../../../components/data-fetcher";
 import FormInputCheck from "../../../components/form-input-check";
-import { getSearchParam } from "../../../util/client-util";
 import CreateAppCard from "./create-app";
 import InstallExistingAppCard from "./install-existing-app";
-import SetupPageHeader, { SETUP_QUERYPARAM } from "../setup-header";
+import SetupPageHeader from "../setup-header";
 
 export default function SetupAppPage(): JSX.Element {
 
@@ -19,7 +18,7 @@ export default function SetupAppPage(): JSX.Element {
 
   return (
     <React.Fragment>
-      {getSearchParam(SETUP_QUERYPARAM) ? <SetupPageHeader pageIndex={1} hideBtnBanner={true}/> : ""}
+      <SetupPageHeader pageIndex={1} hideBtnBanner={true}/>
 
       <DataFetcher type="api" endpoint={ApiEndpoints.App.Existing} loadingDisplay="card" >{
         (data: ApiResponses.Result) => {

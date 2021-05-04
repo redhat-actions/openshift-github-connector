@@ -88,9 +88,17 @@ input {
   }
 }
 
-.form-check-input {
+.form-group .form-check-input {
   // transform: scale(1.5);
   cursor: pointer;
+}
+
+.form-label {
+  font-weight: bold;
+}
+
+.form-check-label {
+  margin-left: 0.5em;
 }
 
 .jumbotron {

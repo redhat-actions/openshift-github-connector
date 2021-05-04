@@ -11,6 +11,7 @@ import {
   GitHubAppPublicData,
   GitHubAppConfigNoSecrets,
 } from "./types/gh-types";
+import ImageRegistry from "./types/image-registries";
 
 namespace ApiResponses {
 
@@ -211,6 +212,19 @@ namespace ApiResponses {
 
   export type ClusterState = ClusterStateDisconnected | ClusterStateConnected;
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  interface ImageRegistryCreationSuccess extends ResultSuccess {
+    registry: ImageRegistry.Info,
+  }
+
+  export type ImageRegistryCreationResult = ImageRegistryCreationSuccess | ResultFailed;
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  interface ImageRegistryListSuccess extends ResultSuccess {
+    registries: ImageRegistry.List,
+  }
+
+  export type ImageRegistryListResult = ImageRegistryListSuccess | ResultFailed;
 }
 
 export default ApiResponses;

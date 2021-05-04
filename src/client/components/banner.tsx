@@ -7,7 +7,7 @@ import { Severity } from "../../common/common-util";
 
 namespace Banner {
   export type Props = {
-    display: boolean,
+    display?: boolean,
     severity?: Severity,
     loading?: boolean,
     title?: React.ReactNode,
@@ -23,6 +23,8 @@ function Banner(props: Banner.Props): JSX.Element {
   delete divProps.severity;
   delete divProps.loading;
   delete divProps.title;
+
+  const display: boolean = props.display == null ? true : props.display;
 
   let icon: IconProp | undefined;
   if (props.severity === "danger") {
@@ -44,7 +46,7 @@ function Banner(props: Banner.Props): JSX.Element {
       "banner rounded p-3",
       "bg-" + props.severity,
       "text-" + (props.severity === "warning" ? "black" : "light"),
-      { "d-none": !props.display }
+      { "d-none": !display }
     )}>
       <div className={classNames(
         "banner-title flex-grow-1 d-flex align-items-center",

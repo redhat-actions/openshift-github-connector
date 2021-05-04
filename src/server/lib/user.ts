@@ -6,11 +6,14 @@ import SecretUtil from "./kube/secret-util";
 import UserInstallation from "./github/user-app-installation";
 import GitHubApp from "./github/gh-app";
 import { GitHubUserType } from "common/types/gh-types";
+import ImageRegistryListWrapper from "./user-image-registry-list";
 
 type UserMementoSaveable = {
   id: string,
   name: string,
   type: GitHubUserType,
+
+  imageRegistries: string,
 
   installedAppId?: string,
   installationId?: string,
@@ -31,20 +34,29 @@ export default class User {
   private _installation: UserInstallation | undefined;
   private _ownsAppId: number | undefined;
 
+  public readonly imageRegistries: ImageRegistryListWrapper;
+
   private constructor(
     public readonly id: number,
     public readonly name: string,
     public readonly type: GitHubUserType,
+    imageRegistryListStr: string,
   ) {
 
     Log.info(`Creating ${type} reference to ${name}`);
+
+    this.imageRegistries = new ImageRegistryListWrapper(this.save, imageRegistryListStr);
   }
 
+  /**
+   * Get the user identified by the session cookie.
+   * If this returns undefined, the route handler must abort the request, since a response will have been sent.
+   */
   public static async getUserForSession(req: express.Request, res: express.Response): Promise<User | undefined> {
     // this could probably be a middleware that attaches the user to the request obj
     if (!req.session.data?.githubUserId) {
       Log.warn(`No user session`)
-      sendError(res, 400, "No user session provided");
+      sendError(res, 401, "No user session provided");
       return undefined;
     }
 
@@ -52,6 +64,10 @@ export default class User {
     return user;
   }
 
+  /**
+   * Get the app installation tied to the user identified by the session cookie.
+   * If this returns undefined, the route handler must abort the request, since a response will have been sent.
+   */
   public static async getInstallationForSession(req: express.Request, res: express.Response): Promise<UserInstallation | undefined> {
     const user = await this.getUserForSession(req, res);
     if (!user) {
@@ -70,10 +86,11 @@ export default class User {
 
   public static async create(
     userInfo: { name: string, id: number, type: GitHubUserType },
-    installationInfo?: { appId: number, installationId: number }
+    imageRegistryListStr?: string,
+    installationInfo?: { appId: number, installationId: number },
   ): Promise<User> {
 
-    const user = new this(userInfo.id, userInfo.name, userInfo.type);
+    const user = new this(userInfo.id, userInfo.name, userInfo.type, imageRegistryListStr ?? JSON.stringify([]));
     if (installationInfo) {
       const app = await GitHubApp.load(installationInfo.appId);
       if (!app) {
@@ -123,12 +140,13 @@ export default class User {
     return false;
   }
 
-  private async save(): Promise<void> {
+  private save = async(): Promise<void> => {
     Log.info(`Saving user ${this.name}`);
     const memento: UserMementoSaveable = {
       id: this.id.toString(),
       name: this.name,
       type: this.type,
+      imageRegistries: this.imageRegistries.toString(),
     }
 
     if (this._installation) {
@@ -139,6 +157,30 @@ export default class User {
     await SecretUtil.createSecret(User.getUserSecretName(this.id), memento, { subtype: SecretUtil.Subtype.USER });
     Log.info(`Update user ${this.name} data in cache`);
     User.cache.set(this.id, this);
+  }
+
+  private static async loadMemento(
+    userId: number
+  ): Promise<UserMemento | undefined> {
+
+    const secret = await SecretUtil.loadFromSecret<UserMementoSaveable>(User.getUserSecretName(userId));
+    if (!secret) {
+      return undefined;
+    }
+
+    const result: UserMemento = {
+      ...secret.data,
+      id: Number(secret.data.id),
+    };
+
+    if (secret.data.installedAppId != null && secret.data.installationId != null) {
+      result.installationInfo = {
+        appId: Number(secret.data.installedAppId),
+        installationId: Number(secret.data.installationId),
+      }
+    }
+
+    return result;
   }
 
   private static async loadUser(userId: number): Promise<User | undefined> {
@@ -152,36 +194,11 @@ export default class User {
       return undefined;
     }
 
-    const user = await this.create(memento, memento.installationInfo);
+    const user = await this.create(memento, memento.imageRegistries, memento.installationInfo);
 
     Log.info(`Loaded user ${memento.name}`);
     User.cache.set(userId, user);
     return user;
-  }
-
-  private static async loadMemento(
-    userId: number
-  ): Promise<UserMemento | undefined> {
-
-    const secret = await SecretUtil.loadFromSecret<UserMementoSaveable>(User.getUserSecretName(userId));
-    if (!secret) {
-      return undefined;
-    }
-
-    const result: UserMemento = {
-      id: Number(secret.data.id),
-      name: secret.data.name,
-      type: secret.data.type,
-    };
-
-    if (secret.data.installedAppId != null && secret.data.installationId != null) {
-      result.installationInfo = {
-        appId: Number(secret.data.installedAppId),
-        installationId: Number(secret.data.installationId),
-      }
-    }
-
-    return result;
   }
 
   private static getUserSecretName(userId: number) {

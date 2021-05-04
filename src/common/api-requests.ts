@@ -1,5 +1,5 @@
 import { GitHubRepoId } from "./types/gh-types";
-import ImageRegistries from "./types/image-registries";
+import ImageRegistry from "./types/image-registries";
 
 namespace ApiRequests {
   export interface CreateCallbackState {
@@ -35,6 +35,15 @@ namespace ApiRequests {
   //   repos: string,
   // };
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  export interface AddImageRegistry extends ImageRegistry.Inputs {
+    ghcrUseGitHubToken?: boolean,
+  }
+
+  export interface DeleteImageRegistry {
+    id: string,
+  }
+
   export interface CreateActionsSecrets {
     repos: GitHubRepoId[],
     createSATokens: boolean,
@@ -45,7 +54,7 @@ namespace ApiRequests {
     namespace?: string,
     overwriteExisting: boolean,
     workflowFileName: string,
-    imageRegistry: ImageRegistries.Info,
+    imageRegistryId: string,
   }
 }
 

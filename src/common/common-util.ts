@@ -97,3 +97,13 @@ export function getFriendlyDateTime(dateToFormat: Date, showTime_: boolean = fal
   }
   return date;
 }
+
+// eslint-disable-next-line quotes
+const BANNED_CHARS = '<>"^`{|';
+
+export function containsBannedCharacters(s: string, allowSpaces: boolean = false): boolean {
+  const banned = BANNED_CHARS + (allowSpaces ? "" : " ");
+
+  const bannedRx = new RegExp(`[${banned}]`);
+  return bannedRx.test(s);
+}

@@ -1,24 +1,27 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
 import React from "react";
-import { Button, Card, Form } from "react-bootstrap";
+import {
+  Button, Card, Col, Form,
+} from "react-bootstrap";
+import { Link } from "react-router-dom";
 import ApiEndpoints from "../../common/api-endpoints";
 import ApiRequests from "../../common/api-requests";
 import ApiResponses from "../../common/api-responses";
 import { STARTER_WORKFLOW } from "../../common/common-util";
 import { GitHubRepoId } from "../../common/types/gh-types";
-import ImageRegistry from "../../common/types/image-registries";
 import Banner from "../components/banner";
 import DataFetcher from "../components/data-fetcher";
 import { ExternalLink } from "../components/external-link";
 import BtnBody from "../components/fa-btn-body";
 import FormInputCheck from "../components/form-input-check";
 import { fetchJSON } from "../util/client-util";
+import ClientPages from "./client-pages";
 
 const defaultWorkflowFileBasename = "openshift";
 
 interface AddWorkflowsPageState {
-  imageRegistry: ImageRegistry.Info,
+  imageRegistryId?: string,
   repo?: GitHubRepoId,
   workflowFileName: {
     name?: string,
@@ -32,17 +35,13 @@ interface AddWorkflowsPageState {
 
 export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPageState> {
 
-  private readonly repoGroupName="repo-radiogroup";
   private readonly bannerId = "submission-banner";
   private readonly fileNameInputId = "filename-input";
+  private readonly imageRegistrySelectId = "image-registry-select";
 
   constructor(props: {}) {
     super(props);
     this.state = {
-      imageRegistry: {
-        type: "GHCR",
-        hostname: ImageRegistry.GHCR_HOSTNAME,
-      },
       workflowFileName: {
         name: defaultWorkflowFileBasename,
       },
@@ -93,11 +92,6 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
           </Card.Body>
         </Card>
 
-        <ContainerImageRegistryCard
-          currentImageRegistry={this.state.imageRegistry}
-          setImageRegistry={(imageRegistry: ImageRegistry.Info) => this.setState({ imageRegistry })}
-        />
-
         <Card>
           <Card.Title>
             Workflow File Name
@@ -124,6 +118,84 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
             </Form>
           </Card.Body>
         </Card>
+
+        <DataFetcher type="api" endpoint={ApiEndpoints.User.ImageRegistries} loadingDisplay="card">{
+          (registriesRes: ApiResponses.ImageRegistryListResult, reload) => {
+
+            return (
+              <Card>
+                <Card.Title>
+                  <div>
+                    Image Registry
+                  </div>
+                  <div className="ml-auto">
+                    <div className="btn-line">
+                      <Button variant="primary">
+                        <Link to={ClientPages.ImageRegistries.path}>
+                          <BtnBody icon="cog" text="Edit Image Registries" />
+                        </Link>
+                      </Button>
+                      <Button variant="primary"
+                        onClick={reload}
+                      >
+                        <BtnBody icon="sync-alt" text="Reload"/>
+                      </Button>
+                    </div>
+                  </div>
+                </Card.Title>
+                <Card.Body>
+                  {
+                    (() => {
+                      if (!registriesRes.success) {
+                        return (
+                          <Banner
+                            severity="danger"
+                            title={"Failed to get image registries: " + registriesRes.message}
+                          />
+                        );
+                      }
+
+                      if (registriesRes.registries.length === 0) {
+                        return (
+                          <Banner
+                            severity="warning"
+                            title="No image registries are configured. Click Edit Image Registries to set up an image registry."
+                          />
+                        );
+                      }
+
+                      return (
+                        <Form.Row className="w-50">
+                          <Form.Group as={Col}>
+                            <Form.Label>
+                              Select an Image Registry
+                            </Form.Label>
+                            <Form.Control id={this.imageRegistrySelectId} as="select" onChange={(e) => {
+                              this.setState({ imageRegistryId: e.currentTarget.value });
+                            }}>
+                              {
+                                registriesRes.registries.map((reg) => {
+                                  return (
+                                    <option
+                                      value={reg.id}
+                                      key={reg.id}
+                                    >
+                                      {reg.username}@{reg.fullPath}
+                                    </option>
+                                  );
+                                })
+                              }
+                            </Form.Control>
+                          </Form.Group>
+                        </Form.Row>
+                      );
+                    })()
+                  }
+                </Card.Body>
+              </Card>
+            );
+          }}
+        </DataFetcher>
 
         <DataFetcher type="api" endpoint={ApiEndpoints.App.Repos.Secrets} loadingDisplay="card">{
           (reposWithSecrets: ApiResponses.ReposSecretsStatus, reload) => {
@@ -280,101 +352,21 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
     else if (this.state.workflowFileName.validationErr || !this.state.workflowFileName.name) {
       throw new Error("Invalid workflow filename. Fix the workflow filename above.");
     }
+    else if (!this.state.imageRegistryId) {
+      throw new Error(`Select an image registry to use.`);
+    }
 
     const reqBody: ApiRequests.CreateWorkflow = {
       repo: this.state.repo,
       workflowFileName: this.state.workflowFileName.name,
       overwriteExisting: this.state.overwriteExistingWorkflow,
-      imageRegistry: this.state.imageRegistry,
+      imageRegistryId: this.state.imageRegistryId,
     };
 
     const res = await fetchJSON<typeof reqBody, ApiResponses.WorkflowCreationResult>("POST", ApiEndpoints.App.Workflows, reqBody);
 
     this.setState({ submissionResult: res });
   }
-}
-
-function ContainerImageRegistryCard(props: {
-  currentImageRegistry: ImageRegistry.Info,
-  setImageRegistry: (registry: ImageRegistry.Info) => void,
-}): JSX.Element {
-  return (
-    <Card>
-      <Card.Title>
-        Container Image Registry
-      </Card.Title>
-      <Card.Body>
-        <p>
-          The starter workflow requires a Container Image Registry to push built images to, and pull images from.
-        </p>
-        <p>
-          You can use the <ExternalLink href="https://docs.github.com/en/packages/guides/about-github-container-registry">
-            GitHub container registry
-          </ExternalLink>, the <ExternalLink
-            href="https://docs.openshift.com/container-platform/4.7/registry/architecture-component-imageregistry.html">
-            OpenShift Integrated Registry
-          </ExternalLink>,
-          or another image registry such
-          as <ExternalLink href="https://quay.io">quay.io</ExternalLink> or <ExternalLink href="https://www.docker.com/products/docker-hub">
-            DockerHub
-          </ExternalLink>.
-        </p>
-
-        <p>
-          The GitHub registry is the default because it requires the least configuration.
-        </p>
-
-        <div className="b w-50">
-          {
-            Object.keys(ImageRegistry.Registries).map((registry_) => {
-              const registryType = registry_ as ImageRegistry.Type;
-              const disabled = !ImageRegistry.Registries[registryType].enabled;
-              const text = `Use ${ImageRegistry.Registries[registryType].description}`;
-
-              return (
-                <FormInputCheck
-                  type="radio"
-                  checked={props.currentImageRegistry.type === registryType}
-                  key={registryType}
-                  disabled={disabled}
-                  title={disabled ? "Not implemented" : text}
-                  onChange={(_checked) => {
-                    props.setImageRegistry({
-                      type: registryType,
-                      hostname: ImageRegistry.GHCR_HOSTNAME,
-                    });
-                  }}
-                >
-                  {text}
-                </FormInputCheck>
-              );
-            })
-          }
-        </div>
-        <div>
-          <Form inline className="my-4">
-            <Form.Group>
-              <Form.Label>
-                Image registry hostname:
-                <Form.Control type="text" className="ml-3"
-                  isValid={true}
-                  isInvalid={false}
-                  value={props.currentImageRegistry.hostname}
-                  readOnly
-                />
-              </Form.Label>
-              <Form.Control.Feedback>
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Form>
-        </div>
-
-        <p>
-          (this setting has no effect)
-        </p>
-      </Card.Body>
-    </Card>
-  );
 }
 
 function SubmissionStatusBanner(props: {

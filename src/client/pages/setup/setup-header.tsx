@@ -5,6 +5,7 @@ import { Button, Card } from "react-bootstrap";
 
 import ClientPages from "../client-pages";
 import BtnBody from "../../components/fa-btn-body";
+import { getSearchParam } from "../../util/client-util";
 
 type SetupPageProps = {
   pageIndex: number,
@@ -21,18 +22,27 @@ type SetupStepType = "passed" | "current" | "todo";
 export const SETUP_QUERYPARAM = "setup";
 const query = { [SETUP_QUERYPARAM]: "true" };
 
+function isSetup(): boolean {
+  return getSearchParam(SETUP_QUERYPARAM) != null;
+}
+
 export function getSetupSteps() {
   return [
     { title: "Welcome", path: ClientPages.Welcome.withQuery(query) },
-    { title: "Setup GitHub App", path: ClientPages.SetupCreateApp.withQuery(query) },
-    { title: "View GitHub App", path: ClientPages.App.withQuery(query) },
+    { title: "Setup App", path: ClientPages.SetupCreateApp.withQuery(query) },
+    { title: "View App", path: ClientPages.App.withQuery(query) },
     // { title: "Create Service Account", path: getSetupPath(ClientPages.SetupServiceAccount) },
-    { title: "Connect Repositories", path: ClientPages.ConnectRepos.withQuery(query) },
-    { title: "Complete", path: ClientPages.SetupFinished.withQuery(query) },
+    { title: "Connect Repos", path: ClientPages.ConnectRepos.withQuery(query) },
+    { title: "Image Registry", path: ClientPages.ImageRegistries.withQuery(query) },
+    { title: "Done", path: ClientPages.SetupFinished.withQuery(query) },
   ];
 }
 
 export default function SetupPageHeader(props: SetupPageProps): JSX.Element {
+
+  if (!isSetup()) {
+    return (<></>);
+  }
 
   const setupSteps = getSetupSteps();
 
@@ -98,6 +108,11 @@ export default function SetupPageHeader(props: SetupPageProps): JSX.Element {
                   if (props.canProceed === false) {
                     return;
                   }
+
+                  // if (props.pageIndex === setupSteps.length - 1) {
+                  //   history.push(ClientPages.SetupFinished.path);
+                  //   return;
+                  // }
 
                   const nextPage = setupSteps[props.pageIndex + 1].path;
                   history.push(nextPage);

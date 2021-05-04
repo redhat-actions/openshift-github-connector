@@ -8,11 +8,11 @@ import SetupPageHeader from "./setup-header";
 export default function SetupFinishedPage(): JSX.Element {
   return (
     <React.Fragment>
-      <SetupPageHeader pageIndex={4} canProceed={false} hideBtnBanner={true} />
+      <SetupPageHeader pageIndex={5} canProceed={false} hideBtnBanner={true} />
       <Jumbotron>
-        <h2>
-          <FontAwesomeIcon icon="check" className="text-success mr-4" />
-          Setup Complete
+        <h2 className="d-flex justify-content-between">
+          Setup Complete!
+          {/* <FontAwesomeIcon icon="check" className="text-success" /> */}
         </h2>
         <hr />
         <h3>{"What's Next"}</h3>
@@ -33,6 +33,9 @@ export default function SetupFinishedPage(): JSX.Element {
           </li>
           <li>
             <Link to={ClientPages.ConnectRepos.path}>Return to the Connect Repositories page</Link>
+          </li>
+          <li>
+            <Link to={ClientPages.ImageRegistries.path}>Return to the Image Registries page</Link>
           </li>
         </ul>
       </Jumbotron>

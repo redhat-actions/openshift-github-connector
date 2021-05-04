@@ -44,7 +44,10 @@ module.exports = {
     "max-len": [ 2, 120, 2, { ignoreUrls: true } ],
     "camelcase": [ 0 ],
 
-    "@typescript-eslint/member-ordering": [ 2 ]
+    "@typescript-eslint/member-ordering": [ 2 ],
+
+    // this is to work with @typescript-eslint/floating-promises void behaviour
+    "no-void": [ 2, { allowAsStatement: true }]
   },
   overrides: [{
     files: [ "*.tsx" ],

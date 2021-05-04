@@ -135,6 +135,19 @@ input[type=checkbox], input[type=radio] {
   margin-right: 1em;
 }
 
+input.form-control[readonly] {
+  background-color: c.$gray-500;
+  color: c.$dark;
+
+  &:hover {
+    cursor: not-allowed;
+  }
+}
+
+.form-label:not([inline]) {
+  padding-bottom: map-get(c.$spacers, 2);
+}
+
 label {
   margin: 0;
 }
@@ -198,4 +211,8 @@ label {
 .long-content {
   max-height: 500px;
   overflow-y: auto;
+}
+
+td div {
+  display: table-cell;
 }

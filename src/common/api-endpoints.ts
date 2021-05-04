@@ -24,6 +24,7 @@ const User = new UrlPath(Root, "/user");
 const SetUserOAuthState = new UrlPath(User, "/oauth/state");
 const PostUserOAuth = new UrlPath(User, "/oauth/post-redirect");
 const UserApp = new UrlPath(User, "/app");
+const UserImageRegistries = new UrlPath(User, "/image-registries");
 // const ServiceAccount = new UrlPath(User, "/serviceaccount");
 
 const Webhook = new UrlPath(Root, "/webhook");
@@ -45,6 +46,7 @@ const ApiEndpoints = {
     SetUserOAuthState,
     PostUserOAuth,
     App: UserApp,
+    ImageRegistries: UserImageRegistries,
     // ServiceAccount,
   },
   App: {

@@ -5,7 +5,7 @@ export function ExternalLink({
   href, children, className, title, icon,
 }: {
     href: string,
-    children: React.ReactNode,
+    children?: React.ReactNode,
     className?: string,
     title?: string,
 

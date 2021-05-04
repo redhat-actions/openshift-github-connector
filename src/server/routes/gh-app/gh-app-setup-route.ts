@@ -201,7 +201,7 @@ router.route(ApiEndpoints.Setup.PostInstallApp.path)
       id: userData.id,
       name: userData.login,
       type: userData.type as GitHubUserType,
-    }, {
+    }, undefined, {
       appId,
       installationId,
     });
