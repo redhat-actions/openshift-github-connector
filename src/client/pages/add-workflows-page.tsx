@@ -22,8 +22,9 @@ const DEFAULT_WORKFLOW_FILE_BASENAME = "openshift";
 const WORKFLOW_FILE_EXTENSION = ".yml";
 const WORKFLOWS_DIR = ".github/workflows/";
 
+const DEFAULT_PORT = 8080;
+
 interface AddWorkflowsPageState {
-  imageRegistryId?: string,
   repo?: GitHubRepoId,
   workflowFile: {
     name: string,
@@ -31,6 +32,8 @@ interface AddWorkflowsPageState {
     validationErr?: string,
   },
   overwriteExistingWorkflow: boolean,
+  imageRegistryId?: string,
+  port: string,
 
   isSubmitting: boolean,
   submissionResult?: ApiResponses.WorkflowCreationResult,
@@ -51,6 +54,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
       },
       overwriteExistingWorkflow: false,
       isSubmitting: false,
+      port: DEFAULT_PORT.toString(),
     };
 
     this.setWorkflowFileName(DEFAULT_WORKFLOW_FILE_BASENAME);
@@ -101,10 +105,10 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
           </Card.Title>
           <Card.Body>
             <p>
-              Workflow files will be placed under the {`repository's`} <code>{WORKFLOWS_DIR}</code> directory.
+              Workflow files are kept in the {`repository's`} <code>{WORKFLOWS_DIR}</code> directory.
               The directory will be created if it does not exist.
             </p>
-            <Form inline className="pt-4">
+            <Form inline className="pt-2">
               <Form.Control type="text"
                 id={this.fileNameInputId}
                 style={{ width: "25ch" }}
@@ -115,13 +119,12 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
               />
               <Form.Control
                 style={{ width: "8ch" }}
-                className="border-none"
                 type="text"
                 readOnly
                 value={this.state.workflowFile.extension}
               />
 
-              <Form.Control.Feedback style={{ minHeight: "2em" }} type={this.state.workflowFile.validationErr ? "invalid" : "valid"}>
+              <Form.Control.Feedback style={{ /* minHeight: "2em" */ }} type={this.state.workflowFile.validationErr ? "invalid" : "valid"}>
                 {this.state.workflowFile.validationErr ?? ""}
               </Form.Control.Feedback>
             </Form>
@@ -135,7 +138,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
               <Card>
                 <Card.Title>
                   <div>
-                    Image Registry
+                    Application Settings
                   </div>
                   <div className="ml-auto">
                     <div className="btn-line">
@@ -175,11 +178,11 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
 
                       return (
                         <React.Fragment>
-                          <Form.Row className="w-50">
-                            <Form.Group as={Col}>
-                              {/* <Form.Label>
-                                Select an Image Registry
-                              </Form.Label> */}
+                          <Form.Row className="align-items-center">
+                            <Form.Group as={Col} className="col-8">
+                              <Form.Label>
+                                Image Registry
+                              </Form.Label>
                               <Form.Control id={this.imageRegistrySelectId} as="select"
                                 // isValid={this.state.imageRegistryId != null}
                                 onChange={(e) => {
@@ -203,16 +206,69 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                                   })
                                 }
                               </Form.Control>
+                              <Form.Text>
+                                An Actions secret called <code>{registriesRes.registryPasswordSecretName}</code> containing
+                                the password for this registry will be created.
+                              </Form.Text>
                             </Form.Group>
                           </Form.Row>
-                          <p className={classNames({ "d-none": this.state.imageRegistryId == null })}>
-                            An Actions secret called <code>{registriesRes.registryPasswordSecretName}</code> containing
-                            the password for this registry will be created.
-                          </p>
                         </React.Fragment>
                       );
                     })()
                   }
+
+                  <Form.Row>
+                    <Form.Group as={Col} className="col-4">
+                      <Form.Label>
+                        Application Port
+                      </Form.Label>
+                      <Form.Control
+                        type="text"
+                        isValid={validatePort(this.state.port)}
+                        isInvalid={!validatePort(this.state.port)}
+                        value={this.state.port}
+                        onChange={(e) => this.setState({ port: e.currentTarget.value })}
+                      >
+                      </Form.Control>
+                      <Form.Control.Feedback type="invalid">
+                        Port must be a number between 1024 and 65536.
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                  </Form.Row>
+
+                  <Form.Row>
+                    <Col className="col-4">
+                      <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.Cluster.Root}>{
+                        (clusterRes: ApiResponses.ClusterState) => {
+                          if (!clusterRes.connected) {
+                            return (<></>);
+                          }
+
+                          return (
+                            <Form.Group >
+                              <Form.Label>
+                                OpenShift Project
+                              </Form.Label>
+                              <Form.Control
+                                type="text"
+                                isValid={true}
+                                isInvalid={undefined}
+                                defaultValue={clusterRes.namespace}
+                                readOnly
+                                // value={this.state.port}
+                                // onChange={(e) => this.setState({ port: e.currentTarget.value })}
+                              >
+                              </Form.Control>
+                              <Form.Control.Feedback type="invalid">
+                                Port must be a number between 1024 and 65536.
+                              </Form.Control.Feedback>
+                            </Form.Group>
+                          );
+                        }
+                      }
+                      </DataFetcher>
+                    </Col>
+                  </Form.Row>
                 </Card.Body>
               </Card>
             );
@@ -390,18 +446,27 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
     else if (!this.state.imageRegistryId) {
       throw new Error(`Select an image registry to use.`);
     }
+    else if (!validatePort(this.state.port)) {
+      throw new Error(`Invalid port.`);
+    }
 
     const reqBody: ApiRequests.CreateWorkflow = {
       repo: this.state.repo,
       workflowFile: this.state.workflowFile,
       overwriteExisting: this.state.overwriteExistingWorkflow,
       imageRegistryId: this.state.imageRegistryId,
+      port: Number(this.state.port),
     };
 
     const res = await fetchJSON<typeof reqBody, ApiResponses.WorkflowCreationResult>("POST", ApiEndpoints.App.Workflows, reqBody);
 
     this.setState({ submissionResult: res });
   }
+}
+
+function validatePort(portStr: string | number): boolean {
+  const port = Number(portStr);
+  return !Number.isNaN(port) && port > 1024 && port < 65536;
 }
 
 function SubmissionStatusBanner(props: {

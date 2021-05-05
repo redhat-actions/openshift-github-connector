@@ -57,6 +57,7 @@ namespace ApiRequests {
       extension: string,
     },
     imageRegistryId: string,
+    port: number,
   }
 }
 

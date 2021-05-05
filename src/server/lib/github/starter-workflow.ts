@@ -46,6 +46,7 @@ enum ENV_VARS {
   REGISTRY_USER = "REGISTRY_USER",
   REGISTRY_PASSWORD = "REGISTRY_PASSWORD",
   NAMESPACE = "OPENSHIFT_NAMESPACE",
+  APP_PORT = "APP_PORT"
 }
 
 const JOB_NAME = "openshift-ci-cd";
@@ -86,6 +87,8 @@ export function editWorkflow(
 
   workflowParsed.setIn([ "on", "push", "branches" ], branches);
   // workflowParsed.setIn([ "on", "workflow_dispatch" ], undefined);
+
+  workflowParsed.setIn([ ENV_SECTION, ENV_VARS.APP_PORT ], reqBody.port);
 
   const firstStepPath = [ "jobs", JOB_NAME, "steps", 0 ];
   workflowParsed.deleteIn(firstStepPath);
