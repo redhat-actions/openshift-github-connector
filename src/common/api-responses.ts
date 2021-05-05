@@ -197,6 +197,7 @@ namespace ApiResponses {
   }
 
   export interface ClusterConfig {
+    externalServer: string,
     name: string,
     user: {
       name: string,

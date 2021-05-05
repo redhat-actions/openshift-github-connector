@@ -185,7 +185,7 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
 
       // If we made it this far, we now try and create the Actions secrets.
 
-      const clusterServerUrl = KubeWrapper.instance.getClusterConfig().server;
+      const clusterServerUrl = KubeWrapper.instance.getClusterConfig().externalServer;
 
       const secretsToCreate: { name: string, plaintextValue: string }[] = [
         { name: DEFAULT_SECRET_NAMES.clusterServerUrl, plaintextValue: clusterServerUrl },

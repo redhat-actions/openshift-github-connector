@@ -20,6 +20,10 @@ securityContext:
 # https://github.com/helm/helm/issues/2055
 clusterAppsSubdomain: ""
 
+# REQUIRED VALUE
+# oc whoami --show-server
+clusterApiServer: ""
+
 ################################################################################
 
 serviceAccountName: github-actions

@@ -35,6 +35,7 @@ export default function ClusterPage(): JSX.Element {
                 {Object.entries({
                   "Cluster Name": data.clusterInfo.name,
                   "Api Server": <a href={data.clusterInfo.server}>{data.clusterInfo.server}</a>,
+                  "External Server": <a href={data.clusterInfo.externalServer}>{data.clusterInfo.externalServer}</a>,
                   User: data.clusterInfo.user.name,
                   Namespace: data.namespace,
                 }).map(([ label, value ], i) => (

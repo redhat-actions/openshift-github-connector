@@ -1,6 +1,7 @@
 import * as k8s from "@kubernetes/client-node";
 import fs from "fs/promises";
 import jwt from "jsonwebtoken";
+import { URL } from "url";
 
 import ApiResponses from "common/api-responses";
 import Log from "server/logger";
@@ -27,11 +28,13 @@ export default class KubeWrapper {
 	private static _initError: Error | undefined;
 
 	private static readonly SA_ENVVAR = "CONNECTOR_SERVICEACCOUNT_NAME";
+	private static readonly APISERVER_ENVVAR = "CLUSTER_API_SERVER";
 
 	constructor(
 		private readonly config: k8s.KubeConfig,
 		public readonly namespace: string,
 		public readonly isInCluster: boolean,
+		public readonly clusterExternalApiServer: string,
 		public readonly serviceAccountName: string,
 	) {
 		// Log.info(`Created KubeWrapper for ${config.currentContext}`);
@@ -163,7 +166,27 @@ export default class KubeWrapper {
 			throw saNotExistError;
 		}
 
-		this._instance = new KubeWrapper(tmpConfig, currentNamespace, isInCluster, serviceAccountName);
+		let clusterExternalApiServerOriginal = process.env[KubeWrapper.APISERVER_ENVVAR];
+		if (!clusterExternalApiServerOriginal && !isInCluster) {
+			clusterExternalApiServerOriginal = tmpConfig.getCurrentCluster()?.server;
+		}
+
+		if (!clusterExternalApiServerOriginal) {
+			const apiServerUrlErr = new Error(`Cluster external API server not provided in environment: ${KubeWrapper.APISERVER_ENVVAR} is not set`);
+			this._initError = apiServerUrlErr;
+			throw apiServerUrlErr;
+		}
+
+
+		const asUrl = new URL(clusterExternalApiServerOriginal);
+		let clusterExternalApiServer = clusterExternalApiServerOriginal;
+		if (!asUrl.protocol) {
+			clusterExternalApiServer = "https://" + clusterExternalApiServerOriginal;
+		}
+
+		Log.info(`${KubeWrapper.APISERVER_ENVVAR} is ${clusterExternalApiServerOriginal}, processed to ${clusterExternalApiServer}`);
+
+		this._instance = new KubeWrapper(tmpConfig, currentNamespace, isInCluster, clusterExternalApiServer, serviceAccountName);
 		this._initError = undefined;
 
 		return this._instance;
@@ -187,11 +210,12 @@ export default class KubeWrapper {
 		}
 
 		return {
+			externalServer: this.clusterExternalApiServer,
 			name: cluster.name,
-			server: cluster.server,
 			user: {
 				name: user.name,
 			},
+			server: cluster.server,
 		};
 	}
 

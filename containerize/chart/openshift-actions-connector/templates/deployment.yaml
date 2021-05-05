@@ -42,6 +42,11 @@ spec:
               name: tmp
 
           env:
+            {{ $apiServerUrl := required ".Values.clusterApiServer must be set. Refer to the values.yaml" .Values.clusterApiServer }}
+
+            - name: CLUSTER_API_SERVER
+              value: {{ .Values.clusterApiServer }}
+
             - name: CONNECTOR_SERVICEACCOUNT_NAME
               value: {{ .Values.serviceAccountName }}
 
