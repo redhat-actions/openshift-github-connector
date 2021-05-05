@@ -184,7 +184,9 @@ namespace ApiResponses {
   }
 
   export interface WorkflowCreationResultSuccess extends ResultSuccess {
-    url: string,
+    secretsUrl: string,
+    workflowFileUrl: string,
+    registrySecret: string,
   }
 
   export type WorkflowCreationResult = ResultFailed | WorkflowCreationResultSuccess;
@@ -222,6 +224,7 @@ namespace ApiResponses {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface ImageRegistryListSuccess extends ResultSuccess {
     registries: ImageRegistry.List,
+    registryPasswordSecretName: string,
   }
 
   export type ImageRegistryListResult = ImageRegistryListSuccess | ResultFailed;

@@ -29,12 +29,12 @@ function isSetup(): boolean {
 export function getSetupSteps() {
   return [
     { title: "Welcome", path: ClientPages.Welcome.withQuery(query) },
-    { title: "Setup App", path: ClientPages.SetupCreateApp.withQuery(query) },
+    { title: "Set up App", path: ClientPages.SetupCreateApp.withQuery(query) },
     { title: "View App", path: ClientPages.App.withQuery(query) },
     // { title: "Create Service Account", path: getSetupPath(ClientPages.SetupServiceAccount) },
     { title: "Connect Repos", path: ClientPages.ConnectRepos.withQuery(query) },
     { title: "Image Registry", path: ClientPages.ImageRegistries.withQuery(query) },
-    { title: "Done", path: ClientPages.SetupFinished.withQuery(query) },
+    { title: "Complete", path: ClientPages.SetupFinished.withQuery(query) },
   ];
 }
 

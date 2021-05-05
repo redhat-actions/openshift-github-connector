@@ -18,13 +18,16 @@ import FormInputCheck from "../components/form-input-check";
 import { fetchJSON } from "../util/client-util";
 import ClientPages from "./client-pages";
 
-const defaultWorkflowFileBasename = "openshift";
+const DEFAULT_WORKFLOW_FILE_BASENAME = "openshift";
+const WORKFLOW_FILE_EXTENSION = ".yml";
+const WORKFLOWS_DIR = ".github/workflows/";
 
 interface AddWorkflowsPageState {
   imageRegistryId?: string,
   repo?: GitHubRepoId,
-  workflowFileName: {
-    name?: string,
+  workflowFile: {
+    name: string,
+    extension: string,
     validationErr?: string,
   },
   overwriteExistingWorkflow: boolean,
@@ -42,15 +45,15 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
   constructor(props: {}) {
     super(props);
     this.state = {
-      workflowFileName: {
-        name: defaultWorkflowFileBasename,
+      workflowFile: {
+        name: DEFAULT_WORKFLOW_FILE_BASENAME,
+        extension: WORKFLOW_FILE_EXTENSION,
       },
       overwriteExistingWorkflow: false,
-      // overwriteExistingWorkflow: true,
       isSubmitting: false,
     };
 
-    this.setWorkflowFileName(defaultWorkflowFileBasename);
+    this.setWorkflowFileName(DEFAULT_WORKFLOW_FILE_BASENAME);
   }
 
   public render(): JSX.Element {
@@ -98,22 +101,28 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
           </Card.Title>
           <Card.Body>
             <p>
-              Workflow files will be placed under the {`repository's`} <code>.github/workflows/</code> directory.
+              Workflow files will be placed under the {`repository's`} <code>{WORKFLOWS_DIR}</code> directory.
               The directory will be created if it does not exist.
             </p>
             <Form inline className="pt-4">
               <Form.Control type="text"
                 id={this.fileNameInputId}
                 style={{ width: "25ch" }}
-                isValid={this.state.workflowFileName.validationErr == null}
-                isInvalid={this.state.workflowFileName.validationErr != null}
-                defaultValue={defaultWorkflowFileBasename}
+                isValid={this.state.workflowFile.validationErr == null}
+                isInvalid={this.state.workflowFile.validationErr != null}
+                defaultValue={DEFAULT_WORKFLOW_FILE_BASENAME}
                 onChange={(e) => this.setWorkflowFileName(e.currentTarget.value)}
               />
-              <Form.Control style={{ width: "8ch" }} type="text" readOnly disabled value=".yml" />
+              <Form.Control
+                style={{ width: "8ch" }}
+                className="border-none"
+                type="text"
+                readOnly
+                value={this.state.workflowFile.extension}
+              />
 
-              <Form.Control.Feedback style={{ minHeight: "2em" }} type={this.state.workflowFileName.validationErr ? "invalid" : "valid"}>
-                {this.state.workflowFileName.validationErr ?? ""}
+              <Form.Control.Feedback style={{ minHeight: "2em" }} type={this.state.workflowFile.validationErr ? "invalid" : "valid"}>
+                {this.state.workflowFile.validationErr ?? ""}
               </Form.Control.Feedback>
             </Form>
           </Card.Body>
@@ -165,29 +174,42 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                       }
 
                       return (
-                        <Form.Row className="w-50">
-                          <Form.Group as={Col}>
-                            <Form.Label>
-                              Select an Image Registry
-                            </Form.Label>
-                            <Form.Control id={this.imageRegistrySelectId} as="select" onChange={(e) => {
-                              this.setState({ imageRegistryId: e.currentTarget.value });
-                            }}>
-                              {
-                                registriesRes.registries.map((reg) => {
-                                  return (
-                                    <option
-                                      value={reg.id}
-                                      key={reg.id}
-                                    >
-                                      {reg.username}@{reg.fullPath}
-                                    </option>
-                                  );
-                                })
-                              }
-                            </Form.Control>
-                          </Form.Group>
-                        </Form.Row>
+                        <React.Fragment>
+                          <Form.Row className="w-50">
+                            <Form.Group as={Col}>
+                              {/* <Form.Label>
+                                Select an Image Registry
+                              </Form.Label> */}
+                              <Form.Control id={this.imageRegistrySelectId} as="select"
+                                // isValid={this.state.imageRegistryId != null}
+                                onChange={(e) => {
+                                  this.setState({ imageRegistryId: e.currentTarget.value });
+                                }}
+                              >
+                                <option disabled selected value={undefined}>
+                                  Select an Image Registry
+                                </option>
+                                {
+                                  registriesRes.registries.map((reg) => {
+                                    return (
+                                      <option
+                                        value={reg.id}
+                                        key={reg.id}
+                                        selected={this.state.imageRegistryId === reg.id}
+                                      >
+                                        {reg.username}@{reg.fullPath}
+                                      </option>
+                                    );
+                                  })
+                                }
+                              </Form.Control>
+                            </Form.Group>
+                          </Form.Row>
+                          <p className={classNames({ "d-none": this.state.imageRegistryId == null })}>
+                            An Actions secret called <code>{registriesRes.registryPasswordSecretName}</code> containing
+                            the password for this registry will be created.
+                          </p>
+                        </React.Fragment>
                       );
                     })()
                   }
@@ -237,7 +259,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                               )}
                             >
                               <FormInputCheck
-                                className="col-6"
+                                className="flex-grow-1"
                                 checked={this.state.repo?.id === repo.repo.id}
                                 type="radio"
                                 onChange={(_checked: boolean) => {
@@ -253,20 +275,17 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                                 disabled={!repo.hasClusterSecrets}
                                 title={repo.hasClusterSecrets ? repo.repo.full_name : "Cannot select - Missing required secrets"}
                               >
-
                                 {repo.repo.full_name}
                               </FormInputCheck>
 
-                              <div className="col-4 centers">
-                                { repo.hasClusterSecrets ? "" :
-                                  <div>
-                                    <FontAwesomeIcon className="text-warning mr-2" fixedWidth icon="exclamation-triangle" />
+                              { repo.hasClusterSecrets ? "" :
+                                <div className="col-4 centers">
+                                  <FontAwesomeIcon className="text-warning mr-2" fixedWidth icon="exclamation-triangle" />
                                   Missing cluster secrets
-                                  </div>
-                                }
-                              </div>
+                                </div>
+                              }
 
-                              <div className="col-2 d-flex align-items-center justify-content-end">
+                              <div className="col-1 d-flex align-items-center justify-content-end">
                                 <Button
                                   variant="light"
                                   title={repo.repo.html_url}
@@ -284,10 +303,21 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                       }
                     </div>
 
-                    <div className="mt-4 mb-2 d-flex justify-content-end align-items-center">
+                    <div className="mt-4 mb-2 d-flex justify-content-between align-items-center">
+                      <div>
+                        <FormInputCheck
+                          bold={false}
+                          checked={this.state.overwriteExistingWorkflow}
+                          type="checkbox"
+                          onChange={(checked) => this.setState({ overwriteExistingWorkflow: checked })}
+                        >
+                          Overwrite <code>
+                            {WORKFLOWS_DIR + (this.state.workflowFile.name || "(invalid)") + this.state.workflowFile.extension}
+                          </code> if it exists
+                        </FormInputCheck>
+                      </div>
                       <Button size="lg"
                         disabled={this.state.repo == null}
-                        title={this.state.repo == null ? "Select a repository to proceed" : "Create Workflow"}
                         onClick={async (_e) => {
                           this.setState({ isSubmitting: true, submissionResult: undefined });
                           try {
@@ -303,7 +333,10 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                             banner?.scrollIntoView();
                           }
                         }}>
-                        <BtnBody icon="plus" text="Create Workflow" />
+                        <BtnBody
+                          icon="plus" text="Create Workflow"
+                          title={this.state.repo == null ? "Select a repository to proceed" : "Create Workflow"}
+                        />
                       </Button>
                     </div>
 
@@ -324,8 +357,10 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
   }
 
   private setWorkflowFileName(basename: string): void {
-    const oldValue = this.state.workflowFileName.name;
-    this.setState({ workflowFileName: { name: oldValue, validationErr: undefined } });
+    const oldValue = this.state.workflowFile.name;
+    const extension = WORKFLOW_FILE_EXTENSION;
+
+    this.setState({ workflowFile: { name: oldValue, extension, validationErr: undefined } });
 
     try {
       if (basename.length === 0) {
@@ -338,10 +373,10 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
         throw new Error(`Illegal character in filename.`);
       }
 
-      this.setState({ workflowFileName: { name: basename, validationErr: undefined } });
+      this.setState({ workflowFile: { name: basename, extension, validationErr: undefined } });
     }
     catch (err) {
-      this.setState({ workflowFileName: { name: undefined, validationErr: err.message } });
+      this.setState({ workflowFile: { name: "", extension, validationErr: err.message } });
     }
   }
 
@@ -349,7 +384,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
     if (!this.state.repo) {
       throw new Error("No repository selected.");
     }
-    else if (this.state.workflowFileName.validationErr || !this.state.workflowFileName.name) {
+    else if (this.state.workflowFile.validationErr || !this.state.workflowFile.name) {
       throw new Error("Invalid workflow filename. Fix the workflow filename above.");
     }
     else if (!this.state.imageRegistryId) {
@@ -358,7 +393,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
 
     const reqBody: ApiRequests.CreateWorkflow = {
       repo: this.state.repo,
-      workflowFileName: this.state.workflowFileName.name,
+      workflowFile: this.state.workflowFile,
       overwriteExisting: this.state.overwriteExistingWorkflow,
       imageRegistryId: this.state.imageRegistryId,
     };
@@ -402,12 +437,20 @@ function SubmissionStatusBanner(props: {
 
       {
         props.submissionResult.success ? (
-          <div className="d-flex align-items-center justify-content-end">
-            <Button variant="info" size="lg">
-              <ExternalLink href={props.submissionResult.url}>
-                <BtnBody icon={[ "fab", "github" ]} iconClasses="text-black" text="View in GitHub"/>
-              </ExternalLink>
-            </Button>
+          <div className="centers">
+            <div className="w-75 btn-line even">
+              <Button variant="info" size="lg">
+                <ExternalLink href={props.submissionResult.secretsUrl}>
+                  <BtnBody icon={[ "fab", "github" ]} iconClasses="text-black" text="View Secrets"/>
+                </ExternalLink>
+              </Button>
+
+              <Button variant="info" size="lg">
+                <ExternalLink href={props.submissionResult.workflowFileUrl}>
+                  <BtnBody icon={[ "fab", "github" ]} iconClasses="text-black" text="View Workflow"/>
+                </ExternalLink>
+              </Button>
+            </div>
           </div>
         ) : ("")
       }

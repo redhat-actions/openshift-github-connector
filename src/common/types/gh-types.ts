@@ -77,6 +77,10 @@ export function isGitHubFileContentType(data: GitHubContentType): data is GitHub
   return data.type === "file";
 }
 
+export function getSecretsUrlForRepo(repo: { html_url: string }): string {
+  return repo.html_url + "/settings/secrets/actions";
+}
+
 // The API is structured as /repos/{owner}/{name}/<path>
 // so you can't just use the repo Id as a unique identifier, which is a bummer.
 export interface GitHubRepoId {

@@ -5,7 +5,7 @@ import ApiEndpoints from "common/api-endpoints";
 import ApiRequests from "common/api-requests";
 import ApiResponses from "common/api-responses";
 import { RepoSecretsPublicKey } from "common/types/gh-types";
-import { createSecret, getRepoSecretPublicKey } from "server/lib/github/gh-util";
+import { createActionsSecret, getRepoSecretPublicKey } from "server/lib/github/gh-util";
 import KubeWrapper, { ServiceAccountToken } from "server/lib/kube/kube-wrapper";
 import Log from "server/logger";
 import SecretUtil from "server/lib/kube/secret-util";
@@ -198,11 +198,12 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
       // for each secret, encrypt the secret using the public key, and then PUT it to GitHub.
       await Promise.all(secretsToCreate.map(async (secretToCreate): Promise<void> => {
         try {
-          await createSecret(
+          await createActionsSecret(
             installation.octokit,
-            repo, repoPublicKey,
+            repo,
             secretToCreate.name,
             secretToCreate.plaintextValue,
+            repoPublicKey,
           );
 
           successes.push({

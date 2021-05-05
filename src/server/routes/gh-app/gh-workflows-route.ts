@@ -1,6 +1,5 @@
 import express from "express";
 import path from "path";
-import yaml from "yaml";
 
 import ApiEndpoints from "common/api-endpoints";
 import ApiRequests from "common/api-requests";
@@ -9,8 +8,11 @@ import Log from "server/logger";
 import { getFriendlyHTTPError, tob64 } from "server/util/server-util";
 import { sendError } from "server/util/send-error";
 import KubeWrapper from "server/lib/kube/kube-wrapper";
-import { GitHubContentFile } from "common/types/gh-types";
+import { GitHubContentFile, getSecretsUrlForRepo } from "common/types/gh-types";
 import User from "server/lib/user";
+import { editWorkflow, getStarterWorkflowContents } from "server/lib/github/starter-workflow";
+import { createActionsSecret } from "server/lib/github/gh-util";
+import { DEFAULT_SECRET_NAMES } from "common/default-secret-names";
 
 const router = express.Router();
 export default router;
@@ -39,29 +41,45 @@ router.route(ApiEndpoints.App.Workflows.path)
     // workflow permission scope exists in edit app page but not in documentation
     // https://docs.github.com/en/rest/reference/permissions-required-for-github-apps#permission-on-single-file
 
-    const appInstallation = await User.getInstallationForSession(req, res);
-    if (!appInstallation) {
+    const user = await User.getUserForSession(req, res);
+    if (!user) {
       return undefined;
     }
 
+    const installation = await User.getInstallationForSession(req, res);
+    if (!installation) {
+      return undefined;
+    }
+
+    const imageRegistry = user.imageRegistries.getById(req.body.imageRegistryId);
+    if (!imageRegistry) {
+      return sendError(res, 404, `Image registry with Id ${req.body.imageRegistryId} was not found`);
+    }
+
+    await createActionsSecret(
+      installation.octokit, req.body.repo, DEFAULT_SECRET_NAMES.registryPassword, imageRegistry.passwordOrToken
+    );
+
+    const registrySecretName = `${req.body.repo.full_name}/${DEFAULT_SECRET_NAMES.registryPassword}`;
+
     Log.info(`Create workflow file into "${req.body.repo.full_name}"`);
 
-    const workflowFilePath = path.join(WORKFLOWS_DIR, req.body.workflowFileName + ".yml");
+    const workflowFilePath = path.join(WORKFLOWS_DIR, req.body.workflowFile.name + req.body.workflowFile.extension);
     Log.info(`Workflow file path is ${workflowFilePath}`);
 
-    const repoMeta = await appInstallation.octokit.request("GET /repos/{owner}/{repo}", {
+    const repoMeta = (await installation.octokit.request("GET /repos/{owner}/{repo}", {
       owner: req.body.repo.owner,
       repo: req.body.repo.name,
-    });
+    })).data;
 
-    const defaultBranch = repoMeta.data.default_branch;
+    const defaultBranch = repoMeta.default_branch;
     Log.info(`Default branch is ${defaultBranch}`);
 
     let existingWorkflowSha: string | undefined;
     try {
       // https://docs.github.com/en/rest/reference/repos#get-repository-content
 
-      const existingFileRes = await appInstallation.octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
+      const existingFileRes = await installation.octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
         owner: req.body.repo.owner,
         repo: req.body.repo.name,
         path: workflowFilePath,
@@ -91,43 +109,15 @@ router.route(ApiEndpoints.App.Workflows.path)
       // the file does not exist
     }
 
-    const workflowFileContentRes = await appInstallation.octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
-      owner: "actions",
-      repo: "starter-workflows",
-      path: "ci/openshift.yml",
-      ref: "main",
-
-      // https://docs.github.com/en/rest/reference/repos#custom-media-types-for-repository-contents
-      mediaType: {
-        format: "raw",
-      },
-    });
-
-    // if (!isGitHubFileContentType(workflowFileContentRes.data)) {
-    //   const type = Array.isArray(workflowFileContentRes.data) ? "array" : workflowFileContentRes.data.type;
-    //   throw new Error(`Received non-file response, type is "${type}"`);
-    // }
-
-    // const workflowFileDecoded = Buffer.from(
-    //   workflowFileContentRes.data.content,
-    //   workflowFileContentRes.data.encoding as BufferEncoding
-    // ).toString("utf-8");
-
-    // since we specified mediatype=raw
-    // the .data field is the file contents
-    // but the typing does not reflect this.
-    const workflowFileDecoded = workflowFileContentRes.data as unknown as string;
-
-    Log.info(`Starter workflow file starts with "${workflowFileDecoded.substring(0, 16)}"`);
-
     const namespace = KubeWrapper.instance.namespace;
     req.body.namespace = namespace;
 
-    const workflowEdited = editWorkflow(req.body, [ defaultBranch ], workflowFileDecoded);
+    const workflowFileContents = await getStarterWorkflowContents(installation);
+    const workflowEdited = editWorkflow(req.body, imageRegistry, [ defaultBranch ], workflowFileContents);
     // const workflowEdited = workflowFileDecoded.replace("$default-branch", defaultBranch);
 
     // https://docs.github.com/en/rest/reference/repos#create-or-update-file-contents
-    const writeRes = await appInstallation.octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
+    const writeRes = await installation.octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
       owner: req.body.repo.owner,
       repo: req.body.repo.name,
       path: workflowFilePath,
@@ -137,7 +127,7 @@ router.route(ApiEndpoints.App.Workflows.path)
       sha: existingWorkflowSha,
       branch: defaultBranch,
       committer: {
-        name: appInstallation.app.config.name,
+        name: installation.app.config.name,
         email: `no-email-here@github.com`,
       },
     });
@@ -146,66 +136,14 @@ router.route(ApiEndpoints.App.Workflows.path)
     const newWorkflowFileUrl = writeRes.data.content.html_url;
 
     const resBody: ApiResponses.WorkflowCreationResult = {
-      message: `Successfully added starter workflow to ${req.body.repo.full_name}.`,
+      message: `Successfully created registry password secret, `
+        + `and added starter workflow to ${req.body.repo.full_name}.`,
       success: true,
       severity: "success",
-      url: newWorkflowFileUrl,
+      secretsUrl: getSecretsUrlForRepo(repoMeta),
+      workflowFileUrl: newWorkflowFileUrl,
+      registrySecret: registrySecretName,
     };
 
     return res.json(resBody);
   });
-
-const ENV_SECTION = "env";
-
-enum ENV_VARS {
-  REGISTRY = "REGISTRY",
-  REGISTRY_USER = "REGISTRY_USER",
-  REGISTRY_PASSWORD = "REGISTRY_PASSWORD",
-  NAMESPACE = "OPENSHIFT_NAMESPACE",
-}
-
-const JOB_NAME = "openshift-ci-cd";
-
-function editWorkflow(reqBody: ApiRequests.CreateWorkflow, branches: string[], workflowFile: string): string {
-  // use the 'document' yaml api to preserve comments & whitespace
-  // https://eemeli.org/yaml/#documents
-  // however, we lose the ability to 'as' the file with a TypeScript type from the schema
-  // since we can't treat the parsed contents as JSON.
-
-  const workflowParsed = yaml.parseDocument(workflowFile);
-
-  // https://github.com/actions/starter-workflows/blob/main/ci/openshift.yml
-  // we have to edit a couple of the top-level sections based on the user-selected settings
-
-  const env = workflowParsed.get(ENV_SECTION);
-  if (env === undefined) {
-    workflowParsed.set(ENV_SECTION, {});
-  }
-
-  // edit registry, app port, namespace here
-
-  // if (reqBody.imageRegistry.type === "GHCR") {
-  //   /* eslint-disable no-template-curly-in-string */
-  //   workflowParsed.setIn([ ENV_SECTION, ENV_VARS.REGISTRY ], "ghcr.io/${{ github.actor }}");
-  //   workflowParsed.setIn([ ENV_SECTION, ENV_VARS.REGISTRY_USER ], "${{ github.actor }}");
-  //   // workflowParsed.deleteIn([ ENV_SECTION, ENV_VARS.REGISTRY_USER ]);
-  //   workflowParsed.setIn([ ENV_SECTION, ENV_VARS.REGISTRY_PASSWORD ], "${{ github.token }}");
-  //   /* eslint-enable no-template-curly-in-string */
-  // }
-  // else {
-  //   throw new Error("Sorry, you can't use that image registry yet :(");
-  // }
-
-  if (reqBody.namespace) {
-    workflowParsed.setIn([ ENV_SECTION, ENV_VARS.NAMESPACE ], reqBody.namespace);
-  }
-
-  workflowParsed.setIn([ "on", "push", "branches" ], branches);
-  // workflowParsed.setIn([ "on", "workflow_dispatch" ], undefined);
-
-  const firstStepPath = [ "jobs", JOB_NAME, "steps", 0 ];
-  workflowParsed.deleteIn(firstStepPath);
-  workflowParsed.getIn(firstStepPath).spaceBefore = false;
-
-  return workflowParsed.toString();
-}

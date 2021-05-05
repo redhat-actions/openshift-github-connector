@@ -2,17 +2,14 @@ namespace ImageRegistry {
   export const Registries = {
     GHCR: {
       description: "GitHub Container Registry",
-      enabled: true,
       hostname: "ghcr.io",
     },
     QUAY: {
       description: "Quay",
-      enabled: true,
       hostname: "quay.io",
     },
     DOCKERHUB: {
       description: "Docker Hub",
-      enabled: true,
       hostname: "docker.io",
     },
     /*
@@ -24,7 +21,6 @@ namespace ImageRegistry {
     */
     OTHER: {
       description: "Other",
-      enabled: true,
       hostname: undefined,
     },
   };
@@ -37,6 +33,7 @@ namespace ImageRegistry {
     namespace: string,
     username: string,
     passwordOrToken: string,
+    ghcrUseGitHubToken?: boolean,
   }
 
   export interface Info extends ImageRegistry.Inputs {

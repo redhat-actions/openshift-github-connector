@@ -5,6 +5,7 @@ import ApiResponses from "common/api-responses";
 import { send405 } from "server/util/send-error";
 import ApiRequests from "common/api-requests";
 import User from "server/lib/user";
+import { DEFAULT_SECRET_NAMES } from "common/default-secret-names";
 
 const router = express.Router();
 
@@ -23,6 +24,7 @@ router.route(ApiEndpoints.User.ImageRegistries.path)
       message: `${registries.length} image registries are set up`,
       severity: "success",
       registries,
+      registryPasswordSecretName: DEFAULT_SECRET_NAMES.registryPassword,
     });
   })
   .post(async (

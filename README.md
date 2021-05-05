@@ -92,6 +92,8 @@ If the CRA server is not restarting because a file is errored, you have to edit 
 
 The `tsconfig.json` in the root of the repository is used for the client (this is the directory structure CRA expects). The server `tsconfig` is `src/server/tsconfig.json`, while the webpack config for the server is at the repository root.
 
+Sometimes VS Code intellisense stops working altogether, particularly when using the absolute import paths created by the `paths` tsconfig entries. Restarting VS Code may fix it; re-running `yarn dev` may also fix it.
+
 ## Resources
 
 ### Frontend

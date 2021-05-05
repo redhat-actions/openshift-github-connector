@@ -2,6 +2,7 @@ import React from "react";
 import classNames from "classnames";
 
 interface FormButtonProps {
+  bold?: boolean,
   checked: boolean,
   className?: string,
   disabled?: boolean,
@@ -14,9 +15,11 @@ interface FormButtonProps {
 
 export default function FormInputCheck(props: FormButtonProps): JSX.Element {
 
+  const bold = props.bold !== false;
+
   return (
     <label
-      className={classNames("d-flex align-items-center clickable py-1 b", props.className, { disabled: props.disabled })}
+      className={classNames("d-flex align-items-center clickable py-1", props.className, { b: bold, disabled: props.disabled })}
       title={props.title}
     >
       <input

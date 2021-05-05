@@ -9,6 +9,7 @@ export default function BtnBody(props: {
   iconClasses?: string,
   isLoading?: boolean,
   text?: string,
+  title?: string,
 }): JSX.Element {
 
   const iconPosition = props.iconPosition || "left";
@@ -32,13 +33,13 @@ export default function BtnBody(props: {
 
   return (
     <div className={classNames("btn-body", { "btn-body-icon": props.icon != null, "btn-body-text": props.text != null })}
-      title={props.text}
+      title={props.title ?? props.text}
     >
       {iconPosition === "left" ? iconElement : ""}
       {iconPosition === "left" ? "" : loadingElement}
       {
         props.text
-          ? <span className="" title={props.text}>
+          ? <span className="">
             {props.text}
           </span>
           : ""

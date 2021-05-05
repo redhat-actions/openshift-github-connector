@@ -1,3 +1,5 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import classNames from "classnames";
 import React, { useState } from "react";
 import { Button, Card } from "react-bootstrap";
 import { v4 as uuid } from "uuid";
@@ -44,15 +46,20 @@ export default function CreateAppCard(): JSX.Element {
               checked={publicChecked}
               onChange={(checked) => setPublicChecked(checked)}
             >
-              Make app public
+              Public app
             </FormInputCheck>
-            <p>
-              Your app will be publicly visible and installable.
-              This does not give users that install your app access to anything, but rather allows your app to act on their behalf.
-            </p>
-            <p>
+            <p className={classNames({ "d-none": publicChecked })}>
+              <FontAwesomeIcon icon="exclamation-triangle" className="text-warning mr-2"/>
               If you make your app private, no one else will be able to install it.
             </p>
+            <p>
+              Public apps do not give users that install your app any access.
+              Rather, users who install your app are giving the app permission to act on their behalf.
+            </p>
+            <p>
+              A public app is recommended so your team members can share it.
+            </p>
+
             <p>
               You can change this later in the GitHub app settings.
             </p>

@@ -66,7 +66,7 @@ export default function ImageRegistriesPage(): JSX.Element {
                       }
 
                       return (
-                        <Table striped bordered hover variant="dark">
+                        <Table striped bordered variant="dark">
                           <thead className="">
                             {/* <colgroup className="row">
                               <col className="col-2"></col>
@@ -170,8 +170,6 @@ function CreateImageRegistryCard({ onChange }: { onChange: () => Promise<void> }
   });
 
   const setRegistryInfo = (reg: Partial<typeof registryInfo>) => {
-    console.log("SET REGISTRY INFO OLD", registryInfo);
-    console.log("SET REGISTRY INFO NEW", reg);
     setRegistryInfo_({
       ...registryInfo,
       ...reg,
@@ -453,7 +451,7 @@ function SubmissionStatusBanner(props: {
         display={props.isSubmitting}
         severity={"info"}
         loading={props.isSubmitting}
-        title={"Creating workflow..."}
+        title={"Creating image registry..."}
       />
     );
   }

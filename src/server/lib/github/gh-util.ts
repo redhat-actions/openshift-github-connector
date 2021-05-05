@@ -4,7 +4,7 @@ import { paginateRest, PaginateInterface } from "@octokit/plugin-paginate-rest";
 import sodium from "tweetsodium";
 
 import Log from "server/logger";
-import { GitHubAppAuthData, GitHubOAuthResponse, GitHubRepoId, GitHubUserData, RepoSecretsPublicKey } from "common/types/gh-types";
+import { GitHubAppAuthData, GitHubOAuthResponse, GitHubRepo, GitHubRepoId, GitHubUserData, RepoSecretsPublicKey } from "common/types/gh-types";
 import HttpConstants from "common/http-constants";
 import fetch from "node-fetch";
 import { throwIfError } from "server/util/server-util";
@@ -60,15 +60,19 @@ export async function getRepoSecretPublicKey(installOctokit: Octokit, repo: GitH
   return publicKeyRes.data;
 }
 
-export async function createSecret(
+export async function createActionsSecret(
   installOctokit: Octokit,
   repo: GitHubRepoId,
-  repoPublicKey: RepoSecretsPublicKey,
   secretName: string,
-  secretPlaintext: string
+  secretPlaintext: string,
+  repoPublicKey?: RepoSecretsPublicKey,
 ): Promise<void> {
 
   // Log.info(`Create Actions secret ${secretName} into ${repo.owner}/${repo.name}`);
+
+  if (!repoPublicKey) {
+    repoPublicKey = await getRepoSecretPublicKey(installOctokit, repo);
+  }
 
   // https://docs.github.com/en/rest/reference/actions#create-or-update-a-repository-secret
 

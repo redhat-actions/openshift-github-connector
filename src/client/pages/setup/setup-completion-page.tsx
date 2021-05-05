@@ -1,4 +1,3 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import { Jumbotron } from "react-bootstrap";
 import { Link } from "react-router-dom";

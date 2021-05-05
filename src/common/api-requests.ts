@@ -37,7 +37,6 @@ namespace ApiRequests {
 
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   export interface AddImageRegistry extends ImageRegistry.Inputs {
-    ghcrUseGitHubToken?: boolean,
   }
 
   export interface DeleteImageRegistry {
@@ -53,7 +52,10 @@ namespace ApiRequests {
     repo: GitHubRepoId,
     namespace?: string,
     overwriteExisting: boolean,
-    workflowFileName: string,
+    workflowFile: {
+      name: string,
+      extension: string,
+    },
     imageRegistryId: string,
   }
 }

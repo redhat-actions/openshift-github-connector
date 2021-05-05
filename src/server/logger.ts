@@ -84,6 +84,7 @@ export function getLoggingMiddleware(): any {
           "access_token",
           "password",
           "registryPassword",
+          "passwordOrToken",
         ];
 
         const bodyCopy = { ...req.body };

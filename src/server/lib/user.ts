@@ -6,7 +6,7 @@ import SecretUtil from "./kube/secret-util";
 import UserInstallation from "./github/user-app-installation";
 import GitHubApp from "./github/gh-app";
 import { GitHubUserType } from "common/types/gh-types";
-import ImageRegistryListWrapper from "./user-image-registry-list";
+import ImageRegistryListWrapper from "./image-registry-list";
 
 type UserMementoSaveable = {
   id: string,

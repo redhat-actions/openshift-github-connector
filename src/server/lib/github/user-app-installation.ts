@@ -44,6 +44,16 @@ export default class UserInstallation {
     return repositories;
   }
 
+  /*
+  public async getRepo(id: number): Promise<GitHubRepo> {
+
+  }
+
+  public async getRepo(info: { owner: string, repo: string }): Promise<GitHubRepo> {
+
+  }
+  */
+
   public async getInstallation(): Promise<GitHubAppInstallationData> {
     const installationReq = await this.app.octokit.request(
       "GET /app/installations/{installation_id}", {

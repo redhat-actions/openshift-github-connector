@@ -21,7 +21,7 @@ import BtnBody from "../../components/fa-btn-body";
 import { getFriendlyDateTime } from "../../../common/common-util";
 import { fetchJSON, getSearchParam } from "../../util/client-util";
 import Banner from "../../components/banner";
-import { GitHubRepoId } from "../../../common/types/gh-types";
+import { getSecretsUrlForRepo, GitHubRepoId } from "../../../common/types/gh-types";
 import DataFetcher from "../../components/data-fetcher";
 import FormInputCheck from "../../components/form-input-check";
 
@@ -498,7 +498,7 @@ function RepoWithSecretsItem({
             title="Edit Secrets in GitHub"
           >
             <ExternalLink
-              href={repoWithSecrets.repo.html_url + "/settings/secrets/actions"}
+              href={getSecretsUrlForRepo(repoWithSecrets.repo)}
               title="Edit Secrets in GitHub"
             >
               <BtnBody icon="edit"/>
@@ -544,7 +544,10 @@ function RepoWithSecretsItem({
                               {getFriendlyDateTime(new Date(secret.updated_at))}
                             </td>
                             <td>
-                              {Object.values(defaultSecrets.defaultSecrets).includes(secret.name)
+                              {[
+                                defaultSecrets.defaultSecrets.clusterServerUrl,
+                                defaultSecrets.defaultSecrets.clusterToken,
+                              ].includes(secret.name)
                                 ? getSecretNameWarning([ secret.name ])
                                 : ("")
                               }
