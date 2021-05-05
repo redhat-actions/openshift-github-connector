@@ -4,13 +4,14 @@ Coming soon...
 
 ## Installing on OpenShift
 See [the chart](./containerize/chart/openshift-actions-connector).
-The one required input is the cluster apps subdomain. It is described in [`values.yaml`](./containerize/chart/openshift-actions-connector/values.yaml).
+The inputs are described in [`values.yaml`](./containerize/chart/openshift-actions-connector/values.yaml).
 
 Install from the root of the repo as follows:
 ```sh
 helm upgrade --install actions-connector \
   containerize/chart/openshift-actions-connector \
   --set clusterAppsSubdomain=apps.<your-openshift-server>.com
+  --set clusterApiServer=$(oc whoami --show-server)
 ```
 
 You do not need any permissions other than in your own namespace.
