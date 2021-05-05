@@ -10,7 +10,7 @@ export default function SetupFinishedPage(): JSX.Element {
       <SetupPageHeader pageIndex={5} canProceed={false} hideBtnBanner={true} />
       <Jumbotron>
         <h2 className="d-flex justify-content-between">
-          Setup Complete!
+          Setup Complete
           {/* <FontAwesomeIcon icon="check" className="text-success" /> */}
         </h2>
         <hr />

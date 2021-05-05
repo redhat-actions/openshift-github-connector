@@ -103,8 +103,8 @@ $circle-font-size: 1rem;
 
   // see SetupStepState
   &.passed {
-    background-color: c.$success;
-    border-color: c.$success;
+    background-color: c.$success-light;
+    border-color: c.$success-light;
   }
 
   &.current {

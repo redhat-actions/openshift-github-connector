@@ -148,7 +148,7 @@ function ImageRegistryRow({ registry, onChange }: { registry: ImageRegistry.Info
             setIsDeleting(false);
           }
         }}>
-          <BtnBody icon="times" text="Remove" isLoading={isDeleting}/>
+          <BtnBody icon="times" title="Remove" isLoading={isDeleting}/>
         </Button>
       </td>
     </tr>
