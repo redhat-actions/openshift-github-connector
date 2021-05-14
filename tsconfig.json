@@ -27,7 +27,8 @@
     "allowSyntheticDefaultImports": true
   },
   "include": [
-    "src"
+    "src",
+    "webpack.config.server.ts"
   ],
   "exclude": [
     "src/server"

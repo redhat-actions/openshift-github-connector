@@ -4,7 +4,7 @@ module.exports = {
     "plugin:react/recommended"
   ],
   ignorePatterns: [
-    "webpack.config*.js",
+    "webpack.config*.[tj]s",
     "build/",
     "jwt.js", "key.js", "auth.js"
   ],
