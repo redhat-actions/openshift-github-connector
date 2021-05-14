@@ -1,5 +1,6 @@
 import webpack from "webpack5";
 import path from "path";
+import { ConsoleRemotePlugin } from '@console/dynamic-plugin-sdk/src/webpack/ConsoleRemotePlugin';
 
 // @ts-ignore
 import nodeExternals from "webpack-node-externals";
@@ -72,6 +73,7 @@ export default function getWebpackConfig(env: any, argv: any): webpack.Configura
       ],
     },
     plugins: [
+      new ConsoleRemotePlugin(),
     ],
     optimization: {
       chunkIds: 'named',

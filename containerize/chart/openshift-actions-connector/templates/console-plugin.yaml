@@ -1,0 +1,13 @@
+# source https://github.com/openshift/console/blob/master/frontend/dynamic-demo-plugin/oc-manifest.yaml
+
+apiVersion: console.openshift.io/v1alpha1
+kind: ConsolePlugin
+metadata:
+  name: 'tims-plugin'
+spec:
+  displayName: "Tim's sweet plugin"
+  service:
+    name: {{ .Values.serverServiceName }}
+    namespace: {{ .Release.Namespace }}
+    port: 80
+    basePath: '/'

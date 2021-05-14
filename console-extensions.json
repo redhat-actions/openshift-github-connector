@@ -1,0 +1,11 @@
+[
+  {
+    "type": "console.navigation/href",
+    "properties": {
+      "id": "github",
+      "perspective": "dev",
+      "name": "GitHub",
+      "href": "/github"
+    }
+  }
+]
