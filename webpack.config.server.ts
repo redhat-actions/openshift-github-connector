@@ -1,5 +1,7 @@
-import webpack from "webpack";
+import webpack from "webpack5";
 import path from "path";
+
+// @ts-ignore
 import nodeExternals from "webpack-node-externals";
 
 // const path = require("path");
@@ -45,6 +47,7 @@ export default function getWebpackConfig(env: any, argv: any): webpack.Configura
         common: srcPath("common"),
       }
     },
+    externalsPresets: { node: true },
     externals: bundleNodeModules ? [
       // dependencies that webpack cannot resolve must go here
       // and exist in the node_modules folder
