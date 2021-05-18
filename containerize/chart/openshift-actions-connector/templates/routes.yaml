@@ -48,3 +48,17 @@ spec:
     weight: 100
 
   wildcardPolicy: None
+
+---
+
+apiVersion: console.openshift.io/v1
+kind: ConsoleLink
+metadata:
+  name: {{ .Values.appName }}
+  labels:
+    {{- toYaml .Values.commonLabels | nindent 4 }}
+spec:
+  {{ $href := printf "https://%s" $host }}
+  href: {{ $href }}
+  location: NamespaceDashboard
+  text: GitHub Connector
