@@ -73,7 +73,6 @@
     "yaml": "^1.10.2"
   },
   "devDependencies": {
-    "@console/dynamic-plugin-sdk": "link:../../console/frontend/packages/console-dynamic-plugin-sdk/",
     "@redhat-actions/eslint-config": "^1.3.1",
     "@types/bootstrap": "^5.0.12",
     "@types/cookie-parser": "^1.4.2",
@@ -92,6 +91,7 @@
     "@typescript-eslint/eslint-plugin": "^4.17.0",
     "@typescript-eslint/parser": "^4.17.0",
     "concurrently": "^6.0.0",
+    "console": "https://github.com/tetchel/console/raw/tim-test-2/frontend/packages/console-dynamic-plugin-sdk/console-dynamic-plugin-sdk.tar.gz",
     "eslint": "^7.21.0",
     "eslint-plugin-react": "^7.22.0",
     "nodemon": "^2.0.7",
@@ -122,8 +122,7 @@
     "version": "0.1.0",
     "displayName": "Tim's amazing plugin",
     "description": "Tim's really amazing plugin",
-    "exposedModules": {
-    },
+    "exposedModules": {},
     "dependencies": {
       "@console/pluginAPI": "*"
     }

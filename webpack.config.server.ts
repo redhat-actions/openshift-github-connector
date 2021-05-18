@@ -1,6 +1,6 @@
 import webpack from "webpack5";
 import path from "path";
-import { ConsoleRemotePlugin } from '@console/dynamic-plugin-sdk/src/webpack/ConsoleRemotePlugin';
+import { ConsoleRemotePlugin } from 'console/dist/lib/webpack/ConsoleRemotePlugin';
 
 // @ts-ignore
 import nodeExternals from "webpack-node-externals";
