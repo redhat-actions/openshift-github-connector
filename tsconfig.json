@@ -28,7 +28,7 @@
   },
   "include": [
     "src",
-    "webpack.config.server.ts"
+    "webpack.config.*.ts"
   ],
   "exclude": [
     "src/server"

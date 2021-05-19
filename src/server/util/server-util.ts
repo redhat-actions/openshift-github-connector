@@ -1,5 +1,4 @@
 import express from "express";
-import os from "os";
 import HttpStatusCodes from "http-status-codes";
 import { Response } from "node-fetch";
 
@@ -25,6 +24,10 @@ export function getFrontendUrl(req: express.Request): string {
 */
 
 // These should be set by Containerfile in prod
+
+// CORS code below is dead now since the front & back ends have the same origin
+
+/*
 const FRONTEND_PROTOCOL_ENVVAR = "FRONTEND_PROTOCOL";
 const FRONTEND_PORT_ENVVAR = "FRONTEND_PORT";
 
@@ -45,6 +48,7 @@ export function getAllowedOrigins(): string[] {
     getFrontendOrigin("localhost"),
   ];
 }
+*/
 
 export function removeTrailingSlash(s: string): string {
   if (s.endsWith("/")) {

@@ -24,6 +24,9 @@ RUN mv -v build/ server/
 RUN yarn build:client
 RUN mv -v build/ client/
 
+RUN yarn build:plugin
+RUN mv -v build/ plugin/
+
 COPY README.md ./
 
 ##################################################
@@ -62,18 +65,23 @@ USER $USER
 
 ENV NODE_ENV production
 
-ARG PROTOCOL=http
 ARG FRONTEND_PORT=3000
-ENV FRONTEND_PROTOCOL $PROTOCOL
+# ENV FRONTEND_PROTOCOL $PROTOCOL
 ENV FRONTEND_PORT $FRONTEND_PORT
+
+ARG PLUGIN_PORT=3001
+ENV PLUGIN_PORT $PLUGIN_PORT
+
 ARG BACKEND_PORT=3003
 ENV BACKEND_PORT $BACKEND_PORT
 
 EXPOSE $FRONTEND_PORT
+EXPOSE $PLUGIN_PORT
 EXPOSE $BACKEND_PORT
 
 COPY --chown=$USER containerize/entrypoint.sh ./
 COPY --chown=$USER --from=builder /app/client ./client
+COPY --chown=$USER --from=builder /app/plugin ./plugin
 COPY --chown=$USER --from=builder /app/server ./server
 
 ENTRYPOINT "./entrypoint.sh"

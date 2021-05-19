@@ -1,39 +1,40 @@
 import webpack from "webpack5";
 import path from "path";
-import { ConsoleRemotePlugin } from 'console/dist/lib/webpack/ConsoleRemotePlugin';
-
-// @ts-ignore
 import nodeExternals from "webpack-node-externals";
 
-// const path = require("path");
-// const nodeExternals = require("webpack-node-externals");
-
-const entry = { server: "./src/server/index.ts" };
-
-function srcPath(relPath: string): string {
-  // https://decembersoft.com/posts/say-goodbye-to-relative-paths-in-typescript-imports/
+export function getSrcPath(relPath: string): string {
   return path.join(__dirname, "src", relPath);
 }
+
+export function getOutDir(): string {
+  return path.join(__dirname, "build");
+}
+
+const entry = { server: getSrcPath("server/index.ts") };
 
 export default function getWebpackConfig(env: any, argv: any): webpack.Configuration {
 // module.exports = function getWebpackConfig() {
 
   // const bundleNodeModules = process.env.WEBPACK_NODE_MODULES === "true";
-  const bundleNodeModules = true;
-  console.log(`Bundling node modules ? ${bundleNodeModules}`);
-
   const mode = argv.mode === "development" ? "development" : "production";
   console.log(`Mode: ${mode}`);
 
+  const bundleNodeModules = mode === "production";
+  console.log(`Bundling node modules ? ${bundleNodeModules}`);
+
+  const outputDir = getOutDir();
+  const outFileName = "[name].js";
+  console.log(`Outputting to ${path.join(outputDir, outFileName)} ...`);
+
   return {
     mode,
+    entry,
     target: "node",
     devtool: "inline-source-map",
-    entry: entry,
     output: {
-      path: path.resolve(__dirname, "build"),
-      filename: "[name].js",
-      chunkFilename: '[name]-chunk.js',
+      path: outputDir,
+      filename: outFileName,
+      chunkFilename: "[name]-chunk.js",
       // https://github.com/mui-org/material-ui/issues/18880#issuecomment-628597666
       libraryTarget: "commonjs2",
     },
@@ -44,18 +45,18 @@ export default function getWebpackConfig(env: any, argv: any): webpack.Configura
 
       alias: {
         // match server/tsconfig.json "paths"
-        server: srcPath("server"),
-        common: srcPath("common"),
-      }
+        server: getSrcPath("server"),
+        common: getSrcPath("common"),
+      },
     },
-    externalsPresets: { node: true },
+    // externalsPresets: { node: true },
     externals: bundleNodeModules ? [
       // dependencies that webpack cannot resolve must go here
       // and exist in the node_modules folder
       // "log4js",
       // "express",
       // "@kubernetes/client-node"
-    ] : [ nodeExternals() ],
+    ] : [ nodeExternals() as any ],   // types don't match webpack5 interface
     module: {
       rules: [
         {
@@ -64,20 +65,13 @@ export default function getWebpackConfig(env: any, argv: any): webpack.Configura
             {
               loader: "ts-loader",
               options: {
-                  // use the tsconfig in the server directory
-                configFile: "src/server/tsconfig.json",
+                // use the tsconfig in the server directory
+                configFile: getSrcPath("server/tsconfig.json"),
               },
             },
           ],
         },
       ],
     },
-    plugins: [
-      new ConsoleRemotePlugin(),
-    ],
-    optimization: {
-      chunkIds: 'named',
-      minimize: false,
-    },
   };
-};
+}

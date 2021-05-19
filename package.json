@@ -10,16 +10,20 @@
     "node": ">= 14"
   },
   "scripts": {
-    "lint": "eslint .",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "lint": "eslint .",
+    "webpack": "export WEBPACK_PACKAGE=webpack5; yarn ts-node ./node_modules/.bin/webpack-cli",
+    "ts-node": "ts-node -O '{ \"module\": \"commonjs\" }'",
     "dev:client": "wait-on -l tcp:3003 && react-scripts start",
-    "dev:server": "concurrently -p name -c 'yellow,magenta' -n 'webpack,srv' 'yarn dev:server:webpack' 'yarn dev:server:nodemon'",
-    "dev:server:webpack": "export WEBPACK_PACKAGE=webpack5; ts-node -O '{ \"module\": \"commonjs\" }' ./node_modules/.bin/webpack-cli --config webpack.config.server.ts --watch --mode=development",
+    "dev:plugin": "yarn webpack --config webpack.config.plugin.ts --watch --mode=development",
+    "dev:server": "concurrently -p name -c 'yellow,magenta' -n 'wbpk,srv' 'yarn dev:server:webpack' 'yarn dev:server:nodemon'",
+    "dev:server:webpack": "yarn webpack --config webpack.config.server.ts --watch --mode=development",
     "dev:server:nodemon": "rm -f build/server.js && wait-on -l build/server.js && nodemon --inspect build/server.js",
-    "dev": "concurrently -p name -c 'yellow,magenta,cyan' -n 'webpack,srv,ui' 'yarn dev:server:webpack' 'yarn dev:server:nodemon' 'yarn dev:client'",
+    "dev": "concurrently -p name -c 'yellow,magenta,cyan' -n 'wbpk,srv,ui' 'yarn dev:server:webpack' 'yarn dev:server:nodemon' 'yarn dev:client'",
     "build:client": "react-scripts build",
-    "build:server": "export WEBPACK_PACKAGE=webpack5; ts-node -O '{ \"module\": \"commonjs\" }' ./node_modules/.bin/webpack-cli --config webpack.config.server.ts --mode=production",
+    "build:server": "yarn webpack --config webpack.config.server.ts --mode=production",
+    "build:plugin": "yarn webpack --config webpack.config.plugin.ts --mode=production",
     "build": "yarn build:client && yarn build:server",
     "container-build": "buildah bud --layers -f containerize/Containerfile --build-arg VCS_REF=$(git rev-parse HEAD | cut -c -7) -t openshift-actions-connector:latest .",
     "container-build:dev": "buildah bud --layers -f containerize/dev/Containerfile.dev -t openshift-actions-connector-dev:latest",
@@ -28,11 +32,7 @@
     "container-tag": "export TAG=quay.io/tetchell/openshift-actions-connector:latest && buildah tag openshift-actions-connector:latest $TAG",
     "container-push": "export TAG=quay.io/tetchell/openshift-actions-connector:latest && buildah push $TAG",
     "container-e2e": "yarn container-build && yarn container-tag && yarn container-push",
-    "helm-install": "export RELEASE_NAME=actions-connector && helm upgrade --install $RELEASE_NAME containerize/chart/openshift-actions-connector",
-    "depr-docker-build:client": "docker build . -f containerize/Containerfile.client -t openshift-actions-connector-client:latest",
-    "depr-docker-build:server": "docker build . -f containerize/Containerfile.server -t openshift-actions-connector-server:latest",
-    "depr-docker-build": "concurrently -p name -c 'cyan,yellow' -n 'client,server' 'yarn docker-build:client' 'yarn docker-build:server'",
-    "dept-docker-run": "concurrently -p name -c 'cyan,yellow' -n 'ui,srv' 'yarn docker-run:client' 'yarn docker-run:server'"
+    "helm-install": "export RELEASE_NAME=actions-connector && helm upgrade --install $RELEASE_NAME containerize/chart/openshift-actions-connector"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.34",
@@ -73,6 +73,7 @@
     "yaml": "^1.10.2"
   },
   "devDependencies": {
+    "@openshift-console/dynamic-plugin-sdk": "^0.0.0-alpha14",
     "@redhat-actions/eslint-config": "^1.3.1",
     "@types/bootstrap": "^5.0.12",
     "@types/cookie-parser": "^1.4.2",
@@ -88,14 +89,17 @@
     "@types/session-file-store": "^1.2.1",
     "@types/uid-safe": "^2.1.2",
     "@types/uuid": "^8.3.0",
+    "@types/webpack-node-externals": "^2.5.1",
     "@typescript-eslint/eslint-plugin": "^4.17.0",
     "@typescript-eslint/parser": "^4.17.0",
     "concurrently": "^6.0.0",
-    "console": "https://github.com/tetchel/console/raw/tim-test-2/frontend/packages/console-dynamic-plugin-sdk/console-dynamic-plugin-sdk.tar.gz",
+    "css-loader": "^5.2.4",
     "eslint": "^7.21.0",
     "eslint-plugin-react": "^7.22.0",
     "nodemon": "^2.0.7",
     "react-scripts": "^4.0.3",
+    "sass-loader": "^11.1.1",
+    "style-loader": "^2.0.0",
     "ts-loader": "^8.0.18",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.3",
@@ -103,7 +107,7 @@
     "webpack": "~4.44",
     "webpack-cli": "^4.5.0",
     "webpack-node-externals": "^3.0.0",
-    "webpack5": "npm:webpack@^5.37.0"
+    "webpack5": "npm:webpack@^5"
   },
   "browserslist": {
     "production": [

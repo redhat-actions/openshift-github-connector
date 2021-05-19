@@ -4,9 +4,8 @@ module.exports = {
     "plugin:react/recommended"
   ],
   ignorePatterns: [
-    "webpack.config*.[tj]s",
+    // "webpack.config*.[tj]s",
     "build/",
-    "jwt.js", "key.js", "auth.js"
   ],
   settings: {
     react: {
@@ -61,5 +60,12 @@ module.exports = {
       "@typescript-eslint/ban-types": [ 0 ],
       "react/react-in-jsx-scope": [ 0 ],
     },
+  }, {
+    files: [ "webpack.config.*.*s" ],
+    rules: {
+      "import/no-extraneous-dependencies": 0,
+      "@typescript-eslint/explicit-module-boundary-types": 0,
+      "no-console": 0
+    }
   }]
 }
