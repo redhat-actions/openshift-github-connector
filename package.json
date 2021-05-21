@@ -14,17 +14,20 @@
     "eject": "react-scripts eject",
     "lint": "eslint .",
     "webpack": "export WEBPACK_PACKAGE=webpack5; yarn ts-node ./node_modules/.bin/webpack-cli",
+    "wds": "export WEBPACK_PACKAGE=webpack5; yarn ts-node ./node_modules/.bin/webpack-cli serve",
     "ts-node": "ts-node -O '{ \"module\": \"commonjs\" }'",
+    "clean": "rm -rf build/",
     "dev:client": "wait-on -l tcp:3003 && react-scripts start",
-    "dev:plugin": "yarn webpack --config webpack.config.plugin.ts --watch --mode=development",
-    "dev:server": "concurrently -p name -c 'yellow,magenta' -n 'wbpk,srv' 'yarn dev:server:webpack' 'yarn dev:server:nodemon'",
+    "dev:plugin:webpack": "yarn wds --config webpack.config.plugin.ts --mode=development",
+    "dev:plugin": "concurrently -p name -c 'magenta,magenta,yellow' -n 'srv,srv,plugin' 'yarn dev:server:webpack' 'yarn dev:server:nodemon' 'yarn dev:plugin:webpack'",
+    "dev:server": "concurrently -p name -c 'magenta,magenta' -n 'srv,srv' 'yarn dev:server:webpack' 'yarn dev:server:nodemon'",
     "dev:server:webpack": "yarn webpack --config webpack.config.server.ts --watch --mode=development",
     "dev:server:nodemon": "rm -f build/server.js && wait-on -l build/server.js && nodemon --inspect build/server.js",
-    "dev": "concurrently -p name -c 'yellow,magenta,cyan' -n 'wbpk,srv,ui' 'yarn dev:server:webpack' 'yarn dev:server:nodemon' 'yarn dev:client'",
+    "dev": "concurrently -p name -c 'magenta,magenta,cyan' -n 'srv,srv,ui' 'yarn dev:server:webpack' 'yarn dev:server:nodemon' 'yarn dev:client'",
     "build:client": "react-scripts build",
     "build:server": "yarn webpack --config webpack.config.server.ts --mode=production",
     "build:plugin": "yarn webpack --config webpack.config.plugin.ts --mode=production",
-    "build": "yarn build:client && yarn build:server",
+    "build": "yarn clean && concurrently -p name -c 'yellow,magenta,cyan' -n 'ui,srv,plugin', 'yarn build:client' 'yarn build:server' 'yarn build:plugin'",
     "container-build": "buildah bud --layers -f containerize/Containerfile --build-arg VCS_REF=$(git rev-parse HEAD | cut -c -7) -t openshift-actions-connector:latest .",
     "container-build:dev": "buildah bud --layers -f containerize/dev/Containerfile.dev -t openshift-actions-connector-dev:latest",
     "container-run": "podman run --rm --name openshift-actions-connector -p 3000:3000 -p 3003:3003 openshift-actions-connector:latest",
@@ -32,7 +35,7 @@
     "container-tag": "export TAG=quay.io/tetchell/openshift-actions-connector:latest && buildah tag openshift-actions-connector:latest $TAG",
     "container-push": "export TAG=quay.io/tetchell/openshift-actions-connector:latest && buildah push $TAG",
     "container-e2e": "yarn container-build && yarn container-tag && yarn container-push",
-    "helm-install": "export RELEASE_NAME=actions-connector && helm upgrade --install $RELEASE_NAME containerize/chart/openshift-actions-connector"
+    "helm-install": "export RELEASE_NAME=actions-connector && helm upgrade --install $RELEASE_NAME containerize/chart/openshift-actions-connector --set clusterApiServer=$(oc whoami --show-server)"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.34",
@@ -73,7 +76,7 @@
     "yaml": "^1.10.2"
   },
   "devDependencies": {
-    "@openshift-console/dynamic-plugin-sdk": "^0.0.0-alpha14",
+    "@openshift-console/dynamic-plugin-sdk": "https://github.com/tetchel/console/raw/tim-test/frontend/packages/console-dynamic-plugin-sdk/%40openshift-console-dynamic-plugin-sdk-0.0.0-alpha9991.tar.gz",
     "@redhat-actions/eslint-config": "^1.3.1",
     "@types/bootstrap": "^5.0.12",
     "@types/cookie-parser": "^1.4.2",
@@ -89,6 +92,7 @@
     "@types/session-file-store": "^1.2.1",
     "@types/uid-safe": "^2.1.2",
     "@types/uuid": "^8.3.0",
+    "@types/webpack-dev-server": "^3.11.4",
     "@types/webpack-node-externals": "^2.5.1",
     "@typescript-eslint/eslint-plugin": "^4.17.0",
     "@typescript-eslint/parser": "^4.17.0",
@@ -126,7 +130,9 @@
     "version": "0.1.0",
     "displayName": "Tim's amazing plugin",
     "description": "Tim's really amazing plugin",
-    "exposedModules": {},
+    "exposedModules": {
+      "welcome": "./src/client/pages/setup/welcome-page.tsx"
+    },
     "dependencies": {
       "@console/pluginAPI": "*"
     }

@@ -1,6 +1,6 @@
 {
     "ignore": [
-        "dist/views/"
+        "build/plugin"
     ],
     "events": {
     },

@@ -3,11 +3,11 @@
 apiVersion: console.openshift.io/v1alpha1
 kind: ConsolePlugin
 metadata:
-  name: 'tims-plugin'
+  name: "tims-plugin"
 spec:
   displayName: "Tim's sweet plugin"
   service:
-    name: {{ .Values.serverServiceName }}
+    name: {{ .Values.pluginServiceName }}
     namespace: {{ .Release.Namespace }}
     port: 80
     basePath: '/'

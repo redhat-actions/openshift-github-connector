@@ -1,29 +1,49 @@
 import webpack from "webpack5";
+import wds from "webpack-dev-server";
 import path from "path";
-import { ConsoleRemotePlugin } from "@openshift-console/dynamic-plugin-sdk/lib/webpack/ConsoleRemotePlugin";
+import { ConsoleRemotePlugin } from "@openshift-console/dynamic-plugin-sdk/lib/webpack";
 
 // eslint-disable-next-line import/extensions
 import { getOutDir, getSrcPath } from "./webpack.config.server";
 
 const entry = { plugin: getSrcPath("client/app.tsx") };
 
-export default function getWebpackConfig(env: any, argv: any): webpack.Configuration {
+export default function getWebpackConfig(
+  env: any, argv: any
+): webpack.Configuration & { devServer: wds.Configuration } {
+
   const mode: "development" | "production" = argv.mode === "development" ? "development" : "production";
   const isProd = mode === "production";
 
-  const outFilename = isProd ? "[name]-bundle-[hash].min.js" : "[name].js";
+  const outFilename = isProd ? "[name]-bundle-[fullhash].min.js" : "[name].js";
   const outChunkFilename = isProd ? "[name]-chunk-[chunkhash].min.js" : "[name]-chunk.js";
-  const outputPath = path.resolve(getOutDir(), "plugin");
+  const outputDir = path.resolve(getOutDir(), "plugin");
 
+  const devServer: wds.Configuration = isProd ? {} : {
+    contentBase: outputDir,
+
+    compress: true,
+    hot: true,
+    host: "localhost",
+    port: 3001,
+    publicPath: "/",
+  };
+
+  console.log(`Webpack v${webpack.version}`);
   console.log(`Mode: ${mode}`);
-  console.log(`Outputting to ${path.join(outputPath, outFilename)} ...`);
+  console.log(`Outputting to ${path.join(outputDir, outFilename)} ...`);
+
+  if (Object.keys(devServer).length > 0) {
+    console.log(`Dev server configured at ${devServer.host}:${devServer.port}${devServer.publicPath}`);
+  }
 
   return {
     mode,
     entry,
     devtool: "inline-source-map",
+    devServer,
     output: {
-      path: outputPath,
+      path: outputDir,
       filename: outFilename,
       chunkFilename: outChunkFilename,
     },
@@ -58,7 +78,8 @@ export default function getWebpackConfig(env: any, argv: any): webpack.Configura
       ],
     },
     plugins: [
-      new ConsoleRemotePlugin(),
+      new ConsoleRemotePlugin() as unknown as webpack.WebpackPluginInstance,
+      // new ConsoleRemotePlugin(),
     ],
     optimization: {
       chunkIds: isProd ? "deterministic" : "named",

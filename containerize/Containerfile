@@ -2,30 +2,27 @@ FROM node:14-alpine as builder
 
 WORKDIR /app
 
+# https://github.com/yarnpkg/yarn/issues/2816#issuecomment-322755762
+# RUN rm -v /usr/local/bin/yarn /usr/local/bin/yarnpkg && npm i -g yarn
+
 COPY package.json yarn.lock ./
 
 RUN yarn install --frozen-lockfile --no-cache
 
 # note: eslintrc must be copied
 # https://github.com/facebook/create-react-app/issues/9791
-COPY tsconfig.json webpack.config.server.ts .eslintrc.js ./
+COPY tsconfig.json webpack.config.*.ts .eslintrc.js console-extensions.json ./
 COPY public/ ./public
 COPY src/ ./src
 
-ENV NODE_ENV production
-ENV WEBPACK_NODE_MODULES true
-RUN yarn build:server
-RUN mv -v build/ server/
-
-# https://create-react-app.dev/docs/adding-custom-environment-variables/
-# ARG PROTOCOL=http
-# ENV REACT_APP_BACKEND_PROTOCOL $PROTOCOL
+RUN yarn build:plugin
+RUN mv -v build/ plugin/
 
 RUN yarn build:client
 RUN mv -v build/ client/
 
-RUN yarn build:plugin
-RUN mv -v build/ plugin/
+RUN yarn build:server
+RUN mv -v build/ server/
 
 COPY README.md ./
 

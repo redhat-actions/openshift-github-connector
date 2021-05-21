@@ -19,7 +19,7 @@ serve --listen $FRONTEND_PORT --single ./client &
 client_pid=$!
 sleep 1
 
-serve --listen $FRONTEND_PORT --single ./plugin &
+serve --listen $PLUGIN_PORT --single ./plugin &
 plugin_pid=$!
 sleep 1
 

@@ -13,9 +13,9 @@ export function getOutDir(): string {
 const entry = { server: getSrcPath("server/index.ts") };
 
 export default function getWebpackConfig(env: any, argv: any): webpack.Configuration {
-// module.exports = function getWebpackConfig() {
 
-  // const bundleNodeModules = process.env.WEBPACK_NODE_MODULES === "true";
+  console.log(`Webpack v${webpack.version}`);
+
   const mode = argv.mode === "development" ? "development" : "production";
   console.log(`Mode: ${mode}`);
 

@@ -51,7 +51,7 @@ serverReplicaCount: 1
 serverImage: quay.io/tetchell/openshift-actions-connector
 serverTag: latest
 
-serverServiceName: actions-connector-server-svc
+serverServiceName: actions-connector-server
 serverPort: 3003
 serverPortName: server-port
 
@@ -62,6 +62,10 @@ serverPortName: server-port
 # clientImage: quay.io/tetchell/openshift-actions-connector-client
 # clientTag: latest
 
-clientServiceName: actions-connector-client-svc
+clientServiceName: actions-connector-client
 clientPort: 3000
 clientPortName: client-port
+
+pluginServiceName: actions-connector-plugin
+pluginPort: 3001
+pluginPortName: plugin-port
