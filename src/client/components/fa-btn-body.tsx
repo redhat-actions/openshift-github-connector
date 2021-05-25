@@ -1,7 +1,7 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
-import { Spinner } from "react-bootstrap";
+import { Spinner } from "@patternfly/react-core";
 
 export default function BtnBody(props: {
   icon?: IconProp,
@@ -28,7 +28,7 @@ export default function BtnBody(props: {
   }
 
   const loadingElement = props.isLoading ? (
-    <Spinner className={classNames({ "d-none": !props.isLoading })} variant="light" animation="border" />
+    <Spinner className={classNames({ "d-none": !props.isLoading })} size="md" />
   ) : ("");
 
   return (

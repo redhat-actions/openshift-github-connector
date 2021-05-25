@@ -2,7 +2,7 @@ import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import classNames from "classnames";
-import { Spinner } from "react-bootstrap";
+import { Spinner } from "@patternfly/react-core";
 import { Severity } from "../../common/common-util";
 
 namespace Banner {
@@ -62,7 +62,7 @@ function Banner(props: Banner.Props): JSX.Element {
         </div>
         <div className="ml-auto">
           {props.loading
-            ? (<Spinner animation="border" style={{ height: "1.5em", width: "1.5em" }}/>)
+            ? (<Spinner style={{ height: "1.5em", width: "1.5em" }}/>)
             : ("")
           }
         </div>

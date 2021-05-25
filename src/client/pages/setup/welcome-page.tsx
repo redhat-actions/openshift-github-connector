@@ -1,5 +1,7 @@
 import React from "react";
-import { Card, Jumbotron } from "react-bootstrap";
+import {
+  Card, CardTitle, CardBody,
+} from "@patternfly/react-core";
 import ApiEndpoints from "../../../common/api-endpoints";
 import ApiResponses from "../../../common/api-responses";
 import DataFetcher from "../../components/data-fetcher";
@@ -9,36 +11,39 @@ export default function WelcomePage(): JSX.Element {
   return (
     <React.Fragment>
       <SetupPageHeader pageIndex={0} canProceed={true} />
-      <Jumbotron>
-        <h2>Welcome to the OpenShift GitHub Actions Connector</h2>
-        <hr />
-        <h5 className="my-3">
-          This wizard will walk you through connecting this OpenShift cluster to your GitHub Actions.
-        </h5>
-        <ul>
-          <li>Install and Configure OpenShift Clusters for use with Red Hat Actions</li>
-          <li>Manage, modify and configure Red Hat actions in your repositories</li>
-          <li>Manage OpenShift GitHub Runners</li>
-        </ul>
+      <Card isLarge className="p-3">
+        <CardTitle>
+          <h2>Welcome to the OpenShift GitHub Actions Connector</h2>
+        </CardTitle>
+        <CardBody>
+          <h5 className="my-3">
+            This wizard will walk you through connecting this OpenShift cluster to your GitHub Actions.
+          </h5>
+          <ul className="bullets-disc">
+            <li>Install and Configure OpenShift Clusters for use with Red Hat Actions</li>
+            <li>Add and configure Red Hat actions in your repositories</li>
+            <li>Manage OpenShift self-hosted Runners</li>
+          </ul>
 
-        <p>
+          <p>
           Click <b>Next</b> in the banner above to get started.
-        </p>
+          </p>
 
-        <div className="d-flex">
-          <div className="ml-auto">
-            <b>Backend status:&nbsp;</b>
-            <DataFetcher type="api" endpoint={ApiEndpoints.Health}>
-              {(data: ApiResponses.Result) => (
-                <React.Fragment>
-                  <span className={data.message === "OK" ? "text-success" : "text-danger"}>
-                    {data.message}
-                  </span>
-                </React.Fragment>
-              )}
-            </DataFetcher>
+          <div className="d-flex">
+            <div className="ml-auto">
+              <b>Backend status:&nbsp;</b>
+              <DataFetcher type="api" endpoint={ApiEndpoints.Health}>
+                {(data: ApiResponses.Result) => (
+                  <React.Fragment>
+                    <span className={data.message === "OK" ? "text-success" : "text-danger"}>
+                      {data.message}
+                    </span>
+                  </React.Fragment>
+                )}
+              </DataFetcher>
+            </div>
           </div>
-        </div>
+        </CardBody>
 
         {/* <div className="row justify-content-center">
           <Link to={getSetupSteps()[0].path}>
@@ -51,12 +56,12 @@ export default function WelcomePage(): JSX.Element {
           </Link>
         </div> */}
 
-      </Jumbotron>
+      </Card>
       <Card>
-        <Card.Title>
+        <CardTitle>
           Cluster info
-        </Card.Title>
-        <Card.Body>
+        </CardTitle>
+        <CardBody>
           <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root} loadingDisplay="card-body">
             {(data: ApiResponses.ClusterState) => (
               <div className="">
@@ -81,7 +86,7 @@ export default function WelcomePage(): JSX.Element {
               </div>
             )}
           </DataFetcher>
-        </Card.Body>
+        </CardBody>
       </Card>
 
     </React.Fragment>

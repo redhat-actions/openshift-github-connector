@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Spinner } from "react-bootstrap";
+import { Card, CardBody, Spinner } from "@patternfly/react-core";
 import UrlPath from "../../common/types/url-path";
 import { fetchJSON } from "../util/client-util";
 
@@ -104,23 +104,23 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
         }
 
         return (
-          <Spinner style={loadingStyle} animation="border" variant="primary"/>
+          <Spinner style={loadingStyle} />
         );
       }
       else if (loadingDisplayType === "card") {
         return (
           <Card style={{ minHeight: "100px" }}>
-            <Card.Body className="d-flex justify-content-center align-items-center">
-              <Spinner style={this.props.loadingStyle ?? {}} animation="border" variant="primary"/>
-            </Card.Body>
+            <CardBody className="d-flex justify-content-center align-items-center">
+              <Spinner style={this.props.loadingStyle ?? {}} />
+            </CardBody>
           </Card>
         );
       }
       else if (loadingDisplayType === "card-body") {
         return (
-          <Card.Body className="d-flex justify-content-center align-items-center">
-            <Spinner style={this.props.loadingStyle ?? {}} animation="border" variant="primary"/>
-          </Card.Body>
+          <CardBody className="d-flex justify-content-center align-items-center">
+            <Spinner style={this.props.loadingStyle ?? {}} />
+          </CardBody>
         );
       }
       else if (loadingDisplayType === "none") {

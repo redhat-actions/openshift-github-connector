@@ -16,35 +16,31 @@ $header-top-height: 1rem;
 
 #setup-header {
   margin-top: - c.$main-vertical-padding;
+
+  z-index: 100;
   position: sticky;
   top: 0;
-  z-index: 100;
+
+  width: calc(100% + 0.25rem);
+  height: 10rem;
   margin-bottom: 3rem;
-}
-
-#setup-header-wrapper {
-  position: relative;
-}
-
-#setup-header-background {
-  position: absolute;
 
   background-color: c.$body-bg;
-  top: 0;
-  right: 0;
-  height: 100%;
-  width: 100%;
 }
 
-// $setup-banner-color: #0c8552;
-$setup-banner-color: #2a4a4a;
+// $setup-banner-color: #2a4a4a;
+$setup-banner-color: #161f20;
 
 #setup-header-body {
-  // top: $header-top-height;
+  position: absolute;
   top: $header-top-height;
+  width: 100%;
+  height: 100%;
+
+  border-radius: c.$card-border-radius;
   // border-radius: 0 0 $card-border-radius $card-border-radius;
   background-color: $setup-banner-color;
-  box-shadow: 0.1rem 0.25rem 0.25rem black;
+  box-shadow: 0.1rem 0.2rem 0.2rem black;
 
   padding: 0.5rem 0;
 }
@@ -76,9 +72,9 @@ $setup-banner-color: #2a4a4a;
 
   color: c.$light;
 
+  text-decoration: none !important;
   &:focus, &:hover {
-    text-decoration: none !important;
-    border-color: c.$body-fg;
+    border-color: #fff;
   }
 }
 
@@ -103,18 +99,23 @@ $circle-font-size: 1rem;
 
   // see SetupStepState
   &.passed {
-    background-color: c.$success-light;
-    border-color: c.$success-light;
+    background-color: c.$pf-global--success-color--100;
+    border-color: c.$pf-global--success-color--100;
+    // background-color: c.$success-light;
+    // border-color: c.$success-light;
   }
 
   &.current {
-    background-color: c.$success;
-    border-color: c.$success;
+    background-color: c.$pf-global--success-color--100;
+    border-color: c.$pf-global--success-color--100;
+    // background-color: c.$success;
+    // border-color: c.$success;
   }
 
   &.todo {
     background-color: "";
-    border-color: c.$warning;
+    border-color: c.$pf-global--warning-color--100;
+    // border-color: c.$warning;
   }
 }
 

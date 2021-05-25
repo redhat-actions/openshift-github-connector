@@ -1,7 +1,9 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
 import React, { useState } from "react";
-import { Button, Card } from "react-bootstrap";
+import {
+  Button, Card, CardTitle, CardBody,
+} from "@patternfly/react-core";
 import { v4 as uuid } from "uuid";
 
 import ApiEndpoints from "../../../../common/api-endpoints";
@@ -31,16 +33,16 @@ export default function CreateAppCard(): JSX.Element {
   return (
     <React.Fragment>
       <Card>
-        <Card.Title>
+        <CardTitle>
           {CREATE_NEW_TITLE}
 
-          <Button variant="info" className="ml-auto">
+          <Button variant="secondary" className="ml-auto">
             <ExternalLink href="https://github.com/settings/apps/" icon={{ icon: [ "fab", "github" ], position: "left" }} >
               View your apps
             </ExternalLink>
           </Button>
-        </Card.Title>
-        <Card.Body>
+        </CardTitle>
+        <CardBody>
           <div className="border-bottom px-2">
             <FormInputCheck type="checkbox"
               checked={publicChecked}
@@ -100,7 +102,7 @@ export default function CreateAppCard(): JSX.Element {
               <input id={manifestInputId} className="d-none" name="manifest" type="manifest" readOnly={true} />
             </form>
 
-            <Button size="lg" type="submit" form={manifestFormId}>
+            <Button isLarge={true} type="submit" form={manifestFormId}>
               <BtnBody icon="plus" text={CREATE_NEW_TITLE} isLoading={isLoading} />
             </Button>
 
@@ -108,7 +110,7 @@ export default function CreateAppCard(): JSX.Element {
 
           <Banner title={error ?? ""} display={error != null} severity="danger" />
 
-        </Card.Body>
+        </CardBody>
       </Card>
     </React.Fragment>
   );

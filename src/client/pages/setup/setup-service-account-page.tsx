@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classnames from "classnames";
-import { Button, Card } from "react-bootstrap";
+import { Button, Card } from "@patternfly/react-core";;
 import jwt from "jsonwebtoken";
 
 import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -115,7 +115,7 @@ export default function SetupSAPage(): JSX.Element {
       }}/>
 
       <Card>
-        <Card.Body>
+        <CardBody>
           <p>
             You have to create a Service Account which can act as your agent on the OpenShift cluster.
             The Service Account will create a token which can be used to authenticate into the cluster from GitHub Actions.
@@ -142,14 +142,14 @@ export default function SetupSAPage(): JSX.Element {
               </li>
             </ul>
           </div>
-        </Card.Body>
+        </CardBody>
       </Card>
 
       <Card id={saNameCardID}>
-        <Card.Title>
+        <CardTitle>
           Service Account Name
-        </Card.Title>
-        <Card.Body>
+        </CardTitle>
+        <CardBody>
           <p className="">
             Enter the name of the service account you would like to use. It is recommended to use a new service account.<br/>
           </p>
@@ -173,7 +173,7 @@ export default function SetupSAPage(): JSX.Element {
           <Banner display={!!saNameError} severity="warn">
             {saNameError ?? ""}
           </Banner>
-        </Card.Body>
+        </CardBody>
       </Card>
 
       <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root}>
@@ -201,10 +201,10 @@ export default function SetupSAPage(): JSX.Element {
             return (
               <React.Fragment>
                 {<Card>
-                  <Card.Title>
+                  <CardTitle>
                     Service Account Role
-                  </Card.Title>
-                  <Card.Body>
+                  </CardTitle>
+                  <CardBody>
                     <div>
                       <p>
                         The <code>edit</code> role is recommended, so the service account can
@@ -235,14 +235,14 @@ export default function SetupSAPage(): JSX.Element {
                         }}
                       />
                     </div>
-                  </Card.Body>
+                  </CardBody>
                 </Card>}
 
                 <Card>
-                  <Card.Title>
+                  <CardTitle>
                     Create the Service Account
-                  </Card.Title>
-                  <Card.Body>
+                  </CardTitle>
+                  <CardBody>
                     {saNameError
                       ? <Banner display={true} severity="error">
                         <span>
@@ -341,7 +341,7 @@ export default function SetupSAPage(): JSX.Element {
                         </p>
                       </React.Fragment>
                     }
-                  </Card.Body>
+                  </CardBody>
                 </Card>
               </React.Fragment>
             );

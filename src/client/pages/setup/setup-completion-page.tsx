@@ -1,5 +1,5 @@
 import React from "react";
-import { Jumbotron } from "react-bootstrap";
+import { Card, CardTitle, CardBody } from "@patternfly/react-core";
 import { Link } from "react-router-dom";
 import ClientPages from "../client-pages";
 import SetupPageHeader from "./setup-header";
@@ -8,36 +8,39 @@ export default function SetupFinishedPage(): JSX.Element {
   return (
     <React.Fragment>
       <SetupPageHeader pageIndex={5} canProceed={false} hideBtnBanner={true} />
-      <Jumbotron>
-        <h2 className="d-flex justify-content-between">
-          Setup Complete
-          {/* <FontAwesomeIcon icon="check" className="text-success" /> */}
-        </h2>
-        <hr />
-        <h3>{"What's Next"}</h3>
-        <ul className="pl-4 b">
-          <li>
-            <Link to={ClientPages.AddWorkflows.path}>Add the OpenShift starter workflow</Link>
-          </li>
-          <li>
-            <Link to={ClientPages.NotImplemented.path}>Connect your OpenShift Image Registry</Link>
-          </li>
-          <li>
-            <Link to={ClientPages.NotImplemented.path}>Create Self-Hosted Runners</Link>
-          </li>
-        </ul>
-        <ul className="pl-4 b">
-          <li>
-            <Link to={ClientPages.App.path}>Return to the View GitHub App page</Link>
-          </li>
-          <li>
-            <Link to={ClientPages.ConnectRepos.path}>Return to the Connect Repositories page</Link>
-          </li>
-          <li>
-            <Link to={ClientPages.ImageRegistries.path}>Return to the Image Registries page</Link>
-          </li>
-        </ul>
-      </Jumbotron>
+      <Card>
+        <CardTitle>
+          <h2 className="d-flex justify-content-between">
+            Setup Complete
+            {/* <FontAwesomeIcon icon="check" className="text-success" /> */}
+          </h2>
+        </CardTitle>
+        <CardBody>
+          <h3 className="mt-4">{"What's Next"}</h3>
+          <ul className="pl-4 b">
+            <li>
+              <Link to={ClientPages.AddWorkflows.path}>Add the OpenShift starter workflow</Link>
+            </li>
+            <li>
+              <Link to={ClientPages.NotImplemented.path}>Connect your OpenShift Image Registry</Link>
+            </li>
+            <li>
+              <Link to={ClientPages.NotImplemented.path}>Create Self-Hosted Runners</Link>
+            </li>
+          </ul>
+          <ul className="pl-4 b">
+            <li>
+              <Link to={ClientPages.App.path}>Return to the View GitHub App page</Link>
+            </li>
+            <li>
+              <Link to={ClientPages.ConnectRepos.path}>Return to the Connect Repositories page</Link>
+            </li>
+            <li>
+              <Link to={ClientPages.ImageRegistries.path}>Return to the Image Registries page</Link>
+            </li>
+          </ul>
+        </CardBody>
+      </Card>
     </React.Fragment>
   );
 }
@@ -84,7 +87,7 @@ export default function SetupHomePage() {
         <FontAwesomeIcon icon="question" className="text-warning" />
       </td>
       <td className="push-right align-middle">
-        <Spinner animation="border" variant="primary" style={{ height: "1em", width: "1em" }}/>
+        <Spinner  variant="primary" style={{ height: "1em", width: "1em" }}/>
       </td>
     </React.Fragment>
   );

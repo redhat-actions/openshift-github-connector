@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button } from "react-bootstrap";
+import { Button } from "@patternfly/react-core";
 import classNames from "classnames";
 
 import AppPageCard from "../components/gh-app-page-card";
@@ -128,10 +128,10 @@ function SwitchViewButton(props: { currentView: ViewType | undefined, onSwitchVi
 
   return (
     <div className="btn-line">
-      <Button variant="info" active={isOwnerActive} onClick={() => props.onSwitchViewType("owner")} className="mr-2">
+      <Button variant="secondary" isActive={isOwnerActive} onClick={() => props.onSwitchViewType("owner")} className="mr-2">
         <BtnBody text="View as owner" />
       </Button>
-      <Button variant="info" active={isUserActive} onClick={() => props.onSwitchViewType("user")}>
+      <Button variant="secondary" isActive={isUserActive} onClick={() => props.onSwitchViewType("user")}>
         <BtnBody text="View as user" />
       </Button>
     </div>

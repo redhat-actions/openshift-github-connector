@@ -29,14 +29,13 @@
   cursor: not-allowed;
 }
 
-$-card-border-radius: 0.5rem;
-$card-box-shadow: 0.1rem 0.1rem 0.1rem black;
+$card-border-radius: 0.5rem;
 
-.card {
-  background-color: c.$card-bg;
-  color: c.$body-fg;
-  border-radius: $-card-border-radius;
-  box-shadow: $card-box-shadow;
+.card, .pf-c-card {
+  --pf-c-card--BoxShadow: 0.1rem 0.1rem 0.1rem #888 !important;
+
+  border-radius: $card-border-radius;
+  // box-shadow: $card-box-shadow;
   margin-bottom: 1.5em;
 
   & .bg-darker {
@@ -51,7 +50,7 @@ $card-box-shadow: 0.1rem 0.1rem 0.1rem black;
 $card-border: 2px solid c.$rh-gray;
 $card-limit-padding: 1rem 1.25rem;
 
-.card-title {
+.card-title, .pf-c-card__title {
   border-bottom: $card-border;
   padding: $card-limit-padding;
 
@@ -67,7 +66,7 @@ $card-limit-padding: 1rem 1.25rem;
   }
 }
 
-.card-footer {
+.card-footer, .pf-c-card__footer {
   border-top: $card-border;
   padding: $card-limit-padding;
   margin: 0;
@@ -80,9 +79,11 @@ input {
     box-shadow: none;
 
     &.error {
+      // border-color: $pf-global--danger-color--200;
       border-color: c.$danger;
     }
     &.warning {
+      // border-color: c.$pf-global--warning-color--200;
       border-color: c.$warning;
     }
   }
@@ -99,14 +100,6 @@ input {
 
 .form-check-label {
   margin-left: 0.5em;
-}
-
-.jumbotron {
-  border-radius: $-card-border-radius;
-  box-shadow: $card-box-shadow;
-  padding: 3rem 3rem;
-
-  background-color: c.$card-bg;
 }
 
 .table thead tr td {

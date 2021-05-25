@@ -1,5 +1,5 @@
 @use "./constants" as c;
-@use "./bs-component-styles";
+@use "./component-styles";
 @use "./setup";
 
 html, body {
@@ -32,12 +32,12 @@ a {
 }
 
 p {
-  margin-top: map-get(c.$spacers, 2);
-  margin-bottom: map-get(c.$spacers, 2);
+  margin-top: c.$pf-global--spacer--md;
+  margin-bottom: c.$pf-global--spacer--md;
 }
 
 .error {
-  color: c.$danger;
+  color: c.$pf-global--danger-color--200;
 }
 
 h1 h2 h3 h4 h5 {
@@ -46,7 +46,7 @@ h1 h2 h3 h4 h5 {
 
 hr {
   border-color: c.$body-fg;
-  margin: map-get(c.$spacers, 4) 0;
+  margin: c.$pf-global--spacer--xl 0;
 }
 
 .b {
@@ -70,7 +70,7 @@ li {
   padding-left: 0;
 }
 
-.bullets-disc {
+ul, .bullets-disc {
   list-style-type: disc;
 }
 
@@ -136,8 +136,8 @@ input[type=checkbox], input[type=radio] {
 }
 
 input.form-control[readonly] {
-  background-color: c.$gray-500;
-  color: c.$dark;
+  background-color: c.$pf-global--disabled-color--100;
+  color: c.$pf-global--BackgroundColor--dark-100;
 
   &:hover {
     cursor: not-allowed;
@@ -145,7 +145,7 @@ input.form-control[readonly] {
 }
 
 .form-label:not([inline]) {
-  padding-bottom: map-get(c.$spacers, 2);
+  padding-bottom: c.$pf-global--spacer--md;
 }
 
 label {
@@ -164,13 +164,13 @@ label {
 
   &.flex-column {
     & > :not(:last-child).btn {
-      margin-bottom: map-get(c.$spacers, 3);
+      margin-bottom: c.$pf-global--spacer--lg;
     }
   }
 
   &:not(.flex-column) {
     & > :not(:last-child).btn {
-      margin-right: map-get(c.$spacers, 3);
+      margin-right: c.$pf-global--spacer--lg;
     }
   }
 }

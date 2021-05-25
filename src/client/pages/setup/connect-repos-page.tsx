@@ -4,10 +4,12 @@ import {
   Badge,
   Button,
   Card,
-  Collapse,
+  CardTitle,
+  CardBody,
+  ExpandableSection,
   Spinner,
-  Table,
-} from "react-bootstrap";
+} from "@patternfly/react-core";
+import { Table } from "@patternfly/react-table";
 import classNames from "classnames";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
@@ -126,10 +128,10 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
             : ""
         }
         <Card>
-          <Card.Title>
+          <CardTitle>
             Connect GitHub Repositories
-          </Card.Title>
-          <Card.Body>
+          </CardTitle>
+          <CardBody>
             <p>
               This step connects GitHub repositories to your OpenShift cluster by
               creating <ExternalLink href="https://docs.github.com/en/actions/reference/encrypted-secrets">
@@ -170,15 +172,15 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
               />
               <label htmlFor={this.createSATokensId} className="b clickable">Create Service Account Tokens</label>
             </div> */}
-          </Card.Body>
+          </CardBody>
         </Card>
         <Card>
-          <Card.Title>
+          <CardTitle>
             <div>
               Secrets
             </div>
-          </Card.Title>
-          <Card.Body>
+          </CardTitle>
+          <CardBody>
             <DataFetcher type="api" endpoint={ApiEndpoints.App.Repos.RepoSecretDefaults} loadingDisplay="spinner">
               {
                 (res: ApiResponses.DefaultSecretsResponse) => (
@@ -205,7 +207,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                 )
               }
             </DataFetcher>
-          </Card.Body>
+          </CardBody>
         </Card>
 
         <Card>
@@ -214,14 +216,14 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
             // Failed to load
             ? (
               <React.Fragment>
-                <Card.Title>
+                <CardTitle>
                   Repositories
-                </Card.Title>
-                <Card.Body>
+                </CardTitle>
+                <CardBody>
                   <Banner severity="danger" display={true}
                     title={this.state.loadingErr}
                   />
-                </Card.Body>
+                </CardBody>
               </React.Fragment>
             ) : (
               <React.Fragment>
@@ -230,20 +232,20 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                 // still loading
                   ? (
                     <React.Fragment>
-                      <Card.Title>
+                      <CardTitle>
                         Repositories
-                      </Card.Title>
-                      <Card.Body >
+                      </CardTitle>
+                      <CardBody >
                         <div className="d-flex justify-content-center">
-                          <Spinner animation="border" variant="primary" />
+                          <Spinner />
                         </div>
-                      </Card.Body>
+                      </CardBody>
                     </React.Fragment>
                   )
                 // Loaded
                   : (
                     <React.Fragment>
-                      <Card.Title>
+                      <CardTitle>
                         <div>
                           Repositories
                         </div>
@@ -267,8 +269,8 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                             </Button>
                           </div>
                         </div>
-                      </Card.Title>
-                      <Card.Body>
+                      </CardTitle>
+                      <CardBody>
                         <p>
                           Select the repositories to create secrets in, so workflows can log into this OpenShift cluster.
                         </p>
@@ -276,7 +278,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                           Then, click <b>Create Secrets</b>.
                         </p>
                         <div className="text-md my-4 btn-line">
-                          <Button variant="light"
+                          <Button variant="plain"
                             onClick={(_e) => {
                               this.setAllChecked(true);
                             }}
@@ -284,7 +286,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                             <BtnBody icon="check-square" text="Select All" />
                           </Button>
 
-                          <Button variant="light"
+                          <Button variant="plain"
                             onClick={(_e) => {
                               this.setAllChecked(false);
                             }}
@@ -354,7 +356,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                           isSubmitting={this.state.isSubmitting}
                           submissionResult={this.state.submissionResult}
                         />
-                      </Card.Body>
+                      </CardBody>
                     </React.Fragment>
                   )
                 }
@@ -483,7 +485,7 @@ function RepoWithSecretsItem({
           }
         </div> */}
         <div className="btn-line">
-          <Button variant="light"
+          <Button variant="secondary"
             title="GitHub Repository"
           >
             <ExternalLink
@@ -494,7 +496,7 @@ function RepoWithSecretsItem({
             </ExternalLink>
           </Button>
 
-          <Button variant="light"
+          <Button variant="secondary"
             title="Edit Secrets in GitHub"
           >
             <ExternalLink
@@ -506,8 +508,7 @@ function RepoWithSecretsItem({
           </Button>
         </div>
       </div>
-      {/* https://react-bootstrap.github.io/utilities/transitions/ */}
-      <Collapse in={isShowingSecrets}>
+      <ExpandableSection isExpanded={isShowingSecrets}>
         {/* Do not put padding or margin on this div as it will mess up the collapse transition */}
         <div>
           {
@@ -561,7 +562,7 @@ function RepoWithSecretsItem({
               )
           }
         </div>
-      </Collapse>
+      </ExpandableSection>
     </div>
   );
 }
@@ -586,7 +587,7 @@ function ShowSecretsButton(props: { noSecrets: number, isShowingSecrets: boolean
 
   return (
     <React.Fragment>
-      <Button variant="light b"
+      <Button variant="secondary"
         title={text}
         onClick={(_e) => {
           props.onClick();
@@ -598,7 +599,7 @@ function ShowSecretsButton(props: { noSecrets: number, isShowingSecrets: boolean
         </span>
         <div>
           {props.noSecrets > 0 ?
-            <Badge variant="info">{props.noSecrets}</Badge>
+            <Badge>{props.noSecrets}</Badge>
             : ("")
           }
         </div>

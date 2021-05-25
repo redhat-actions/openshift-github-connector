@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
-  Button, Card,
-} from "react-bootstrap";
+  Button, Card, CardTitle, CardBody,
+} from "@patternfly/react-core";
 
 import ApiEndpoints from "../../../../common/api-endpoints";
 import ApiRequests from "../../../../common/api-requests";
@@ -22,10 +22,10 @@ export default function InstallExistingAppCard(): JSX.Element {
   return (
     <React.Fragment>
       <Card>
-        <Card.Title>
+        <CardTitle>
           {USE_EXISTING_TITLE}
-        </Card.Title>
-        <Card.Body>
+        </CardTitle>
+        <CardBody>
           <DataFetcher type="api" endpoint={ApiEndpoints.App.Existing} loadingDisplay="card-body">{
             (data: ApiResponses.AllAppsState) => {
               if (!data.success || data.totalCount === 0) {
@@ -81,7 +81,7 @@ export default function InstallExistingAppCard(): JSX.Element {
           }
           </DataFetcher>
 
-        </Card.Body>
+        </CardBody>
       </Card>
     </React.Fragment>
   );
@@ -99,7 +99,7 @@ function InstallAppSection({ selectedApp }: { selectedApp: ApiResponses.Existing
 
   // if (props.selectedApp == null) {
   //   return (
-  //     <Button size="lg" disabled title="Select an app to proceed.">
+  //     <Button isLarge disabled title="Select an app to proceed.">
   //       {btnBody}
   //     </Button>
   //   );
@@ -129,7 +129,7 @@ function InstallAppSection({ selectedApp }: { selectedApp: ApiResponses.Existing
       </div>
 
       <div className="mt-4 d-flex align-items-center justify-content-center">
-        <Button size="lg" disabled={isLoading} onClick={async () => {
+        <Button isLarge disabled={isLoading} onClick={async () => {
           // if (props.selectedApp == null) {
           //   setError("No app selected");
           //   return;

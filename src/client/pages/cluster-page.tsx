@@ -1,5 +1,6 @@
 import React from "react";
-import { Button, Table } from "react-bootstrap";
+import { Button } from "@patternfly/react-core";
+import { Table } from "@patternfly/react-table";
 import ApiEndpoints from "../../common/api-endpoints";
 import ApiResponses from "../../common/api-responses";
 import DataFetcher from "../components/data-fetcher";

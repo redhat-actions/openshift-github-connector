@@ -2,8 +2,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
 import React from "react";
 import {
-  Button, Card, Col, Form,
-} from "react-bootstrap";
+  Button, Card, CardTitle, CardBody, Form, FormGroup, TextInput, FormSelect,
+} from "@patternfly/react-core";
+import { ExclamationTriangleIcon } from "@patternfly/react-icons";
 import { Link } from "react-router-dom";
 import ApiEndpoints from "../../common/api-endpoints";
 import ApiRequests from "../../common/api-requests";
@@ -29,7 +30,7 @@ interface AddWorkflowsPageState {
   workflowFile: {
     name: string,
     extension: string,
-    validationErr?: string,
+    validationErr: string | null | undefined,
   },
   overwriteExistingWorkflow: boolean,
   imageRegistryId?: string,
@@ -51,6 +52,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
       workflowFile: {
         name: DEFAULT_WORKFLOW_FILE_BASENAME,
         extension: WORKFLOW_FILE_EXTENSION,
+        validationErr: undefined,
       },
       overwriteExistingWorkflow: false,
       isSubmitting: false,
@@ -65,10 +67,10 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
     return (
       <React.Fragment>
         <Card>
-          <Card.Title>
+          <CardTitle>
             Add Starter Workflow to Repository
-          </Card.Title>
-          <Card.Body>
+          </CardTitle>
+          <CardBody>
             <p>
               Here you can add the starter workflow and maybe some other ones to your repositories.
             </p>
@@ -96,39 +98,45 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                 </ExternalLink>
               </li>
             </ul>
-          </Card.Body>
+          </CardBody>
         </Card>
 
         <Card>
-          <Card.Title>
+          <CardTitle>
             Workflow File Name
-          </Card.Title>
-          <Card.Body>
+          </CardTitle>
+          <CardBody>
             <p>
               Workflow files are kept in the {`repository's`} <code>{WORKFLOWS_DIR}</code> directory.
               The directory will be created if it does not exist.
             </p>
-            <Form inline className="pt-2">
-              <Form.Control type="text"
-                id={this.fileNameInputId}
-                style={{ width: "25ch" }}
-                isValid={this.state.workflowFile.validationErr == null}
-                isInvalid={this.state.workflowFile.validationErr != null}
-                defaultValue={DEFAULT_WORKFLOW_FILE_BASENAME}
-                onChange={(e) => this.setWorkflowFileName(e.currentTarget.value)}
-              />
-              <Form.Control
-                style={{ width: "8ch" }}
-                type="text"
-                readOnly
-                value={this.state.workflowFile.extension}
-              />
-
-              <Form.Control.Feedback style={{ /* minHeight: "2em" */ }} type={this.state.workflowFile.validationErr ? "invalid" : "valid"}>
-                {this.state.workflowFile.validationErr ?? ""}
-              </Form.Control.Feedback>
+            <Form isHorizontal className="pt-2">
+              <FormGroup
+                fieldId={"workflow-file-name"}
+                // eslint-disable-next-line no-nested-ternary
+                validated={this.state.workflowFile.validationErr !== undefined ?
+                  (this.state.workflowFile.validationErr == null ? "success" : "error")
+                  : "default"
+                }
+                helperText={this.state.workflowFile.validationErr}
+                helperTextInvalidIcon={<ExclamationTriangleIcon />}
+              >
+                <TextInput
+                  id={this.fileNameInputId}
+                  style={{ width: "25ch" }}
+                  validated={this.state.workflowFile.validationErr == null ? "success" : "error"}
+                  defaultValue={DEFAULT_WORKFLOW_FILE_BASENAME}
+                  onChange={(value) => this.setWorkflowFileName(value)}
+                />
+                <TextInput isReadOnly
+                  style={{ width: "8ch" }}
+                  type="text"
+                  readOnly
+                  value={this.state.workflowFile.extension}
+                />
+              </FormGroup>
             </Form>
-          </Card.Body>
+          </CardBody>
         </Card>
 
         <DataFetcher type="api" endpoint={ApiEndpoints.User.ImageRegistries} loadingDisplay="card">{
@@ -136,7 +144,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
 
             return (
               <Card>
-                <Card.Title>
+                <CardTitle>
                   <div>
                     Application Settings
                   </div>
@@ -154,8 +162,8 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                       </Button>
                     </div>
                   </div>
-                </Card.Title>
-                <Card.Body>
+                </CardTitle>
+                <CardBody>
                   {
                     (() => {
                       if (!registriesRes.success) {
@@ -178,98 +186,72 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
 
                       return (
                         <React.Fragment>
-                          <Form.Row className="align-items-center">
-                            <Form.Group as={Col} className="col-8">
-                              <Form.Label>
-                                Image Registry
-                              </Form.Label>
-                              <Form.Control id={this.imageRegistrySelectId} as="select"
-                                // isValid={this.state.imageRegistryId != null}
-                                onChange={(e) => {
-                                  this.setState({ imageRegistryId: e.currentTarget.value });
-                                }}
-                              >
-                                <option disabled selected value={undefined}>
-                                  Select an Image Registry
-                                </option>
-                                {
-                                  registriesRes.registries.map((reg) => {
-                                    return (
-                                      <option
-                                        value={reg.id}
-                                        key={reg.id}
-                                        selected={this.state.imageRegistryId === reg.id}
-                                      >
-                                        {reg.username}@{reg.fullPath}
-                                      </option>
-                                    );
-                                  })
-                                }
-                              </Form.Control>
-                              <Form.Text>
-                                An Actions secret called <code>{registriesRes.registryPasswordSecretName}</code> containing
-                                the password for this registry will be created.
-                              </Form.Text>
-                            </Form.Group>
-                          </Form.Row>
+                          <FormGroup
+                            fieldId="registry"
+                            label="Image Registry"
+                            helperText={`An Actions secret called "${registriesRes.registryPasswordSecretName}" containing `
+                              + `the password for this registry will be created.`
+                            }
+                          >
+                            <FormSelect id={this.imageRegistrySelectId} as="select"
+                              // isValid={this.state.imageRegistryId != null}
+                              onChange={(value) => {
+                                this.setState({ imageRegistryId: value });
+                              }}
+                            >
+                              <option disabled selected value={undefined}>
+                                Select an Image Registry
+                              </option>
+                              {
+                                registriesRes.registries.map((reg) => {
+                                  return (
+                                    <option
+                                      value={reg.id}
+                                      key={reg.id}
+                                      selected={this.state.imageRegistryId === reg.id}
+                                    >
+                                      {reg.username}@{reg.fullPath}
+                                    </option>
+                                  );
+                                })
+                              }
+                            </FormSelect>
+                          </FormGroup>
                         </React.Fragment>
                       );
                     })()
                   }
 
-                  <Form.Row>
-                    <Form.Group as={Col} className="col-4">
-                      <Form.Label>
-                        Application Port
-                      </Form.Label>
-                      <Form.Control
-                        type="text"
-                        isValid={validatePort(this.state.port)}
-                        isInvalid={!validatePort(this.state.port)}
-                        value={this.state.port}
-                        onChange={(e) => this.setState({ port: e.currentTarget.value })}
-                      >
-                      </Form.Control>
-                      <Form.Control.Feedback type="invalid">
-                        Port must be a number between 1024 and 65536.
-                      </Form.Control.Feedback>
-                    </Form.Group>
-                  </Form.Row>
+                  <FormGroup
+                    fieldId="port"
+                    label="Application Port"
+                    helperTextInvalid="Port must be a number between 1024 and 65536."
+                  >
+                    <TextInput
+                      validated={validatePort(this.state.port) ? "success" : "error"}
+                      value={this.state.port}
+                      onChange={(value) => this.setState({ port: value })}
+                    />
+                  </FormGroup>
 
-                  <Form.Row>
-                    <Col className="col-4">
-                      <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.Cluster.Root}>{
-                        (clusterRes: ApiResponses.ClusterState) => {
-                          if (!clusterRes.connected) {
-                            return (<></>);
-                          }
-
-                          return (
-                            <Form.Group >
-                              <Form.Label>
-                                OpenShift Project
-                              </Form.Label>
-                              <Form.Control
-                                type="text"
-                                isValid={true}
-                                isInvalid={undefined}
-                                defaultValue={clusterRes.namespace}
-                                readOnly
-                                // value={this.state.port}
-                                // onChange={(e) => this.setState({ port: e.currentTarget.value })}
-                              >
-                              </Form.Control>
-                              <Form.Control.Feedback type="invalid">
-                                Port must be a number between 1024 and 65536.
-                              </Form.Control.Feedback>
-                            </Form.Group>
-                          );
-                        }
+                  <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.Cluster.Root}>{
+                    (clusterRes: ApiResponses.ClusterState) => {
+                      if (!clusterRes.connected) {
+                        return (<></>);
                       }
-                      </DataFetcher>
-                    </Col>
-                  </Form.Row>
-                </Card.Body>
+
+                      return (
+                        <FormGroup fieldId="project" label="OpenShift Project">
+                          <TextInput
+                            defaultValue={clusterRes.namespace}
+                            readOnly
+                          />
+                        </FormGroup>
+                      );
+                    }
+                  }
+                  </DataFetcher>
+                </CardBody>
               </Card>
             );
           }}
@@ -280,7 +262,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
             return (
               <React.Fragment>
                 <Card>
-                  <Card.Title>
+                  <CardTitle>
                     <div>
                       Select repository
                     </div>
@@ -300,8 +282,8 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                         </Button>
                       </div>
                     </div>
-                  </Card.Title>
-                  <Card.Body>
+                  </CardTitle>
+                  <CardBody>
                     <div className="long-content">
                       {
                         reposWithSecrets.repos.map((repo, i) => {
@@ -343,7 +325,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
 
                               <div className="col-1 d-flex align-items-center justify-content-end">
                                 <Button
-                                  variant="light"
+                                  variant="secondary"
                                   title={repo.repo.html_url}
                                 >
                                   <ExternalLink
@@ -372,7 +354,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                           </code> if it exists
                         </FormInputCheck>
                       </div>
-                      <Button size="lg"
+                      <Button isLarge
                         disabled={this.state.repo == null}
                         onClick={async (_e) => {
                           this.setState({ isSubmitting: true, submissionResult: undefined });
@@ -401,7 +383,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                       isSubmitting={this.state.isSubmitting}
                       submissionResult={this.state.submissionResult}
                     />
-                  </Card.Body>
+                  </CardBody>
                 </Card>
               </React.Fragment>
             );
@@ -504,13 +486,13 @@ function SubmissionStatusBanner(props: {
         props.submissionResult.success ? (
           <div className="centers">
             <div className="w-75 btn-line even">
-              <Button variant="info" size="lg">
+              <Button variant="secondary" isLarge>
                 <ExternalLink href={props.submissionResult.secretsUrl}>
                   <BtnBody icon={[ "fab", "github" ]} iconClasses="text-black" text="View Secrets"/>
                 </ExternalLink>
               </Button>
 
-              <Button variant="info" size="lg">
+              <Button variant="secondary" isLarge>
                 <ExternalLink href={props.submissionResult.workflowFileUrl}>
                   <BtnBody icon={[ "fab", "github" ]} iconClasses="text-black" text="View Workflow"/>
                 </ExternalLink>

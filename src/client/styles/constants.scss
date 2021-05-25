@@ -1,22 +1,9 @@
-@forward "~bootstrap/scss/bootstrap";
+@import "~@patternfly/patternfly/sass-utilities/all";
 
-// https://getbootstrap.com/docs/4.0/getting-started/theming/#sass-options
-
-// plug https://getbootstrap.com/docs/4.0/getting-started/theming/#all-colors
-// into
-// https://material.io/design/color/the-color-system.html#tools-for-picking-colors
-// use the 700 for foreground on dark theme
-$primary: #0278ee;
-$info: #127B87;
-// $success: #28a745;
-$success: #208337;
-$success-light: #27a745;
-// $light: #f8f9fa;
-
-$body-bg: #121215;
-$body-fg: white;
-
-$card-bg: #2d2d30;
+// $body-bg: #121215;
+// $body-fg: white;
+$body-bg: $pf-global--BackgroundColor--200;
+$body-fg: $pf-global--Color--100;
 
 @import "~bootstrap/scss/bootstrap";
 
