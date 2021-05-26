@@ -15,14 +15,10 @@ COPY tsconfig.json webpack.config.*.ts .eslintrc.js console-extensions.json ./
 COPY public/ ./public
 COPY src/ ./src
 
-RUN yarn build:plugin
-RUN mv -v build/ plugin/
-
-RUN yarn build:client
+RUN yarn build
+RUN mv -v dist/plugin plugin/
+RUN mv -v dist/server server/
 RUN mv -v build/ client/
-
-RUN yarn build:server
-RUN mv -v build/ server/
 
 COPY README.md ./
 

@@ -7,7 +7,7 @@ export function getSrcPath(relPath: string): string {
 }
 
 export function getOutDir(): string {
-  return path.join(__dirname, "build");
+  return path.join(__dirname, "dist");
 }
 
 const entry = { server: getSrcPath("server/index.ts") };
@@ -22,7 +22,7 @@ export default function getWebpackConfig(env: any, argv: any): webpack.Configura
   const bundleNodeModules = mode === "production";
   console.log(`Bundling node modules ? ${bundleNodeModules}`);
 
-  const outputDir = getOutDir();
+  const outputDir = path.resolve(getOutDir(), "server");
   const outFileName = "[name].js";
   console.log(`Outputting to ${path.join(outputDir, outFileName)} ...`);
 
