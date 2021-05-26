@@ -75,6 +75,38 @@ export default function getWebpackConfig(
             "sass-loader",
           ],
         },
+        {
+          test: /\.css$/i,
+          use: [
+            "style-loader",
+            "css-loader",
+          ],
+        },
+        // https://github.com/patternfly/patternfly-react-seed/blob/master/webpack.common.js
+        {
+          test: /\.(jpg|jpeg|png|gif)$/i,
+          use: [
+            {
+              loader: "url-loader",
+              options: {
+                limit: 5000,
+                outputPath: "images",
+                name: "[name].[ext]",
+              },
+            },
+          ],
+        },
+        {
+          test: /\.(svg|ttf|eot|woff|woff2)$/,
+          use: {
+            loader: "file-loader",
+            options: {
+              limit: 5000,
+              outputPath: "fonts",
+              name: "[name].[ext]",
+            },
+          },
+        },
       ],
     },
     plugins: [

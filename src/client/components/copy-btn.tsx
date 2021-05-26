@@ -1,6 +1,6 @@
 import React from "react";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { Button } from "@patternfly/react-core";;
+import { Button } from "@patternfly/react-core";
 import BtnBody from "./fa-btn-body";
 
 interface CopyBtnProps extends React.HTMLAttributes<HTMLButtonElement> {
