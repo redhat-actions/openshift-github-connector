@@ -13,7 +13,7 @@ import { ExternalLink } from "../components/external-link";
 import { TooltipIcon } from "../components/tooltip-icon";
 import ApiResponses from "../../common/api-responses";
 import Banner from "../components/banner";
-import BtnBody from "../components/fa-btn-body";
+import BtnBody from "../components/btn-body";
 import { fetchJSON } from "../util/client-util";
 import ApiEndpoints from "../../common/api-endpoints";
 import ApiRequests from "../../common/api-requests";

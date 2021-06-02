@@ -10,7 +10,7 @@ import ApiEndpoints from "../../../../common/api-endpoints";
 import ApiRequests from "../../../../common/api-requests";
 import Banner from "../../../components/banner";
 import { ExternalLink } from "../../../components/external-link";
-import BtnBody from "../../../components/fa-btn-body";
+import BtnBody from "../../../components/btn-body";
 import FormInputCheck from "../../../components/form-input-check";
 import { getWindowLocationNoPath, fetchJSON } from "../../../util/client-util";
 import { getGitHubAppManifest } from "../../../util/github-app-manifest";

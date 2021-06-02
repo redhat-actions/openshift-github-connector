@@ -14,7 +14,7 @@ import { GitHubRepoId } from "../../common/types/gh-types";
 import Banner from "../components/banner";
 import DataFetcher from "../components/data-fetcher";
 import { ExternalLink } from "../components/external-link";
-import BtnBody from "../components/fa-btn-body";
+import BtnBody from "../components/btn-body";
 import FormInputCheck from "../components/form-input-check";
 import { fetchJSON } from "../util/client-util";
 import ClientPages from "./client-pages";
@@ -62,8 +62,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
     this.setWorkflowFileName(DEFAULT_WORKFLOW_FILE_BASENAME);
   }
 
-  public render(): JSX.Element {
-
+  render(): JSX.Element {
     return (
       <React.Fragment>
         <Card>

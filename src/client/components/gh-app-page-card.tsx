@@ -6,7 +6,7 @@ import {
 } from "@patternfly/react-core";
 
 import { ExternalLink } from "./external-link";
-import BtnBody from "./fa-btn-body";
+import BtnBody from "./btn-body";
 
 export default function appPageCard(props: {
     header: string,

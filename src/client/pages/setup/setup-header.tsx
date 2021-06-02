@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button } from "@patternfly/react-core";
 
 import ClientPages from "../client-pages";
-import BtnBody from "../../components/fa-btn-body";
+import BtnBody from "../../components/btn-body";
 import { getSearchParam } from "../../util/client-util";
 
 type SetupPageProps = {
@@ -40,6 +40,8 @@ export function getSetupSteps() {
 
 export default function SetupPageHeader(props: SetupPageProps): JSX.Element {
 
+  const history = useHistory();
+
   if (!isSetup()) {
     return (<></>);
   }
@@ -53,8 +55,6 @@ export default function SetupPageHeader(props: SetupPageProps): JSX.Element {
       </span>
     );
   }
-
-  const history = useHistory();
 
   // const nextBtnText = props.pageIndex === setupSteps.length - 1 ? "Finish" : "Next";
   const nextBtnText = "Next";
@@ -115,11 +115,9 @@ export default function SetupPageHeader(props: SetupPageProps): JSX.Element {
                 history.push(nextPage);
               }}
             >
-              <a>
-                <div className="d-flex align-items-center">
-                  <BtnBody icon="arrow-right" iconPosition="right" text={nextBtnText}/>
-                </div>
-              </a>
+              <div className="d-flex align-items-center">
+                <BtnBody icon="arrow-right" iconPosition="right" text={nextBtnText}/>
+              </div>
             </Button>
             : ""}
         </div>

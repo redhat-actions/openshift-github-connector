@@ -4,7 +4,7 @@ import { Table } from "@patternfly/react-table";
 import ApiEndpoints from "../../common/api-endpoints";
 import ApiResponses from "../../common/api-responses";
 import DataFetcher from "../components/data-fetcher";
-import BtnBody from "../components/fa-btn-body";
+import BtnBody from "../components/btn-body";
 import { fetchJSON } from "../util/client-util";
 
 export default function ClusterPage(): JSX.Element {

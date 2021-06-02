@@ -38,11 +38,7 @@ export default function BtnBody(props: {
       {iconPosition === "left" ? iconElement : ""}
       {iconPosition === "left" ? "" : loadingElement}
       {
-        props.text
-          ? <span className="">
-            {props.text}
-          </span>
-          : ""
+        props.text ?? ""
       }
       {iconPosition === "right" ? iconElement : ""}
       {iconPosition === "right" ? "" : loadingElement}

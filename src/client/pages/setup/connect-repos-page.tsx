@@ -19,7 +19,7 @@ import ApiResponses from "../../../common/api-responses";
 import ApiRequests from "../../../common/api-requests";
 import { ExternalLink } from "../../components/external-link";
 import SetupPageHeader, { SETUP_QUERYPARAM } from "./setup-header";
-import BtnBody from "../../components/fa-btn-body";
+import BtnBody from "../../components/btn-body";
 import { getFriendlyDateTime } from "../../../common/common-util";
 import { fetchJSON, getSearchParam } from "../../util/client-util";
 import Banner from "../../components/banner";
@@ -60,7 +60,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
     };
   }
 
-  public async componentDidMount() {
+  async componentDidMount() {
     await this.loadReposSecrets();
   }
 
@@ -119,7 +119,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
   }
 
   // eslint-disable-next-line @typescript-eslint/member-ordering
-  public render(): JSX.Element {
+  render(): JSX.Element {
     return (
       <React.Fragment>
         {

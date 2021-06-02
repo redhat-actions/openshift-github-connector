@@ -11,7 +11,7 @@ import Banner from "../../../components/banner";
 import DataFetcher from "../../../components/data-fetcher";
 import { ExternalLink } from "../../../components/external-link";
 import { getFriendlyDateTime } from "../../../../common/common-util";
-import BtnBody from "../../../components/fa-btn-body";
+import BtnBody from "../../../components/btn-body";
 
 export const USE_EXISTING_TITLE = "Use Existing App";
 

@@ -5,7 +5,7 @@ import classNames from "classnames";
 import AppPageCard from "../components/gh-app-page-card";
 import DataFetcher from "../components/data-fetcher";
 import ApiEndpoints from "../../common/api-endpoints";
-import BtnBody from "../components/fa-btn-body";
+import BtnBody from "../components/btn-body";
 import ApiResponses from "../../common/api-responses";
 import ClientPages from "./client-pages";
 import { fetchJSON, getSearchParam } from "../util/client-util";
@@ -43,13 +43,14 @@ function GitHubAppPageBody({
 }: {
   data: ApiResponses.UserAppState, reload: () => Promise<void>, isSetup: boolean,
 }): JSX.Element {
+
+  const [ viewType, setViewType ] = useState<ViewType>();
+
   if (!data.success) {
     return (
       <NoApp />
     );
   }
-
-  const [ viewType, setViewType ] = useState<ViewType>();
 
   if (!viewType) {
     if (data.installed) {
