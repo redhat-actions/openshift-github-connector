@@ -3,11 +3,15 @@
 apiVersion: console.openshift.io/v1alpha1
 kind: ConsolePlugin
 metadata:
-  name: "tims-plugin"
+  name: "github-connector"
+  labels:
+    {{- toYaml .Values.commonLabels | nindent 4 }}
 spec:
-  displayName: "Tim's sweet plugin"
+  displayName: "GitHub Connector"
   service:
     name: {{ .Values.pluginServiceName }}
     namespace: {{ .Release.Namespace }}
     port: 80
     basePath: '/'
+
+# also see ConsoleLink in routes.yaml

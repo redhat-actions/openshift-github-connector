@@ -5,7 +5,11 @@
 $body-bg: $pf-global--BackgroundColor--200;
 $body-fg: $pf-global--Color--100;
 
-@import "~bootstrap/scss/bootstrap";
+// @import "~bootstrap/scss/bootstrap";
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/mixins";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/utilities";
 
 /* https://www.redhat.com/en/about/brand/standards/color */
 $rh-red: #e00;

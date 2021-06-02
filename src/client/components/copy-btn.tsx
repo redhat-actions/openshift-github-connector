@@ -22,7 +22,7 @@ export default class CopyToClipboardBtn extends React.Component<CopyBtnProps, Co
     };
   }
 
-  render() {
+  override render() {
     let text: string;
     let icon: IconProp;
     if (this.state.copyState === "success") {

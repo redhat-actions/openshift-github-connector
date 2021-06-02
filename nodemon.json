@@ -1,6 +1,7 @@
 {
     "ignore": [
-        "build/plugin"
+        "dist/plugin",
+        "webpack.config*"
     ],
     "events": {
     },

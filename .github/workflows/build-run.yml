@@ -12,6 +12,12 @@ jobs:
         with:
           node-version: 14
 
+      - name: Increase max watches
+        run: |
+          set -ex
+          echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf
+          sudo sysctl -p
+
       - uses: actions/checkout@v2
 
       - uses: bahmutov/npm-install@v1
@@ -28,11 +34,12 @@ jobs:
         shell: bash
         run: |
           set -eEx
-          nohup yarn dev > out.log 2>&1 &
+          nohup yarn dev:all > out.log 2>&1 &
           dev_pid=$!
           echo "dev_pid=$dev_pid" >> $GITHUB_ENV
 
           yarn wait-on -l tcp:3000 -t 60000
+          yarn wait-on -l tcp:3001 -t 60000
           yarn wait-on -l tcp:3003 -t 60000
 
       - name: Test
@@ -40,6 +47,7 @@ jobs:
         run: |
           set -eEx
           curl -sSf http://localhost:3000
+          curl -sSf http://localhost:3001
           curl -sSf http://localhost:3003
 
       - name: Stop

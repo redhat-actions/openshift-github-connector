@@ -49,7 +49,7 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
     return { loadingError: error };
   }
 
-  async componentDidMount(): Promise<void> {
+  override async componentDidMount(): Promise<void> {
     await this.load();
   }
 
@@ -86,7 +86,7 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
     }
   }
 
-  public render() {
+  override render() {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (this.state == null || !this.state.loaded) {
       const loadingDisplayType = this.props.loadingDisplay ?? "text";

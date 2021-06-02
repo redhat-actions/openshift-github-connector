@@ -5,15 +5,15 @@
       "id": "github",
       "perspective": "dev",
       "name": "GitHub",
-      "href": "/github"
+      "href": "/github-connector"
     }
   },
   {
     "type": "console.page/route",
     "properties": {
-      "component": { "$codeRef": "welcome" },
+      "component": { "$codeRef": "app" },
       "exact": false,
-      "path": "/github"
+      "path": "/github-connector"
     }
   }
 ]

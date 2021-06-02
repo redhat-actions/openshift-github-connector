@@ -1,4 +1,7 @@
 import webpack from "webpack5";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import TerserPlugin from "terser-webpack-plugin";
 import path from "path";
 import nodeExternals from "webpack-node-externals";
 
@@ -17,9 +20,10 @@ export default function getWebpackConfig(env: any, argv: any): webpack.Configura
   console.log(`Webpack v${webpack.version}`);
 
   const mode = argv.mode === "development" ? "development" : "production";
+  const isProd = mode === "production";
   console.log(`Mode: ${mode}`);
 
-  const bundleNodeModules = mode === "production";
+  const bundleNodeModules = isProd;
   console.log(`Bundling node modules ? ${bundleNodeModules}`);
 
   const outputDir = path.resolve(getOutDir(), "server");
@@ -30,7 +34,7 @@ export default function getWebpackConfig(env: any, argv: any): webpack.Configura
     mode,
     entry,
     target: "node",
-    devtool: "inline-source-map",
+    devtool: isProd ? "source-map" : "eval-source-map",
     output: {
       path: outputDir,
       filename: outFileName,
@@ -72,6 +76,12 @@ export default function getWebpackConfig(env: any, argv: any): webpack.Configura
           ],
         },
       ],
+    },
+    optimization: {
+      chunkIds: isProd ? "deterministic" : "named",
+      minimize: isProd,
+      // https://github.com/terser/terser/issues/412
+      minimizer: [ new TerserPlugin({ terserOptions: { ecma: 8 } }) ],
     },
   };
 }

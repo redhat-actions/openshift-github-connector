@@ -11,15 +11,15 @@ export default function WelcomePage(): JSX.Element {
   return (
     <React.Fragment>
       <SetupPageHeader pageIndex={0} canProceed={true} />
-      <Card isLarge className="p-3">
+      <Card isLarge>
         <CardTitle>
-          <h2>Welcome to the OpenShift GitHub Actions Connector</h2>
+          Welcome to the OpenShift GitHub Actions Connector
         </CardTitle>
         <CardBody>
-          <h5 className="my-3">
+          <p className="b">
             This wizard will walk you through connecting this OpenShift cluster to your GitHub Actions.
-          </h5>
-          <ul className="bullets-disc">
+          </p>
+          <ul>
             <li>Install and Configure OpenShift Clusters for use with Red Hat Actions</li>
             <li>Add and configure Red Hat actions in your repositories</li>
             <li>Manage OpenShift self-hosted Runners</li>
@@ -64,7 +64,7 @@ export default function WelcomePage(): JSX.Element {
         <CardBody>
           <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root} loadingDisplay="card-body">
             {(data: ApiResponses.ClusterState) => (
-              <div className="">
+              <>
                 <p>
                   <b>Namespace:&nbsp;</b>
                   <span className={data.connected ? "text-success" : "text-danger"}>
@@ -83,7 +83,7 @@ export default function WelcomePage(): JSX.Element {
                     {data.connected ? data.serviceAccountName : "Error"}
                   </span>
                 </p>
-              </div>
+              </>
             )}
           </DataFetcher>
         </CardBody>

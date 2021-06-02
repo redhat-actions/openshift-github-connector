@@ -11,6 +11,8 @@ import HomePage from "./home-page";
 import SetupFinishedPage from "./setup/setup-completion-page";
 import AddWorkflowsPage from "./add-workflows-page";
 import ImageRegistriesPage from "./image-registries-page";
+import { getSetupSteps } from "./setup/setup-header";
+import { isInOpenShiftConsole } from "../util/client-util";
 
 export class ClientPage extends UrlPath {
   constructor(
@@ -34,9 +36,11 @@ export class ClientPage extends UrlPath {
   }
 }
 
-const Home = new ClientPage(undefined, "/", HomePage);
+const appRootPath = isInOpenShiftConsole() ? "/github-connector" : "/";
 
-const Setup = new ClientPage(Home, "/setup", () => (<Redirect to={SetupWelcome.path} />));
+const Home = new ClientPage(undefined, appRootPath, HomePage);
+
+const Setup = new ClientPage(Home, "/setup", () => (<Redirect to={getSetupSteps()[0].path} />));
 const SetupWelcome = new ClientPage(Setup, "/welcome", SetupWelcomePage);
 const SetupCreateApp = new ClientPage(Setup, "/app", SetupAppPage);
 const SetupCreatingApp = new ClientPage(Setup, "/creating-app", PostCreateAppPages.CreatingAppPage);

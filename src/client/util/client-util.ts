@@ -111,3 +111,11 @@ export async function fetchJSON<
 export function getWindowLocationNoPath(): string {
   return window.location.protocol + "//" + window.location.host;
 }
+
+export function isInOpenShiftConsole(): boolean {
+  return process.env.IN_OPENSHIFT_CONSOLE?.toString() === "true";
+}
+
+export function getConsoleModifierClass(): string {
+  return isInOpenShiftConsole() ? "is-console" : "is-standalone";     // "console" class is already used by bootstrap
+}

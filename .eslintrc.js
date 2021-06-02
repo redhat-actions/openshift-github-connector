@@ -1,7 +1,11 @@
 module.exports = {
   extends: [
     "@redhat-actions/eslint-config",
-    "plugin:react/recommended"
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended"
+  ],
+  plugins: [
+    "react", "react-hooks"
   ],
   ignorePatterns: [
     // "webpack.config*.[tj]s",
@@ -21,6 +25,7 @@ module.exports = {
     project: [
       "./tsconfig.json",
       "./src/server/tsconfig.json",
+      "./webpack.config*.[tj]s"
     ],
   },
   rules: {

@@ -60,7 +60,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
     };
   }
 
-  async componentDidMount() {
+  override async componentDidMount() {
     await this.loadReposSecrets();
   }
 
@@ -119,7 +119,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
   }
 
   // eslint-disable-next-line @typescript-eslint/member-ordering
-  render(): JSX.Element {
+  override render(): JSX.Element {
     return (
       <React.Fragment>
         {

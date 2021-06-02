@@ -62,7 +62,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
     this.setWorkflowFileName(DEFAULT_WORKFLOW_FILE_BASENAME);
   }
 
-  render(): JSX.Element {
+  override render(): JSX.Element {
     return (
       <React.Fragment>
         <Card>

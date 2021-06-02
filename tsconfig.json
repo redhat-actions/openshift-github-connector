@@ -23,12 +23,15 @@
     // "noUnusedLocals": true,
     // "noUnusedParameters": true,
     "noImplicitReturns": true,
+    "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true
   },
   "include": [
-    "src",
-    "webpack.config.*.ts"
+    "./src",
+    "./webpack.config.*",
+    // "console-extensions.json",
+    "./package.json"
   ],
   "exclude": [
     "src/server"

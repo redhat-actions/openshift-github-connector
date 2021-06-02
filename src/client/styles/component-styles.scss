@@ -32,7 +32,7 @@
 $card-border-radius: 0.5rem;
 
 .card, .pf-c-card {
-  --pf-c-card--BoxShadow: 0.1rem 0.1rem 0.1rem #888 !important;
+  // --pf-c-card--BoxShadow: 0.1rem 0.1rem 0.1rem #888 !important;
 
   border-radius: $card-border-radius;
   // box-shadow: $card-box-shadow;
@@ -52,7 +52,7 @@ $card-limit-padding: 1rem 1.25rem;
 
 .card-title, .pf-c-card__title {
   border-bottom: $card-border;
-  padding: $card-limit-padding;
+  // padding: $card-limit-padding;
 
   display: flex;
   align-items: center;
@@ -68,7 +68,7 @@ $card-limit-padding: 1rem 1.25rem;
 
 .card-footer, .pf-c-card__footer {
   border-top: $card-border;
-  padding: $card-limit-padding;
+  // padding: $card-limit-padding;
   margin: 0;
 }
 

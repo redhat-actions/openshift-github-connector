@@ -51,6 +51,8 @@ spec:
 
 ---
 
+# the ConsoleLink is in this file because it needs to know the frontend host
+
 apiVersion: console.openshift.io/v1
 kind: ConsoleLink
 metadata:

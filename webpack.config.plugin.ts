@@ -1,12 +1,13 @@
 import webpack from "webpack5";
 import wds from "webpack-dev-server";
 import path from "path";
-import { ConsoleRemotePlugin } from "@openshift-console/dynamic-plugin-sdk/lib/webpack";
-
+import { ConsoleRemotePlugin } from "@tetchel/dynamic-plugin-sdk/lib/webpack/ConsoleRemotePlugin";
 // eslint-disable-next-line import/extensions
-import { getOutDir, getSrcPath } from "./webpack.config.server";
+import { getOutDir } from "./webpack.config.server";
+// eslint-disable-next-line import/extensions
+import Package from "./package.json";
 
-const entry = { plugin: getSrcPath("client/app.tsx") };
+// const entry = { plugin: path.relative(__dirname, getSrcPath("client/app.tsx")) };
 
 export default function getWebpackConfig(
   env: any, argv: any
@@ -16,6 +17,7 @@ export default function getWebpackConfig(
   const isProd = mode === "production";
 
   const outFilename = isProd ? "[name]-bundle-[fullhash].min.js" : "[name].js";
+  // const outFilename = isProd ? "[name]-bundle-[fullhash].min.js" : "[name].js";
   const outChunkFilename = isProd ? "[name]-chunk-[chunkhash].min.js" : "[name]-chunk.js";
   const outputDir = path.resolve(getOutDir(), "plugin");
 
@@ -27,6 +29,7 @@ export default function getWebpackConfig(
     host: "localhost",
     port: 3001,
     publicPath: "/",
+    writeToDisk: true,
   };
 
   console.log(`Webpack v${webpack.version}`);
@@ -35,12 +38,16 @@ export default function getWebpackConfig(
 
   if (Object.keys(devServer).length > 0) {
     console.log(`Dev server configured at ${devServer.host}:${devServer.port}${devServer.publicPath}`);
+    console.log(
+      `Connect plugin to cluster by running from 'console' directory: `
+      + `./bin/bridge -plugins ${Package.consolePlugin.name}=http://${devServer.host}:${devServer.port}`
+    );
   }
 
   return {
     mode,
-    entry,
-    devtool: "inline-source-map",
+    // entry,
+    devtool: isProd ? "source-map" : "eval-source-map",
     devServer,
     output: {
       path: outputDir,
@@ -107,11 +114,20 @@ export default function getWebpackConfig(
             },
           },
         },
+        {
+          // This prevents loading the patternfly base.css in the console, which causes the console styling to screw up.
+          test: /patternfly\/react-core\/dist\/styles\/base.css/,
+          use: {
+            loader: "null-loader",
+          },
+        },
       ],
     },
     plugins: [
       new ConsoleRemotePlugin() as unknown as webpack.WebpackPluginInstance,
-      // new ConsoleRemotePlugin(),
+      new webpack.EnvironmentPlugin({
+        IN_OPENSHIFT_CONSOLE: true,
+      }),
     ],
     optimization: {
       chunkIds: isProd ? "deterministic" : "named",

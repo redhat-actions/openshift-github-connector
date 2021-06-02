@@ -1,6 +1,6 @@
 {
   "name": "openshift-actions-connector",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -20,15 +20,16 @@
     "clean": "rm -rf build/",
     "dev:client": "react-scripts start",
     "dev:plugin:webpack": "yarn wds --config webpack.config.plugin.ts --mode=development",
-    "dev:plugin": "concurrently -p name -c 'magenta,magenta,yellow' -n 'srv,srv,plugin' 'yarn dev:server:webpack' 'yarn dev:server:nodemon' 'yarn dev:plugin:webpack'",
-    "dev:server": "concurrently -p name -c 'magenta,magenta' -n 'srv,srv' 'yarn dev:server:webpack' 'yarn dev:server:nodemon'",
+    "dev:plugin": "concurrently -k -p name -c 'magenta,magenta,yellow' -n 'server,server,plugin' 'yarn dev:server:webpack' 'yarn dev:server:nodemon' 'yarn dev:plugin:webpack'",
     "dev:server:webpack": "yarn webpack --config webpack.config.server.ts --watch --mode=development",
-    "dev:server:nodemon": "rm -f build/server.js && wait-on -l build/server.js && nodemon --inspect build/server.js",
-    "dev": "concurrently -p name -c 'magenta,magenta,cyan' -n 'srv,srv,ui' 'yarn dev:server:webpack' 'yarn dev:server:nodemon' 'yarn dev:client'",
+    "dev:server:nodemon": "rm -f dist/server/server.js && wait-on -l dist/server/server.js && nodemon --inspect dist/server/server.js",
+    "dev:server": "concurrently -k -p name -c 'magenta,magenta' -n 'server,server' 'yarn dev:server:webpack' 'yarn dev:server:nodemon'",
+    "dev": "concurrently -k -p name -c 'magenta,magenta,cyan' -n 'server,server,client' 'yarn dev:server:webpack' 'yarn dev:server:nodemon' 'yarn dev:client'",
+    "dev:all": "concurrently -k -p name -c 'magenta,magenta,cyan,yellow' -n 'server,server,client,plugin' 'yarn dev:server:webpack' 'yarn dev:server:nodemon' 'yarn dev:client' 'yarn:dev:plugin:webpack'",
     "build:client": "react-scripts build",
     "build:server": "yarn webpack --config webpack.config.server.ts --mode=production",
     "build:plugin": "yarn webpack --config webpack.config.plugin.ts --mode=production",
-    "build": "yarn clean && concurrently -p name -c 'yellow,magenta,cyan' -n 'ui,srv,plugin', 'yarn build:client' 'yarn build:server' 'yarn build:plugin'",
+    "build": "yarn clean && concurrently --kill-others-on-fail -p name -c 'cyan,magenta,yellow' -n 'client,server,plugin', 'yarn build:client' 'yarn build:server' 'yarn build:plugin'",
     "container-build": "buildah bud --layers -f containerize/Containerfile --build-arg VCS_REF=$(git rev-parse HEAD | cut -c -7) -t openshift-actions-connector:latest .",
     "container-build:dev": "buildah bud --layers -f containerize/dev/Containerfile.dev -t openshift-actions-connector-dev:latest",
     "container-run": "podman run --rm --name openshift-actions-connector -p 3000:3000 -p 3003:3003 openshift-actions-connector:latest",
@@ -78,8 +79,8 @@
     "yaml": "^1.10.2"
   },
   "devDependencies": {
-    "@openshift-console/dynamic-plugin-sdk": "https://github.com/tetchel/console/raw/tim-test/frontend/packages/console-dynamic-plugin-sdk/%40openshift-console-dynamic-plugin-sdk-0.0.0-alpha9991.tar.gz",
     "@redhat-actions/eslint-config": "^1.3.1",
+    "@tetchel/dynamic-plugin-sdk": "^0.0.0-alpha22",
     "@types/cookie-parser": "^1.4.2",
     "@types/express": "^4.17.11",
     "@types/express-session": "^1.17.3",
@@ -96,24 +97,27 @@
     "@types/webpack-node-externals": "^2.5.1",
     "@typescript-eslint/eslint-plugin": "^4.17.0",
     "@typescript-eslint/parser": "^4.17.0",
-    "concurrently": "^6.0.0",
+    "concurrently": "^6.2.0",
     "css-loader": "^5.2.4",
+    "encoding": "^0.1.13",
     "eslint": "^7.21.0",
     "eslint-plugin-react": "^7.22.0",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "file-loader": "^6.2.0",
     "nodemon": "^2.0.7",
+    "null-loader": "^4.0.1",
     "react-scripts": "^4.0.3",
-    "sass-loader": "^11.1.1",
+    "sass-loader": "^12.0.0",
     "style-loader": "^2.0.0",
-    "ts-loader": "^8.0.18",
-    "ts-node": "^9.1.1",
-    "typescript": "^4.2.3",
+    "ts-loader": "^8",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.3.2",
     "url-loader": "^4.1.1",
     "wait-on": "^5.3.0",
     "webpack": "~4.44",
     "webpack-cli": "^4.5.0",
     "webpack-node-externals": "^3.0.0",
-    "webpack5": "npm:webpack@^5"
+    "webpack5": "npm:webpack@5.0.0-beta.16"
   },
   "browserslist": {
     "production": [
@@ -128,12 +132,12 @@
     ]
   },
   "consolePlugin": {
-    "name": "tims-plugin",
+    "name": "github-connector",
     "version": "0.1.0",
-    "displayName": "Tim's amazing plugin",
-    "description": "Tim's really amazing plugin",
+    "displayName": "OpenShift GitHub Connector",
+    "description": "Connect your OpenShift cluster to GitHub to enable integrations",
     "exposedModules": {
-      "welcome": "./src/client/pages/setup/welcome-page.tsx"
+      "app": "./src/client/app.tsx"
     },
     "dependencies": {
       "@console/pluginAPI": "*"

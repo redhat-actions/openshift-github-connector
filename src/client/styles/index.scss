@@ -15,9 +15,16 @@ html, body {
 
 main {
   padding: c.$main-vertical-padding 0;
-  min-width: c.$breakpoint-sm;
-  width: 80%;
-  max-width: c.$breakpoint-lg;
+
+  &.is-standalone {
+    min-width: c.$breakpoint-sm;
+    width: 80%;
+    max-width: c.$breakpoint-lg;
+  }
+
+  &.is-console {
+    width: 95%;
+  }
 }
 
 a {
