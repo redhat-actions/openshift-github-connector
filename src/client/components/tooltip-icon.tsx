@@ -1,11 +1,11 @@
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip, TooltipPosition } from "@patternfly/react-core";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import classNames from "classnames";
+import { QuestionCircleIcon } from "@patternfly/react-icons";
+import { IconElement } from "../util/icons";
 
 interface TooltipProps {
-  icon?: IconProp,
+  icon?: IconElement,
   iconClasses?: string,
   position?: TooltipPosition,
 
@@ -18,7 +18,7 @@ export function TooltipIcon(props: TooltipProps) {
   // const id = "help-popover" + uuid();
 
   const position = props.position ?? "top";
-  const icon = props.icon ?? "question-circle";
+  const Icon = props.icon ?? QuestionCircleIcon;
 
   return (
     <Tooltip
@@ -30,7 +30,7 @@ export function TooltipIcon(props: TooltipProps) {
       }
       position={position}
     >
-      <FontAwesomeIcon icon={icon} className={classNames("mx-3", props.iconClasses)} size="lg" />
+      <Icon className={classNames("mx-3", props.iconClasses)} size="lg" />
     </Tooltip>
   );
 }

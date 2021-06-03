@@ -12,6 +12,7 @@ import DataFetcher from "../../../components/data-fetcher";
 import { ExternalLink } from "../../../components/external-link";
 import { getFriendlyDateTime } from "../../../../common/common-util";
 import BtnBody from "../../../components/btn-body";
+import { CommonIcons } from "../../../util/icons";
 
 export const USE_EXISTING_TITLE = "Use Existing App";
 
@@ -94,7 +95,7 @@ function InstallAppSection({ selectedApp }: { selectedApp: ApiResponses.Existing
   const btnText = `Install ${selectedApp.name}`;
 
   const btnBody = (
-    <BtnBody text={btnText} icon={[ "fab", "github" ]} iconClasses="text-black" isLoading={isLoading}/>
+    <BtnBody text={btnText} icon={CommonIcons.GitHub} iconClasses="text-black" isLoading={isLoading}/>
   );
 
   // if (props.selectedApp == null) {

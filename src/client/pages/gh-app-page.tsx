@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@patternfly/react-core";
 import classNames from "classnames";
 
+import { BookIcon } from "@patternfly/react-icons";
 import AppPageCard from "../components/gh-app-page-card";
 import DataFetcher from "../components/data-fetcher";
 import ApiEndpoints from "../../common/api-endpoints";
@@ -11,9 +12,10 @@ import ClientPages from "./client-pages";
 import { fetchJSON, getSearchParam } from "../util/client-util";
 import SetupPageHeader, { SETUP_QUERYPARAM } from "./setup/setup-header";
 import { ExternalLink } from "../components/external-link";
+import { CommonIcons } from "../util/icons";
 
-const DOCS_ICON = "book";
-const EDIT_ICON = "cog";
+const DOCS_ICON = BookIcon;
+const EDIT_ICON = CommonIcons.Configure;
 
 type ViewType = "owner" | "user";
 
@@ -80,10 +82,10 @@ function GitHubAppPageBody({
               await reload();
             }
           }>
-            <BtnBody icon="times" text="Unbind"/>
+            <BtnBody icon={CommonIcons.Delete} text="Unbind"/>
           </Button>
           <Button onClick={() => reload()}>
-            <BtnBody icon="sync-alt" text="Refresh"/>
+            <BtnBody icon={CommonIcons.Reload} text="Reload"/>
           </Button>
         </div>
       </div>

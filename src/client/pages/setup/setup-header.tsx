@@ -1,8 +1,8 @@
 import classNames from "classnames";
 import { Link, useHistory } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button } from "@patternfly/react-core";
 
+import { ArrowRightIcon, CheckCircleIcon } from "@patternfly/react-icons";
 import ClientPages from "../client-pages";
 import BtnBody from "../../components/btn-body";
 import { getSearchParam } from "../../util/client-util";
@@ -83,7 +83,7 @@ export default function SetupPageHeader(props: SetupPageProps): JSX.Element {
               <Link to={step.path} key={i} className={classNames("setup-step", stepType)}>
                 <div className="mb-2 d-flex justify-content-center">
                   <div className={`setup-step-circle ${stepType}`}>
-                    {stepType === "passed" ? <FontAwesomeIcon icon="check-circle"/> : (i + 1).toString()}
+                    {stepType === "passed" ? <CheckCircleIcon /> : (i + 1).toString()}
                   </div>
                 </div>
                 <span className={classNames({ b: isCurrentStep })}>{step.title}</span>
@@ -116,7 +116,7 @@ export default function SetupPageHeader(props: SetupPageProps): JSX.Element {
               }}
             >
               <div className="d-flex align-items-center">
-                <BtnBody icon="arrow-right" iconPosition="right" text={nextBtnText}/>
+                <BtnBody icon={ArrowRightIcon} iconPosition="right" text={nextBtnText}/>
               </div>
             </Button>
             : ""}

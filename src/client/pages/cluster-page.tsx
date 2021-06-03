@@ -6,6 +6,7 @@ import ApiResponses from "../../common/api-responses";
 import DataFetcher from "../components/data-fetcher";
 import BtnBody from "../components/btn-body";
 import { fetchJSON } from "../util/client-util";
+import { CommonIcons } from "../util/icons";
 
 export default function ClusterPage(): JSX.Element {
   return (
@@ -17,7 +18,7 @@ export default function ClusterPage(): JSX.Element {
           await fetchJSON("PUT", ApiEndpoints.Cluster.Root.path);
           window.location.reload();
         }}>
-          <BtnBody icon="sync-alt" text="Refresh" />
+          <BtnBody icon={CommonIcons.Reload} text="Reload" />
         </Button>
       </h1>
       <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root} loadingDisplay="spinner">{

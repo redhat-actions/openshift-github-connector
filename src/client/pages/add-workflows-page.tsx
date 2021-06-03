@@ -1,10 +1,11 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
 import React from "react";
 import {
   Button, Card, CardTitle, CardBody, Form, FormGroup, TextInput, FormSelect,
 } from "@patternfly/react-core";
-import { ExclamationTriangleIcon } from "@patternfly/react-icons";
+import {
+  BookOpenIcon, CogIcon, ExclamationTriangleIcon, GithubIcon, PlusIcon, SyncAltIcon, YoutubeIcon,
+} from "@patternfly/react-icons";
 import { Link } from "react-router-dom";
 import ApiEndpoints from "../../common/api-endpoints";
 import ApiRequests from "../../common/api-requests";
@@ -18,6 +19,7 @@ import BtnBody from "../components/btn-body";
 import FormInputCheck from "../components/form-input-check";
 import { fetchJSON } from "../util/client-util";
 import ClientPages from "./client-pages";
+import { CommonIcons } from "../util/icons";
 
 const DEFAULT_WORKFLOW_FILE_BASENAME = "openshift";
 const WORKFLOW_FILE_EXTENSION = ".yml";
@@ -80,19 +82,19 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
             <ul className="no-bullets">
               <li>
                 <ExternalLink href={STARTER_WORKFLOW.htmlFile}>
-                  <FontAwesomeIcon fixedWidth icon={[ "fab", "github" ]} className="mr-2 text-light" />
+                  <GithubIcon className="mr-2 text-light" />
                   View it on GitHub
                 </ExternalLink>
               </li>
               <li>
                 <ExternalLink href={STARTER_WORKFLOW.blog}>
-                  <FontAwesomeIcon fixedWidth icon="book-open" className="mr-2 text-light" />
+                  <BookOpenIcon className="mr-2 text-light" />
                   Read the blog
                 </ExternalLink>
               </li>
               <li>
                 <ExternalLink href={STARTER_WORKFLOW.youtube}>
-                  <FontAwesomeIcon fixedWidth icon={[ "fab", "youtube" ]} className="mr-2 text-light" />
+                  <YoutubeIcon className="mr-2 text-light"/>
                   Watch the video
                 </ExternalLink>
               </li>
@@ -151,13 +153,13 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                     <div className="btn-line">
                       <Button variant="primary">
                         <Link to={ClientPages.ImageRegistries.path}>
-                          <BtnBody icon="cog" text="Edit Image Registries" />
+                          <BtnBody icon={CommonIcons.Configure} text="Edit Image Registries" />
                         </Link>
                       </Button>
                       <Button variant="primary"
                         onClick={reload}
                       >
-                        <BtnBody icon="sync-alt" text="Reload"/>
+                        <BtnBody icon={CommonIcons.Reload} text="Reload"/>
                       </Button>
                     </div>
                   </div>
@@ -271,13 +273,13 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                           <ExternalLink
                             href={reposWithSecrets.urls.installationSettings}
                           >
-                            <BtnBody icon="cog" text="Edit Installation" />
+                            <BtnBody icon={CogIcon} text="Edit Installation" />
                           </ExternalLink>
                         </Button>
                         <Button variant="primary"
                           onClick={reload}
                         >
-                          <BtnBody icon="sync-alt" text="Reload"/>
+                          <BtnBody icon={SyncAltIcon} text="Reload"/>
                         </Button>
                       </div>
                     </div>
@@ -317,7 +319,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
 
                               { repo.hasClusterSecrets ? "" :
                                 <div className="col-4 centers">
-                                  <FontAwesomeIcon className="text-warning mr-2" fixedWidth icon="exclamation-triangle" />
+                                  <ExclamationTriangleIcon className="text-warning mr-2" />
                                   Missing cluster secrets
                                 </div>
                               }
@@ -330,7 +332,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                                   <ExternalLink
                                     href={repo.repo.html_url}
                                   >
-                                    <BtnBody icon={[ "fab", "github" ]} />
+                                    <BtnBody icon={CommonIcons.GitHub} />
                                   </ExternalLink>
                                 </Button>
                               </div>
@@ -371,7 +373,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                           }
                         }}>
                         <BtnBody
-                          icon="plus" text="Create Workflow"
+                          icon={PlusIcon} text="Create Workflow"
                           title={this.state.repo == null ? "Select a repository to proceed" : "Create Workflow"}
                         />
                       </Button>
@@ -487,13 +489,13 @@ function SubmissionStatusBanner(props: {
             <div className="w-75 btn-line even">
               <Button variant="secondary" isLarge>
                 <ExternalLink href={props.submissionResult.secretsUrl}>
-                  <BtnBody icon={[ "fab", "github" ]} iconClasses="text-black" text="View Secrets"/>
+                  <BtnBody icon={CommonIcons.GitHub} iconClasses="text-black" text="View Secrets"/>
                 </ExternalLink>
               </Button>
 
               <Button variant="secondary" isLarge>
                 <ExternalLink href={props.submissionResult.workflowFileUrl}>
-                  <BtnBody icon={[ "fab", "github" ]} iconClasses="text-black" text="View Workflow"/>
+                  <BtnBody icon={CommonIcons.GitHub} iconClasses="text-black" text="View Workflow" />
                 </ExternalLink>
               </Button>
             </div>

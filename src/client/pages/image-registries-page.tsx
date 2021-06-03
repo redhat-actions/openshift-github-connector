@@ -6,8 +6,10 @@ import {
 } from "@patternfly/react-core";
 import { Table } from "@patternfly/react-table";
 import { v4 as uuid } from "uuid";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+import {
+  ExternalLinkAltIcon, PlusIcon, QuestionCircleIcon, SyncAltIcon, TimesIcon,
+} from "@patternfly/react-icons";
 import ImageRegistry from "../../common/types/image-registries";
 import { ExternalLink } from "../components/external-link";
 import { TooltipIcon } from "../components/tooltip-icon";
@@ -42,7 +44,7 @@ export default function ImageRegistriesPage(): JSX.Element {
                     <Button variant="primary"
                       onClick={reload}
                     >
-                      <BtnBody icon="sync-alt" text="Reload"/>
+                      <BtnBody icon={SyncAltIcon} text="Reload"/>
                     </Button>
                   </div>
                 </CardTitle>
@@ -128,7 +130,7 @@ function ImageRegistryRow({ registry, onChange }: { registry: ImageRegistry.Info
           {registry.fullPath}
         </div>
         <div className="text-right">
-          <ExternalLink href={"https://" + registry.fullPath} icon={{ position: "right", icon: "external-link-alt" }} />
+          <ExternalLink href={"https://" + registry.fullPath} icon={{ position: "right", icon: ExternalLinkAltIcon }} />
         </div>
       </td>
       <td >{registry.username}</td>
@@ -149,7 +151,7 @@ function ImageRegistryRow({ registry, onChange }: { registry: ImageRegistry.Info
             setIsDeleting(false);
           }
         }}>
-          <BtnBody icon="times" title="Remove" isLoading={isDeleting}/>
+          <BtnBody icon={TimesIcon} title="Remove" isLoading={isDeleting}/>
         </Button>
       </td>
     </tr>
@@ -393,7 +395,7 @@ function CreateImageRegistryCard({ onChange }: { onChange: () => Promise<void> }
                     className="mx-2"
                     href="https://docs.github.com/en/actions/reference/authentication-in-a-workflow"
                   >
-                    <FontAwesomeIcon icon="question-circle" size="lg"/>
+                    <QuestionCircleIcon size="lg" />
                   </ExternalLink>
                 </div>
               </FormGroup>
@@ -401,7 +403,7 @@ function CreateImageRegistryCard({ onChange }: { onChange: () => Promise<void> }
 
             <div className="mt-3 d-flex justify-content-center align-items-center">
               <Button isLarge type="submit">
-                <BtnBody text="Add Image Registry" icon="plus" />
+                <BtnBody text="Add Image Registry" icon={PlusIcon} />
               </Button>
             </div>
           </Form>

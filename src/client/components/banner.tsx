@@ -1,8 +1,7 @@
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import classNames from "classnames";
 import { Spinner } from "@patternfly/react-core";
+import { CommonIcons, IconElement } from "../util/icons";
 import { Severity } from "../../common/common-util";
 
 namespace Banner {
@@ -26,18 +25,18 @@ function Banner(props: Banner.Props): JSX.Element {
 
   const display: boolean = props.display == null ? true : props.display;
 
-  let icon: IconProp | undefined;
+  let BannerIcon: IconElement | undefined;
   if (props.severity === "danger") {
-    icon = "times-circle";
+    BannerIcon = CommonIcons.Error;
   }
   else if (props.severity === "warning") {
-    icon = "exclamation-triangle";
+    BannerIcon = CommonIcons.Warning;
   }
   else if (props.severity === "info") {
-    icon = "info-circle";
+    BannerIcon = CommonIcons.Info;
   }
   else if (props.severity === "success") {
-    icon = "check-circle";
+    BannerIcon = CommonIcons.Success;
   }
 
   return (
@@ -52,8 +51,8 @@ function Banner(props: Banner.Props): JSX.Element {
         "banner-title flex-grow-1 d-flex align-items-center",
       )}>
         <div>
-          {icon != null
-            ? <FontAwesomeIcon icon={icon} className="fa-lg mr-3" />
+          {BannerIcon != null
+            ? <BannerIcon className="fa-lg mr-3" />
             : ("")
           }
         </div>

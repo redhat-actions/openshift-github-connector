@@ -1,18 +1,17 @@
 import React from "react";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import classNames from "classnames";
 import {
   Button, Card, CardTitle, CardBody,
 } from "@patternfly/react-core";
-
 import { ExternalLink } from "./external-link";
 import BtnBody from "./btn-body";
+import { IconElement } from "../util/icons";
 
 export default function appPageCard(props: {
     header: string,
     buttons: {
       href: string,
-      icon: IconProp,
+      icon: IconElement,
       text: string,
     }[],
     children: React.ReactNode,

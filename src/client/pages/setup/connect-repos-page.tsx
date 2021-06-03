@@ -11,8 +11,11 @@ import {
 } from "@patternfly/react-core";
 import { Table } from "@patternfly/react-table";
 import classNames from "classnames";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import {
+  BookOpenIcon, CheckSquareIcon,
+  EditIcon, EyeIcon, EyeSlashIcon,
+  InfoCircleIcon, MinusCircleIcon, MinusSquareIcon,
+} from "@patternfly/react-icons";
 
 import ApiEndpoints from "../../../common/api-endpoints";
 import ApiResponses from "../../../common/api-responses";
@@ -26,6 +29,7 @@ import Banner from "../../components/banner";
 import { getSecretsUrlForRepo, GitHubRepoId } from "../../../common/types/gh-types";
 import DataFetcher from "../../components/data-fetcher";
 import FormInputCheck from "../../components/form-input-check";
+import { CommonIcons, IconElement } from "../../util/icons";
 
 type ConnectReposPageProps = {};
 
@@ -147,7 +151,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
               <ExternalLink
                 href={"https://github.com/redhat-actions/oc-login/wiki/Using-a-Service-Account-for-GitHub-Actions"}
               >
-                <FontAwesomeIcon fixedWidth icon="book-open" className="text-light mr-2" />
+                <BookOpenIcon className="text-light mr-2" />
                 Read More about using a service account for GitHub Actions
               </ExternalLink>.
             </p>
@@ -256,7 +260,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                                 href={this.state.reposSecretsData.urls.installationSettings}
                                 title="Edit Installation"
                               >
-                                <BtnBody icon="cog" text="Edit Installation" />
+                                <BtnBody icon={CommonIcons.Configure} text="Edit Installation" />
                               </ExternalLink>
                             </Button>
                             <Button variant="primary"
@@ -265,7 +269,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                                 await this.loadReposSecrets();
                               }}
                             >
-                              <BtnBody icon="sync-alt" text="Reload"/>
+                              <BtnBody icon={CommonIcons.Reload} text="Reload"/>
                             </Button>
                           </div>
                         </div>
@@ -283,7 +287,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                               this.setAllChecked(true);
                             }}
                           >
-                            <BtnBody icon="check-square" text="Select All" />
+                            <BtnBody icon={CheckSquareIcon} text="Select All" />
                           </Button>
 
                           <Button variant="plain"
@@ -292,7 +296,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                             }}
                             title="Deselect All"
                           >
-                            <BtnBody icon="minus-square" text="Deselect All"/>
+                            <BtnBody icon={MinusSquareIcon} text="Deselect All"/>
                           </Button>
                         </div>
                         <div className="long-content">
@@ -492,7 +496,7 @@ function RepoWithSecretsItem({
               href={repoWithSecrets.repo.html_url}
               title="GitHub Repository"
             >
-              <BtnBody icon={[ "fab", "github" ]} />
+              <BtnBody icon={CommonIcons.GitHub} />
             </ExternalLink>
           </Button>
 
@@ -503,7 +507,7 @@ function RepoWithSecretsItem({
               href={getSecretsUrlForRepo(repoWithSecrets.repo)}
               title="Edit Secrets in GitHub"
             >
-              <BtnBody icon="edit"/>
+              <BtnBody icon={EditIcon} />
             </ExternalLink>
           </Button>
         </div>
@@ -568,20 +572,20 @@ function RepoWithSecretsItem({
 }
 
 function ShowSecretsButton(props: { noSecrets: number, isShowingSecrets: boolean, onClick: () => void }): JSX.Element {
-  let icon: IconProp;
+  let BtnIcon: IconElement;
   let text: string;
   if (props.noSecrets > 0) {
     if (props.isShowingSecrets) {
-      icon = "eye-slash";
+      BtnIcon = EyeSlashIcon;
       text = "Hide Secrets";
     }
     else {
-      icon = "eye";
+      BtnIcon = EyeIcon;
       text = "Show Secrets";
     }
   }
   else {
-    icon = "minus-circle";
+    BtnIcon = MinusCircleIcon;
     text = "No Secrets";
   }
 
@@ -593,7 +597,7 @@ function ShowSecretsButton(props: { noSecrets: number, isShowingSecrets: boolean
           props.onClick();
         }}
       >
-        <FontAwesomeIcon fixedWidth icon={icon} />
+        <BtnIcon />
         <span className="mx-2">
           {text}
         </span>
@@ -614,7 +618,7 @@ function getSecretNameWarning(_secretNames: string[]): JSX.Element {
 
   return (
     <div>
-      <FontAwesomeIcon className="mr-2 text-success" icon="info-circle" title={msg} fixedWidth />
+      <InfoCircleIcon className="mr-2 text-success" title={msg} />
       {msg}
     </div>
   );
@@ -657,7 +661,7 @@ function SubmissionResultBanner(props: {
                 {props.submissionResult.successes.map((success) => {
                   return (
                     <li key={success.actionsSecretName + success.repo.full_name}>
-                      <FontAwesomeIcon icon="check-circle" fixedWidth className="mr-2 text-success" />
+                      <CommonIcons.Success className="mr-2 text-success" />
                       <b>{success.actionsSecretName}</b> in {success.repo.full_name}
                     </li>
                   );
@@ -674,7 +678,7 @@ function SubmissionResultBanner(props: {
                 {props.submissionResult.failures.map((failure) => {
                   return (
                     <li key={failure.actionsSecretName + failure.repo.full_name}>
-                      <FontAwesomeIcon icon="times-circle" fixedWidth className="mr-2 text-danger" />
+                      <CommonIcons.Error className="mr-2 text-danger" />
                       {failure.actionsSecretName != null ?
                         (
                           <React.Fragment>

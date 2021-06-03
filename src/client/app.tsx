@@ -1,9 +1,6 @@
 import React from "react";
 import { Route, Switch } from "react-router-dom";
 import { Helmet } from "react-helmet";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { fab } from "@fortawesome/free-brands-svg-icons";
-import { fas } from "@fortawesome/free-solid-svg-icons";
 
 // note PF is excluded in the console by webpack.config.plugin
 import "@patternfly/react-core/dist/styles/base.css";
@@ -14,12 +11,6 @@ import NotFound from "./pages/errors/404";
 import { getConsoleModifierClass } from "./util/client-util";
 
 export default function app(): JSX.Element {
-  // https://fontawesome.com/how-to-use/on-the-web/using-with/react
-  // if an icon is not showing up, make sure it exists in "solid" or "brands"
-  // https://fontawesome.com/cheatsheet
-  // beacuse we are not including the "regular" icons.
-  library.add(fab, fas);
-
   return (
     <React.Fragment>
       <Helmet>

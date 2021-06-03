@@ -40,10 +40,6 @@
     "helm-install": "export RELEASE_NAME=actions-connector && helm upgrade --install $RELEASE_NAME containerize/chart/openshift-actions-connector --set clusterApiServer=$(oc whoami --show-server)"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.34",
-    "@fortawesome/free-brands-svg-icons": "^5.15.2",
-    "@fortawesome/free-solid-svg-icons": "^5.15.2",
-    "@fortawesome/react-fontawesome": "^0.1.14",
     "@kubernetes/client-node": "^0.14.0",
     "@octokit/auth-app": "^3.4.0",
     "@octokit/core": "^3.4.0",
