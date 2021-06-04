@@ -2,13 +2,12 @@ import { Octokit } from "@octokit/core";
 import { createAppAuth } from "@octokit/auth-app";
 import { paginateRest, PaginateInterface } from "@octokit/plugin-paginate-rest";
 import sodium from "tweetsodium";
+import fetch from "node-fetch";
 
 import Log from "server/logger";
-import { GitHubAppAuthData, GitHubOAuthResponse, GitHubRepo, GitHubRepoId, GitHubUserData, RepoSecretsPublicKey } from "common/types/gh-types";
+import { GitHubAppAuthData, GitHubOAuthResponse, GitHubRepoId, GitHubUserData, RepoSecretsPublicKey } from "common/types/gh-types";
 import HttpConstants from "common/http-constants";
-import fetch from "node-fetch";
 import { throwIfError } from "server/util/server-util";
-import { AuthenticationApi } from "@kubernetes/client-node";
 
 export async function getGitHubHostname(): Promise<string> {
   return "github.com";

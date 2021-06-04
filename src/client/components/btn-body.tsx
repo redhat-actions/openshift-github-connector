@@ -1,4 +1,3 @@
-import React from "react";
 import classNames from "classnames";
 import { Spinner } from "@patternfly/react-core";
 import { IconElement } from "../util/icons";

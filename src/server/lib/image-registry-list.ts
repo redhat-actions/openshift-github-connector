@@ -1,6 +1,5 @@
 import { v4 as uuid } from "uuid";
 import ImageRegistry from "common/types/image-registries";
-import User from "./user";
 import Log from "server/logger";
 
 export default class ImageRegistryListWrapper {

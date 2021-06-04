@@ -51,7 +51,7 @@ interface ConnectReposPageState {
 
 export default class ConnectReposPage extends React.Component<RouteComponentProps<ConnectReposPageProps>, ConnectReposPageState> {
 
-  private readonly createSATokensId = "create-tokens-checkbox";
+  // private readonly createSATokensId = "create-tokens-checkbox";
   private readonly bannerId = "create-secrets-status-banner";
 
   constructor(props: RouteComponentProps<ConnectReposPageProps>) {

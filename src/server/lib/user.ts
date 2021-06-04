@@ -1,4 +1,4 @@
-import express, { application } from "express";
+import express from "express";
 
 import Log from "server/logger";
 import { sendError } from "server/util/send-error";

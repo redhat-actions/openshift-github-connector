@@ -6,7 +6,7 @@ import { fetchJSON } from "../util/client-util";
 interface BaseDataFetcherProps<Data> {
     children: (data: Data, reload: () => Promise<void>) => React.ReactNode,
     type: "generic" | "api",
-    loadingDisplay?: "text" | "spinner" | "spinner-1em" | "card" | "card-body" | "none" | JSX.Element,
+    loadingDisplay?: "text" | "spinner" | "card" | "card-body" | "none" | JSX.Element,
     loadingStyle?: React.CSSProperties,
 }
 
@@ -35,8 +35,6 @@ interface DataFetcherState<Data> {
  * Utility component which can load data asynchronously and then pass the data to children.
  */
 export default class DataFetcher<Data> extends React.Component<DataFetcherProps<Data>, DataFetcherState<Data>> {
-
-  private readonly eventTarget = new EventTarget();
 
   constructor(
     props: DataFetcherProps<Data>,
@@ -95,22 +93,16 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
           <span style={this.props.loadingStyle}>Loading...</span>
         );
       }
-      else if (loadingDisplayType === "spinner" || loadingDisplayType === "spinner-1em") {
+      else if (loadingDisplayType === "spinner") {
         const loadingStyle = this.props.loadingStyle ?? {};
-
-        if (loadingDisplayType === "spinner-1em") {
-          loadingStyle.height = "1em";
-          loadingStyle.width = "1em";
-        }
-
         return (
-          <Spinner style={loadingStyle} />
+          <Spinner style={loadingStyle} diameter="1em"/>
         );
       }
       else if (loadingDisplayType === "card") {
         return (
           <Card style={{ minHeight: "100px" }}>
-            <CardBody className="d-flex justify-content-center align-items-center">
+            <CardBody className="centers">
               <Spinner style={this.props.loadingStyle ?? {}} />
             </CardBody>
           </Card>
@@ -118,8 +110,8 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
       }
       else if (loadingDisplayType === "card-body") {
         return (
-          <CardBody className="d-flex justify-content-center align-items-center">
-            <Spinner style={this.props.loadingStyle ?? {}} />
+          <CardBody className="centers">
+            <Spinner style={this.props.loadingStyle ?? {}} size="md" />
           </CardBody>
         );
       }

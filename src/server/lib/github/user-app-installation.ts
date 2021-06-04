@@ -1,12 +1,11 @@
 
 import { Octokit } from "@octokit/core";
-import { paginateRest, PaginateInterface } from "@octokit/plugin-paginate-rest";
+import { PaginateInterface } from "@octokit/plugin-paginate-rest";
 
-import { GitHubAppInstallationData, GitHubAppInstallationUrls, GitHubRepo, GitHubUserType } from "common/types/gh-types";
+import { GitHubAppInstallationData, GitHubAppInstallationUrls, GitHubRepo } from "common/types/gh-types";
 import GitHubApp from "server/lib/github/gh-app";
-import Log from "server/logger";
-import User from "../user";
-import { getAppOctokit } from "./gh-util";
+import User from "server/lib/user";
+import { getAppOctokit } from "server/lib/github/gh-util";
 
 export default class UserInstallation {
 
