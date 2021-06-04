@@ -8,7 +8,7 @@ import { Table } from "@patternfly/react-table";
 import { v4 as uuid } from "uuid";
 
 import {
-  ExternalLinkAltIcon, PlusIcon, QuestionCircleIcon, SyncAltIcon, TimesIcon,
+  ExternalLinkAltIcon, PlusIcon, SyncAltIcon, TimesIcon,
 } from "@patternfly/react-icons";
 import ImageRegistry from "../../common/types/image-registries";
 import { ExternalLink } from "../components/external-link";
@@ -172,6 +172,7 @@ function CreateImageRegistryCard({ onChange }: { onChange: () => Promise<void> }
     username: "",
   });
 
+  // helper function to set partial registry info and maintain the rest
   const setRegistryInfo = (reg: Partial<typeof registryInfo>) => {
     setRegistryInfo_({
       ...registryInfo,
@@ -243,23 +244,26 @@ function CreateImageRegistryCard({ onChange }: { onChange: () => Promise<void> }
           }}>
             <div>
               <FormGroup fieldId="registry" label="Registry">
-                <FormSelect onChange={(value) => {
-                  const type = value as ImageRegistry.Type;
-                  const reg = ImageRegistry.Registries[type];
+                <FormSelect
+                  aria-label="Registry"
+                  value={registryInfo.type}
+                  onChange={(value) => {
+                    const type = value as ImageRegistry.Type;
+                    const reg = ImageRegistry.Registries[type];
 
-                  const isGhcr = type === "GHCR";
-                  const ghcrUseGitHubToken = registryInfo.ghcrUseGitHubToken && isGhcr;
-                  // setRegistryType(type);
+                    const isGhcr = type === "GHCR";
+                    const ghcrUseGitHubToken = registryInfo.ghcrUseGitHubToken && isGhcr;
+                    // setRegistryType(type);
 
-                  if (!reg.hostname) {
-                    setShowHostnameInput(true);
-                    setRegistryInfo({ type, hostname: "", ghcrUseGitHubToken });
-                  }
-                  else {
-                    setShowHostnameInput(false);
-                    setRegistryInfo({ type, hostname: reg.hostname, ghcrUseGitHubToken });
-                  }
-                }}
+                    if (!reg.hostname) {
+                      setShowHostnameInput(true);
+                      setRegistryInfo({ type, hostname: "", ghcrUseGitHubToken });
+                    }
+                    else {
+                      setShowHostnameInput(false);
+                      setRegistryInfo({ type, hostname: reg.hostname, ghcrUseGitHubToken });
+                    }
+                  }}
                 >
                   {
                     Object.entries(ImageRegistry.Registries).map(([ type, reg ]) => {
@@ -267,7 +271,7 @@ function CreateImageRegistryCard({ onChange }: { onChange: () => Promise<void> }
                         <option
                           value={type}
                           key={type}
-                          title=""
+                          title={reg.description}
                         >
                           {reg.description} {reg.hostname ? `(${reg.hostname})` : ""}
                         </option>
@@ -287,15 +291,13 @@ function CreateImageRegistryCard({ onChange }: { onChange: () => Promise<void> }
                        The namespace is the first segment of the registry path, between the first and second slashes.
                       </p>
                       <p>
-                       For example, for the image path <br/>
+                       For example, for the image path<br/>&quot;
                         <span className="">ghcr.io/</span>
-                        <span className="font-weight-bold">redhat-actions</span>/my-image:latest
+                        <span className="b">redhat-actions</span>/my-image:latest&quot;
                       </p>
                       <p>
-                       The registry hostname is {`"ghcr.io"`}.
-                      </p>
-                      <p>
-                       The namespace is <span className="font-weight-bold">{`"redhat-actions"`}</span>.
+                       The registry hostname is &quot;ghcr.io&quot;, and
+                       the namespace is <span className="b">&quot;redhat-actions&quot;</span>.
                       </p>
                     </React.Fragment>
                   )}
@@ -305,6 +307,7 @@ function CreateImageRegistryCard({ onChange }: { onChange: () => Promise<void> }
                 helperTextInvalid={registryInfo.namespace.length > 0 ? "The namespace contains illegal characters." : undefined}
               >
                 <TextInput
+                  aria-label="Namespace"
                   defaultValue={registryInfo.namespace}
                   onChange={(value) => {
                     const namespace = value;
@@ -318,6 +321,7 @@ function CreateImageRegistryCard({ onChange }: { onChange: () => Promise<void> }
             <div className={classNames({ "d-none": !showHostnameInput })}>
               <FormGroup fieldId="hostname" label="Hostname" validated={validateNoBannedCharacters(registryInfo.hostname)}>
                 <TextInput
+                  aria-label="Hostname"
                   onChange={(value) => {
                     setRegistryInfo({ hostname: value });
                   }}
@@ -336,7 +340,8 @@ function CreateImageRegistryCard({ onChange }: { onChange: () => Promise<void> }
                 />
               }>
                 <TextInput
-                  readOnly
+                  aria-label="Registry Path"
+                  isReadOnly
                   value={registryInfo.hostname ? `${registryInfo.hostname}/${registryInfo.namespace}` : ""}
                 />
               </FormGroup>
@@ -344,62 +349,58 @@ function CreateImageRegistryCard({ onChange }: { onChange: () => Promise<void> }
 
             <hr/>
 
-            <div className="d-flex align-items-center">
-              <FormGroup
-                fieldId="username"
-                label="Username"
-                validated={validateNoBannedCharacters(registryInfo.username)}
-              >
-                <TextInput
-                  defaultValue={userNameIsNamespace ? registryInfo.namespace : registryInfo.username}
-                  readOnly={userNameIsNamespace}
-                  title={userNameIsNamespace ? "Username is same as namespace" : ""}
-                  onChange={(value) => { setRegistryInfo({ username: value }); }}
-                />
-              </FormGroup>
-              <FormGroup
-                fieldId="username-same-as-namespace"
+            <FormGroup
+              isInline
+              fieldId="username"
+              label="Username"
+              validated={validateNoBannedCharacters(registryInfo.username)}
+            >
+              <TextInput
+                className="col-6"
+                defaultValue={userNameIsNamespace ? registryInfo.namespace : registryInfo.username}
+                isReadOnly={userNameIsNamespace}
+                title={userNameIsNamespace ? "Username is same as namespace" : ""}
+                onChange={(value) => { setRegistryInfo({ username: value }); }}
+              />
+              <Checkbox
                 label="Username same as namespace"
-                className="pl-3 b"
-              >
-                <Checkbox
-                  id="username-is-namespace"
-                  checked={userNameIsNamespace}
-                  onChange={(checked) => { setUserNameIsNamespace(checked); }}
-                />
-              </FormGroup>
-            </div>
+                id="username-same-as-namespace"
+                isChecked={userNameIsNamespace}
+                onChange={(checked) => { setUserNameIsNamespace(checked); }}
+              />
+            </FormGroup>
 
-            <div>
-              <FormGroup label="Password or Token" fieldId="password-or-token">
-                <TextInput
-                  type="password"
-                  readOnly={registryInfo.ghcrUseGitHubToken}
-                  value={registryInfo.passwordOrToken}
-                  onChange={(value) => { setRegistryInfo({ passwordOrToken: value }); }}
-                />
-              </FormGroup>
+            <FormGroup
+              isInline
+              fieldId="password-or-token"
+              label="Password or Token"
+            >
+              <TextInput
+                className="col-6"
+                type="password"
+                isReadOnly={registryInfo.ghcrUseGitHubToken}
+                value={registryInfo.passwordOrToken}
+                onChange={(value) => { setRegistryInfo({ passwordOrToken: value }); }}
+              />
 
-              <FormGroup
-                className={classNames("pl-3 b", { "d-none": registryInfo.type !== "GHCR" })}
-                fieldId="use-github-token"
-              >
-                <Checkbox
-                  id="use-github-token-cb"
-                  checked={registryInfo.ghcrUseGitHubToken ?? false}
-                  onChange={(checked) => { setRegistryInfo({ ghcrUseGitHubToken: checked, passwordOrToken: "" }); }}
-                />
-                <div>
-                  Use built-in Actions workflow token
-                  <ExternalLink
-                    className="mx-2"
-                    href="https://docs.github.com/en/actions/reference/authentication-in-a-workflow"
-                  >
-                    <QuestionCircleIcon size="lg" />
-                  </ExternalLink>
-                </div>
-              </FormGroup>
-            </div>
+              <Checkbox
+                label={
+                  <div className="d-flex align-items-center">
+                    Use built-in Actions workflow token
+                    <ExternalLink
+                      className="mx-2"
+                      href="https://docs.github.com/en/actions/reference/authentication-in-a-workflow"
+                    >
+                      <TooltipIcon body="Click to open GitHub Documentation" iconClasses="text-fg" />
+                    </ExternalLink>
+                  </div>
+                }
+                id="use-github-token"
+                isChecked={registryInfo.ghcrUseGitHubToken ?? false}
+                className={classNames({ "d-none": registryInfo.type !== "GHCR" })}
+                onChange={(checked) => { setRegistryInfo({ ghcrUseGitHubToken: checked, passwordOrToken: "" }); }}
+              />
+            </FormGroup>
 
             <div className="mt-3 d-flex justify-content-center align-items-center">
               <Button isLarge type="submit">

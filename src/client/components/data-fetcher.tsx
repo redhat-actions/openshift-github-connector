@@ -85,6 +85,8 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
   }
 
   override render() {
+    const cardSpinnerSize = "lg";
+
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (this.state == null || !this.state.loaded) {
       const loadingDisplayType = this.props.loadingDisplay ?? "text";
@@ -103,7 +105,7 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
         return (
           <Card style={{ minHeight: "100px" }}>
             <CardBody className="centers">
-              <Spinner style={this.props.loadingStyle ?? {}} />
+              <Spinner style={this.props.loadingStyle ?? {}} size={cardSpinnerSize}/>
             </CardBody>
           </Card>
         );
@@ -111,7 +113,7 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
       else if (loadingDisplayType === "card-body") {
         return (
           <CardBody className="centers">
-            <Spinner style={this.props.loadingStyle ?? {}} size="md" />
+            <Spinner style={this.props.loadingStyle ?? {}} size={cardSpinnerSize} />
           </CardBody>
         );
       }

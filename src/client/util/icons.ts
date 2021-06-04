@@ -1,13 +1,13 @@
 import {
   CheckCircleIcon, CogIcon, EditIcon, ExclamationTriangleIcon,
   GithubIcon, InfoCircleIcon, SyncAltIcon, TimesCircleIcon,
-  TimesIcon,
+  TrashAltIcon,
 } from "@patternfly/react-icons";
 import { SVGIconProps } from "@patternfly/react-icons/dist/js/createIcon";
 
 export const CommonIcons = {
   Reload: SyncAltIcon,
-  Delete: TimesIcon,
+  Delete: TrashAltIcon,
 
   Success: CheckCircleIcon,
   Info: InfoCircleIcon,

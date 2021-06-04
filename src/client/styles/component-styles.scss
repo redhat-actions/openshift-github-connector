@@ -1,28 +1,28 @@
 @use "./constants" as c;
 
-.btn {
-  max-height: 3em;
-  display: flex;
-  justify-content: center;
+.btn, .pf-c-button {
+  // max-height: 3em;
+
+  display: flex !important;
+  justify-content: space-around;
   align-items: center;
 
   & a, & a:focus {
     color: inherit;
     &:hover {
-      text-decoration: none;
+      --pf-global--link--TextDecoration--hover: none;
+      // text-decoration: none;
     }
   }
 
+  /*
   &.btn-light, &.btn-outline-light {
     &:hover a {
       text-decoration: none;
       color: c.$dark;
     }
   }
-
-  &.btn-lg {
-    font-weight: bold;
-  }
+  */
 }
 
 .btn:disabled, button:disabled, [type="button"]:disabled {
@@ -41,10 +41,6 @@ $card-border-radius: 0.5rem;
   & .bg-darker {
     background-color: c.$body-bg;
   }
-
-  & .bg-lighter {
-    background-color: c.$rh-gray-dark;
-  }
 }
 
 $card-border: 2px solid c.$rh-gray;
@@ -59,10 +55,13 @@ $card-limit-padding: 1rem 1.25rem;
 
   margin: 0;
   font-weight: bold;
+}
 
-  & h4, & h5 {
-    margin: 0;
-    font-weight: bold;
+.pf-c-card__body {
+  padding-top: calc(var(--pf-c-card--child--PaddingBottom) / 2);
+
+  & p:first-child {
+    margin-top: 0;
   }
 }
 
@@ -89,19 +88,32 @@ input {
   }
 }
 
-.form-group .form-check-input {
-  // transform: scale(1.5);
-  cursor: pointer;
-}
-
-.form-label {
-  font-weight: bold;
-}
-
-.form-check-label {
-  margin-left: 0.5em;
+.pf-c-check {
+  align-items: center !important;
 }
 
 .table thead tr td {
   border-top: none;
+}
+
+.pf-c-tooltip {
+
+  & p {
+    margin: c.$pf-global--spacer--xs 0;
+    text-align: left;
+  }
+}
+
+.pf-c-form__group, .pf-c-form-control {
+  margin-bottom: c.$pf-global--spacer--sm;
+
+  &-label {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+.tooltip-icon {
+  height: 1.25em;
+  width: 1.25em;
 }

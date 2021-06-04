@@ -19,7 +19,7 @@ export function ExternalLink({
   return (
     <a href={href}
       target="_blank" rel="noopener noreferrer"
-      className={"external-link font-weight-bold " + (className ?? "")}
+      className={"b" + (className ?? "")}
       title={title != null ? title : href}
     >
       {icon?.position === "left" ? <icon.icon style={{ marginRight: marginSize }} /> : ("")}

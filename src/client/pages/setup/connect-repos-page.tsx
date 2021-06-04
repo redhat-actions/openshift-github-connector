@@ -8,6 +8,8 @@ import {
   CardBody,
   ExpandableSection,
   Spinner,
+  ExpandableSectionToggle,
+  Checkbox,
 } from "@patternfly/react-core";
 import { Table } from "@patternfly/react-table";
 import classNames from "classnames";
@@ -28,7 +30,6 @@ import { fetchJSON, getSearchParam } from "../../util/client-util";
 import Banner from "../../components/banner";
 import { getSecretsUrlForRepo, GitHubRepoId } from "../../../common/types/gh-types";
 import DataFetcher from "../../components/data-fetcher";
-import FormInputCheck from "../../components/form-input-check";
 import { CommonIcons, IconElement } from "../../util/icons";
 
 type ConnectReposPageProps = {};
@@ -151,7 +152,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
               <ExternalLink
                 href={"https://github.com/redhat-actions/oc-login/wiki/Using-a-Service-Account-for-GitHub-Actions"}
               >
-                <BookOpenIcon className="text-light mr-2" />
+                <BookOpenIcon className="mr-2" />
                 Read More about using a service account for GitHub Actions
               </ExternalLink>.
             </p>
@@ -185,7 +186,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
             </div>
           </CardTitle>
           <CardBody>
-            <DataFetcher type="api" endpoint={ApiEndpoints.App.Repos.RepoSecretDefaults} loadingDisplay="spinner">
+            <DataFetcher type="api" endpoint={ApiEndpoints.App.Repos.RepoSecretDefaults} loadingDisplay="card-body">
               {
                 (res: ApiResponses.DefaultSecretsResponse) => (
                   <div>
@@ -239,9 +240,9 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                       <CardTitle>
                         Repositories
                       </CardTitle>
-                      <CardBody >
+                      <CardBody>
                         <div className="d-flex justify-content-center">
-                          <Spinner />
+                          <Spinner size="lg" />
                         </div>
                       </CardBody>
                     </React.Fragment>
@@ -282,7 +283,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                           Then, click <b>Create Secrets</b>.
                         </p>
                         <div className="text-md my-4 btn-line">
-                          <Button variant="plain"
+                          <Button variant="tertiary"
                             onClick={(_e) => {
                               this.setAllChecked(true);
                             }}
@@ -290,7 +291,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                             <BtnBody icon={CheckSquareIcon} text="Select All" />
                           </Button>
 
-                          <Button variant="plain"
+                          <Button variant="tertiary"
                             onClick={(_e) => {
                               this.setAllChecked(false);
                             }}
@@ -440,6 +441,7 @@ function RepoWithSecretsItem({
 }: RepoItemProps): JSX.Element {
 
   const [ isShowingSecrets, setIsShowingSecrets ] = useState(false);
+  const expandableSectionId = "expandable-secrets-" + i;
 
   const isEven = i % 2 === 0;
 
@@ -459,14 +461,14 @@ function RepoWithSecretsItem({
             classNames("flex-grow-1 d-flex justify-content-between align-items-center")
           }
         >
-          <FormInputCheck checked={checked} type="checkbox"
-            className={"flex-grow-1 m-0 clickable"}
-            title="Click to toggle"
+          <Checkbox isChecked={checked}
+            id={"toggle-" + i}
+            className={"flex-grow-1 m-0"}
             onChange={(newChecked) => {
               onCheckChanged(newChecked);
-            }}>
-            {repoWithSecrets.repo.full_name}
-          </FormInputCheck>
+            }}
+            label={repoWithSecrets.repo.full_name}
+          />
 
           <div className="mr-4">
             <ShowSecretsButton
@@ -512,8 +514,8 @@ function RepoWithSecretsItem({
           </Button>
         </div>
       </div>
-      <ExpandableSection isExpanded={isShowingSecrets}>
-        {/* Do not put padding or margin on this div as it will mess up the collapse transition */}
+      <ExpandableSectionToggle isExpanded={isShowingSecrets} contentId={expandableSectionId} className="d-none" />
+      <ExpandableSection isExpanded={isShowingSecrets} isDetached contentId={expandableSectionId}>
         <div>
           {
             repoWithSecrets.secrets.length === 0
@@ -601,12 +603,10 @@ function ShowSecretsButton(props: { noSecrets: number, isShowingSecrets: boolean
         <span className="mx-2">
           {text}
         </span>
-        <div>
-          {props.noSecrets > 0 ?
-            <Badge>{props.noSecrets}</Badge>
-            : ("")
-          }
-        </div>
+        {props.noSecrets > 0 ?
+          <Badge>{props.noSecrets}</Badge>
+          : ("")
+        }
       </Button>
     </React.Fragment>
   );

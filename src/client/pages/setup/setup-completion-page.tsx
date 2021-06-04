@@ -1,5 +1,10 @@
 import React from "react";
-import { Card, CardTitle, CardBody } from "@patternfly/react-core";
+import {
+  Card,
+  CardTitle,
+  CardBody,
+  Title,
+} from "@patternfly/react-core";
 import { Link } from "react-router-dom";
 import ClientPages from "../client-pages";
 import SetupPageHeader from "./setup-header";
@@ -10,14 +15,11 @@ export default function SetupFinishedPage(): JSX.Element {
       <SetupPageHeader pageIndex={5} canProceed={false} hideBtnBanner={true} />
       <Card>
         <CardTitle>
-          <h2 className="d-flex justify-content-between">
-            Setup Complete
-            {/* <FontAwesomeIcon icon="check" className="text-success" /> */}
-          </h2>
+          Setup Complete
         </CardTitle>
         <CardBody>
-          <h3 className="mt-4">{"What's Next"}</h3>
-          <ul className="pl-4 b">
+          <Title headingLevel="h3" className="pb-2">{"What's Next"}</Title>
+          <ul className="b">
             <li>
               <Link to={ClientPages.AddWorkflows.path}>Add the OpenShift starter workflow</Link>
             </li>
@@ -28,7 +30,8 @@ export default function SetupFinishedPage(): JSX.Element {
               <Link to={ClientPages.NotImplemented.path}>Create Self-Hosted Runners</Link>
             </li>
           </ul>
-          <ul className="pl-4 b">
+          <br/>
+          <ul className="b">
             <li>
               <Link to={ClientPages.App.path}>Return to the View GitHub App page</Link>
             </li>

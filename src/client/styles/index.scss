@@ -7,10 +7,9 @@ html, body {
   width: 100%;
   height: 100%;
 
-  color: c.$body-fg;
   background-color: c.$body-bg;
 
-  line-height: 1.5em;
+  // line-height: 1.5em;
 }
 
 main {
@@ -27,15 +26,21 @@ main {
   }
 }
 
+/*
 a {
   color: rgb(130, 225, 255);
   &:focus, &:hover {
     color: rgb(240, 255, 255);
   }
 }
+*/
 
 .text-black {
-  color: black;
+  color: black !important;
+}
+
+.text-fg {
+  color: c.$body-fg !important;
 }
 
 p {
@@ -53,11 +58,11 @@ h1 h2 h3 h4 h5 {
 
 hr {
   border-color: c.$body-fg;
-  margin: c.$pf-global--spacer--xl 0;
+  // margin: c.$pf-global--spacer--xl 0;
 }
 
 .b {
-  font-weight: bold;
+  font-weight: bold !important;
 }
 
 dl, ol, ul {
@@ -86,7 +91,7 @@ code, pre {
     background-color: #111;
     color: white;
     border-radius: 0.33em;
-    padding: 0.33em;
+    padding: 0.15em 0.5em;
   }
 }
 
@@ -107,6 +112,13 @@ input[type=checkbox], input[type=radio], .clickable {
       text-decoration: none;
     }
   }
+}
+
+input[type=checkbox], input[type=radio] {
+  // transform: scale(1.5);
+  width: 1.2rem;
+  height: 1.2rem;
+  // margin-right: 1em;
 }
 
 @mixin text-lg {
@@ -135,14 +147,7 @@ input[type=checkbox], input[type=radio], .clickable {
 //   min-height: 4em;
 // }
 
-input[type=checkbox], input[type=radio] {
-  // transform: scale(1.5);
-  width: 1.2rem;
-  height: 1.2rem;
-  margin-right: 1em;
-}
-
-input.form-control[readonly] {
+.form-control[readonly], .pf-c-form-control[readonly] {
   background-color: c.$pf-global--disabled-color--100;
   color: c.$pf-global--BackgroundColor--dark-100;
 
@@ -171,28 +176,32 @@ label {
 
   &.flex-column {
     & > :not(:last-child).btn {
-      margin-bottom: c.$pf-global--spacer--lg;
+      &.btn, &.pf-c-button {
+        margin-bottom: c.$pf-global--spacer--md;
+      }
     }
   }
 
   &:not(.flex-column) {
-    & > :not(:last-child).btn {
-      margin-right: c.$pf-global--spacer--lg;
+    & > :not(:last-child) {
+      &.btn, &.pf-c-button {
+        margin-right: c.$pf-global--spacer--md;
+      }
     }
   }
 }
 
 .btn-body {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
   font-weight: bold;
 
-  min-width: 1.6rem;
+  // min-width: 1.6rem;
   min-height: 1.6rem;
 
   &.btn-body-text {
-    & svg, .spinner-border {
+    & svg, .spinner-border, .pf-c-spinner {
       &:first-child {
         margin-right: 1ch;
       }
@@ -203,9 +212,8 @@ label {
     }
   }
 
-  & .spinner-border {
-    width: 1em;
-    height: 1em;
+  & .pf-c-spinner {
+    --pf-c-spinner--Color: #{c.$light};
   }
 }
 

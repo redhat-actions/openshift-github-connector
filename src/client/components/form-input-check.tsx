@@ -1,6 +1,4 @@
-import React from "react";
-import classNames from "classnames";
-
+/*
 interface FormButtonProps {
   bold?: boolean,
   checked: boolean,
@@ -36,3 +34,5 @@ export default function FormInputCheck(props: FormButtonProps): JSX.Element {
     </label>
   );
 }
+*/
+export {};

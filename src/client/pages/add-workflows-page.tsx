@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import React from "react";
 import {
-  Button, Card, CardTitle, CardBody, Form, FormGroup, TextInput, FormSelect,
+  Button, Card, CardTitle, CardBody, Form, FormGroup, TextInput, FormSelect, Checkbox, Radio,
 } from "@patternfly/react-core";
 import {
   BookOpenIcon, CogIcon, ExclamationTriangleIcon, GithubIcon, PlusIcon, SyncAltIcon, YoutubeIcon,
@@ -16,7 +16,6 @@ import Banner from "../components/banner";
 import DataFetcher from "../components/data-fetcher";
 import { ExternalLink } from "../components/external-link";
 import BtnBody from "../components/btn-body";
-import FormInputCheck from "../components/form-input-check";
 import { fetchJSON } from "../util/client-util";
 import ClientPages from "./client-pages";
 import { CommonIcons } from "../util/icons";
@@ -82,19 +81,19 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
             <ul className="no-bullets">
               <li>
                 <ExternalLink href={STARTER_WORKFLOW.htmlFile}>
-                  <GithubIcon className="mr-2 text-light" />
+                  <GithubIcon className="mr-2" />
                   View it on GitHub
                 </ExternalLink>
               </li>
               <li>
                 <ExternalLink href={STARTER_WORKFLOW.blog}>
-                  <BookOpenIcon className="mr-2 text-light" />
+                  <BookOpenIcon className="mr-2" />
                   Read the blog
                 </ExternalLink>
               </li>
               <li>
                 <ExternalLink href={STARTER_WORKFLOW.youtube}>
-                  <YoutubeIcon className="mr-2 text-light"/>
+                  <YoutubeIcon className="mr-2"/>
                   Watch the video
                 </ExternalLink>
               </li>
@@ -111,28 +110,22 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
               Workflow files are kept in the {`repository's`} <code>{WORKFLOWS_DIR}</code> directory.
               The directory will be created if it does not exist.
             </p>
-            <Form isHorizontal className="pt-2">
+            <Form className="pt-2">
               <FormGroup
-                fieldId={"workflow-file-name"}
-                // eslint-disable-next-line no-nested-ternary
-                validated={this.state.workflowFile.validationErr !== undefined ?
-                  (this.state.workflowFile.validationErr == null ? "success" : "error")
-                  : "default"
-                }
-                helperText={this.state.workflowFile.validationErr}
-                helperTextInvalidIcon={<ExclamationTriangleIcon />}
+                fieldId={this.fileNameInputId}
+                validated={this.state.workflowFile.validationErr == null ? "success" : "error"}
+                helperTextInvalid={this.state.workflowFile.validationErr}
               >
                 <TextInput
+                  className="col-4 mr-0"
                   id={this.fileNameInputId}
-                  style={{ width: "25ch" }}
                   validated={this.state.workflowFile.validationErr == null ? "success" : "error"}
                   defaultValue={DEFAULT_WORKFLOW_FILE_BASENAME}
                   onChange={(value) => this.setWorkflowFileName(value)}
                 />
                 <TextInput isReadOnly
-                  style={{ width: "8ch" }}
+                  className="col-1"
                   type="text"
-                  readOnly
                   value={this.state.workflowFile.extension}
                 />
               </FormGroup>
@@ -190,15 +183,17 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                           <FormGroup
                             fieldId="registry"
                             label="Image Registry"
-                            helperText={`An Actions secret called "${registriesRes.registryPasswordSecretName}" containing `
-                              + `the password for this registry will be created.`
+                            helperText={<div>
+                              An Actions secret called &quot;<b>{registriesRes.registryPasswordSecretName}</b>&quot; containing
+                              the password for this registry will be created.
+                            </div>
                             }
                           >
-                            <FormSelect id={this.imageRegistrySelectId} as="select"
-                              // isValid={this.state.imageRegistryId != null}
+                            <FormSelect id={this.imageRegistrySelectId}
                               onChange={(value) => {
                                 this.setState({ imageRegistryId: value });
                               }}
+                              className="col-6"
                             >
                               <option disabled selected value={undefined}>
                                 Select an Image Registry
@@ -229,29 +224,31 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                     helperTextInvalid="Port must be a number between 1024 and 65536."
                   >
                     <TextInput
+                      className="col-6"
                       validated={validatePort(this.state.port) ? "success" : "error"}
                       value={this.state.port}
                       onChange={(value) => this.setState({ port: value })}
                     />
                   </FormGroup>
 
-                  <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.Cluster.Root}>{
-                    (clusterRes: ApiResponses.ClusterState) => {
-                      if (!clusterRes.connected) {
-                        return (<></>);
-                      }
+                  <FormGroup fieldId="project" label="OpenShift Project">
+                    <DataFetcher loadingDisplay="text" type="api" endpoint={ApiEndpoints.Cluster.Root}>{
+                      (clusterRes: ApiResponses.ClusterState) => {
+                        if (!clusterRes.connected) {
+                          return (<></>);
+                        }
 
-                      return (
-                        <FormGroup fieldId="project" label="OpenShift Project">
+                        return (
                           <TextInput
+                            className="col-6"
                             defaultValue={clusterRes.namespace}
-                            readOnly
+                            isReadOnly
                           />
-                        </FormGroup>
-                      );
+                        );
+                      }
                     }
-                  }
-                  </DataFetcher>
+                    </DataFetcher>
+                  </FormGroup>
                 </CardBody>
               </Card>
             );
@@ -293,14 +290,15 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                           return (
                             <div key={repo.repo.id}
                               className={classNames(
-                                "row m-0 p-3 rounded",
-                                { "bg-darker": isEven, "bg-lighter": !isEven }
+                                "d-flex align-items-center row m-0 p-3 rounded",
+                                { "bg-darker": !isEven }
                               )}
                             >
-                              <FormInputCheck
+                              <Radio
+                                id={repo.repo.id + "-radio"}
+                                name={repo.repo.id + "-radio"}
                                 className="flex-grow-1"
-                                checked={this.state.repo?.id === repo.repo.id}
-                                type="radio"
+                                isChecked={this.state.repo?.id === repo.repo.id}
                                 onChange={(_checked: boolean) => {
                                   this.setState({
                                     repo: {
@@ -311,11 +309,10 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                                     },
                                   });
                                 }}
-                                disabled={!repo.hasClusterSecrets}
+                                isDisabled={!repo.hasClusterSecrets}
                                 title={repo.hasClusterSecrets ? repo.repo.full_name : "Cannot select - Missing required secrets"}
-                              >
-                                {repo.repo.full_name}
-                              </FormInputCheck>
+                                label={repo.repo.full_name}
+                              />
 
                               { repo.hasClusterSecrets ? "" :
                                 <div className="col-4 centers">
@@ -326,7 +323,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
 
                               <div className="col-1 d-flex align-items-center justify-content-end">
                                 <Button
-                                  variant="secondary"
+                                  variant="tertiary"
                                   title={repo.repo.html_url}
                                 >
                                   <ExternalLink
@@ -342,20 +339,19 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                       }
                     </div>
 
-                    <div className="mt-4 mb-2 d-flex justify-content-between align-items-center">
-                      <div>
-                        <FormInputCheck
-                          bold={false}
-                          checked={this.state.overwriteExistingWorkflow}
-                          type="checkbox"
-                          onChange={(checked) => this.setState({ overwriteExistingWorkflow: checked })}
-                        >
+                    <div className="mt-4 d-flex justify-content-between align-items-center">
+                      <Checkbox
+                        id="overwrite-workflow-file"
+                        isChecked={this.state.overwriteExistingWorkflow}
+                        onChange={(checked) => this.setState({ overwriteExistingWorkflow: checked })}
+                        label={
+                          <>
                           Overwrite <code>
-                            {WORKFLOWS_DIR + (this.state.workflowFile.name || "(invalid)") + this.state.workflowFile.extension}
-                          </code> if it exists
-                        </FormInputCheck>
-                      </div>
-                      <Button isLarge
+                              {WORKFLOWS_DIR + (this.state.workflowFile.name || "(invalid)") + this.state.workflowFile.extension}
+                            </code> if it exists
+                          </>}
+                      />
+                      <Button
                         disabled={this.state.repo == null}
                         onClick={async (_e) => {
                           this.setState({ isSubmitting: true, submissionResult: undefined });
@@ -487,15 +483,15 @@ function SubmissionStatusBanner(props: {
         props.submissionResult.success ? (
           <div className="centers">
             <div className="w-75 btn-line even">
-              <Button variant="secondary" isLarge>
+              <Button variant="secondary">
                 <ExternalLink href={props.submissionResult.secretsUrl}>
-                  <BtnBody icon={CommonIcons.GitHub} iconClasses="text-black" text="View Secrets"/>
+                  <BtnBody icon={CommonIcons.GitHub} text="View Secrets"/>
                 </ExternalLink>
               </Button>
 
-              <Button variant="secondary" isLarge>
+              <Button variant="secondary">
                 <ExternalLink href={props.submissionResult.workflowFileUrl}>
-                  <BtnBody icon={CommonIcons.GitHub} iconClasses="text-black" text="View Workflow" />
+                  <BtnBody icon={CommonIcons.GitHub} text="View Workflow" />
                 </ExternalLink>
               </Button>
             </div>

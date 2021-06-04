@@ -1,5 +1,5 @@
 import React from "react";
-import { Tooltip, TooltipPosition } from "@patternfly/react-core";
+import { Title, Tooltip, TooltipPosition } from "@patternfly/react-core";
 import classNames from "classnames";
 import { QuestionCircleIcon } from "@patternfly/react-icons";
 import { IconElement } from "../util/icons";
@@ -23,14 +23,16 @@ export function TooltipIcon(props: TooltipProps) {
   return (
     <Tooltip
       content={
-        <>
-          <h3 className="text-black">{props.title}</h3>
-          {props.body}
-        </>
+        <div>
+          <Title headingLevel="h5">{props.title}</Title>
+          <div>
+            {props.body}
+          </div>
+        </div>
       }
       position={position}
     >
-      <Icon className={classNames("mx-3", props.iconClasses)} size="lg" />
+      <Icon className={classNames("mx-3 tooltip-icon", props.iconClasses)} />
     </Tooltip>
   );
 }

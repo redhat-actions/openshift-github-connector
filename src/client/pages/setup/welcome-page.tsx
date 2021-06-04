@@ -2,6 +2,8 @@ import React from "react";
 import {
   Card, CardTitle, CardBody,
 } from "@patternfly/react-core";
+import { Table } from "@patternfly/react-table";
+
 import ApiEndpoints from "../../../common/api-endpoints";
 import ApiResponses from "../../../common/api-responses";
 import DataFetcher from "../../components/data-fetcher";
@@ -58,32 +60,35 @@ export default function WelcomePage(): JSX.Element {
 
       </Card>
       <Card>
-        <CardTitle>
-          Cluster info
-        </CardTitle>
         <CardBody>
           <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root} loadingDisplay="card-body">
             {(data: ApiResponses.ClusterState) => (
-              <>
-                <p>
-                  <b>Namespace:&nbsp;</b>
-                  <span className={data.connected ? "text-success" : "text-danger"}>
+              <Table>
+                <tr>
+                  <td className="b">Cluster API Server:</td>
+                  <td className={data.connected ? "text-success" : "text-danger"}>
+                    {data.connected ? data.clusterInfo.externalServer : "Error"}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="b">Namespace:</td>
+                  <td className={data.connected ? "text-success" : "text-danger"}>
                     {data.connected ? data.namespace : "Error"}
-                  </span>
-                </p>
-                <p>
-                  <b>User:&nbsp;</b>
-                  <span className={data.connected ? "text-success" : "text-danger"}>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="b">User:</td>
+                  <td className={data.connected ? "text-success" : "text-danger"}>
                     {data.connected ? data.clusterInfo.user.name : "Error"}
-                  </span>
-                </p>
-                <p>
-                  <b>Service Account Name:&nbsp;</b>
-                  <span className={data.connected ? "text-success" : "text-danger"}>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="b">Service Account Name:</td>
+                  <td className={data.connected ? "text-success" : "text-danger"}>
                     {data.connected ? data.serviceAccountName : "Error"}
-                  </span>
-                </p>
-              </>
+                  </td>
+                </tr>
+              </Table>
             )}
           </DataFetcher>
         </CardBody>

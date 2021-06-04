@@ -24,12 +24,12 @@ export default function BtnBody(props: {
   const iconPosition = props.iconPosition || "left";
 
   const loadingElement = props.isLoading ? (
-    <Spinner className={classNames({ "d-none": !props.isLoading })} size="md" />
+    <Spinner size="md" />
   ) : ("");
 
   let BtnIcon: JSX.Element = <></>;
   if (props.icon) {
-    BtnIcon = <props.icon className={props.iconClasses} />;
+    BtnIcon = <props.icon className={classNames(props.iconClasses)} />;
   }
 
   return (
@@ -38,9 +38,11 @@ export default function BtnBody(props: {
     >
       {iconPosition === "left" ? BtnIcon : ""}
       {iconPosition === "left" ? "" : loadingElement}
-      {
-        props.text ?? ""
-      }
+      <span>
+        {
+          props.text ?? ""
+        }
+      </span>
       {iconPosition === "right" ? BtnIcon : ""}
       {iconPosition === "right" ? "" : loadingElement}
     </div>

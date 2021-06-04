@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import {
-  Card, CardTitle, CardBody,
+  Card, CardTitle, CardBody, Checkbox,
 } from "@patternfly/react-core";
 
 import ApiEndpoints from "../../../../common/api-endpoints";
 import ApiResponses from "../../../../common/api-responses";
 import DataFetcher from "../../../components/data-fetcher";
-import FormInputCheck from "../../../components/form-input-check";
 import CreateAppCard from "./create-app";
 import InstallExistingAppCard from "./install-existing-app";
 import SetupPageHeader from "../setup-header";
@@ -46,13 +45,13 @@ export default function SetupAppPage(): JSX.Element {
                   </p>
 
                   <div className="d-none border-bottom px-2 py-3">
-                    <FormInputCheck type="checkbox"
-                      disabled={true}
-                      checked={enterpriseChecked}
+                    <Checkbox
+                      id="use-ghe"
+                      isDisabled={true}
+                      isChecked={enterpriseChecked}
                       onChange={(checked) => setEnterpriseChecked(checked)}
-                    >
-                      Use GitHub Enterprise
-                    </FormInputCheck>
+                      label="Use GitHub Enterprise"
+                    />
                     <p>
                       Use a GitHub Enterprise (GHE) instance instead of <code>github.com</code>. The GHE instance must be reachable from this cluster.
                     </p>

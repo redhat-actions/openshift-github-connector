@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import React, { useState } from "react";
 import {
-  Button, Card, CardTitle, CardBody,
+  Button, Card, CardTitle, CardBody, Checkbox,
 } from "@patternfly/react-core";
 import { v4 as uuid } from "uuid";
 
@@ -13,7 +13,6 @@ import ApiRequests from "../../../../common/api-requests";
 import Banner from "../../../components/banner";
 import { ExternalLink } from "../../../components/external-link";
 import BtnBody from "../../../components/btn-body";
-import FormInputCheck from "../../../components/form-input-check";
 import { getWindowLocationNoPath, fetchJSON } from "../../../util/client-util";
 import { getGitHubAppManifest } from "../../../util/github-app-manifest";
 
@@ -38,20 +37,20 @@ export default function CreateAppCard(): JSX.Element {
         <CardTitle>
           {CREATE_NEW_TITLE}
 
-          <Button variant="secondary" className="ml-auto">
+          <Button variant="tertiary" className="ml-auto">
             <ExternalLink href="https://github.com/settings/apps/" icon={{ icon: GithubIcon, position: "left" }} >
               View your apps
             </ExternalLink>
           </Button>
         </CardTitle>
         <CardBody>
-          <div className="border-bottom px-2">
-            <FormInputCheck type="checkbox"
-              checked={publicChecked}
+          <div>
+            <Checkbox
+              id="public-app"
+              isChecked={publicChecked}
               onChange={(checked) => setPublicChecked(checked)}
-            >
-              Public app
-            </FormInputCheck>
+              label="Public app"
+            />
             <p className={classNames({ "d-none": publicChecked })}>
               <ExclamationTriangleIcon className="text-warning mr-2"/>
               If you make your app private, no one else will be able to install it.
@@ -76,7 +75,7 @@ export default function CreateAppCard(): JSX.Element {
             </p>
           </div>
 
-          <div className="d-flex flex-column align-items-center my-4">
+          <div className="d-flex flex-column align-items-center my-3">
             <form className="" id={manifestFormId} method="post" action={githubManifestUrl} onSubmit={
               async (e) => {
                 e.preventDefault();
@@ -104,7 +103,7 @@ export default function CreateAppCard(): JSX.Element {
               <input id={manifestInputId} className="d-none" name="manifest" type="manifest" readOnly={true} />
             </form>
 
-            <Button isLarge={true} type="submit" form={manifestFormId}>
+            <Button type="submit" className="mt-2" form={manifestFormId}>
               <BtnBody icon={PlusIcon} text={CREATE_NEW_TITLE} isLoading={isLoading} />
             </Button>
 

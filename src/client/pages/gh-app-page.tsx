@@ -1,8 +1,13 @@
 import React, { useState } from "react";
-import { Button } from "@patternfly/react-core";
+import {
+  Button,
+  Title,
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@patternfly/react-core";
 import classNames from "classnames";
 
-import { BookIcon } from "@patternfly/react-icons";
+import { BookIcon, UserIcon, UsersIcon } from "@patternfly/react-icons";
 import AppPageCard from "../components/gh-app-page-card";
 import DataFetcher from "../components/data-fetcher";
 import ApiEndpoints from "../../common/api-endpoints";
@@ -66,12 +71,12 @@ function GitHubAppPageBody({
   return (
     <React.Fragment>
       <div className="d-flex align-items-center my-4">
-        <h2 className="m-0">
-          <ExternalLink className="text-light" href={data.appData.html_url}>
+        <Title headingLevel="h2" className="m-0">
+          <ExternalLink href={data.appData.html_url}>
             {data.appData.name}
           </ExternalLink>
           {/* The app avatar can be fetched from /identicons/app/app/<slug> */}
-        </h2>
+        </Title>
 
         <div className="ml-auto"></div>
 
@@ -91,18 +96,16 @@ function GitHubAppPageBody({
       </div>
 
       <div className="my-3 d-flex align-items-center">
-        <h5 className="my-3">
-          <DataFetcher type="api" endpoint={ApiEndpoints.User.Root} loadingDisplay="text">{
-            (userRes: ApiResponses.GitHubUserResponse) => {
-              return (
-                <React.Fragment>
-                  Logged in as <ExternalLink href={userRes.html_url}>{userRes.login}</ExternalLink>
-                </React.Fragment>
-              );
-            }
+        <DataFetcher type="api" endpoint={ApiEndpoints.User.Root} loadingDisplay="text">{
+          (userRes: ApiResponses.GitHubUserResponse) => {
+            return (
+              <Title headingLevel="h4" className="d-flex">
+                Logged in as&nbsp;<ExternalLink href={userRes.html_url}>{userRes.login}</ExternalLink>
+              </Title>
+            );
           }
-          </DataFetcher>
-        </h5>
+        }
+        </DataFetcher>
         <div className="ml-auto">
           {
             data.installed && data.owned ?
@@ -130,14 +133,18 @@ function SwitchViewButton(props: { currentView: ViewType | undefined, onSwitchVi
   const isUserActive = !isOwnerActive;
 
   return (
-    <div className="btn-line">
-      <Button variant="secondary" isActive={isOwnerActive} onClick={() => props.onSwitchViewType("owner")} className="mr-2">
-        <BtnBody text="View as owner" />
-      </Button>
-      <Button variant="secondary" isActive={isUserActive} onClick={() => props.onSwitchViewType("user")}>
-        <BtnBody text="View as user" />
-      </Button>
-    </div>
+    <ToggleGroup>
+      <ToggleGroupItem text="View as owner"
+        icon={<UserIcon />}
+        onChange={() => props.onSwitchViewType("owner")}
+        isSelected={isOwnerActive}
+      />
+      <ToggleGroupItem text="View as user"
+        icon={<UsersIcon />}
+        onChange={() => props.onSwitchViewType("user")}
+        isSelected={isUserActive}
+      />
+    </ToggleGroup>
   );
 }
 
