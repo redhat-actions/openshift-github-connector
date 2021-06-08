@@ -38,17 +38,13 @@ jobs:
           dev_pid=$!
           echo "dev_pid=$dev_pid" >> $GITHUB_ENV
 
-          yarn wait-on -l tcp:3000 -t 60000
-          yarn wait-on -l tcp:3001 -t 60000
-          yarn wait-on -l tcp:3003 -t 60000
+          yarn wait-on -l tcp:8080 -t 60000
 
       - name: Test
         shell: bash
         run: |
           set -eEx
-          curl -sSf http://localhost:3000
-          curl -sSf http://localhost:3001
-          curl -sSf http://localhost:3003
+          curl -sSf http://localhost:8080
 
       - name: Stop
         if: always()

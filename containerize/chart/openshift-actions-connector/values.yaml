@@ -12,14 +12,6 @@ securityContext:
       drop:
         - ALL
 
-
-# REQUIRED VALUE:
-# This is the apps.<cluster url> subdomain.which may have been edited by the admin. There does not appear to be a user API to get this.
-# the easiest way to get this is to `oc expose <some service>` and then look at its subdomain
-# "$(oc whoami --show-server | cut -d'/' -f3 | cut -d':' -f1 | sed -e 's/api/apps/')"
-# https://github.com/helm/helm/issues/2055
-clusterAppsSubdomain: ""
-
 # REQUIRED VALUE
 # oc whoami --show-server
 clusterApiServer: ""
@@ -51,21 +43,8 @@ serverReplicaCount: 1
 serverImage: quay.io/tetchell/openshift-actions-connector
 serverTag: latest
 
-serverServiceName: actions-connector-server
-serverPort: 3003
-serverPortName: server-port
-
-################################################################################
-
-# clientReplicaCount: 1
-
-# clientImage: quay.io/tetchell/openshift-actions-connector-client
-# clientTag: latest
-
-clientServiceName: actions-connector-client
-clientPort: 3000
-clientPortName: client-port
-
-pluginServiceName: actions-connector-plugin
-pluginPort: 3001
-pluginPortName: plugin-port
+serverServiceName: actions-connector
+serverHttpPort: 8080
+serverHttpPortName: server-http
+serverHttpsPort: 8443
+serverHttpsPortName: server-https

@@ -1936,10 +1936,10 @@
   dependencies:
     defer-to-connect "^2.0.0"
 
-"@tetchel/dynamic-plugin-sdk@^0.0.0-alpha22":
-  version "0.0.0-alpha22"
-  resolved "https://registry.yarnpkg.com/@tetchel/dynamic-plugin-sdk/-/dynamic-plugin-sdk-0.0.0-alpha22.tgz#c9191abfcb50ef3a24e2f96ba7180b2eb75a7aad"
-  integrity sha512-y3uNpz7LMIrx+tfCMWzDxOrvV09gDkZVfurTSVMncxOc2SaP2D2DYOTKaq+fe6/0knd/0tXhmyz7nkru02mlSA==
+"@tetchel/dynamic-plugin-sdk@^0.0.0-alpha24":
+  version "0.0.0-alpha24"
+  resolved "https://registry.yarnpkg.com/@tetchel/dynamic-plugin-sdk/-/dynamic-plugin-sdk-0.0.0-alpha24.tgz#2bf0a0a6c376549ad2ad5ce9d1d964e421445a32"
+  integrity sha512-3nuVkMeT0YVyjc1EsHdrxbJ5fZtR2N5AKez6IyvawfHiyKkMaQpTH4I3wGsJa51EvJ+L5BwuCNnmZfa7fJxdCA==
   dependencies:
     comment-json "4.x"
     webpack "5.0.0-beta.16"

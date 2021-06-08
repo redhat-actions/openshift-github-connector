@@ -46,7 +46,7 @@ router.route(ApiEndpoints.User.App.path)
     }
 
     if (user.ownsAppId != null) {
-    // owned
+      // owned
       const ownedApp = await GitHubApp.load(user.ownsAppId);
       if (!ownedApp) {
         throw new Error(`User "${user.name} owns app ${user.ownsAppId} but that app was not found`);
@@ -65,7 +65,7 @@ router.route(ApiEndpoints.User.App.path)
       };
 
       if (installedAppData != null) {
-      // owned and installed
+        // owned and installed
 
         const combinedData: ApiResponses.UserAppOwnedAndInstalled = {
           success: true,
@@ -97,10 +97,10 @@ router.route(ApiEndpoints.User.App.path)
     // not owned
 
     if (!installedAppResponse) {
-    // neither owned nor installed
+      // neither owned nor installed
 
       const resBody: ApiResponses.GitHubAppMissing = {
-        message: `User "${user.name} does not own an app, or have an app installed.`,
+        message: `User "${user.name}" does not own an app, or have an app installed.`,
         success: false,
       };
 

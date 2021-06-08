@@ -92,7 +92,7 @@ export default class KubeWrapper {
 	*/
 
 	public static async initialize(): Promise <KubeWrapper> {
-		Log.info(`Configuring kube client...`);
+		Log.info(`Configuring kube client`);
 
 		const tmpConfig = new k8s.KubeConfig();
 

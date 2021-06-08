@@ -5,45 +5,17 @@ metadata:
   labels:
     {{- toYaml .Values.commonLabels | nindent 4 }}
   annotations:
+    service.alpha.openshift.io/serving-cert-secret-name: console-serving-cert
 spec:
     type: ClusterIP
     selector:
       {{- toYaml .Values.commonLabels | nindent 6 }}
     ports:
     - port: 80
-      targetPort: {{ .Values.serverPort }}
+      name: {{ .Values.serverHttpPortName }}
+      targetPort: {{ .Values.serverHttpPort }}
       protocol: TCP
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ .Values.clientServiceName }}
-  labels:
-    {{- toYaml .Values.commonLabels | nindent 4 }}
-  annotations:
-spec:
-    type: ClusterIP
-    selector:
-      {{ toYaml .Values.commonLabels | nindent 6 }}
-    ports:
-    - port: 80
-      targetPort: {{ .Values.clientPort }}
-      protocol: TCP
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ .Values.pluginServiceName }}
-  labels:
-    {{- toYaml .Values.commonLabels | nindent 4 }}
-  annotations:
-    service.alpha.openshift.io/serving-cert-secret-name: console-serving-cert
-spec:
-    type: ClusterIP
-    selector:
-      {{ toYaml .Values.commonLabels | nindent 6 }}
-    ports:
-    - port: 80
-      targetPort: {{ .Values.pluginPort }}
+    - port: 443
+      name: {{ .Values.serverHttpsPortName }}
+      targetPort: {{ .Values.serverHttpsPort }}
       protocol: TCP

@@ -23,7 +23,7 @@ export function sendError(
     severity,
   };
 
-  res.header("Content-Type", "application/problem+json").json(resBody);
+  res.header(HttpConstants.Headers.ContentType, HttpConstants.ContentTypes.Problem).json(resBody);
 }
 
 export const send405 = (allowed: HttpConstants.Methods[]) => (

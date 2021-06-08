@@ -9,9 +9,9 @@ metadata:
 spec:
   displayName: "GitHub Connector"
   service:
-    name: {{ .Values.pluginServiceName }}
+    name: {{ .Values.serverServiceName }}
     namespace: {{ .Release.Namespace }}
-    port: 80
-    basePath: '/'
+    port: 443
+    basePath: "/console-plugin"
 
 # also see ConsoleLink in routes.yaml

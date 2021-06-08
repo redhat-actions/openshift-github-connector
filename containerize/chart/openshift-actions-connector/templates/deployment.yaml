@@ -30,10 +30,10 @@ spec:
           imagePullPolicy: Always
           image: {{ .Values.serverImage }}:{{ .Values.serverTag }}
           ports:
-            - name: {{ .Values.clientPortName }}
-              containerPort: {{ .Values.clientPort }}
-            - name: {{ .Values.serverPortName }}
-              containerPort: {{ .Values.serverPort }}
+            - name: {{ .Values.serverHttpPortName }}
+              containerPort: {{ .Values.serverHttpPort }}
+            - name: {{ .Values.serverHttpsPortName }}
+              containerPort: {{ .Values.serverHttpsPort }}
 
           {{- toYaml .Values.securityContext | nindent 10 }}
           resources:
@@ -54,7 +54,6 @@ spec:
 
           {{ $apiServerUrl := required ".Values.clusterApiServer must be set. Refer to the values.yaml" .Values.clusterApiServer }}
           env:
-
             - name: CLUSTER_API_SERVER
               value: {{ .Values.clusterApiServer }}
 

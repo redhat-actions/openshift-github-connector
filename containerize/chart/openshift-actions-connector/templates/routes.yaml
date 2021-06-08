@@ -8,37 +8,7 @@ metadata:
     # https://docs.openshift.com/container-platform/4.7/networking/routes/route-configuration.html
     haproxy.router.openshift.io/hsts_header: max-age=31536000;includeSubDomains;preload
 spec:
-  {{ $subdomain := required ".Values.clusterAppsSubdomain must be set. Refer to the values.yaml" .Values.clusterAppsSubdomain }}
-
-  # do not put another . or the TLS cert domain will no longer match
-  {{ $host := printf "%s-%s.%s" .Values.appName .Release.Namespace .Values.clusterAppsSubdomain }}
-  # The host has to be the same for both client & server so we don't have to worry about CORS
-  host: {{ $host }}
   path: /
-  tls:
-    termination: edge
-    insecureEdgeTerminationPolicy: Redirect
-  to:
-    kind: Service
-    name: {{ .Values.clientServiceName }}
-    weight: 100
-
-  wildcardPolicy: None
-
----
-
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  name: {{ .Values.appName }}-server
-  labels:
-    {{- toYaml .Values.commonLabels | nindent 4 }}
-  annotations:
-    haproxy.router.openshift.io/hsts_header: max-age=31536000;includeSubDomains;preload
-spec:
-  # The host has to be the same for both client & server so we don't have to worry about CORS
-  host: {{ $host }}
-  path: /api
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect
@@ -48,19 +18,3 @@ spec:
     weight: 100
 
   wildcardPolicy: None
-
----
-
-# the ConsoleLink is in this file because it needs to know the frontend host
-
-apiVersion: console.openshift.io/v1
-kind: ConsoleLink
-metadata:
-  name: {{ .Values.appName }}
-  labels:
-    {{- toYaml .Values.commonLabels | nindent 4 }}
-spec:
-  {{ $href := printf "https://%s" $host }}
-  href: {{ $href }}
-  location: NamespaceDashboard
-  text: GitHub Connector

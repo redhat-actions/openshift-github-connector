@@ -2,9 +2,6 @@ FROM node:14-alpine as builder
 
 WORKDIR /app
 
-# https://github.com/yarnpkg/yarn/issues/2816#issuecomment-322755762
-# RUN rm -v /usr/local/bin/yarn /usr/local/bin/yarnpkg && npm i -g yarn
-
 COPY package.json yarn.lock ./
 
 RUN yarn install --frozen-lockfile --no-cache
@@ -46,35 +43,18 @@ WORKDIR /app
 
 RUN apk add curl
 
-COPY --chown=$USER package.json yarn.lock ./
-RUN yarn global add --frozen-lockfile \
-    # This package is used to serve the bundled, static react app
-    serve
-    # These are the external dependencies
-    # as specified in server webpack.config
-    # log4js express @kubernetes/client-node
-
 USER $USER
 
 ENV NODE_ENV production
 
-ARG FRONTEND_PORT=3000
-# ENV FRONTEND_PROTOCOL $PROTOCOL
-ENV FRONTEND_PORT $FRONTEND_PORT
+ARG PORT=8080
+ENV PORT $PORT
 
-ARG PLUGIN_PORT=3001
-ENV PLUGIN_PORT $PLUGIN_PORT
-
-ARG BACKEND_PORT=3003
-ENV BACKEND_PORT $BACKEND_PORT
-
-EXPOSE $FRONTEND_PORT
-EXPOSE $PLUGIN_PORT
-EXPOSE $BACKEND_PORT
+EXPOSE $PORT
 
 COPY --chown=$USER containerize/entrypoint.sh ./
+COPY --chown=$USER --from=builder /app/server .
 COPY --chown=$USER --from=builder /app/client ./client
 COPY --chown=$USER --from=builder /app/plugin ./plugin
-COPY --chown=$USER --from=builder /app/server ./server
 
-ENTRYPOINT "./entrypoint.sh"
+ENTRYPOINT [ "node", "./server.js" ]

@@ -9,6 +9,38 @@ import Package from "./package.json";
 
 // const entry = { plugin: path.relative(__dirname, getSrcPath("client/app.tsx")) };
 
+const CONSOLE_API_BASE_PATH = `/api/plugins/${Package.consolePlugin.name}/`;
+
+function devServerConfig(outputDir: string): wds.Configuration {
+  const wdsConfig: wds.Configuration = {
+    contentBase: outputDir,
+
+    compress: true,
+    hot: true,
+    host: "localhost",
+    // https: true,
+    port: 8081,
+    publicPath: "/",
+    writeToDisk: true,
+
+    proxy: {
+      [CONSOLE_API_BASE_PATH]: {
+        target: "http://localhost:8080",
+        secure: false,
+        pathRewrite: { [`^${CONSOLE_API_BASE_PATH}`]: "" },
+      },
+    },
+  };
+
+  // console.log(`Dev server configured at ${devServer.host}:${devServer.port}${devServer.publicPath}`);
+  console.log(
+    `Connect plugin to cluster by running from 'console' directory: `
+    + `./bin/bridge -plugins ${Package.consolePlugin.name}=http${wdsConfig.https === true ? "s" : ""}://${wdsConfig.host}:${wdsConfig.port}`
+  );
+
+  return wdsConfig;
+}
+
 export default function getWebpackConfig(
   env: any, argv: any
 ): webpack.Configuration & { devServer: wds.Configuration } {
@@ -21,34 +53,15 @@ export default function getWebpackConfig(
   const outChunkFilename = isProd ? "[name]-chunk-[chunkhash].min.js" : "[name]-chunk.js";
   const outputDir = path.resolve(getOutDir(), "plugin");
 
-  const devServer: wds.Configuration = isProd ? {} : {
-    contentBase: outputDir,
-
-    compress: true,
-    hot: true,
-    host: "localhost",
-    port: 3001,
-    publicPath: "/",
-    writeToDisk: true,
-  };
-
   console.log(`Webpack v${webpack.version}`);
   console.log(`Mode: ${mode}`);
   console.log(`Outputting to ${path.join(outputDir, outFilename)} ...`);
-
-  if (Object.keys(devServer).length > 0) {
-    console.log(`Dev server configured at ${devServer.host}:${devServer.port}${devServer.publicPath}`);
-    console.log(
-      `Connect plugin to cluster by running from 'console' directory: `
-      + `./bin/bridge -plugins ${Package.consolePlugin.name}=http://${devServer.host}:${devServer.port}`
-    );
-  }
 
   return {
     mode,
     // entry,
     devtool: isProd ? "source-map" : "eval-source-map",
-    devServer,
+    devServer: isProd ? {} : devServerConfig(outputDir),
     output: {
       path: outputDir,
       filename: outFilename,
@@ -127,6 +140,8 @@ export default function getWebpackConfig(
       new ConsoleRemotePlugin() as unknown as webpack.WebpackPluginInstance,
       new webpack.EnvironmentPlugin({
         IN_OPENSHIFT_CONSOLE: true,
+        // this is used by api-endpoints.ts
+        API_BASE_PATH: CONSOLE_API_BASE_PATH,
       }),
     ],
     optimization: {

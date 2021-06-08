@@ -1,6 +1,10 @@
 import UrlPath from "./types/url-path";
 
-const Root = new UrlPath(undefined, "/api/v1");
+const apiBasePath = process.env.API_BASE_PATH ?? "/";
+// When running in the console, we have to prepend the console-determine plugin API path to reach our backend.
+const apiRootPath = apiBasePath + "api/v1";
+
+const Root = new UrlPath(undefined, apiRootPath);
 const Health = new UrlPath(Root, "/health");
 
 const Setup = new UrlPath(Root, "/setup");
