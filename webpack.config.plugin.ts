@@ -21,7 +21,7 @@ function devServerConfig(outputDir: string): wds.Configuration {
     // https: true,
     port: 8081,
     publicPath: "/",
-    writeToDisk: true,
+    // writeToDisk: true,
 
     proxy: {
       [CONSOLE_API_BASE_PATH]: {
