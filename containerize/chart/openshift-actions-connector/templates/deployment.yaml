@@ -35,7 +35,13 @@ spec:
             - name: {{ .Values.serverHttpsPortName }}
               containerPort: {{ .Values.serverHttpsPort }}
 
-          {{- toYaml .Values.securityContext | nindent 10 }}
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+
           resources:
             limits:
               cpu: 250m

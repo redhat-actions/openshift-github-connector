@@ -12,6 +12,6 @@ spec:
     name: {{ .Values.serverServiceName }}
     namespace: {{ .Release.Namespace }}
     port: 443
-    basePath: "/console-plugin"
+    basePath: "/"
 
 # also see ConsoleLink in routes.yaml

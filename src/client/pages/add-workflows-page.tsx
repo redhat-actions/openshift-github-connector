@@ -24,7 +24,7 @@ const DEFAULT_WORKFLOW_FILE_BASENAME = "openshift";
 const WORKFLOW_FILE_EXTENSION = ".yml";
 const WORKFLOWS_DIR = ".github/workflows/";
 
-const DEFAULT_PORT = 8080;
+const DEFAULT_PORT = 3003;
 
 interface AddWorkflowsPageState {
   repo?: GitHubRepoId,

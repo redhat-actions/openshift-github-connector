@@ -148,7 +148,7 @@ app.use((err_: any, req: express.Request, res: express.Response, next: express.N
 
 // Start server once all middleware are in place //
 
-const httpPort = process.env.BACKEND_HTTP_PORT || 8080;
+const httpPort = process.env.BACKEND_HTTP_PORT || 3003;
 
 Log.info(`HTTP Port is ${httpPort}`);
 
@@ -162,7 +162,7 @@ http.createServer(app).listen(httpPort)
 if (isProduction) {
   Log.info(`In production, starting HTTPS server`);
 
-  const httpsPort = process.env.BACKEND_HTTPS_PORT || 8443;
+  const httpsPort = process.env.BACKEND_HTTPS_PORT || 3443;
   Log.info(`HTTPS Port is ${httpsPort}`);
 
   getCertData()

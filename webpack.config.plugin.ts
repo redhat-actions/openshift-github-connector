@@ -10,6 +10,9 @@ import Package from "./package.json";
 // const entry = { plugin: path.relative(__dirname, getSrcPath("client/app.tsx")) };
 
 const CONSOLE_API_BASE_PATH = `/api/plugins/${Package.consolePlugin.name}/`;
+const BACKEND_HTTPS = false;
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+const BACKEND_URL = `http${BACKEND_HTTPS ? "s" : ""}://localhost:3003`;
 
 function devServerConfig(outputDir: string): wds.Configuration {
   const wdsConfig: wds.Configuration = {
@@ -19,15 +22,19 @@ function devServerConfig(outputDir: string): wds.Configuration {
     hot: true,
     host: "localhost",
     // https: true,
-    port: 8081,
+    port: 3001,
     publicPath: "/",
     // writeToDisk: true,
 
     proxy: {
       [CONSOLE_API_BASE_PATH]: {
-        target: "http://localhost:8080",
-        secure: false,
+        target: BACKEND_URL,
+        secure: BACKEND_HTTPS,
         pathRewrite: { [`^${CONSOLE_API_BASE_PATH}`]: "" },
+      },
+      "/api": {
+        target: BACKEND_URL,
+        secure: BACKEND_HTTPS,
       },
     },
   };
@@ -35,7 +42,7 @@ function devServerConfig(outputDir: string): wds.Configuration {
   // console.log(`Dev server configured at ${devServer.host}:${devServer.port}${devServer.publicPath}`);
   console.log(
     `Connect plugin to cluster by running from 'console' directory: `
-    + `./bin/bridge -plugins ${Package.consolePlugin.name}=http${wdsConfig.https === true ? "s" : ""}://${wdsConfig.host}:${wdsConfig.port}`
+    + `./examples/run-bridge.sh -plugins ${Package.consolePlugin.name}=http${wdsConfig.https === true ? "s" : ""}://${wdsConfig.host}:${wdsConfig.port}`
   );
 
   return wdsConfig;

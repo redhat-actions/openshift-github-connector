@@ -42,7 +42,7 @@ jobs:
           echo "View output in Logs step below"
           sleep 10
 
-          yarn wait-on -l tcp:8080 -t 60000
+          yarn wait-on -l tcp:3003 -t 60000
 
       - name: Podman inspect
         run: |
@@ -53,7 +53,7 @@ jobs:
         run: |
           set -eEx
           podman ps
-          curl -sSf http://localhost:8080
+          curl -sSf http://localhost:3003
 
       - name: Push container image
         if: ${{ steps.commit_data.outputs.is_pr }} == 'false'
