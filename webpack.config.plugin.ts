@@ -23,7 +23,7 @@ function devServerConfig(outputDir: string): wds.Configuration {
     host: "localhost",
     // https: true,
     port: 3001,
-    publicPath: "/",
+    // publicPath: "/",
     // writeToDisk: true,
 
     proxy: {
@@ -67,7 +67,7 @@ export default function getWebpackConfig(
   return {
     mode,
     // entry,
-    devtool: isProd ? "source-map" : "eval-source-map",
+    devtool: isProd ? "source-map" : "inline-source-map",
     devServer: isProd ? {} : devServerConfig(outputDir),
     output: {
       path: outputDir,
