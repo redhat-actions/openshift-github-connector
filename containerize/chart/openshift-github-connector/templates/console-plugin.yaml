@@ -9,7 +9,7 @@ metadata:
 spec:
   displayName: "GitHub Connector"
   service:
-    name: {{ .Values.serverServiceName }}
+    name: {{ .Values.serviceName }}
     namespace: {{ .Release.Namespace }}
     port: 443
     basePath: "/"

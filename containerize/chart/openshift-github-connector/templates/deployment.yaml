@@ -58,7 +58,6 @@ spec:
               readOnly: true
               mountPath: /var/serving-cert
 
-          {{ $apiServerUrl := required ".Values.clusterApiServer must be set. Refer to the values.yaml" .Values.clusterApiServer }}
           env:
             - name: CLUSTER_API_SERVER
               value: {{ .Values.clusterApiServer }}

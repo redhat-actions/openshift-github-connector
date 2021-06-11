@@ -2,7 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-appName: actions-connector
+appName: github-connector
 
 # REQUIRED VALUE
 # oc whoami --show-server
@@ -10,21 +10,21 @@ clusterApiServer: ""
 
 ################################################################################
 
-serviceAccountName: github-actions
+serviceAccountName: github-connector
 # A rolebinding is created with this role, allowing the application pod to
 # modify resources in the namespace
 serviceAccountRole: edit
 
 ################################################################################
 
-sessionSecretName: connector-session-secrets
+sessionSecretName: github-connector-session-secrets
 sessionSecretKeyName: session-secret
 sessionStoreKeyName: session-store-secret
 
 ################################################################################
 
 commonLabels:
-  app: openshift-actions-connector
+  app: openshift-github-connector
 
 deploymentLabels:
 
@@ -35,7 +35,7 @@ serverReplicaCount: 1
 serverImage: quay.io/tetchell/openshift-actions-connector
 serverTag: latest
 
-serverServiceName: actions-connector
+serviceName: github-connector
 serverHttpPort: 3003
 serverHttpPortName: server-http
 serverHttpsPort: 3443

@@ -1,7 +1,7 @@
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: {{ .Values.appName }}-client
+  name: {{ .Values.appName }}
   labels:
     {{- toYaml .Values.commonLabels | nindent 4 }}
   annotations:
@@ -14,7 +14,7 @@ spec:
     insecureEdgeTerminationPolicy: Redirect
   to:
     kind: Service
-    name: {{ .Values.serverServiceName }}
+    name: {{ .Values.serviceName }}
     weight: 100
 
   wildcardPolicy: None

@@ -5,7 +5,7 @@ on:
   pull_request:
 
 env:
-  CHART_DIR: containerize/chart/openshift-actions-connector
+  CHART_DIR: containerize/chart/openshift-github-connector
 
 jobs:
   helm_lint:
