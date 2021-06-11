@@ -55,6 +55,19 @@ export async function throwIfError(res: Response): Promise<void> {
   }
 }
 
+const CSRF_HEADER = "X-CSRFToken";
+
+// copied from console/frontend/public/co-fetch
+const CSRF_COOKIE = "csrf-token=";
+function getCSRFToken(): string {
+  return document.cookie
+    .split(";")
+    .map((c) => c.trim())
+    .filter((c) => c.startsWith(CSRF_COOKIE))
+    .map((c) => c.slice(CSRF_COOKIE.length))
+    .pop() ?? "";
+}
+
 export async function fetchJSON<
   // eslint-disable-next-line @typescript-eslint/ban-types
   Req extends {} = never,
@@ -64,19 +77,17 @@ export async function fetchJSON<
 ): Promise<{ statusCode: number } & Res> {
 
   const hasBody = body != null;
-  if (hasBody && method === "GET") {
-    // eslint-disable-next-line no-console
-    console.error(`GET request has body`);
-  }
-
   let stringifiedBody: string | undefined;
   if (hasBody) {
     stringifiedBody = JSON.stringify(body);
   }
 
+  const consoleCSRFToken = getCSRFToken();
+
   const headers = {
     ...options.headers,
     ...HttpConstants.getJSONContentHeaders(stringifiedBody),
+    [CSRF_HEADER]: consoleCSRFToken,
   };
 
   const res = await fetch(url.toString(), {
