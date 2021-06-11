@@ -37,7 +37,7 @@
     "container-tag": "export TAG=quay.io/tetchell/openshift-actions-connector:latest && buildah tag openshift-actions-connector:latest $TAG",
     "container-push": "export TAG=quay.io/tetchell/openshift-actions-connector:latest && buildah push $TAG",
     "container-e2e": "yarn container-build && yarn container-tag && yarn container-push",
-    "helm-install": "export RELEASE_NAME=actions-connector && helm upgrade --install $RELEASE_NAME containerize/chart/openshift-actions-connector --set clusterApiServer=$(oc whoami --show-server)"
+    "helm-install": "export RELEASE_NAME=github-connector && helm upgrade --install $RELEASE_NAME containerize/chart/openshift-github-connector --set clusterApiServer=$(oc whoami --show-server)"
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.14.0",

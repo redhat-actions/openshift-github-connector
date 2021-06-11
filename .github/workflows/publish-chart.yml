@@ -1,0 +1,96 @@
+name: Publish chart to Pages
+on:
+  push:
+env:
+  PAGES_BRANCH: release-chart
+  PAGES_URL: https://redhat-actions.github.io/openshift-github-connector
+  CHART_OUTPUT_DIR: packages/
+  CHART_SRC_DIR: containerize/chart/openshift-github-connector
+
+jobs:
+  package-chart:
+    name: Package Helm Chart
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          source: github
+          github_pat: ${{ github.token }}
+          yq: latest
+
+      - uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          source: mirror
+          helm: latest
+
+      - name: Helm lint
+        run: helm lint ${{ env.CHART_SRC_DIR }}
+
+      - uses: redhat-actions/common/commit-data@v1
+        id: commit_data
+
+      - name: Get tag
+        shell: bash
+        run: |
+          export TAG=${{ steps.commit_data.outputs.tag }}
+          if [[ -z $TAG ]]; then
+            TAG=0.0.0-latest
+          elif [[ $TAG =~ v* ]]; then
+            TAG=${TAG#v*}
+          fi
+          echo "TAG=$TAG" >> $GITHUB_ENV
+
+      - name: Get Chart.yaml path
+        run: echo "CHART_YAML=${{ env.CHART_SRC_DIR }}/Chart.yaml" | tee -a $GITHUB_ENV
+
+      - name: Update Chart.yaml version
+        run: yq -ei e '.version = "${{ env.TAG }}"' ${{ env.CHART_YAML }}
+
+      - name: Package Helm Chart
+        shell: bash
+        run: |
+          set -xeE -o pipefail
+          cat ${{ env.CHART_YAML }}
+          echo
+          mkdir -p ${{ env.CHART_OUTPUT_DIR }}
+          helm package ${{ env.CHART_SRC_DIR }} --destination ${{ env.CHART_OUTPUT_DIR }}
+
+          helm repo index ${{ env.CHART_SRC_DIR }} \
+            --url ${{ env.PAGES_URL }}
+
+      # The chart name will be eg. 'actions-runner-v1.0.0.tgz'
+      - name: Get chart package filename
+        shell: bash
+        run: |
+          set -xeE -o pipefail
+          export CHART_SUFFIX=${{ env.TAG }}.tgz
+          export CHART_PATH=$(ls ${{ env.CHART_OUTPUT_DIR }}*$CHART_SUFFIX)
+          echo "CHART_PATH=$CHART_PATH" >> $GITHUB_ENV
+          echo "CHART_FILENAME=$(basename $CHART_PATH)" >> $GITHUB_ENV
+
+      - name: Upload helm chart
+        uses: actions/upload-artifact@v2
+        with:
+          path: ${{ env.CHART_PATH }}
+          name: ${{ env.CHART_FILENAME }}
+
+      - name: Commit and push packaged chart
+        run: |
+          set -xeE -o pipefail
+          git config user.name "Chart Packager Bot"
+          git config user.email github-actions@github.com
+
+          git status
+          git add -Av
+          git stash save
+
+          git fetch origin
+          git checkout ${{ env.PAGES_BRANCH }}
+
+          git checkout stash -- .
+
+          git commit -m "Add ${{ env.TAG }} chart package"
+          git push origin ${{ env.PAGES_BRANCH }}
