@@ -56,6 +56,7 @@ jobs:
           cat ${{ env.CHART_YAML }}
           echo
           mkdir -p ${{ env.CHART_OUTPUT_DIR }}
+          echo "${{ steps.commit_data.outputs.short_sha }} > ${{ env.CHART_OUTPUT_DIR }}/.git-ref"
           helm package ${{ env.CHART_SRC_DIR }} --destination ${{ env.CHART_OUTPUT_DIR }}
 
           helm repo index ${{ env.CHART_SRC_DIR }} \
