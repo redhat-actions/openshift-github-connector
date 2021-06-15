@@ -4,8 +4,8 @@ on:
 env:
   PAGES_BRANCH: release-chart
   PAGES_URL: https://redhat-actions.github.io/openshift-github-connector
-  CHART_OUTPUT_DIR: packages/
   CHART_SRC_DIR: containerize/chart/openshift-github-connector
+  CHART_OUTPUT_DIR: containerize/chart/openshift-github-connector/packages/
 
 jobs:
   package-chart:
@@ -62,7 +62,6 @@ jobs:
           helm repo index ${{ env.CHART_SRC_DIR }} \
             --url ${{ env.PAGES_URL }}/${{ env.CHART_SRC_DIR }}
 
-          echo "Chart URL will be: ${{ env.PAGES_URL }}/${{ env.CHART_SRC_DIR }}/index.yaml"
           cat "${{ env.CHART_SRC_DIR }}/index.yaml"
 
       # The chart name will be eg. 'actions-runner-v1.0.0.tgz'
