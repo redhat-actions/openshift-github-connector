@@ -60,7 +60,9 @@ jobs:
           helm package ${{ env.CHART_SRC_DIR }} --destination ${{ env.CHART_OUTPUT_DIR }}
 
           helm repo index ${{ env.CHART_SRC_DIR }} \
-            --url ${{ env.PAGES_URL }}
+            --url ${{ env.PAGES_URL }}/${{ env.CHART_SRC_DIR }}
+
+          echo "Chart URL will be: ${{ env.PAGES_URL }}/${{ env.CHART_SRC_DIR }}"
 
       # The chart name will be eg. 'actions-runner-v1.0.0.tgz'
       - name: Get chart package filename
