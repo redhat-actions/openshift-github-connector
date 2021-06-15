@@ -37,7 +37,7 @@ jobs:
         run: |
           export TAG=${{ steps.commit_data.outputs.tag }}
           if [[ -z $TAG ]]; then
-            TAG=0.0.0-latest
+            TAG=0.0.0
           elif [[ $TAG =~ v* ]]; then
             TAG=${TAG#v*}
           fi
