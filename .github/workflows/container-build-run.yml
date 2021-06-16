@@ -29,7 +29,7 @@ jobs:
           image: ${{ env.IMAGE_NAME }}
           tags: latest ${{ steps.commit_data.outputs.branch }}
           dockerfiles:
-            containerize/Containerfile
+            Containerfile
           layers: true
           oci: true
           build-args:

@@ -4,8 +4,8 @@ on:
 env:
   PAGES_BRANCH: release-chart
   PAGES_URL: https://redhat-actions.github.io/openshift-github-connector
-  CHART_SRC_DIR: containerize/chart/openshift-github-connector
-  CHART_OUTPUT_DIR: containerize/chart/openshift-github-connector/packages/
+  CHART_SRC_DIR: chart/openshift-github-connector
+  CHART_OUTPUT_DIR: chart/openshift-github-connector/packages/
 
 jobs:
   package-chart:

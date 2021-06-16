@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- toYaml .Values.commonLabels | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- toYaml .Values.commonLabels | nindent 6 }}
+  replicas: {{ .Values.serverReplicaCount }}
+  template:
+    metadata:
+      labels:
+        {{- toYaml .Values.commonLabels | nindent 8 }}
+    spec:
+      serviceAccountName: {{ .Values.serviceAccountName }}
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
+      volumes:
+        - emptyDir: {}
+          name: tmp
+        - name: console-serving-cert
+          secret:
+            secretName: console-serving-cert
+            defaultMode: 420
+
+      containers:
+        - name: {{ .Values.appName }}
+          imagePullPolicy: Always
+          image: {{ .Values.serverImage }}:{{ .Values.serverTag }}
+          ports:
+            - name: {{ .Values.serverHttpPortName }}
+              containerPort: {{ .Values.serverHttpPort }}
+            - name: {{ .Values.serverHttpsPortName }}
+              containerPort: {{ .Values.serverHttpsPort }}
+
+          securityContext:
+            readOnlyRootFilesystem: {{ .Values.readOnlyRootFilesystem }}
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+
+          resources:
+            limits:
+              cpu: 250m
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 512Mi
+
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+
+            - name: console-serving-cert
+              readOnly: true
+              mountPath: /var/serving-cert
+
+          env:
+            - name: CLUSTER_API_SERVER
+              value: {{ .Values.clusterApiServer }}
+
+            - name: CONNECTOR_SERVICEACCOUNT_NAME
+              value: {{ .Values.serviceAccountName }}
+
+            - name: OAUTH_CLIENT_ID
+              value: {{ .Values.oauthClientId }}
+
+            - name: OAUTH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: {{ .Values.oauthClientSecretKeyName }}
+
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: {{ .Values.sessionSecretKeyName }}
+
+            - name: SESSION_STORE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: {{ .Values.sessionStoreKeyName }}
+
+            - name: SESSION_STORE_PATH
+              value: /tmp/sessions

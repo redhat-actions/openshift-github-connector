@@ -1,0 +1,30 @@
+# source https://github.com/openshift/console/blob/master/frontend/dynamic-demo-plugin/oc-manifest.yaml
+
+apiVersion: console.openshift.io/v1alpha1
+kind: ConsolePlugin
+metadata:
+  name: "github-connector"
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- toYaml .Values.commonLabels | nindent 4 }}
+spec:
+  displayName: "GitHub Connector"
+  service:
+    name: {{ .Values.serviceName }}
+    namespace: {{ .Release.Namespace }}
+    port: 443
+    basePath: "/"
+
+---
+
+apiVersion: console.openshift.io/v1
+kind: ConsoleLink
+metadata:
+  name: {{ .Values.appName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- toYaml .Values.commonLabels | nindent 4 }}
+spec:
+  href: {{ tpl .Values.appUrl . | quote }}
+  location: NamespaceDashboard
+  text: GitHub Connector

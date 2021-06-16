@@ -30,14 +30,14 @@
     "build:server": "yarn webpack --config webpack.config.server.ts --mode=production",
     "build:plugin": "yarn webpack --config webpack.config.plugin.ts --mode=production",
     "build": "yarn clean && concurrently --kill-others-on-fail -p name -c 'cyan,magenta,yellow' -n 'client,server,plugin', 'yarn build:client' 'yarn build:server' 'yarn build:plugin'",
-    "container-build": "buildah bud --layers -f containerize/Containerfile --build-arg VCS_REF=$(git rev-parse HEAD | cut -c -7) -t openshift-actions-connector:latest .",
-    "container-build:dev": "buildah bud --layers -f containerize/dev/Containerfile.dev -t openshift-actions-connector-dev:latest",
+    "container-build": "buildah bud --layers -f Containerfile --build-arg VCS_REF=$(git rev-parse HEAD | cut -c -7) -t openshift-actions-connector:latest .",
+    "container-build:dev": "buildah bud --layers -f Containerfile.dev -t openshift-actions-connector-dev:latest",
     "container-run": "podman run --rm --name openshift-actions-connector -p 3003:3003 openshift-actions-connector:latest",
     "container-run-d": "podman run -d --rm --name openshift-actions-connector -p 3003:3003 openshift-actions-connector:latest",
     "container-tag": "export TAG=quay.io/tetchell/openshift-actions-connector:latest && buildah tag openshift-actions-connector:latest $TAG",
     "container-push": "export TAG=quay.io/tetchell/openshift-actions-connector:latest && buildah push $TAG",
     "container-e2e": "yarn container-build && yarn container-tag && yarn container-push",
-    "helm-install": "export RELEASE_NAME=github-connector && helm upgrade --install $RELEASE_NAME containerize/chart/openshift-github-connector --set clusterApiServer=$(oc whoami --show-server)"
+    "helm-install": "export RELEASE_NAME=github-connector && helm upgrade --install $RELEASE_NAME chart/openshift-github-connector"
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.14.0",
@@ -61,6 +61,7 @@
     "jsonwebtoken": "^8.5.1",
     "log4js": "^6.3.0",
     "node-fetch": "^2.6.1",
+    "passport-oauth2": "^1.5.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-helmet": "^6.1.0",
@@ -82,6 +83,7 @@
     "@types/express-session": "^1.17.3",
     "@types/node": "14",
     "@types/node-fetch": "^2.5.8",
+    "@types/passport-oauth2": "^1.4.10",
     "@types/react": "^17.0.3",
     "@types/react-dom": "^17.0.2",
     "@types/react-helmet": "^6.1.0",
