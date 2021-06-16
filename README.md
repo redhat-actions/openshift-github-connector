@@ -3,13 +3,13 @@
 Coming soon...
 
 ## Installing on OpenShift
-See [the chart](./containerize/chart/openshift-actions-connector).
-The inputs are described in [`values.yaml`](./containerize/chart/openshift-actions-connector/values.yaml).
+See [the chart](./chart/openshift-actions-connector).
+The inputs are described in [`values.yaml`](./chart/openshift-actions-connector/values.yaml).
 
 Install from the root of the repo as follows:
 ```sh
 helm upgrade --install actions-connector \
-  containerize/chart/openshift-actions-connector \
+  chart/openshift-actions-connector \
   --set clusterAppsSubdomain=apps.<your-openshift-server>.com
   --set clusterApiServer=$(oc whoami --show-server)
 ```

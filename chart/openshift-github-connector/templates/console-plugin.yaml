@@ -4,6 +4,7 @@ apiVersion: console.openshift.io/v1alpha1
 kind: ConsolePlugin
 metadata:
   name: "github-connector"
+  namespace: {{ .Values.namespace }}
   labels:
     {{- toYaml .Values.commonLabels | nindent 4 }}
 spec:
@@ -14,4 +15,16 @@ spec:
     port: 443
     basePath: "/"
 
-# also see ConsoleLink in routes.yaml
+---
+
+apiVersion: console.openshift.io/v1
+kind: ConsoleLink
+metadata:
+  name: {{ .Values.appName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- toYaml .Values.commonLabels | nindent 4 }}
+spec:
+  href: {{ tpl .Values.appUrl . | quote }}
+  location: NamespaceDashboard
+  text: GitHub Connector

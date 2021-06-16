@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.appName }}
+  namespace: {{ .Values.namespace }}
   labels:
     {{- toYaml .Values.commonLabels | nindent 4 }}
 spec:
@@ -26,7 +27,7 @@ spec:
             defaultMode: 420
 
       containers:
-        - name: {{ .Values.appName }}-server
+        - name: {{ .Values.appName }}
           imagePullPolicy: Always
           image: {{ .Values.serverImage }}:{{ .Values.serverTag }}
           ports:
@@ -36,7 +37,7 @@ spec:
               containerPort: {{ .Values.serverHttpsPort }}
 
           securityContext:
-            readOnlyRootFilesystem: true
+            readOnlyRootFilesystem: {{ .Values.readOnlyRootFilesystem }}
             runAsNonRoot: true
             capabilities:
               drop:
@@ -65,16 +66,25 @@ spec:
             - name: CONNECTOR_SERVICEACCOUNT_NAME
               value: {{ .Values.serviceAccountName }}
 
+            - name: OAUTH_CLIENT_ID
+              value: {{ .Values.oauthClientId }}
+
+            - name: OAUTH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: {{ .Values.oauthClientSecretKeyName }}
+
             - name: SESSION_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.sessionSecretName }}
+                  name: {{ .Values.secretName }}
                   key: {{ .Values.sessionSecretKeyName }}
 
             - name: SESSION_STORE_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.sessionSecretName }}
+                  name: {{ .Values.secretName }}
                   key: {{ .Values.sessionStoreKeyName }}
 
             - name: SESSION_STORE_PATH

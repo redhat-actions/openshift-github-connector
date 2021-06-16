@@ -40,6 +40,7 @@ RUN mkdir -v /app  \
     && chown $USER:0 /app \
     && chmod 774 /app
 WORKDIR /app
+ENV HOME /app
 
 RUN apk add curl
 

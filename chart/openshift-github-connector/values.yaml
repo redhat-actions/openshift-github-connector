@@ -1,12 +1,21 @@
-# Default values for openshift-actions-connector.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
 appName: github-connector
+namespace: github-connector
 
 # REQUIRED VALUE
 # oc whoami --show-server
-clusterApiServer: ""
+# https://github.com/helm/helm/issues/2055
+clusterApiServer: "https://api.crc.testing:6443"
+
+# REQUIRED VALUE:
+# This is the apps.<cluster url> subdomain.which may have been edited by the admin. There does not appear to be a user API to get this.
+# the easiest way to get this is to `oc expose <some service>` and then look at its subdomain
+clusterAppsSubdomain: "apps-crc.testing"
+
+# Use the tpl function to access these values
+# https://stackoverflow.com/a/62896363
+subdomainCheck: '{{- required ".Values.clusterAppsSubdomain must be set. Refer to the values.yaml" .Values.clusterAppsSubdomain }}'
+appHost: '{{- printf "%s.%s" .Values.appName .Values.clusterAppsSubdomain }}'
+appUrl: '{{- printf "https://%s" (tpl .Values.appHost .) }}'
 
 ################################################################################
 
@@ -17,9 +26,13 @@ serviceAccountRole: edit
 
 ################################################################################
 
-sessionSecretName: github-connector-session-secrets
+secretName: github-connector
+
 sessionSecretKeyName: session-secret
 sessionStoreKeyName: session-store-secret
+
+oauthClientId: github-connector-oauth-client
+oauthClientSecretKeyName: github-connector-oauth-secret
 
 ################################################################################
 
@@ -31,6 +44,7 @@ deploymentLabels:
 ################################################################################
 
 serverReplicaCount: 1
+readOnlyRootFilesystem: true
 
 serverImage: quay.io/tetchell/openshift-actions-connector
 serverTag: latest
