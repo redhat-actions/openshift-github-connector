@@ -54,8 +54,8 @@ jobs:
         run: |
           set -eEx
           podman ps
-          curl -sSf http://localhost:${{ env.PORT }}
-          curl -sSf http://localhost:${{ env.PORT }}/api/v1/
+          curl -sSf https://localhost:${{ env.PORT }}
+          curl -sSf https://localhost:${{ env.PORT }}/api/v1/
 
       - name: Push container image
         if: ${{ steps.commit_data.outputs.is_pr }} == 'false'
