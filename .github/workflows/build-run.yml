@@ -2,6 +2,9 @@ name: Build and run
 on:
   push:
 
+env:
+  PORT: 3000
+
 jobs:
   ci:
     name: CI
@@ -30,6 +33,12 @@ jobs:
         run: |
           yarn build
 
+      - uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
+
       - name: Run dev
         shell: bash
         run: |
@@ -38,13 +47,14 @@ jobs:
           dev_pid=$!
           echo "dev_pid=$dev_pid" >> $GITHUB_ENV
 
-          yarn wait-on -l tcp:3443 -t 60000
+          yarn wait-on -l tcp:${{ env.PORT }} -t 60000
 
       - name: Test
         shell: bash
         run: |
           set -eEx
-          curl -sSf http://localhost:3443
+          curl -sSfk https://localhost:${{ env.PORT }}
+          curl -sSfk https://localhost:${{ env.PORT }}/api/v1/
 
       - name: Stop
         if: always()
