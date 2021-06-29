@@ -39,7 +39,7 @@ export default class UserInstallation {
   }
 
   public async getRepos(): Promise<GitHubRepo[]> {
-    const repositories: GitHubRepo[] = await this.octokit.paginate("GET /installation/repositories", { per_page: 100 });
+    const repositories: GitHubRepo[] = await this.octokit.paginate("GET /installation/repositories", { per_page: 100 }) as GitHubRepo[];
     return repositories;
   }
 
