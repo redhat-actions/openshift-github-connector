@@ -40,8 +40,8 @@ async function main(): Promise<void> {
   Log.info(`Plugin path is ${pluginPath}`);
 
   if (!isProduction()) {
-    loadEnv(".env");
-    loadEnv(".env.local");
+    await loadEnv(".env");
+    await loadEnv(".env.local");
   }
 
   await loadRouterCerts();

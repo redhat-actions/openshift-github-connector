@@ -39,6 +39,12 @@ jobs:
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
 
+      - uses: tetchel/generate-tls-cert@v1
+        with:
+          output_directory: /var/certs/localhost
+
+      - run: echo "SERVING_CA_DIRECTORY=/var/certs/localhost" >> .env.local
+
       - name: Run dev
         shell: bash
         run: |
