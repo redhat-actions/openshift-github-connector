@@ -131,7 +131,9 @@ router.route(ApiEndpoints.App.Workflows.path)
     });
 
     // const newWorkflowFileName = writeRes.data.content.name;
-    const newWorkflowFileUrl = writeRes.data.content.html_url;
+
+    // eslint-disable-next-line
+    const newWorkflowFileUrl = writeRes.data.content?.html_url ?? repoMeta.html_url;
 
     const resBody: ApiResponses.WorkflowCreationResult = {
       message: `Successfully created registry password secret, `
