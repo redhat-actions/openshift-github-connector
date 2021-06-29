@@ -50,7 +50,7 @@ spec:
               containerPort: {{ .Values.serverHttpsPort }}
 
           securityContext:
-            # readOnlyRootFilesystem: {{ .Values.readOnlyRootFilesystem }}
+            readOnlyRootFilesystem: {{ .Values.readOnlyRootFilesystem }}
             runAsNonRoot: true
             capabilities:
               drop:
