@@ -36,6 +36,8 @@ interface DataFetcherState<Data> {
  */
 export default class DataFetcher<Data> extends React.Component<DataFetcherProps<Data>, DataFetcherState<Data>> {
 
+  private readonly abortController = new AbortController();
+
   constructor(
     props: DataFetcherProps<Data>,
   ) {
@@ -51,6 +53,10 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
     await this.load();
   }
 
+  override async componentWillUnmount(): Promise<void> {
+    this.abortController.abort();
+  }
+
   async load(): Promise<void> {
     this.setState({
       data: undefined,
@@ -61,7 +67,9 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
     try {
       let data: Data;
       if (this.props.type === "api") {
-        data = await fetchJSON<{}, Data>("GET", this.props.endpoint.path);
+        data = await fetchJSON<never, Data>("GET", this.props.endpoint.path, undefined, {
+          signal: this.abortController.signal,
+        });
       }
       else {
         data = await this.props.fetchData();
@@ -98,7 +106,9 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
       else if (loadingDisplayType === "spinner") {
         const loadingStyle = this.props.loadingStyle ?? {};
         return (
-          <Spinner style={loadingStyle} diameter="1em"/>
+          <div className="center-x">
+            <Spinner style={loadingStyle} diameter="1em"/>
+          </div>
         );
       }
       else if (loadingDisplayType === "card") {

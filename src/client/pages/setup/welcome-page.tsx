@@ -2,12 +2,12 @@ import React from "react";
 import {
   Card, CardTitle, CardBody,
 } from "@patternfly/react-core";
-import { Table } from "@patternfly/react-table";
 
 import ApiEndpoints from "../../../common/api-endpoints";
 import ApiResponses from "../../../common/api-responses";
 import DataFetcher from "../../components/data-fetcher";
 import SetupPageHeader from "./setup-header";
+import { ObjectTable } from "../../components/object-table";
 
 export default function WelcomePage(): JSX.Element {
   return (
@@ -60,36 +60,40 @@ export default function WelcomePage(): JSX.Element {
 
       </Card>
       <Card>
+        <CardTitle>
+          Cluster Info
+        </CardTitle>
         <CardBody>
           <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root} loadingDisplay="card-body">
-            {(data: ApiResponses.ClusterState) => (
-              <Table>
-                <tr>
-                  <td className="b">Cluster API Server:</td>
-                  <td className={data.connected ? "text-success" : "text-danger"}>
-                    {data.connected ? data.clusterInfo.externalServer : "Error"}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="b">Namespace:</td>
-                  <td className={data.connected ? "text-success" : "text-danger"}>
-                    {data.connected ? data.namespace : "Error"}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="b">User:</td>
-                  <td className={data.connected ? "text-success" : "text-danger"}>
-                    {data.connected ? data.clusterInfo.user.name : "Error"}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="b">Service Account Name:</td>
-                  <td className={data.connected ? "text-success" : "text-danger"}>
-                    {data.connected ? data.serviceAccountName : "Error"}
-                  </td>
-                </tr>
-              </Table>
-            )}
+            {(data: ApiResponses.ClusterState) => {
+              if (!data.connected) {
+                return (
+                  <>
+                    <p className="error">
+                      Disconnected!
+                    </p>
+                    <p className="error">
+                      {data.error}
+                    </p>
+                  </>
+                );
+              }
+
+              return (
+                <>
+                  <ObjectTable
+                    label="Cluster Info"
+                    obj={{
+                      // "Cluster Name": data.clusterInfo.name,
+                      // "API Server": data.clusterInfo.externalServer,
+                      "External API Server": data.clusterInfo.externalServer,
+                      Namespace: data.namespace,
+                      User: data.clusterInfo.user.name,
+                      "Service Account Name": data.serviceAccountName,
+                    }} />
+                </>
+              );
+            }}
           </DataFetcher>
         </CardBody>
       </Card>

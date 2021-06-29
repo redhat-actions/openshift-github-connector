@@ -6,7 +6,6 @@ import ApiRequests from "common/api-requests";
 import ApiResponses from "common/api-responses";
 import KubeWrapper, { ServiceAccountToken as ServiceAccountTokenData } from "server/lib/kube/kube-wrapper";
 import GitHubUserMemento from "server/lib/memento/user-memento";
-import { send405, sendError } from "server/util/send-error";
 
 const router = express.Router();
 export default router;
@@ -18,14 +17,14 @@ router.route(ApiEndpoints.User.ServiceAccount.path)
     next
   ) => {
 
-    const sessionData = req.session.data;
-    if (!sessionData) {
-      return sendError(res, 400, `No session`);
+    const UserSessionData = req.session.data;
+    if (!UserSessionData) {
+      return res.sendError(400, `No session`);
     }
 
-    const userData = await GitHubUserMemento.loadUser(sessionData.githubUserId);
+    const userData = await GitHubUserMemento.loadUser(UserSessionData.githubUserId);
     if (!userData) {
-      return sendError(res, 400, `No data for user ID ${sessionData.githubUserId}`);
+      return res.sendError(400, `No data for user ID ${UserSessionData.githubUserId}`);
     }
 
     const serviceAccountName = userData.serviceAccount?.serviceAccountName;
@@ -47,9 +46,9 @@ router.route(ApiEndpoints.User.ServiceAccount.path)
     res: express.Response<ApiResponses.ServiceAccountState>,
     next
   ) => {
-    const sessionData = req.session.data;
-    if (!sessionData) {
-      return sendError(res, 400, `No session`);
+    const UserSessionData = req.session.data;
+    if (!UserSessionData) {
+      return res.sendError(400, `No session`);
     }
 
     const serviceAccountTokenInput = req.body.serviceAccountToken;
@@ -59,10 +58,10 @@ router.route(ApiEndpoints.User.ServiceAccount.path)
       serviceAccountToken = await KubeWrapper.loadForServiceAccount(serviceAccountTokenInput);
     }
     catch (err) {
-      return sendError(res, 400, err.message, `Error adding service account token`);
+      return res.sendError(400, err.message, `Error adding service account token`);
     }
 
-    await GitHubUserMemento.addServiceAccount(sessionData.githubUserId, {
+    await GitHubUserMemento.addServiceAccount(UserSessionData.githubUserId, {
       serviceAccountName: serviceAccountToken.serviceAccountName,
       serviceAccountToken: serviceAccountToken.token,
     });

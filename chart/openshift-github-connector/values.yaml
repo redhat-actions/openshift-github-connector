@@ -8,7 +8,8 @@ clusterApiServer: "https://api.crc.testing:6443"
 
 # REQUIRED VALUE:
 # This is the apps.<cluster url> subdomain.which may have been edited by the admin. There does not appear to be a user API to get this.
-# the easiest way to get this is to `oc expose <some service>` and then look at its subdomain
+# the easiest way to get this is to `oc expose <some service>` and then look at its subdomai
+# or look at the console URL, after the first '.' in the domain name.
 clusterAppsSubdomain: "apps-crc.testing"
 
 # Use the tpl function to access these values
@@ -32,7 +33,14 @@ sessionSecretKeyName: session-secret
 sessionStoreKeyName: session-store-secret
 
 oauthClientId: github-connector-oauth-client
-oauthClientSecretKeyName: github-connector-oauth-secret
+oauthClientSecretKeyName: oauth-secret
+# URL path must match the route used in the server code.
+oauthCallbackUrl: '{{- printf "%s/api/v1/auth/callback" (tpl .Values.appUrl .) }}'
+
+servingCertSecret: connector-serving-cert
+servingCADirectory: /var/certs/serving
+routerCADirectory: /var/certs/router
+insecureTrustApiServerCert: false
 
 ################################################################################
 

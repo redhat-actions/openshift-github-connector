@@ -217,6 +217,16 @@ label {
   }
 }
 
+.center-x {
+  display: flex;
+  justify-content: center;
+}
+
+.center-y {
+  display: flex;
+  align-items: center;
+}
+
 .centers {
   display: flex;
   justify-content: center;

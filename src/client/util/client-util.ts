@@ -86,7 +86,7 @@ export async function fetchJSON<
 
   const headers = {
     ...options.headers,
-    ...HttpConstants.getJSONContentHeaders(stringifiedBody),
+    ...HttpConstants.getJSONHeadersForReq(stringifiedBody),
     [CSRF_HEADER]: consoleCSRFToken,
   };
 
@@ -128,5 +128,6 @@ export function isInOpenShiftConsole(): boolean {
 }
 
 export function getConsoleModifierClass(): string {
-  return isInOpenShiftConsole() ? "is-console" : "is-standalone";     // "console" class is already used by bootstrap
+  // "console" class is already used by bootstrap so we add 'is'
+  return isInOpenShiftConsole() ? "is-console" : "is-standalone";
 }

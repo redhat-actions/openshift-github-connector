@@ -1,9 +1,9 @@
 import express from "express";
-import HttpStatusCodes from "http-status-codes";
-import { Response } from "node-fetch";
+import https from "https";
+import fetch, { RequestInit, Response } from "node-fetch";
+import dotenv from "dotenv";
 
 import Log from "server/logger";
-import ApiResponses from "common/api-responses";
 import HttpConstants from "common/http-constants";
 import { Stringable } from "common/common-util";
 
@@ -50,6 +50,14 @@ export function getAllowedOrigins(): string[] {
 }
 */
 
+export function isProduction(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
+export function isInCluster(): boolean {
+  return !!process.env.KUBERNETES_PORT;
+}
+
 export function removeTrailingSlash(s: string): string {
   if (s.endsWith("/")) {
     return s.substring(0, s.length - 1);
@@ -68,6 +76,7 @@ export function getServerUrl(req: express.Request, includePath: boolean = false)
   return serverUrl;
 }
 
+/*
 export function getClientUrl(req: express.Request): string {
   const proto = req.secure ? "https" : "http";
   // this may fail if the request is cross-origin
@@ -76,6 +85,7 @@ export function getClientUrl(req: express.Request): string {
   Log.info(`Client URL is ${clientUrl}`);
   return clientUrl;
 }
+*/
 
 export function tob64(s: string): string {
   return Buffer.from(s).toString("base64");
@@ -127,16 +137,6 @@ export function isInK8s(): boolean {
   return process.env.IN_K8S === "true";
 }
 */
-
-export function sendSuccessStatusJSON(res: express.Response, statusCode: number): void {
-  const resBody: ApiResponses.Result = {
-    message: statusCode + " " + HttpStatusCodes.getStatusText(statusCode),
-    // status: statusCode,
-    success: true,
-  };
-
-  res.status(statusCode).json(resBody);
-}
 
 export function getFriendlyHTTPError(err: Error & { response?: any }): Error {
   if (!err.response) {
@@ -280,4 +280,43 @@ export function deleteKey<T extends Record<string, unknown>, K extends string>(o
   delete partial[key];
 
   return partial as Omit<T, typeof key>;
+}
+
+export function loadEnv(envPath: string): void {
+  const result = dotenv.config({ path: envPath });
+  if (result.parsed) {
+    Log.info(`Loaded ${envPath}`, result.parsed);
+  }
+  else if (result.error) {
+    Log.error(`Failed to load ${envPath}`, result.error);
+  }
+}
+
+const CLUSTER_API_SERVER_URL = "https://openshift.default/";
+
+export async function fetchFromOpenShiftApiServer(
+  path: string,
+  authorization?: string,
+  options?: RequestInit
+): Promise<unknown> {
+  const url = CLUSTER_API_SERVER_URL + path;
+
+  Log.info(`${options?.method ?? "GET"} ${url}`);
+
+  const insecureTrustApiServer = process.env.INSECURE_TRUST_APISERVER_CERT === "true";
+
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      Authorization: authorization ?? "",
+      [HttpConstants.Headers.ContentType]: HttpConstants.ContentTypes.Json,
+    },
+    agent: new https.Agent({
+      rejectUnauthorized: !insecureTrustApiServer,
+    }),
+  });
+
+  await throwIfError(response);
+
+  return response.json();
 }

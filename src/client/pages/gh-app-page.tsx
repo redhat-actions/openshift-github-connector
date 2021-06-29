@@ -96,8 +96,8 @@ function GitHubAppPageBody({
       </div>
 
       <div className="my-3 d-flex align-items-center">
-        <DataFetcher type="api" endpoint={ApiEndpoints.User.Root} loadingDisplay="text">{
-          (userRes: ApiResponses.GitHubUserResponse) => {
+        <DataFetcher type="api" endpoint={ApiEndpoints.User.UserGitHubInfo} loadingDisplay="text">{
+          (userRes: ApiResponses.GitHubUserDetailsResponse) => {
             return (
               <Title headingLevel="h4" className="d-flex">
                 Logged in as&nbsp;<ExternalLink href={userRes.html_url}>{userRes.login}</ExternalLink>

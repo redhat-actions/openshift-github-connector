@@ -2,17 +2,16 @@ import express from "express";
 
 import ApiEndpoints from "common/api-endpoints";
 import ApiResponses from "common/api-responses";
-import { send405 } from "server/util/send-error";
 import ApiRequests from "common/api-requests";
-import User from "server/lib/user";
 import { DEFAULT_SECRET_NAMES } from "common/default-secret-names";
+import { send405 } from "server/express-extensions";
 
 const router = express.Router();
 
 router.route(ApiEndpoints.User.ImageRegistries.path)
   .get(async (req, res: express.Response<ApiResponses.ImageRegistryListResult>, next) => {
 
-    const user = await User.getUserForSession(req, res);
+    const user = await req.getUserOrDie();
     if (!user) {
       return undefined;
     }
@@ -32,7 +31,7 @@ router.route(ApiEndpoints.User.ImageRegistries.path)
     res: express.Response<ApiResponses.ImageRegistryCreationResult>,
     next,
   ) => {
-    const user = await User.getUserForSession(req, res);
+    const user = await req.getUserOrDie();
     if (!user) {
       return undefined;
     }
@@ -51,7 +50,7 @@ router.route(ApiEndpoints.User.ImageRegistries.path)
     res: express.Response<ApiResponses.Result>,
     next,
   ) => {
-    const user = await User.getUserForSession(req, res);
+    const user = await req.getUserOrDie();
     if (!user) {
       return undefined;
     }

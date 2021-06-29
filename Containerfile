@@ -14,10 +14,8 @@ COPY src/ ./src
 
 RUN yarn build
 RUN mv -v dist/plugin plugin/
-RUN mv -v dist/server server/
 RUN mv -v build/ client/
-
-COPY README.md ./
+RUN mv -v dist/server server/
 
 ##################################################
 
@@ -48,14 +46,15 @@ USER $USER
 
 ENV NODE_ENV production
 
-ARG PORT=3003
+ARG PORT=3443
 ENV PORT $PORT
 
 EXPOSE $PORT
 
-COPY --chown=$USER --from=builder /app/server .
 # These paths must match those in server/index.ts so they can be served statically
 COPY --chown=$USER --from=builder /app/client ./client
 COPY --chown=$USER --from=builder /app/plugin ./plugin
+COPY --chown=$USER --from=builder /app/server .
+COPY --chown=$USER README.md .
 
 ENTRYPOINT [ "node", "./server.js" ]

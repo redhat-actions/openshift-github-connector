@@ -9,18 +9,6 @@ import Log from "./logger";
 const dayMs = 1000 * 60 * 60 * 24;
 const FileStore = sessionFileStore(session);
 
-// Type of session data goes here
-declare module "express-session" {
-  interface SessionData {
-    setupData: {
-      githubAppId: number,
-    },
-    data: {
-      githubUserId: number,
-    },
-  }
-}
-
 const SECRET_NAME = "SESSION_SECRET";
 const STORE_SECRET_NAME = "SESSION_STORE_SECRET";
 const STORE_PATH = "SESSION_STORE_PATH";
@@ -72,8 +60,8 @@ function getSessionMw(): express.RequestHandler {
     cookie: {
       httpOnly: true,
       maxAge: dayMs,
-      // name: ""
-      sameSite: "strict",
+      // https://github.com/auth0/passport-auth0/issues/70#issuecomment-432895163
+      sameSite: false,
       secure: "auto",
       signed: true,
     },

@@ -11,8 +11,6 @@ import InstallExistingAppCard from "./install-existing-app";
 import SetupPageHeader from "../setup-header";
 
 export default function SetupAppPage(): JSX.Element {
-
-  const [ createOrUse, setCreateOrUse ] = useState<"create" | "use-existing">();
   const [ enterpriseChecked, setEnterpriseChecked ] = useState(false);
 
   return (
@@ -22,8 +20,6 @@ export default function SetupAppPage(): JSX.Element {
       <DataFetcher type="api" endpoint={ApiEndpoints.App.Existing} loadingDisplay="card" >{
         (data: ApiResponses.Result) => {
           const appExists = data.success;
-
-          setCreateOrUse(appExists ? "use-existing" : "create");
 
           return (
             <React.Fragment>
@@ -75,7 +71,7 @@ export default function SetupAppPage(): JSX.Element {
               </Card>
 
               {
-                createOrUse === "create" ? <CreateAppCard /> : <InstallExistingAppCard />
+                appExists ? <InstallExistingAppCard /> : <CreateAppCard />
               }
             </React.Fragment>
           );

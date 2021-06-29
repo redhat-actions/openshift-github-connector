@@ -7,9 +7,19 @@ import Workflows from "server/routes/gh-app/gh-workflows-route";
 import User from "server/routes/user-route";
 import UserApp from "server/routes/gh-app/user-app-route";
 import ImageRegistries from "server/routes/image-registry-route";
+import OAuthRouter from "server/routes/oauth-route";
 
 const Routes = {
-  App, Cluster, Webhook, AppSetup, Secrets, User, UserApp, Workflows, ImageRegistries,
+  App,
+  Cluster,
+  Webhook,
+  AppSetup,
+  Secrets,
+  User,
+  UserApp,
+  Workflows,
+  ImageRegistries,
+  OAuthRouter,
 };
 
 export default Routes;

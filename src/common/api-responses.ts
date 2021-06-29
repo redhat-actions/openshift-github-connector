@@ -6,12 +6,13 @@ import {
   GitHubRepo,
   GitHubActionsSecret,
   GitHubRepoId,
-  GitHubUserData,
+  GitHubUserDetails,
   GitHubAppInstallationUrls,
   GitHubAppPublicData,
   GitHubAppConfigNoSecrets,
 } from "./types/gh-types";
 import ImageRegistry from "./types/image-registries";
+import { ConnectorUserInfo } from "./types/user-types";
 
 namespace ApiResponses {
 
@@ -24,13 +25,14 @@ namespace ApiResponses {
     severity: Severity,
   }
 
-  export interface ResultSuccess extends ResultWithSeverity {
+  export interface ResultSuccess extends Result {
     success: true,
+    severity?: "success" | "info",
   }
 
-  export interface ResultFailed extends ResultWithSeverity {
+  export interface ResultFailed extends Result {
     success: false,
-    severity: "warning" | "danger",
+    severity?: "warning" | "danger",
   }
 
   export interface Error extends ResultFailed {
@@ -121,10 +123,13 @@ namespace ApiResponses {
     removed: boolean,
   }
 
+  export type User = ConnectorUserInfo & ResultSuccess;
+  export type UserResponse = User | ResultFailed;
+
   // extending githubuser type here in case we want to add more fields to this response later
 
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  export interface GitHubUserResponse extends GitHubUserData {
+  export interface GitHubUserDetailsResponse extends GitHubUserDetails {
 
   }
 

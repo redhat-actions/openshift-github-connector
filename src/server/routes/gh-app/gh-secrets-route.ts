@@ -1,17 +1,16 @@
 import express from "express";
 
-import { send405, sendError } from "server/util/send-error";
 import ApiEndpoints from "common/api-endpoints";
 import ApiRequests from "common/api-requests";
 import ApiResponses from "common/api-responses";
-import { RepoSecretsPublicKey } from "common/types/gh-types";
+import { GitHubActionsSecret, GitHubRepo, RepoSecretsPublicKey } from "common/types/gh-types";
 import { createActionsSecret, getRepoSecretPublicKey } from "server/lib/github/gh-util";
 import KubeWrapper, { ServiceAccountToken } from "server/lib/kube/kube-wrapper";
 import Log from "server/logger";
 import SecretUtil from "server/lib/kube/secret-util";
 import { Severity } from "common/common-util";
 import { DEFAULT_SECRET_NAMES, getDefaultSecretNames } from "common/default-secret-names";
-import User from "server/lib/user";
+import { send405 } from "server/express-extensions";
 
 const router = express.Router();
 
@@ -22,9 +21,14 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
     next
   ) => {
 
-    const installation = await User.getInstallationForSession(req, res);
+    const user = await req.getUserOrDie();
+    if (!user) {
+      return res.send401();
+    }
+
+    const installation = user.installation;
     if (!installation) {
-      return undefined;
+      return res.sendError(400, `No installation for user ${user.name}`);
     }
 
     /*
@@ -47,14 +51,14 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
     const repos = await installation.getRepos();
 
     const reposWithSecrets: ApiResponses.ReposSecretsStatus["repos"] = await Promise.all(
-      repos.map(async (repo): Promise<ApiResponses.ReposSecretsStatus["repos"][number]> => {
+      repos.map(async (repo: GitHubRepo): Promise<ApiResponses.ReposSecretsStatus["repos"][number]> => {
         const secretsResponse = await installation.octokit.request("GET /repos/{owner}/{repo}/actions/secrets", {
           owner: repo.owner.login,
           repo: repo.name,
         });
 
         const secrets = secretsResponse.data.secrets;
-        const secretNames = secrets.map((secret) => secret.name);
+        const secretNames = secrets.map((secret: GitHubActionsSecret) => secret.name);
 
         const hasClusterSecrets = secretNames.includes(DEFAULT_SECRET_NAMES.clusterServerUrl)
           && secretNames.includes(DEFAULT_SECRET_NAMES.clusterToken);
@@ -81,20 +85,14 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
     res: express.Response<ApiResponses.RepoSecretsCreationSummary>,
     next
   ) => {
-    if (req.session.data?.githubUserId == null) {
-      return sendError(res, 400, `Missing user info in cookie`);
+    const user = await req.getUserOrDie();
+    if (!user) {
+      return res.sendError(401, "No user session is saved. Please start the setup again.");
     }
 
-    const [ installation, user ] = await Promise.all([
-      User.getInstallationForSession(req, res),
-      User.getUserForSession(req, res),
-    ]);
-
+    const installation = user.installation;
     if (!installation) {
-      return sendError(res, 400, "No app session is saved. Please connect to a GitHub App before proceeding.");
-    }
-    else if (!user) {
-      return sendError(res, 400, "No user session is saved. Please start the setup again.");
+      return res.sendError(400, "No app session is saved. Please connect to a GitHub App before proceeding.");
     }
 
     const serviceAccountName = KubeWrapper.instance.serviceAccountName;
@@ -117,7 +115,7 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
             createdByApp: installation.app.config.name,
             createdByAppId: installation.app.config.id.toString(),
             createdByUser: user.name,
-            createdByUserId: user.id.toString(),
+            createdByUserId: user.uid.toString(),
           });
 
           return {

@@ -57,6 +57,7 @@ module.exports = {
     files: [ "*.tsx" ],
     rules: {
       "no-console": 0,
+      "no-nested-ternary": 0,
       "max-len": [ 2, 150, 2, { ignoreUrls: true } ],
       "operator-linebreak": [ 0 ],
       "import/extensions": [ 2, { css: "always", json: "always", scss: "always" }],

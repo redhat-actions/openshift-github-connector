@@ -6,16 +6,19 @@ metadata:
   labels:
     {{- toYaml .Values.commonLabels | nindent 4 }}
   annotations:
-    service.alpha.openshift.io/serving-cert-secret-name: console-serving-cert
+    # https://docs.openshift.com/container-platform/3.11/dev_guide/secrets.html#service-serving-certificate-secrets
+    service.alpha.openshift.io/serving-cert-secret-name: {{ .Values.servingCertSecret }}
 spec:
     type: ClusterIP
     selector:
       {{- toYaml .Values.commonLabels | nindent 6 }}
     ports:
-    - port: 80
-      name: {{ .Values.serverHttpPortName }}
-      targetPort: {{ .Values.serverHttpPort }}
-      protocol: TCP
+
+    # - port: 80
+    #   name: {{ .Values.serverHttpPortName }}
+    #   targetPort: {{ .Values.serverHttpPort }}
+    #   protocol: TCP
+
     - port: 443
       name: {{ .Values.serverHttpsPortName }}
       targetPort: {{ .Values.serverHttpsPort }}

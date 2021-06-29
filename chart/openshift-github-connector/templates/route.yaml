@@ -11,9 +11,11 @@ metadata:
 spec:
   {{ $subdomainCheck := tpl .Values.subdomainCheck . }}
   host: {{ tpl .Values.appHost . | quote }}
+  port:
+    targetPort: {{ .Values.serverHttpsPort }}
   path: /
   tls:
-    termination: edge
+    termination: reencrypt
     insecureEdgeTerminationPolicy: Redirect
   to:
     kind: Service
