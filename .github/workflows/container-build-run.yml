@@ -7,6 +7,7 @@ env:
   IMAGE_NAME: openshift-actions-connector
   REGISTRY_HOSTNAME: quay.io
   REGISTRY_USER: tetchell
+  PORT: 3443
 
 jobs:
   ci:
@@ -42,7 +43,7 @@ jobs:
           echo "View output in Logs step below"
           sleep 10
 
-          yarn wait-on -l tcp:3443 -t 60000
+          yarn wait-on -l tcp:${{ env.PORT }} -t 60000
 
       - name: Podman inspect
         run: |
@@ -53,8 +54,8 @@ jobs:
         run: |
           set -eEx
           podman ps
-          curl -sSf http://localhost:3443
-          curl -sSf http://localhost:3443/api/v1/
+          curl -sSf http://localhost:${{ env.PORT }}
+          curl -sSf http://localhost:${{ env.PORT }}/api/v1/
 
       - name: Push container image
         if: ${{ steps.commit_data.outputs.is_pr }} == 'false'
