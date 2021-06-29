@@ -5,7 +5,7 @@ import { GitHubAppOwnerUrls, GitHubAppConfig, GitHubAppInstallationData, GitHubA
 import SecretUtil from "server/lib/kube/secret-util";
 import { getAppOctokit, getGitHubHostname } from "./gh-util";
 import { fromb64, toValidK8sName } from "server/util/server-util";
-import User from "../user";
+import User from "server/lib/user/user";
 
 /**
  * The data we must save in order to be able to reconstruct this GitHub app.

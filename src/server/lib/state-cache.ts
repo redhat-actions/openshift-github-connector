@@ -7,18 +7,18 @@ export default class StateCache {
 
   private static readonly TTL_MS = 5 * 60 * 1000;
 
-  public add(sessionID: string, state: string): void {
-    this.states.set(sessionID, { iat: Date.now(), state });
+  public add(uid: string, state: string): void {
+    this.states.set(uid, { iat: Date.now(), state });
   }
 
-  public validate(sessionID: string, state: string): boolean {
-    const stateLookup = this.states.get(sessionID);
+  public validate(uid: string, state: string): boolean {
+    const stateLookup = this.states.get(uid);
     if (stateLookup == null) {
       Log.info(`State "${state}" not found in state map`);
       return false;
     }
 
-    this.states.delete(sessionID);
+    this.states.delete(uid);
 
     if (StateCache.isExpired(stateLookup.iat, StateCache.TTL_MS)) {
       Log.info(`State "${state}" is expired`);

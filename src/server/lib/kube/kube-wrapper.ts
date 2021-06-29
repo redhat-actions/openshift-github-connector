@@ -129,10 +129,10 @@ export default class KubeWrapper {
 
 		let currentNamespace = currentContext?.namespace;
 		if (!currentNamespace && isInCluster) {
-			Log.debug("Load namespace from pod mount file");
+			Log.info("Load namespace from pod mount file");
 			currentNamespace = (await fs.readFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")).toString().trim();
 		}
-		Log.info(`Current namespace is "${currentNamespace}"`);
+		Log.info(`Current namespace is ${currentNamespace}`);
 
 		if (!currentNamespace) {
 			const nsErr = new Error(

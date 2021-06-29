@@ -2,14 +2,25 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
 
+// note PF is excluded in the console by webpack.config.plugin
+import "@patternfly/react-core/dist/styles/base.css";
+
+import "./client/styles/index.scss";
+
 import App from "./client/app";
 import reportWebVitals from "./client/reportWebVitals";
 
-ReactDOM.render(
-  <React.StrictMode>
+function Router(): JSX.Element {
+  return (
     <BrowserRouter>
       <App/>
     </BrowserRouter>
+  );
+}
+
+ReactDOM.render(
+  <React.StrictMode>
+    <Router />
   </React.StrictMode>,
   document.getElementById("root")
 );

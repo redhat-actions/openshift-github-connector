@@ -1,17 +1,16 @@
 import express from "express";
 
 import ApiEndpoints from "common/api-endpoints";
-import { send405 } from "server/util/send-error";
 import ApiResponses from "common/api-responses";
-import User from "server/lib/user";
 import { deleteSecrets } from "common/types/gh-types";
 import GitHubApp from "server/lib/github/gh-app";
+import { send405 } from "server/express-extensions";
 
 const router = express.Router();
 
 router.route(ApiEndpoints.User.App.path)
   .get(async (req, res: express.Response<ApiResponses.UserAppState>, next) => {
-    const user = await User.getUserForSession(req, res);
+    const user = await req.getUserOrDie();
     if (!user) {
       return undefined;
     }
@@ -113,9 +112,9 @@ router.route(ApiEndpoints.User.App.path)
   .delete(async (
     req, res: express.Response<ApiResponses.RemovalResult>, next
   ) => {
-    const user = await User.getUserForSession(req, res);
+    const user = await req.getUserOrDie();
     if (!user) {
-      return undefined;
+      return res.sendError(401, `Authentication required`);
     }
 
     const removed = await user.removeInstallation();

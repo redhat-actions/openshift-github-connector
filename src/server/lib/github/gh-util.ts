@@ -5,7 +5,7 @@ import sodium from "tweetsodium";
 import fetch from "node-fetch";
 
 import Log from "server/logger";
-import { GitHubAppAuthData, GitHubOAuthResponse, GitHubRepoId, GitHubUserData, RepoSecretsPublicKey } from "common/types/gh-types";
+import { GitHubAppAuthData, GitHubOAuthResponse, GitHubRepoId, GitHubUserDetails, RepoSecretsPublicKey } from "common/types/gh-types";
 import HttpConstants from "common/http-constants";
 import { throwIfError } from "server/util/server-util";
 
@@ -99,7 +99,7 @@ export async function createActionsSecret(
 
 export async function exchangeCodeForUserData(
   client_id: string, client_secret: string, oauthCode: string
-): Promise<GitHubUserData> {
+): Promise<GitHubUserDetails> {
   const githubReqBody = JSON.stringify({
     client_id,
     client_secret,
@@ -110,7 +110,7 @@ export async function exchangeCodeForUserData(
   // https://docs.github.com/en/developers/apps/identifying-and-authorizing-users-for-github-apps#response
   const oauthRes = await fetch("https://github.com/login/oauth/access_token", {
     method: "POST",
-    headers: HttpConstants.getJSONContentHeaders(githubReqBody),
+    headers: HttpConstants.getJSONHeadersForReq(githubReqBody),
     body: githubReqBody,
   });
 
@@ -129,6 +129,6 @@ export async function exchangeCodeForUserData(
     throw new Error(err.message);
   }
 
-  const userData: GitHubUserData = await userDataRes.json();
+  const userData: GitHubUserDetails = await userDataRes.json();
   return userData;
 }

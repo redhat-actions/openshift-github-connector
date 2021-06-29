@@ -61,7 +61,7 @@ function Banner(props: Banner.Props): JSX.Element {
         </div>
         <div className="ml-auto">
           {props.loading
-            ? (<Spinner style={{ height: "1.5em", width: "1.5em" }}/>)
+            ? (<Spinner size="md"/>)
             : ("")
           }
         </div>

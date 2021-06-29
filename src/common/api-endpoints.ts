@@ -7,6 +7,12 @@ const apiRootPath = apiBasePath + "api/v1";
 const Root = new UrlPath(undefined, apiRootPath);
 const Health = new UrlPath(Root, "/health");
 
+const Auth = new UrlPath(Root, "/auth");
+const Login = new UrlPath(Auth, "/login");
+const LoginStatus = new UrlPath(Login, "/status");
+// Must match helm chart value which passes callback URL env var to the pod
+const OAuthCallback = new UrlPath(Auth, "/callback");
+
 const Setup = new UrlPath(Root, "/setup");
 const CreatingApp = new UrlPath(Setup, "/creating-app");
 const SetCreateAppState = new UrlPath(CreatingApp, "/state");
@@ -25,8 +31,9 @@ const Workflows = new UrlPath(App, "/workflows");
 const Cluster = new UrlPath(Root, "/cluster");
 
 const User = new UrlPath(Root, "/user");
-const SetUserOAuthState = new UrlPath(User, "/oauth/state");
-const PostUserOAuth = new UrlPath(User, "/oauth/post-redirect");
+const UserGitHubInfo = new UrlPath(User, "/github");
+// const SetUserOAuthState = new UrlPath(User, "/oauth/state");
+// const PostUserOAuth = new UrlPath(User, "/oauth/post-redirect");
 const UserApp = new UrlPath(User, "/app");
 const UserImageRegistries = new UrlPath(User, "/image-registries");
 // const ServiceAccount = new UrlPath(User, "/serviceaccount");
@@ -36,6 +43,11 @@ const Webhook = new UrlPath(Root, "/webhook");
 const ApiEndpoints = {
   Root,
   Health,
+  Auth: {
+    Login,
+    LoginStatus,
+    OAuthCallback,
+  },
   Setup: {
     Root: Setup,
     SetCreateAppState,
@@ -47,8 +59,9 @@ const ApiEndpoints = {
   },
   User: {
     Root: User,
-    SetUserOAuthState,
-    PostUserOAuth,
+    UserGitHubInfo,
+    // SetUserOAuthState,
+    // PostUserOAuth,
     App: UserApp,
     ImageRegistries: UserImageRegistries,
     // ServiceAccount,

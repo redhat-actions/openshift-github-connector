@@ -56,7 +56,7 @@ function getLogger(): log4js.Logger {
   _logger.level = "debug";
 
   _logger.info("Logger initialized");
-  _logger.info(`Logging to "${logFilePath}"`);
+  _logger.info(`Logging to ${logFilePath}`);
   return _logger;
 }
 

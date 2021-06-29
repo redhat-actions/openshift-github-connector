@@ -4,10 +4,10 @@ import { components } from "@octokit/openapi-types/dist-types/index";
 /* eslint-disable camelcase */
 
 // an organization can also be a simple-user
-export type GitHubUserData = NonNullable<components["schemas"]["simple-user"]>;
+export type GitHubUserDetails = NonNullable<components["schemas"]["simple-user"]>;
 export type GitHubUserType = "Organization" | "User";
 export type GitHubOrg = components["schemas"]["organization-simple"];
-export type GitHubRepo = components["schemas"]["repository"] & { owner: GitHubUserData };
+export type GitHubRepo = components["schemas"]["repository"] & { owner: GitHubUserDetails };
 export type GitHubAppInstallationData = components["schemas"]["installation"];
 export type GitHubActionsSecret = components["schemas"]["actions-secret"];
 export type GitHubActionsOrgSecret = components["schemas"]["organization-actions-secret"];
@@ -36,7 +36,7 @@ export type GitHubOAuthResponse = {
 export type GitHubAppConfig = components["schemas"]["integration"] & GitHubAppConfigSecrets & {
   // some keys are inexplicably marked optional
   slug: string,
-  owner: GitHubUserData,
+  owner: GitHubUserDetails,
 };
 
 // export type GitHubAppConfigNoSecrets = Omit<GitHubAppConfig, keyof GitHubAppConfigSecrets>;

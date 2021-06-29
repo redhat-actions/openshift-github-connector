@@ -1,11 +1,10 @@
 import express from "express";
 
 import ApiEndpoints from "common/api-endpoints";
-import { send405, sendError } from "server/util/send-error";
 import ApiResponses from "common/api-responses";
 import Log from "server/logger";
 import GitHubApp from "server/lib/github/gh-app";
-import User from "server/lib/user";
+import { send405 } from "server/express-extensions";
 
 const router = express.Router();
 
@@ -54,14 +53,19 @@ router.route(ApiEndpoints.App.Existing.path)
     return res.json(resBody);
   })
   .delete(async (req, res: express.Response<ApiResponses.RemovalResult>, next) => {
-    const installation = await User.getInstallationForSession(req, res);
-    if (!installation) {
+    const user = await req.getUserOrDie();
+    if (!user) {
       return undefined;
     }
 
+    const installation = user.installation;
+    if (!installation) {
+      return res.sendError(400, `No app installation for user ${user.name}`);
+    }
+
     if (installation.user.ownsAppId !== installation.app.id) {
-      return sendError(
-        res, 403,
+      return res.sendError(
+        403,
         `User ${installation.user.name} does not own ${installation.app.config.name}, and so cannot delete it.`
       );
     }

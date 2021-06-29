@@ -8,9 +8,14 @@ export default class ImageRegistryListWrapper {
 
   public constructor(
     private readonly onChange: () => Promise<void>,
-    imageRegistriesStringified: string,
+    imageRegistriesStringified: string | undefined,
   ) {
-    this.imageRegistries = JSON.parse(imageRegistriesStringified);
+    if (imageRegistriesStringified) {
+      this.imageRegistries = JSON.parse(imageRegistriesStringified);
+    }
+    else {
+      this.imageRegistries = [];
+    }
   }
 
   // public static async create(ids: string[]): Promise<ImageRegistryList> {
