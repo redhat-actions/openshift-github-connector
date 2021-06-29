@@ -36,6 +36,12 @@ jobs:
           build-args:
             VCS_REF=${{ steps.commit_data.outputs.short_sha }}
 
+      - uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
+
       - name: Run container
         run: |
           set -eEx
@@ -54,8 +60,8 @@ jobs:
         run: |
           set -eEx
           podman ps
-          curl -sSf https://localhost:${{ env.PORT }}
-          curl -sSf https://localhost:${{ env.PORT }}/api/v1/
+          curl -sSfk https://localhost:${{ env.PORT }}
+          curl -sSfk https://localhost:${{ env.PORT }}/api/v1/
 
       - name: Push container image
         if: ${{ steps.commit_data.outputs.is_pr }} == 'false'

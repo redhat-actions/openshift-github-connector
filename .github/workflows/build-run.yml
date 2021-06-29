@@ -53,8 +53,8 @@ jobs:
         shell: bash
         run: |
           set -eEx
-          curl -sSf https://localhost:${{ env.PORT }}
-          curl -sSf https://localhost:${{ env.PORT }}/api/v1/
+          curl -sSfk https://localhost:${{ env.PORT }}
+          curl -sSfk https://localhost:${{ env.PORT }}/api/v1/
 
       - name: Stop
         if: always()
