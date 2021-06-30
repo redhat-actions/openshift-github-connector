@@ -3,18 +3,20 @@
 Coming soon...
 
 ## Installing on OpenShift
-See [the chart](./chart/openshift-actions-connector).
-The inputs are described in [`values.yaml`](./chart/openshift-actions-connector/values.yaml).
+See [the chart](./chart/openshift-github-connector).
+The inputs are described in [`values.yaml`](./chart/openshift-github-connector/values.yaml).
 
 Install from the root of the repo as follows:
 ```sh
-helm upgrade --install actions-connector \
-  chart/openshift-actions-connector \
+helm upgrade --install github-connector \
+  chart/openshift-github-connector \
   --set clusterAppsSubdomain=apps.<your-openshift-server>.com
   --set clusterApiServer=$(oc whoami --show-server)
 ```
 
-You do not need any permissions other than in your own namespace.
+You need to be a cluster administrator to create an `OAuthClient` since it is a cluster-scoped resource.
+
+See the [`values.yaml`](./chart/values.yaml) for an explanation of these values and the others you may set.
 
 ## Developing locally
 
@@ -42,19 +44,11 @@ oc policy add-role-to-user edit -z github-connector-dev-sa -z
 
 This service account name is then passed through the environment, in the `deployment.yaml` or `.env`.
 
----
-
-There is no story for live reload on OpenShift yet.
-
-To build and push the container images you can use the scripts in `package.json`, though I haven't added a way to override the registry user or path.
-
-### OpenShift OAuth for local development
+### OpenShift OAuth
 1. Use [Telepresence](https://www.telepresence.io/docs/latest/howtos/intercepts/) to proxy the OpenShift API server out of the cluster to your local development environment. Otherwise, it will not know how to resolve the `openshift.default` host.
 2. Create an OAuthClient:
 ```sh
 cat <<EOF | oc create -f-
-```
-```yaml
 apiVersion: oauth.openshift.io/v1
 kind: OAuthClient
 metadata:
@@ -66,6 +60,7 @@ redirectURIs:
   # must match .env callback
   - https://localhost:3000/api/v1/auth/callback
 grantMethod: auto
+EOF
 ```
 3. Add the client secret UUID to `.env.local` as `OAUTH_CLIENT_SECRET=<uuid from OAuthClient>`
 
@@ -99,15 +94,12 @@ The **Serving CA** is used by the Connector's HTTPS server. It is then up to the
 You can generate a certificate for local development using [these instructions](https://letsencrypt.org/docs/certificates-for-localhost/#making-and-trusting-your-own-certificates). Then, copy them somewhere and add that directory to your `.env.local`.
 
 ## Set up the environment
-If you haven't yet, run `yarn install`.
-
 Create a file called `.env.local` next to the existing `.env`. This is environment variables that will be loaded at server startup, and will not be committed to SCM.
 
 Set the session secrets to two different UUIDs.
 
-```
-
 Your `.env.local` should look like this:
+
 ```properties
 SESSION_SECRET=<uuid>
 SESSION_STORE_SECRET=<another uuid>
