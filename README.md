@@ -36,9 +36,11 @@ When running locally you have to create, configure, and link a service account t
 then
 
 ```sh
-oc create sa github-actions
-oc policy add-role-to-user edit -z github-actions -z
+oc create sa github-connector-dev-sa
+oc policy add-role-to-user edit -z github-connector-dev-sa -z
 ```
+
+This service account name is then passed through the environment, in the `deployment.yaml` or `.env`.
 
 ---
 
