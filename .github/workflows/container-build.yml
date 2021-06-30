@@ -54,7 +54,7 @@ jobs:
 
       - name: Podman inspect
         run: |
-          podman inspect ${{ env.IMAGE_NAME }}/latest
+          podman inspect ${{ env.IMAGE_NAME }}:latest
 
       # - name: Test
       #   shell: bash
