@@ -44,10 +44,6 @@ oc policy add-role-to-user edit -z github-connector-dev-sa -z
 
 This service account name is then passed through the environment, in the `deployment.yaml` or `.env`.
 
----
-
-Use the scripts in `package.json` to build and push the container images. I haven't added a way to override the registry user or path.
-
 ### OpenShift OAuth
 1. Use [Telepresence](https://www.telepresence.io/docs/latest/howtos/intercepts/) to proxy the OpenShift API server out of the cluster to your local development environment. Otherwise, it will not know how to resolve the `openshift.default` host.
 2. Create an OAuthClient:
