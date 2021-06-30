@@ -4,6 +4,7 @@ on:
 
 env:
   PORT: 3000
+  OAUTH_CLIENT_SECRET: "not-a-real-client-secret"
 
 jobs:
   ci:
