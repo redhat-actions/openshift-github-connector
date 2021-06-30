@@ -49,7 +49,6 @@ This service account name is then passed through the environment, in the `deploy
 2. Create an OAuthClient:
 ```sh
 cat <<EOF | oc create -f-
-yaml
 apiVersion: oauth.openshift.io/v1
 kind: OAuthClient
 metadata:
