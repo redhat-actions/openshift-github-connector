@@ -24,7 +24,8 @@ jobs:
         run: |
           yarn --frozen-lockfile add wait-on
 
-      - name: Build container
+      - name: Build container image
+        id: build_image
         uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.IMAGE_NAME }}
@@ -53,7 +54,7 @@ jobs:
 
       - name: Podman inspect
         run: |
-          podman inspect $(podman ps -q)
+          podman inspect ${{ env.IMAGE_NAME }}/latest
 
       # - name: Test
       #   shell: bash

@@ -4,7 +4,9 @@ on:
 
 env:
   PORT: 3000
-  OAUTH_CLIENT_SECRET: "not-a-real-client-secret"
+  OAUTH_CLIENT_SECRET: "stub"
+  SESSION_SECRET: "stub"
+  SESSION_STORE_SECRET: "stub"
 
 jobs:
   ci:
