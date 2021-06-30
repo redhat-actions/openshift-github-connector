@@ -27,6 +27,11 @@ async function main(): Promise<void> {
   Log.info(`Running in ${isProduction() ? "PRODUCTION" : "DEVELOPMENT"} mode`);
   Log.info(`isInCluster ? ${isInCluster()}`);
 
+  if (!isProduction()) {
+    await loadEnv(".env");
+    await loadEnv(".env.local");
+  }
+
   // The containerfile build must use these same paths for static assets
   const FRONTEND_ROOT_DIR = isProduction() ? "client" : path.join("..", "..", "build");
 
@@ -38,11 +43,6 @@ async function main(): Promise<void> {
   const PLUGIN_ROOT_DIR = "plugin";
   const pluginPath = path.join(__dirname, PLUGIN_ROOT_DIR);
   Log.info(`Plugin path is ${pluginPath}`);
-
-  if (!isProduction()) {
-    loadEnv(".env");
-    loadEnv(".env.local");
-  }
 
   await loadRouterCerts();
   await KubeWrapper.initialize();

@@ -36,9 +36,11 @@ When running locally you have to create, configure, and link a service account t
 then
 
 ```sh
-oc create sa github-actions
-oc policy add-role-to-user edit -z github-actions -z
+oc create sa github-connector-dev-sa
+oc policy add-role-to-user edit -z github-connector-dev-sa -z
 ```
+
+This service account name is then passed through the environment, in the `deployment.yaml` or `.env`.
 
 ---
 
@@ -70,19 +72,31 @@ grantMethod: auto
 ### Fix TLS self-signed cert rejection
 If the cluster uses self-signed certs, the OAuth client will not trust the certs.
 
+There are two different TLS keys and CAs used.
+
+#### Router CA
+
+The **Router CA** is the CA used for the OpenShift authentication routes. This needs to be trusted by the Connector when it acts as an OAuth client, or the TLS handshake will fail and authentication will not work.
+
 For in-cluster deployment (using the Helm chart), copy the serving cert from the `openshift-authentication` namespace into the namespace of your deployment.
 
 ```sh
 oc get secret v4-0-config-system-router-certs -n openshift-authentication -o yaml | sed 's/namespace: openshift-authentication/namespace: github-connector/g' | oc apply -f-
 ```
-
 The secret will then be mounted into the pod and trusted at runtime. Refer to the deployment.yaml.
 
 For local development, copy out the secret to a file eg:
 ```
 oc get secret v4-0-config-system-router-certs -o jsonpath='{.data.apps-crc\.testing}' | base64 -d
 ```
-Paste the cert into `/var/certs/crc/crc.pem`, matching `.env` `ROUTER_CA_DIRECTORY=/var/certs/crc/`.
+Paste the cert into `/var/certs/crc/crc.pem`, matching `.env.local` `ROUTER_CA_DIRECTORY=/var/certs/crc/`.
+
+A different CA will be used by the API server, eg `kubernetes.default` or `openshift.default`. Certificate validation for that server can be disabled by setting `INSECURE_TRUST_APISERVER_CERT=true` in the environment.
+
+#### Serving CA
+The **Serving CA** is used by the Connector's HTTPS server. It is then up to the client (eg. the user's browser) to trust the certificate. Obviously, this would ideally be a certificate issued by a proper authority so it would be trusted by default.
+
+You can generate a certificate for local development using [these instructions](https://letsencrypt.org/docs/certificates-for-localhost/#making-and-trusting-your-own-certificates). Then, copy them somewhere and add that directory to your `.env.local`.
 
 ## Set up the environment
 If you haven't yet, run `yarn install`.
@@ -99,8 +113,11 @@ SESSION_SECRET=<uuid>
 SESSION_STORE_SECRET=<another uuid>
 OAUTH_CLIENT_SECRET: <uuid from above>,
 CONNECTOR_SERVICEACCOUNT_NAME=<service account from above>
-# If using a cluser with self-signed certs
+# See 'Router CA' above
+ROUTER_CA_DIRECTORY=/var/certs/crc/`
 INSECURE_TRUST_APISERVER_CERT: true,
+# See 'Serving CA' above
+SERVING_CA_DIRECTORY=/var/certs/localhost
 ```
 
 Then run `yarn dev` to run the development server.

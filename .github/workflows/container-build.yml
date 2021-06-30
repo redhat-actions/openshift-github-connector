@@ -1,0 +1,89 @@
+name: Container build and push
+on:
+  push:
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: openshift-actions-connector
+  REGISTRY_HOSTNAME: quay.io
+  REGISTRY_USER: tetchell
+  # PORT: 3443
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: redhat-actions/common/commit-data@v1
+        id: commit_data
+
+      - name: Install
+        run: |
+          yarn --frozen-lockfile add wait-on
+
+      - name: Build container image
+        id: build_image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: ${{ env.IMAGE_NAME }}
+          tags: latest ${{ steps.commit_data.outputs.branch }}
+          dockerfiles:
+            Containerfile
+          layers: true
+          oci: true
+          build-args:
+            VCS_REF=${{ steps.commit_data.outputs.short_sha }}
+
+      # - uses: redhat-actions/oc-login@v1
+      #   with:
+      #     openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+      #     openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+      #     namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
+
+      # - name: Run container
+      #   run: |
+      #     set -eEx
+      #     nohup yarn container-run > out.log 2>&1 &
+      #     echo "View output in Logs step below"
+      #     sleep 10
+
+      #     yarn wait-on -l tcp:${{ env.PORT }} -t 60000
+
+      - name: Podman inspect
+        run: |
+          podman inspect ${{ env.IMAGE_NAME }}:latest
+
+      # - name: Test
+      #   shell: bash
+      #   run: |
+      #     set -eEx
+      #     podman ps
+      #     curl -sSfk https://localhost:${{ env.PORT }}
+      #     curl -sSfk https://localhost:${{ env.PORT }}/api/v1/
+
+      - name: Push container image
+        if: ${{ steps.commit_data.outputs.is_pr }} == 'false'
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          registry: ${{ env.REGISTRY_HOSTNAME }}/${{ env.REGISTRY_USER }}
+          image:  ${{ env.IMAGE_NAME }}
+          tags: latest ${{ steps.commit_data.outputs.branch }}
+          username: ${{ env.REGISTRY_USER }}
+          password: ${{ secrets.QUAY_TOKEN }}
+
+      # - name: Logs
+      #   if: always()
+      #   run: |
+      #     echo "============ nohup output ============"
+      #     cat out.log
+      #     echo "========== end nohup output =========="
+      #     echo "=========== Container logs ==========="
+      #     podman logs $(podman ps -a -q)
+
+      # - name: Take down
+      #   if: always()
+      #   run: |
+      #     podman stop $(podman ps -q)

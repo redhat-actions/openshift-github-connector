@@ -4,6 +4,9 @@ on:
 
 env:
   PORT: 3000
+  OAUTH_CLIENT_SECRET: "stub"
+  SESSION_SECRET: "stub"
+  SESSION_STORE_SECRET: "stub"
 
 jobs:
   ci:
@@ -38,6 +41,13 @@ jobs:
           openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
+
+      - uses: tetchel/generate-tls-cert@v1
+        with:
+          output_directory: /var/certs/localhost
+
+      - name: Add cert to env configuration
+        run: echo "SERVING_CA_DIRECTORY=/var/certs/localhost" >> .env.local
 
       - name: Run dev
         shell: bash

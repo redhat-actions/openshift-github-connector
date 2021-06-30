@@ -1,4 +1,5 @@
 import express from "express";
+import fs from "fs/promises";
 import https from "https";
 import fetch, { RequestInit, Response } from "node-fetch";
 import dotenv from "dotenv";
@@ -282,7 +283,15 @@ export function deleteKey<T extends Record<string, unknown>, K extends string>(o
   return partial as Omit<T, typeof key>;
 }
 
-export function loadEnv(envPath: string): void {
+export async function loadEnv(envPath: string): Promise<void> {
+  try {
+    await fs.access(envPath);
+  }
+  catch (err) {
+    Log.warn(`${envPath} does not exist.`);
+    return;
+  }
+
   const result = dotenv.config({ path: envPath });
   if (result.parsed) {
     Log.info(`Loaded ${envPath}`, result.parsed);
