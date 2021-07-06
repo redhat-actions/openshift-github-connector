@@ -12,20 +12,19 @@ import ApiResponses from "common/api-responses";
 import Routes from "./routes";
 import Log, { getLoggingMiddleware } from "./logger";
 import {
-  getFriendlyHTTPError, isInCluster, isProduction, loadEnv,
+  getFriendlyHTTPError, isProduction, loadEnv,
 } from "./util/server-util";
 import getSessionMiddleware from "./session-mw";
 import { loadServingCerts, loadRouterCerts } from "./util/certs";
 import { setupPassport } from "./oauth";
 import KubeWrapper from "./lib/kube/kube-wrapper";
-import { addCustomExtensions, send405 } from "./express-extensions";
+import { addCustomExtensions, send405 } from "./express-extends";
 
 /* eslint-disable spaced-comment */
 
 async function main(): Promise<void> {
   Log.info(`NODE_ENV=${process.env.NODE_ENV}`);
   Log.info(`Running in ${isProduction() ? "PRODUCTION" : "DEVELOPMENT"} mode`);
-  Log.info(`isInCluster ? ${isInCluster()}`);
 
   if (!isProduction()) {
     await loadEnv(".env");
@@ -77,11 +76,11 @@ async function main(): Promise<void> {
 
   app.use(getSessionMiddleware());
 
-  // must run after kubewrapper, and after session MW.
+  addCustomExtensions(app);
+
+  // must run after kubewrapper, after custom extensions, and after session MW.
   // but before all routes and static assets
   await setupPassport(app);
-
-  addCustomExtensions(app);
 
   ///// Serve static assets in production mode /////
 

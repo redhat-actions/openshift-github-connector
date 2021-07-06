@@ -10,7 +10,7 @@ import Log from "server/logger";
 import SecretUtil from "server/lib/kube/secret-util";
 import { Severity } from "common/common-util";
 import { DEFAULT_SECRET_NAMES, getDefaultSecretNames } from "common/default-secret-names";
-import { send405 } from "server/express-extensions";
+import { send405 } from "server/express-extends";
 
 const router = express.Router();
 

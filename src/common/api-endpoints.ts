@@ -9,7 +9,7 @@ const Health = new UrlPath(Root, "/health");
 
 const Auth = new UrlPath(Root, "/auth");
 const Login = new UrlPath(Auth, "/login");
-const LoginStatus = new UrlPath(Login, "/status");
+// const LoginStatus = new UrlPath(Login, "/status");
 // Must match helm chart value which passes callback URL env var to the pod
 const OAuthCallback = new UrlPath(Auth, "/callback");
 
@@ -22,7 +22,7 @@ const PreInstallApp = new UrlPath(Setup, "/pre-install-app");
 const PostInstallApp = new UrlPath(Setup, "/post-install-app");
 
 const App = new UrlPath(Root, "/app");
-const AppsExisting = new UrlPath(App, "/exists");
+// const AppsExisting = new UrlPath(App, "/exists");
 const AppRepos = new UrlPath(App, "/repos");
 const RepoSecrets = new UrlPath(AppRepos, "/secrets");
 const RepoSecretDefaults = new UrlPath(RepoSecrets, "/defaults");
@@ -30,12 +30,13 @@ const Workflows = new UrlPath(App, "/workflows");
 
 const Cluster = new UrlPath(Root, "/cluster");
 
-const User = new UrlPath(Root, "/user");
-const UserGitHubInfo = new UrlPath(User, "/github");
+const OpenShiftUser = new UrlPath(Root, "/user");
+const UserWithGitHub = new UrlPath(OpenShiftUser, "/github");
+const UserWithGitHubDetails = new UrlPath(OpenShiftUser, "/github/details");
 // const SetUserOAuthState = new UrlPath(User, "/oauth/state");
 // const PostUserOAuth = new UrlPath(User, "/oauth/post-redirect");
-const UserApp = new UrlPath(User, "/app");
-const UserImageRegistries = new UrlPath(User, "/image-registries");
+const UserApp = new UrlPath(OpenShiftUser, "/app");
+const UserImageRegistries = new UrlPath(OpenShiftUser, "/image-registries");
 // const ServiceAccount = new UrlPath(User, "/serviceaccount");
 
 const Webhook = new UrlPath(Root, "/webhook");
@@ -45,7 +46,7 @@ const ApiEndpoints = {
   Health,
   Auth: {
     Login,
-    LoginStatus,
+    // LoginStatus,
     OAuthCallback,
   },
   Setup: {
@@ -58,8 +59,9 @@ const ApiEndpoints = {
     PostInstallApp,
   },
   User: {
-    Root: User,
-    UserGitHubInfo,
+    Root: OpenShiftUser,
+    UserGitHub: UserWithGitHub,
+    UserGitHubDetails: UserWithGitHubDetails,
     // SetUserOAuthState,
     // PostUserOAuth,
     App: UserApp,
@@ -68,7 +70,7 @@ const ApiEndpoints = {
   },
   App: {
     Root: App,
-    Existing: AppsExisting,
+    // Existing: AppsExisting,
     Repos: {
       Root: AppRepos,
       Secrets: RepoSecrets,

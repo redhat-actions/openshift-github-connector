@@ -2,7 +2,7 @@ import express from "express";
 
 import ApiEndpoints from "common/api-endpoints";
 import ApiResponses from "common/api-responses";
-import { send405 } from "server/express-extensions";
+import { send405 } from "server/express-extends";
 
 const router = express.Router();
 
@@ -64,11 +64,16 @@ router.route(ApiEndpoints.User.PostUserOAuth.path)
 router.route(ApiEndpoints.User.Root.path)
   .get(async (
     req: express.Request<any, void>,
-    res: express.Response<ApiResponses.UserResponse>,
+    res: express.Response<ApiResponses.OpenShiftUserResponse>,
     next
   ) => {
     const user = await req.getUserOrDie();
     if (!user) {
+      /*
+      return res.json({
+        message: `Not logged in`,
+        success: false,
+      });*/
       return undefined;
     }
 
@@ -76,15 +81,43 @@ router.route(ApiEndpoints.User.Root.path)
       success: true,
       message: `User is ${user.name}`,
       severity: "info",
-      isAdmin: user.isAdmin,
-      name: user.name,
-      uid: user.uid,
-      githubUserInfo: user.githubUserInfo,
+      ...user.openshiftUserInfo,
     });
-
   }).all(send405([ "GET" ]));
 
-router.route(ApiEndpoints.User.UserGitHubInfo.path)
+router.route(ApiEndpoints.User.UserGitHub.path)
+  .get(async (
+    req: express.Request<any, void>,
+    res: express.Response<ApiResponses.UserResponse>,
+    next
+  ) => {
+    const user = await req.getUserOrDie();
+    if (!user) {
+      /*
+      return res.json({
+        message: `Not logged in`,
+        success: false,
+      });*/
+      return undefined;
+    }
+
+    if (!user.githubUserInfo) {
+      return res.json({
+        success: false,
+        message: `No GitHub user info for ${user.name}`,
+        severity: "warning",
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: `User is ${user.name} and GitHub username is ${user.githubUserInfo.name}`,
+      severity: "info",
+      ...user.allInfo,
+    });
+  }).all(send405([ "GET" ]));
+
+router.route(ApiEndpoints.User.UserGitHubDetails.path)
   .get(async (
     req: express.Request<any, void>,
     res: express.Response<ApiResponses.GitHubUserDetailsResponse>,

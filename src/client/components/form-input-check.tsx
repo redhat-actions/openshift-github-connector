@@ -17,7 +17,7 @@ export default function FormInputCheck(props: FormButtonProps): JSX.Element {
 
   return (
     <label
-      className={classNames("d-flex align-items-center clickable py-1", props.className, { b: bold, disabled: props.disabled })}
+      className={classNames("center-y clickable py-1", props.className, { b: bold, disabled: props.disabled })}
       title={props.title}
     >
       <input

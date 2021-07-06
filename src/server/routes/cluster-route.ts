@@ -4,7 +4,7 @@ import KubeWrapper from "server/lib/kube/kube-wrapper";
 import ApiEndpoints from "common/api-endpoints";
 import Log from "server/logger";
 import ApiResponses from "common/api-responses";
-import { send405 } from "server/express-extensions";
+import { send405 } from "server/express-extends";
 
 const router = express.Router();
 export default router;

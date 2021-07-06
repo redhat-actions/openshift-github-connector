@@ -7,9 +7,14 @@
   justify-content: space-around;
   align-items: center;
 
-  & a, & a:focus {
+  & a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
     color: inherit;
-    &:hover {
+
+    &:focus, &:hover {
       --pf-global--link--TextDecoration--hover: none;
       // text-decoration: none;
     }
@@ -27,6 +32,10 @@
 
 .btn:disabled, button:disabled, [type="button"]:disabled {
   cursor: not-allowed;
+}
+
+.pf-c-page__header-brand-link {
+  flex: inherit !important;
 }
 
 $card-border-radius: 0.5rem;
@@ -55,6 +64,10 @@ $card-limit-padding: 1rem 1.25rem;
 
   margin: 0;
   font-weight: bold;
+
+  & .btn-line {
+    margin-left: auto;
+  }
 }
 
 .pf-c-card__body {
@@ -78,12 +91,12 @@ input {
     box-shadow: none;
 
     &.error {
-      // border-color: $pf-global--danger-color--200;
-      border-color: c.$danger;
+      border-color: c.$pf-global--danger-color--200;
+      // border-color: c.$danger;
     }
     &.warning {
-      // border-color: c.$pf-global--warning-color--200;
-      border-color: c.$warning;
+      border-color: c.$pf-global--warning-color--200;
+      // border-color: c.$warning;
     }
   }
 }
@@ -116,4 +129,22 @@ input {
 .tooltip-icon {
   height: 1.25em;
   width: 1.25em;
+}
+
+.pf-c-page__header, .hover-box {
+  & a, #nav-toggle {
+    padding: c.$pf-global--spacer--sm;
+
+    border: c.$pf-global--BorderWidth--md solid transparent;
+    border-radius: 0.5rem;
+
+    &:hover, &:focus {
+      text-decoration: none;
+      border-color: white;
+
+      &.light {
+        border-color: c.$pf-color-black-850;
+      }
+    }
+  }
 }

@@ -78,7 +78,7 @@ For in-cluster deployment (using the Helm chart), copy the serving cert from the
 ```sh
 oc get secret v4-0-config-system-router-certs -n openshift-authentication -o yaml | sed 's/namespace: openshift-authentication/namespace: github-connector/g' | oc apply -f-
 ```
-The secret will then be mounted into the pod and trusted at runtime. Refer to the deployment.yaml.
+If the secrets exists in the same namespace as the deployment, it will be mounted into the pod and trusted at runtime. Refer to the `deployment.yaml`.
 
 For local development, copy out the secret to a file eg:
 ```
@@ -101,19 +101,20 @@ Set the session secrets to two different UUIDs.
 Your `.env.local` should look like this:
 
 ```properties
-SESSION_SECRET=<uuid>
+SESSION_SECRET=<any uuid>
 SESSION_STORE_SECRET=<another uuid>
-OAUTH_CLIENT_SECRET: <uuid from above>,
+OAUTH_CLIENT_SECRET=<uuid from OAuthClient above>
 CONNECTOR_SERVICEACCOUNT_NAME=<service account from above>
+
+# Steps below are necessary only if your cluster uses untrusted TLS certs
 # See 'Router CA' above
-ROUTER_CA_DIRECTORY=/var/certs/crc/`
-INSECURE_TRUST_APISERVER_CERT: true,
+ROUTER_CA_DIRECTORY=/var/certs/crc/
+INSECURE_TRUST_APISERVER_CERT: true
 # See 'Serving CA' above
 SERVING_CA_DIRECTORY=/var/certs/localhost
 ```
 
 Then run `yarn dev` to run the development server.
-
 
 ## Project Structure
 

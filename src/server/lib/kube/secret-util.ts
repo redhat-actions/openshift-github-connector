@@ -144,6 +144,8 @@ namespace SecretUtil {
   }
 
   export async function getSecretsMatchingSelector(labelSelector: string): Promise<V1SecretList> {
+    Log.info(`Get secrets in namespace ${KubeWrapper.instance.ns} with selector ${labelSelector}`);
+
     const secrets = await KubeWrapper.instance.coreClient.listNamespacedSecret(
       KubeWrapper.instance.ns,
       undefined, undefined, undefined, undefined,

@@ -23,10 +23,9 @@ import ApiEndpoints from "../../../common/api-endpoints";
 import ApiResponses from "../../../common/api-responses";
 import ApiRequests from "../../../common/api-requests";
 import { ExternalLink } from "../../components/external-link";
-import SetupPageHeader, { SETUP_QUERYPARAM } from "./setup-header";
 import BtnBody from "../../components/btn-body";
 import { getFriendlyDateTime } from "../../../common/common-util";
-import { fetchJSON, getSearchParam } from "../../util/client-util";
+import { fetchJSON } from "../../util/client-util";
 import Banner from "../../components/banner";
 import { getSecretsUrlForRepo, GitHubRepoId } from "../../../common/types/gh-types";
 import DataFetcher from "../../components/data-fetcher";
@@ -126,12 +125,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
   // eslint-disable-next-line @typescript-eslint/member-ordering
   override render(): JSX.Element {
     return (
-      <React.Fragment>
-        {
-          getSearchParam(SETUP_QUERYPARAM) != null
-            ? <SetupPageHeader pageIndex={3} canProceed={true} />
-            : ""
-        }
+      <>
         <Card>
           <CardTitle>
             Connect GitHub Repositories
@@ -152,7 +146,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
               <ExternalLink
                 href={"https://github.com/redhat-actions/oc-login/wiki/Using-a-Service-Account-for-GitHub-Actions"}
               >
-                <BookOpenIcon className="mr-2" />
+                <BookOpenIcon className="me-2" />
                 Read More about using a service account for GitHub Actions
               </ExternalLink>.
             </p>
@@ -168,7 +162,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
             <p>
 
             </p>
-            <div className="d-flex align-items-center">
+            <div className="center-y">
               <input type="checkbox"
                 // className="form-check-input"
                 id={this.createSATokensId}
@@ -220,7 +214,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
           {this.state.loadingErr != null
             // Failed to load
             ? (
-              <React.Fragment>
+              <>
                 <CardTitle>
                   Repositories
                 </CardTitle>
@@ -229,32 +223,32 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                     title={this.state.loadingErr}
                   />
                 </CardBody>
-              </React.Fragment>
+              </>
             ) : (
-              <React.Fragment>
+              <>
 
                 {this.state.repoCheckedMap == null || this.state.reposSecretsData == null
                 // still loading
                   ? (
-                    <React.Fragment>
+                    <>
                       <CardTitle>
                         Repositories
                       </CardTitle>
                       <CardBody>
-                        <div className="d-flex justify-content-center">
+                        <div className="center-x">
                           <Spinner size="lg" />
                         </div>
                       </CardBody>
-                    </React.Fragment>
+                    </>
                   )
                 // Loaded
                   : (
-                    <React.Fragment>
+                    <>
                       <CardTitle>
                         <div>
                           Repositories
                         </div>
-                        <div className="ml-auto">
+                        <div className="ms-auto">
                           <div className="btn-line">
                             <Button variant="primary">
                               <ExternalLink
@@ -362,14 +356,14 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                           submissionResult={this.state.submissionResult}
                         />
                       </CardBody>
-                    </React.Fragment>
+                    </>
                   )
                 }
-              </React.Fragment>
+              </>
             )
           }
         </Card>
-      </React.Fragment>
+      </>
     );
   }
 
@@ -452,7 +446,7 @@ function RepoWithSecretsItem({
       <div className={
         classNames(
           "b rounded",
-          "d-flex align-items-center justify-content-between",
+          "center-y justify-content-between",
         )
       }>
 
@@ -470,7 +464,7 @@ function RepoWithSecretsItem({
             label={repoWithSecrets.repo.full_name}
           />
 
-          <div className="mr-4">
+          <div className="me-4">
             <ShowSecretsButton
               noSecrets={repoWithSecrets.secrets.length}
               isShowingSecrets={isShowingSecrets}
@@ -481,11 +475,11 @@ function RepoWithSecretsItem({
         {/* <div className="mx-3">
           {isConnectedToACluster
             ? (
-              <React.Fragment>
+              <>
                 <FontAwesomeIcon icon="check-circle"
                   className="text-success" fixedWidth
                 />
-              </React.Fragment>
+              </>
             )
             : ("")
           }
@@ -592,7 +586,7 @@ function ShowSecretsButton(props: { noSecrets: number, isShowingSecrets: boolean
   }
 
   return (
-    <React.Fragment>
+    <>
       <Button variant="secondary"
         title={text}
         onClick={(_e) => {
@@ -608,7 +602,7 @@ function ShowSecretsButton(props: { noSecrets: number, isShowingSecrets: boolean
           : ("")
         }
       </Button>
-    </React.Fragment>
+    </>
   );
 }
 
@@ -618,7 +612,7 @@ function getSecretNameWarning(_secretNames: string[]): JSX.Element {
 
   return (
     <div>
-      <InfoCircleIcon className="mr-2 text-success" title={msg} />
+      <InfoCircleIcon className="me-2 text-success" title={msg} />
       {msg}
     </div>
   );
@@ -645,7 +639,7 @@ function SubmissionResultBanner(props: {
   }
 
   return (
-    <React.Fragment>
+    <>
       <Banner
         id={props.bannerId}
         display={true}
@@ -656,34 +650,34 @@ function SubmissionResultBanner(props: {
         {
           props.submissionResult.successes != null && props.submissionResult.successes.length > 0
             ?
-            <React.Fragment>
+            <>
               <ul className="no-bullets">
                 {props.submissionResult.successes.map((success) => {
                   return (
                     <li key={success.actionsSecretName + success.repo.full_name}>
-                      <CommonIcons.Success className="mr-2 text-success" />
+                      <CommonIcons.Success className="me-2 text-success" />
                       <b>{success.actionsSecretName}</b> in {success.repo.full_name}
                     </li>
                   );
                 })}
               </ul>
-            </React.Fragment>
+            </>
             : ("")
         }
         {
           props.submissionResult.failures != null && props.submissionResult.failures.length > 0
             ?
-            <React.Fragment>
+            <>
               <ul className="no-bullets">
                 {props.submissionResult.failures.map((failure) => {
                   return (
                     <li key={failure.actionsSecretName + failure.repo.full_name}>
-                      <CommonIcons.Error className="mr-2 text-danger" />
+                      <CommonIcons.Error className="me-2 text-danger" />
                       {failure.actionsSecretName != null ?
                         (
-                          <React.Fragment>
+                          <>
                             <b>{failure.actionsSecretName}</b> in&nbsp;
-                          </React.Fragment>
+                          </>
                         )
                         : ("")
                       }
@@ -695,10 +689,10 @@ function SubmissionResultBanner(props: {
                   );
                 })}
               </ul>
-            </React.Fragment>
+            </>
             : ("")
         }
       </div>
-    </React.Fragment>
+    </>
   );
 }

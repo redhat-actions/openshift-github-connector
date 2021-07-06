@@ -1,26 +1,63 @@
 import {
   Button, Card, CardBody, CardTitle,
 } from "@patternfly/react-core";
-import { Link } from "react-router-dom";
+import { useContext, useState } from "react";
+
 import ApiEndpoints from "../../common/api-endpoints";
-import ApiResponses from "../../common/api-responses";
-import DataFetcher from "../components/data-fetcher";
+import { ConnectorUserInfo } from "../../common/types/user-types";
 import { ObjectTable } from "../components/object-table";
-import ClientPages from "./client-pages";
+import { OpenShiftUserContext } from "../contexts";
+import { fetchJSON } from "../util/client-util";
 
 export function UserPage(): JSX.Element {
+
+  const userContext = useContext(OpenShiftUserContext);
+
+  const [ error, setError ] = useState<string>();
+  const [ isLoggingOut, setIsLoggingOut ] = useState(false);
 
   return (
     <>
       <div className="d-flex justify-content-end">
-        <div className="">
-          <Button>
+        <div className="error">
+          {error}
+        </div>
+        <div className="btn-line">
+          <Button
+            isDisabled={isLoggingOut}
+            onClick={userContext.reload}
+          >
+            Refresh
+          </Button>
+          <Button
+            isLoading={isLoggingOut}
+            isDisabled={isLoggingOut}
+            onClick={async () => {
+              setIsLoggingOut(true);
+              try {
+                await fetchJSON("DELETE", ApiEndpoints.Auth.Login);
+                window.location.reload();
+              }
+              catch (err) {
+                setError(err);
+              }
+              finally {
+                setIsLoggingOut(false);
+              }
+            }}>
             Log Out
           </Button>
         </div>
       </div>
       <div className="my-3"></div>
-      <DataFetcher type="api" endpoint={ApiEndpoints.User.Root}>{
+      <Card>
+        <CardTitle>
+          OpenShift User
+        </CardTitle>
+        <UserInfoCardBody userData={userContext.user} />
+      </Card>
+
+      {/* <DataFetcher type="api" endpoint={ApiEndpoints.User.Root}>{
         (userData: ApiResponses.UserResponse) => {
           if (!userData.success) {
             return (
@@ -49,12 +86,12 @@ export function UserPage(): JSX.Element {
           );
         }
       }
-      </DataFetcher>
+      </DataFetcher> */}
     </>
   );
 }
 
-function OpenShiftUserInfoCardBody({ userData }: { userData: ApiResponses.User }): JSX.Element {
+function UserInfoCardBody({ userData }: { userData: ConnectorUserInfo }): JSX.Element {
   return (
     <>
       <CardBody>
@@ -62,31 +99,9 @@ function OpenShiftUserInfoCardBody({ userData }: { userData: ApiResponses.User }
           obj={{
             Username: userData.name,
             "Connector Administrator": userData.isAdmin ? "Yes" : "No",
+            "GitHub Username": userData.githubInfo?.name ?? "Not available",
           }}
         />
-      </CardBody>
-    </>
-  );
-}
-
-function GitHubUserInfoCardBody({ userData }: { userData: ApiResponses.User }): JSX.Element {
-  if (!userData.githubUserInfo) {
-    return (
-      <CardBody>
-        <p>
-          No GitHub info for this user.
-        </p>
-        <p>
-          Sign in with GitHub though the <Link to={ClientPages.SetupCreateApp.path}>App Setup page</Link>.
-        </p>
-      </CardBody>
-    );
-  }
-
-  return (
-    <>
-      <CardBody>
-        GitHub {userData.githubUserInfo.type}: <span className="b">{userData.githubUserInfo.name}</span>
       </CardBody>
     </>
   );

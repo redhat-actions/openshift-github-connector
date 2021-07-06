@@ -22,7 +22,7 @@ export default function appPageCard(props: {
         <div>
           {props.header}
         </div>
-        <div className="ml-auto"></div>
+        <div className="ms-auto"></div>
         <div className="btn-line">
           {
             props.buttons.map((btnProps, i) => {

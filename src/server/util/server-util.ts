@@ -55,9 +55,11 @@ export function isProduction(): boolean {
   return process.env.NODE_ENV === "production";
 }
 
+/*
 export function isInCluster(): boolean {
   return !!process.env.KUBERNETES_PORT;
 }
+*/
 
 export function removeTrailingSlash(s: string): string {
   if (s.endsWith("/")) {
@@ -145,8 +147,15 @@ export function getFriendlyHTTPError(err: Error & { response?: any }): Error {
   }
 
   const errRes = err.response;
-  const betterMessage = `${errRes.request.method} ${errRes.request.uri.href}: `
-        + `${errRes.statusCode} ${errRes.body.message || errRes.body.reason}`;
+
+  let betterMessage: string;
+  if (!errRes.request && err.response.data) {
+    betterMessage = `${errRes.status ?? "Unknown status"} ${errRes.url}: ${errRes.data.message ?? "Unknown cause"}`;
+  }
+  else {
+    betterMessage = `${errRes.request?.method} ${errRes.request?.uri.href}: `
+      + `${errRes.statusCode} ${errRes.body?.message || errRes.body?.reason}`;
+  }
 
   const betterError = new Error(betterMessage);
   betterError.stack = err.stack?.replace(err.message, betterMessage);

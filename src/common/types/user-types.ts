@@ -19,17 +19,24 @@ export type GitHubUserInfo = Readonly<{
   /**
    * GitHub user ID
    */
-  readonly id: number,
+  id: number,
   /**
    * GitHub user name (login)
    */
-  readonly name: string,
+  name: string,
   /**
    * Whether the user is a regular user or an organization
    */
-  readonly type: GitHubUserType,
+  type: GitHubUserType,
+}>;
+
+export type GitHubAppInstallInfo = Readonly<{
+  appId: number,
+  appName: string,
+  installationId: number,
 }>;
 
 export interface ConnectorUserInfo extends OpenShiftUserInfo {
-  githubUserInfo?: GitHubUserInfo,
+  readonly githubInfo?: GitHubUserInfo,
+  readonly githubInstallationInfo?: GitHubAppInstallInfo,
 }

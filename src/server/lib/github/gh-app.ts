@@ -1,10 +1,16 @@
 import { Octokit } from "@octokit/core";
 
 import Log from "server/logger";
-import { GitHubAppOwnerUrls, GitHubAppConfig, GitHubAppInstallationData, GitHubAppConfigNoSecrets, GitHubAppAuthData } from "common/types/gh-types";
+import {
+  GitHubAppOwnerUrls,
+  GitHubAppConfig,
+  GitHubAppInstallationData,
+  GitHubAppConfigNoSecrets,
+  GitHubAppAuthData
+} from "common/types/gh-types";
 import SecretUtil from "server/lib/kube/secret-util";
 import { getAppOctokit, getGitHubHostname } from "./gh-util";
-import { fromb64, toValidK8sName } from "server/util/server-util";
+import { fromb64, getFriendlyHTTPError, toValidK8sName } from "server/util/server-util";
 import User from "server/lib/user/user";
 
 /**
@@ -53,13 +59,28 @@ class GitHubApp {
   }
 
   private static async getAppConfig(octokit: Octokit): Promise<GitHubAppConfigNoSecrets> {
+    Log.info(`Get app config`);
     return (await octokit.request("GET /app")).data as GitHubAppConfigNoSecrets;
   }
 
   public static async create(authData: GitHubAppAuthData): Promise<GitHubApp> {
     const octokit = getAppOctokit(authData);
 
-    const configNoSecrets = await this.getAppConfig(octokit);
+    let configNoSecrets ;
+    try {
+      configNoSecrets = await this.getAppConfig(octokit);
+    }
+    catch (err) {
+      if (err.response.status === 404) {
+
+        throw new Error(
+          `Received ${getFriendlyHTTPError(err)}; app has likely been deleted. `
+          + `Delete the secret "${this.getAppSecretName(authData.id)}" to remove the app from the cluster.`
+        );
+      }
+      throw err;
+    }
+
     const config = {
       ...authData,
       ...configNoSecrets

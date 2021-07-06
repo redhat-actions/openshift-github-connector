@@ -6,12 +6,7 @@ $body-bg: $pf-global--BackgroundColor--200;
 $body-fg: $pf-global--Color--100;
 
 // @import "~bootstrap/scss/bootstrap";
-@import "~bootstrap/scss/functions";
-@import "~bootstrap/scss/mixins";
-@import "~bootstrap/scss/bootstrap-grid";
-@import "~bootstrap/scss/grid";
-@import "~bootstrap/scss/variables";
-@import "~bootstrap/scss/utilities";
+@import "~bootstrap/scss/bootstrap-utilities";
 
 /* https://www.redhat.com/en/about/brand/standards/color */
 $rh-red: #e00;
@@ -34,3 +29,4 @@ $breakpoint-xl: 1200px;
 
 $main-vertical-padding: 2rem;
 $navbar-height: 4rem;
+$pf-global--BorderRadius--md: 0.5rem;

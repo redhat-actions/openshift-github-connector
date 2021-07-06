@@ -5,7 +5,7 @@ import Log from "server/logger";
 import ApiEndpoints from "common/api-endpoints";
 import { OAUTH2_STRATEGY_NAME } from "server/oauth";
 import ApiResponses from "common/api-responses";
-import { send405 } from "server/express-extensions";
+import { send405 } from "server/express-extends";
 
 const oauthRouter = express.Router();
 
@@ -47,7 +47,7 @@ oauthRouter.route(ApiEndpoints.Auth.Login.path)
       success: false,
     });
   })
-  .all(send405([ "GET", "DELETE" ]));
+  .all(send405([ "GET" ]));
 
 oauthRouter.route(ApiEndpoints.Auth.OAuthCallback.path)
   .get(passport.authenticate(strategy, {
@@ -58,8 +58,9 @@ oauthRouter.route(ApiEndpoints.Auth.OAuthCallback.path)
     failureFlash: true,
     session,
   }))
-  .all(send405([ "GET", "DELETE" ]));
+  .all(send405([ "GET" ]));
 
+/*
 oauthRouter.route(ApiEndpoints.Auth.LoginStatus.path)
   .get(async (req, res: express.Response<ApiResponses.Result>, next) => {
 
@@ -83,6 +84,7 @@ oauthRouter.route(ApiEndpoints.Auth.LoginStatus.path)
     });
   })
   .all(send405([ "GET", "DELETE" ]));
+*/
 
 Log.info(
   `Started authentication route, `
