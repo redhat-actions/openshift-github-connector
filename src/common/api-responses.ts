@@ -47,6 +47,7 @@ namespace ApiResponses {
 
   export interface CreatingAppResponse extends Result {
     appInstallUrl: string,
+    appName: string,
   }
 
   export interface ExistingAppData {
@@ -64,10 +65,11 @@ namespace ApiResponses {
     },
   }
 
-  export type AllAppsState = {
+  export type ClusterAppState = {
     success: true,
-    totalCount: number,
+    // totalCount: number,
     visibleApps: ExistingAppData[],
+    // app: ExistingAppData,
   } | ResultFailed;
 
   export interface GitHubAppMissing extends Result {

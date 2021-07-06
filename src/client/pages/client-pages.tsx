@@ -1,31 +1,31 @@
 import React from "react";
 import {
-  Link, Redirect, Route, RouteComponentProps,
+  Link, Redirect, Route,
 } from "react-router-dom";
 
 import UrlPath from "../../common/types/url-path";
 import ClusterPage from "./cluster-page";
 import GitHubAppPage from "./gh-app-page";
-import SetupWelcomePage from "./setup/welcome-page";
 import SelectReposPage from "./setup/connect-repos-page";
-import SetupAppPage from "./setup/gh-app/setup-app";
-import * as PostCreateAppPages from "./setup/gh-app/post-create-app";
 import HomePage from "./home-page";
-import SetupFinishedPage from "./setup/setup-completion-page";
-import AddWorkflowsPage from "./add-workflows-page";
 import ImageRegistriesPage from "./image-registries-page";
-import { getSetupSteps } from "./setup/setup-header";
 import { isInOpenShiftConsole } from "../util/client-util";
-import { getTitle } from "../components/title";
 import { UserPage } from "./user";
+import { BasePage } from "./base-page";
+import SetupWizard, { getSetupPagePath } from "./setup/setup";
+import AddWorkflowsPage from "./add-workflows-page";
+import SetupFinishedPage from "./setup/setup-completion-page";
+import { PostCreateAppCallbackPage, InstalledAppPage } from "./setup/gh-app/app-callbacks";
 
 export class ClientPage extends UrlPath {
   constructor(
     parentPath: UrlPath | undefined,
     endpoint: string,
-    public readonly pageTitle: string,
+    public readonly title: string,
     // type copied from <Route component=> prop
-    public readonly component: React.ComponentType<RouteComponentProps<any>> | React.ComponentType<any>,
+    // public readonly component: React.ComponentType<RouteComponentProps<any>> | React.ComponentType<any>,
+    public readonly component: React.ComponentType<any>,
+    private readonly exact: boolean = true,
   ) {
     super(parentPath, endpoint);
   }
@@ -36,11 +36,8 @@ export class ClientPage extends UrlPath {
 
   public get route(): JSX.Element {
     return (
-      <Route key={this.path} exact path={this.path} /* component={this.component} */ render={(props) => (
-        <>
-          {getTitle(this.pageTitle)}
-          <this.component {...props} />
-        </>
+      <Route key={this.path} exact={this.exact} path={this.path} /* component={this.component} */ render={(props) => (
+        <BasePage content={this.component} title={this.title} {...props} />
       )}/>
     );
   }
@@ -57,16 +54,21 @@ const Home = new ClientPage(undefined, appRootPath, "", HomePage);
 // const Login = new ClientPage(Home, "/login", "Log in", LoginPage);
 const User = new ClientPage(Home, "/user", "User", UserPage);
 
-const Setup = new ClientPage(Home, "/setup", "Set up", () => (<Redirect to={getSetupSteps()[0].path} />));
-const SetupWelcome = new ClientPage(Setup, "/welcome", "Welcome", SetupWelcomePage);
-const SetupCreateApp = new ClientPage(Setup, "/app", "Create GitHub App", SetupAppPage);
-const SetupCreatingApp = new ClientPage(Setup, "/creating-app", "Creating App...", PostCreateAppPages.CreatingAppPage);
+const Setup = new ClientPage(Home, "/setup/:page", "Set up", SetupWizard, false);
+const SetupIndex = new ClientPage(Home, "/setup", "Set up", () => (<Redirect to={getSetupPagePath("WELCOME")} />));
+// const SetupWelcome = new ClientPage(SetupIndex, "/welcome", "Welcome", WelcomePage);
+// const SetupCreateApp = new ClientPage(SetupIndex, "/app", "Set up GitHub App", SetupAppPage);
+const CreatingAppCallback = new ClientPage(Home, "/creating-app-callback", "Creating App...", PostCreateAppCallbackPage);
+// const SetupInstallApp = new ClientPage(SetupIndex, "/install-app", "Install App", InstallExistingAppPage);
+const InstalledAppCallback = new ClientPage(Home, "/installed-app-callback", "Installed App", InstalledAppPage);
+// const SetupViewApp = new ClientPage(SetupIndex, "/view-app", "View GitHub App", GitHubAppPage);
+// const SetupConnectRepos = new ClientPage(SetupIndex, "/connect-repos", "Connect Repositories", SelectReposPage);
+const SetupFinished = new ClientPage(Home, "/setup-complete", "Setup Complete", SetupFinishedPage);
 // const SetupPostOAuth = new ClientPage(Setup, "/oauth-callback", PostOAuthPage);
-const SetupInstalledApp = new ClientPage(Setup, "/installed-app", "Installed App", PostCreateAppPages.InstalledAppPage);
-const SetupFinished = new ClientPage(Setup, "/done", "Setup Complete", SetupFinishedPage);
+
+const App = new ClientPage(Home, "/app", "GitHub App", GitHubAppPage);
 
 const AddWorkflows = new ClientPage(Home, "/add-workflows", "Add Workflows", AddWorkflowsPage);
-const App = new ClientPage(Home, "/app", "GitHub App", GitHubAppPage);
 const ConnectRepos = new ClientPage(Home, "/connect-repos", "Connect Repositories", SelectReposPage);
 const Cluster = new ClientPage(Home, "/cluster", "Cluster Info", ClusterPage);
 
@@ -82,17 +84,23 @@ const NotImplemented = new ClientPage(Home, "/not-implemented", "Not Implemented
 }));
 
 const ClientPages = {
-  Welcome: SetupWelcome,
+  // Welcome: SetupWelcome,
   Home,
   // Login,
   User,
 
+  SetupIndex,
   Setup,
-  SetupCreateApp,
-  SetupCreatingApp,
+  // SetupWelcome,
+  // SetupCreateApp,
+  CreatingAppCallback,
   // SetupPostOAuth,
-  SetupInstalledApp,
+  // SetupInstallApp,
+  InstalledAppCallback,
+  // SetupViewApp,
+  // SetupConnectRepos,
   SetupFinished,
+
   ConnectRepos,
 
   App,

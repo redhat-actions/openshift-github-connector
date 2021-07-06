@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Card,
   CardTitle,
@@ -7,12 +6,10 @@ import {
 } from "@patternfly/react-core";
 import { Link } from "react-router-dom";
 import ClientPages from "../client-pages";
-import SetupPageHeader from "./setup-header";
 
 export default function SetupFinishedPage(): JSX.Element {
   return (
-    <React.Fragment>
-      <SetupPageHeader pageIndex={5} canProceed={false} hideBtnBanner={true} />
+    <>
       <Card>
         <CardTitle>
           Setup Complete
@@ -44,7 +41,7 @@ export default function SetupFinishedPage(): JSX.Element {
           </ul>
         </CardBody>
       </Card>
-    </React.Fragment>
+    </>
   );
 }
 
@@ -66,7 +63,7 @@ function getStatusCells(success: boolean, btnLabels: {
   const btnLink = success ? btnLinks.success : btnLinks.failure;
 
   return (
-    <React.Fragment>
+    <>
       <td>
         {statusIcon}
       </td>
@@ -77,7 +74,7 @@ function getStatusCells(success: boolean, btnLabels: {
           </Button>
         </Link>
       </td>
-    </React.Fragment>
+    </>
   );
 }
 
@@ -85,21 +82,21 @@ export default function SetupHomePage() {
   // const unknown = <FontAwesomeIcon icon="question" className="text-warning" />;
 
   const tdLoadingDisplay = (
-    <React.Fragment>
+    <>
       <td>
         <FontAwesomeIcon icon="question" className="text-warning" />
       </td>
       <td className="push-right align-middle">
         <Spinner  variant="primary" style={{ height: "1em", width: "1em" }}/>
       </td>
-    </React.Fragment>
+    </>
   );
 
   return (
-    <React.Fragment>
+    <>
       <h1 className="text-center mb-5">Setup Status</h1>
 
-      <div className="d-flex justify-content-center">
+      <div className="center-x">
         <Table className="w-75 table-dark">
           <tbody>
             <tr>
@@ -136,7 +133,7 @@ export default function SetupHomePage() {
           </tbody>
         </Table>
       </div>
-    </React.Fragment>
+    </>
   );
 }
 */

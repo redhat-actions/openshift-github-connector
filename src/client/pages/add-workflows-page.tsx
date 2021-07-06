@@ -65,7 +65,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
 
   override render(): JSX.Element {
     return (
-      <React.Fragment>
+      <>
         <Card>
           <CardTitle>
             Add Starter Workflow to Repository
@@ -81,19 +81,19 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
             <ul className="no-bullets">
               <li>
                 <ExternalLink href={STARTER_WORKFLOW.htmlFile}>
-                  <GithubIcon className="mr-2" />
+                  <GithubIcon className="me-2" />
                   View it on GitHub
                 </ExternalLink>
               </li>
               <li>
                 <ExternalLink href={STARTER_WORKFLOW.blog}>
-                  <BookOpenIcon className="mr-2" />
+                  <BookOpenIcon className="me-2" />
                   Read the blog
                 </ExternalLink>
               </li>
               <li>
                 <ExternalLink href={STARTER_WORKFLOW.youtube}>
-                  <YoutubeIcon className="mr-2"/>
+                  <YoutubeIcon className="me-2"/>
                   Watch the video
                 </ExternalLink>
               </li>
@@ -117,7 +117,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                 helperTextInvalid={this.state.workflowFile.validationErr}
               >
                 <TextInput
-                  className="col-4 mr-0"
+                  className="col-4 me-0"
                   id={this.fileNameInputId}
                   validated={this.state.workflowFile.validationErr == null ? "success" : "error"}
                   defaultValue={DEFAULT_WORKFLOW_FILE_BASENAME}
@@ -142,7 +142,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                   <div>
                     Application Settings
                   </div>
-                  <div className="ml-auto">
+                  <div className="ms-auto">
                     <div className="btn-line">
                       <Button variant="primary">
                         <Link to={ClientPages.ImageRegistries.path}>
@@ -179,7 +179,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                       }
 
                       return (
-                        <React.Fragment>
+                        <>
                           <FormGroup
                             fieldId="registry"
                             label="Image Registry"
@@ -213,7 +213,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                               }
                             </FormSelect>
                           </FormGroup>
-                        </React.Fragment>
+                        </>
                       );
                     })()
                   }
@@ -258,13 +258,13 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
         <DataFetcher type="api" endpoint={ApiEndpoints.App.Repos.Secrets} loadingDisplay="card">{
           (reposWithSecrets: ApiResponses.ReposSecretsStatus, reload) => {
             return (
-              <React.Fragment>
+              <>
                 <Card>
                   <CardTitle>
                     <div>
                       Select repository
                     </div>
-                    <div className="ml-auto">
+                    <div className="ms-auto">
                       <div className="btn-line">
                         <Button variant="primary">
                           <ExternalLink
@@ -290,7 +290,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                           return (
                             <div key={repo.repo.id}
                               className={classNames(
-                                "d-flex align-items-center row m-0 p-3 rounded",
+                                "center-y row m-0 p-3 rounded",
                                 { "bg-darker": !isEven }
                               )}
                             >
@@ -316,12 +316,12 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
 
                               { repo.hasClusterSecrets ? "" :
                                 <div className="col-4 centers">
-                                  <ExclamationTriangleIcon className="text-warning mr-2" />
+                                  <ExclamationTriangleIcon className="text-warning me-2" />
                                   Missing cluster secrets
                                 </div>
                               }
 
-                              <div className="col-1 d-flex align-items-center justify-content-end">
+                              <div className="col-1 center-y justify-content-end">
                                 <Button
                                   variant="tertiary"
                                   title={repo.repo.html_url}
@@ -382,12 +382,12 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                     />
                   </CardBody>
                 </Card>
-              </React.Fragment>
+              </>
             );
           }
         }
         </DataFetcher>
-      </React.Fragment>
+      </>
     );
   }
 
@@ -470,7 +470,7 @@ function SubmissionStatusBanner(props: {
   }
 
   return (
-    <React.Fragment>
+    <>
       <Banner
         className="my-3"
         id={props.bannerId}
@@ -498,6 +498,6 @@ function SubmissionStatusBanner(props: {
           </div>
         ) : ("")
       }
-    </React.Fragment>
+    </>
   );
 }

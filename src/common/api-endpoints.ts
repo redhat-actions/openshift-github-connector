@@ -9,7 +9,7 @@ const Health = new UrlPath(Root, "/health");
 
 const Auth = new UrlPath(Root, "/auth");
 const Login = new UrlPath(Auth, "/login");
-const LoginStatus = new UrlPath(Login, "/status");
+// const LoginStatus = new UrlPath(Login, "/status");
 // Must match helm chart value which passes callback URL env var to the pod
 const OAuthCallback = new UrlPath(Auth, "/callback");
 
@@ -22,7 +22,7 @@ const PreInstallApp = new UrlPath(Setup, "/pre-install-app");
 const PostInstallApp = new UrlPath(Setup, "/post-install-app");
 
 const App = new UrlPath(Root, "/app");
-const AppsExisting = new UrlPath(App, "/exists");
+// const AppsExisting = new UrlPath(App, "/exists");
 const AppRepos = new UrlPath(App, "/repos");
 const RepoSecrets = new UrlPath(AppRepos, "/secrets");
 const RepoSecretDefaults = new UrlPath(RepoSecrets, "/defaults");
@@ -45,7 +45,7 @@ const ApiEndpoints = {
   Health,
   Auth: {
     Login,
-    LoginStatus,
+    // LoginStatus,
     OAuthCallback,
   },
   Setup: {
@@ -68,7 +68,7 @@ const ApiEndpoints = {
   },
   App: {
     Root: App,
-    Existing: AppsExisting,
+    // Existing: AppsExisting,
     Repos: {
       Root: AppRepos,
       Secrets: RepoSecrets,

@@ -1,5 +1,5 @@
+import { useState } from "react";
 import classNames from "classnames";
-import React, { useState } from "react";
 import {
   Button, Card, CardTitle, CardBody, Checkbox,
 } from "@patternfly/react-core";
@@ -32,16 +32,18 @@ export default function CreateAppCard(): JSX.Element {
   const githubManifestUrl = `https://github.com/settings/apps/new?state=${state}`;
 
   return (
-    <React.Fragment>
+    <>
       <Card>
         <CardTitle>
           {CREATE_NEW_TITLE}
 
-          <Button variant="tertiary" className="ml-auto">
-            <ExternalLink href="https://github.com/settings/apps/" icon={{ icon: GithubIcon, position: "left" }} >
-              View your apps
-            </ExternalLink>
-          </Button>
+          <div className="btn-line">
+            <Button variant="tertiary">
+              <ExternalLink href="https://github.com/settings/apps/" icon={{ Icon: GithubIcon, position: "left" }} >
+                View your apps
+              </ExternalLink>
+            </Button>
+          </div>
         </CardTitle>
         <CardBody>
           <div>
@@ -52,7 +54,7 @@ export default function CreateAppCard(): JSX.Element {
               label="Public app"
             />
             <p className={classNames({ "d-none": publicChecked })}>
-              <ExclamationTriangleIcon className="text-warning mr-2"/>
+              <ExclamationTriangleIcon className="text-warning me-2"/>
               If you make your app private, no one else will be able to install it.
             </p>
             <p>
@@ -66,9 +68,9 @@ export default function CreateAppCard(): JSX.Element {
             <p>
               You can change this later in the GitHub app settings.
             </p>
-            <p className="my-3">
+            <p>
               <ExternalLink href="https://docs.github.com/en/developers/apps/making-a-github-app-public-or-private"
-                icon={{ icon: BookOpenIcon, position: "left" }}
+                icon={{ Icon: BookOpenIcon, position: "left" }}
               >
                 Read more about public and private apps.
               </ExternalLink>
@@ -113,6 +115,6 @@ export default function CreateAppCard(): JSX.Element {
 
         </CardBody>
       </Card>
-    </React.Fragment>
+    </>
   );
 }

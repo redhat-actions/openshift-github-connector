@@ -2,7 +2,7 @@ import express from "express";
 
 import ApiEndpoints from "common/api-endpoints";
 import ApiResponses from "common/api-responses";
-import { send405 } from "server/express-extensions";
+import { send405 } from "server/express-extends";
 
 const router = express.Router();
 
@@ -69,6 +69,11 @@ router.route(ApiEndpoints.User.Root.path)
   ) => {
     const user = await req.getUserOrDie();
     if (!user) {
+      /*
+      return res.json({
+        message: `Not logged in`,
+        success: false,
+      });*/
       return undefined;
     }
 
@@ -76,10 +81,7 @@ router.route(ApiEndpoints.User.Root.path)
       success: true,
       message: `User is ${user.name}`,
       severity: "info",
-      isAdmin: user.isAdmin,
-      name: user.name,
-      uid: user.uid,
-      githubUserInfo: user.githubUserInfo,
+      ...user.info,
     });
 
   }).all(send405([ "GET" ]));

@@ -2,7 +2,7 @@
 @use "./component-styles";
 @use "./setup";
 
-html, body {
+html, body, #root, #wrapper, main {
   margin: 0;
   width: 100%;
   height: 100%;
@@ -12,6 +12,7 @@ html, body {
   // line-height: 1.5em;
 }
 
+/*
 main {
   padding: c.$main-vertical-padding 0;
 
@@ -25,6 +26,7 @@ main {
     width: 95%;
   }
 }
+*/
 
 /*
 a {
@@ -37,6 +39,10 @@ a {
 
 .text-black {
   color: black !important;
+}
+
+.text-white {
+  color: white !important;
 }
 
 .text-fg {
@@ -213,7 +219,7 @@ label {
   }
 
   & .pf-c-spinner {
-    --pf-c-spinner--Color: #{c.$light};
+    --pf-c-spinner--Color: #{c.$pf-color-black-200};
   }
 }
 

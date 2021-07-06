@@ -1,18 +1,10 @@
-import React from "react";
 import {
   Card, CardTitle, CardBody,
 } from "@patternfly/react-core";
 
-import ApiEndpoints from "../../../common/api-endpoints";
-import ApiResponses from "../../../common/api-responses";
-import DataFetcher from "../../components/data-fetcher";
-import SetupPageHeader from "./setup-header";
-import { ObjectTable } from "../../components/object-table";
-
 export default function WelcomePage(): JSX.Element {
   return (
-    <React.Fragment>
-      <SetupPageHeader pageIndex={0} canProceed={true} />
+    <>
       <Card isLarge>
         <CardTitle>
           Welcome to the OpenShift GitHub Actions Connector
@@ -28,76 +20,37 @@ export default function WelcomePage(): JSX.Element {
           </ul>
 
           <p>
-          Click <b>Next</b> in the banner above to get started.
+          Click <b>Next</b> to get started.
           </p>
 
-          <div className="d-flex">
-            <div className="ml-auto">
+          {/* <div className="d-flex">
+            <div className="ms-auto">
               <b>Backend status:&nbsp;</b>
               <DataFetcher type="api" endpoint={ApiEndpoints.Health}>
                 {(data: ApiResponses.Result) => (
-                  <React.Fragment>
+                  <>
                     <span className={data.message === "OK" ? "text-success" : "text-danger"}>
                       {data.message}
                     </span>
-                  </React.Fragment>
+                  </>
                 )}
               </DataFetcher>
             </div>
-          </div>
+          </div> */}
         </CardBody>
 
         {/* <div className="row justify-content-center">
           <Link to={getSetupSteps()[0].path}>
-            <Button className="btn-primary btn-lg d-flex align-items-center mt-3 px-5">
+            <Button className="btn-primary btn-lg center-y mt-3 px-5">
               <div className="font-weight-bold align-self-center" title="Get Started">
                 Get Started
               </div>
-              <FontAwesomeIcon icon="long-arrow-alt-right" className="ml-3" style={{ fontSize: "1.5em" }}/>
+              <FontAwesomeIcon icon="long-arrow-alt-right" className="ms-3" style={{ fontSize: "1.5em" }}/>
             </Button>
           </Link>
         </div> */}
 
       </Card>
-      <Card>
-        <CardTitle>
-          Cluster Info
-        </CardTitle>
-        <CardBody>
-          <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root} loadingDisplay="card-body">
-            {(data: ApiResponses.ClusterState) => {
-              if (!data.connected) {
-                return (
-                  <>
-                    <p className="error">
-                      Disconnected!
-                    </p>
-                    <p className="error">
-                      {data.error}
-                    </p>
-                  </>
-                );
-              }
-
-              return (
-                <>
-                  <ObjectTable
-                    label="Cluster Info"
-                    obj={{
-                      // "Cluster Name": data.clusterInfo.name,
-                      // "API Server": data.clusterInfo.externalServer,
-                      "External API Server": data.clusterInfo.externalServer,
-                      Namespace: data.namespace,
-                      User: data.clusterInfo.user.name,
-                      "Service Account Name": data.serviceAccountName,
-                    }} />
-                </>
-              );
-            }}
-          </DataFetcher>
-        </CardBody>
-      </Card>
-
-    </React.Fragment>
+    </>
   );
 }

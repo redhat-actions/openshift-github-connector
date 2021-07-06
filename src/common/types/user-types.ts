@@ -31,5 +31,7 @@ export type GitHubUserInfo = Readonly<{
 }>;
 
 export interface ConnectorUserInfo extends OpenShiftUserInfo {
-  githubUserInfo?: GitHubUserInfo,
+  readonly githubUserInfo?: GitHubUserInfo,
+  readonly ownsApp: boolean,
+  readonly hasInstallation: boolean,
 }

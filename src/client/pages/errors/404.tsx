@@ -1,14 +1,22 @@
-import React from "react";
+import { Title } from "@patternfly/react-core";
+import { Link } from "react-router-dom";
+import { BasePage } from "../base-page";
 
 export default function notFound(props: { path: string }): JSX.Element {
   return (
-    <React.Fragment>
-      <h1 className="mb-3">404 Not Found</h1>
-      <h3>There is no page at {props.path}</h3>
-      <br className="my-3"/>
-      <h2>
-        <a href="/">Go back home</a>
-      </h2>
-    </React.Fragment>
+    <>
+      <BasePage title="Not Found" content={
+        () => (
+          <>
+            <Title headingLevel="h2">404 Not Found</Title>
+            <Title headingLevel="h4">There is no page at {props.path}</Title>
+            <br className="my-3"/>
+            <Title headingLevel="h2">
+              <Link to="/">Go back home</Link>
+            </Title>
+          </>
+        )
+      } />
+    </>
   );
 }

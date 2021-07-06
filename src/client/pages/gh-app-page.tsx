@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Button,
   Title,
@@ -14,8 +14,7 @@ import ApiEndpoints from "../../common/api-endpoints";
 import BtnBody from "../components/btn-body";
 import ApiResponses from "../../common/api-responses";
 import ClientPages from "./client-pages";
-import { fetchJSON, getSearchParam } from "../util/client-util";
-import SetupPageHeader, { SETUP_QUERYPARAM } from "./setup/setup-header";
+import { fetchJSON } from "../util/client-util";
 import { ExternalLink } from "../components/external-link";
 import { CommonIcons } from "../util/icons";
 
@@ -25,13 +24,8 @@ const EDIT_ICON = CommonIcons.Configure;
 type ViewType = "owner" | "user";
 
 export default function GitHubAppPage() {
-  const isSetup = getSearchParam(SETUP_QUERYPARAM) != null;
-
   return (
-    <React.Fragment>
-      {
-        isSetup ? <SetupPageHeader pageIndex={2} canProceed={true}/> : <></>
-      }
+    <>
       <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.User.App}>
         {
           (data: ApiResponses.UserAppState, reload) => {
@@ -41,7 +35,7 @@ export default function GitHubAppPage() {
           }
         }
       </DataFetcher>
-    </React.Fragment>
+    </>
   );
 }
 
@@ -69,8 +63,8 @@ function GitHubAppPageBody({
   }
 
   return (
-    <React.Fragment>
-      <div className="d-flex align-items-center my-4">
+    <>
+      <div className="center-y my-4">
         <Title headingLevel="h2" className="m-0">
           <ExternalLink href={data.appData.html_url}>
             {data.appData.name}
@@ -78,7 +72,7 @@ function GitHubAppPageBody({
           {/* The app avatar can be fetched from /identicons/app/app/<slug> */}
         </Title>
 
-        <div className="ml-auto"></div>
+        <div className="ms-auto"></div>
 
         <div className="btn-line even">
           <Button variant="danger" className={classNames({ "d-none": isSetup })} onClick={
@@ -95,7 +89,7 @@ function GitHubAppPageBody({
         </div>
       </div>
 
-      <div className="my-3 d-flex align-items-center">
+      <div className="my-3 center-y">
         <DataFetcher type="api" endpoint={ApiEndpoints.User.UserGitHubInfo} loadingDisplay="text">{
           (userRes: ApiResponses.GitHubUserDetailsResponse) => {
             return (
@@ -106,7 +100,7 @@ function GitHubAppPageBody({
           }
         }
         </DataFetcher>
-        <div className="ml-auto">
+        <div className="ms-auto">
           {
             data.installed && data.owned ?
               <SwitchViewButton currentView={viewType} onSwitchViewType={(newViewType) => {
@@ -123,7 +117,7 @@ function GitHubAppPageBody({
       {
         viewType === "user" && data.installed ? <AppInstalledCards {...data.installedAppData} /> : ("")
       }
-    </React.Fragment>
+    </>
   );
 }
 
@@ -150,7 +144,7 @@ function SwitchViewButton(props: { currentView: ViewType | undefined, onSwitchVi
 
 function AppOwnerCards(props: ApiResponses.UserOwnedAppData): JSX.Element {
   return (
-    <React.Fragment>
+    <>
       <AppPageCard header="App Permissions" buttons={[{
         href: "https://docs.github.com/en/developers/apps/creating-a-github-app-using-url-parameters#github-app-permissions",
         icon: DOCS_ICON,
@@ -202,14 +196,14 @@ function AppOwnerCards(props: ApiResponses.UserOwnedAppData): JSX.Element {
           })}
         </ul>
       </AppPageCard>
-    </React.Fragment>
+    </>
   );
 }
 
 function AppInstalledCards(props: ApiResponses.UserAppInstalledData): JSX.Element {
 
   return (
-    <React.Fragment>
+    <>
       <AppPageCard header="Enabled Repositories" buttons={[{
         href: props.installUrls.installationSettings,
         icon: EDIT_ICON,
@@ -227,7 +221,7 @@ function AppInstalledCards(props: ApiResponses.UserAppInstalledData): JSX.Elemen
           })}
         </ul>
       </AppPageCard>
-    </React.Fragment>
+    </>
   );
 }
 
@@ -258,12 +252,12 @@ function NoApp(): JSX.Element {
   */
 
   return (
-    <React.Fragment>
+    <>
       <p>A GitHub App has not yet been added to the connector.</p>
       <h2 className="my-3">
-        <a href={ClientPages.SetupCreateApp.path}>Create an App</a>
+        <a href={ClientPages.SetupIndex.path}>Go to the Setup</a>
       </h2>
       {/* <p>You will be redirected in {countdown} ...</p> */}
-    </React.Fragment>
+    </>
   );
 }

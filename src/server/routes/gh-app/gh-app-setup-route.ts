@@ -9,13 +9,11 @@ import GitHubApp from "server/lib/github/gh-app";
 import { exchangeCodeForUserData } from "server/lib/github/gh-util";
 import StateCache from "server/lib/state-cache";
 import { GitHubUserType } from "common/types/gh-types";
-import { UserSessionData } from "server/lib/user/server-user-types";
-import { send405 } from "server/express-extensions";
+import { send405 } from "server/express-extends";
 
 const router = express.Router();
 
 const stateCache = new StateCache();
-const githubUserAddingCache = new Map<string, number>();
 
 router.route(ApiEndpoints.Setup.SetCreateAppState.path)
   .post(async (req, res, next) => {
@@ -34,14 +32,9 @@ router.route(ApiEndpoints.Setup.SetCreateAppState.path)
     return res.sendStatus(201);
   });
 
-function createSessionSetupData(userInfo: UserSessionData, appId: number): void {
-  Log.info(`Saving setup data appId=${appId}`);
-  githubUserAddingCache.set(userInfo.info.uid, appId);
-}
-
 router.route(ApiEndpoints.Setup.CreatingApp.path)
   .post(async (
-    req: express.Request<any, any, ApiRequests.OAuthCallbackData>,
+    req: express.Request<any, any, ApiRequests.GitHubOAuthCallbackData>,
     res: express.Response<ApiResponses.CreatingAppResponse>,
     next
   ) => {
@@ -66,7 +59,7 @@ router.route(ApiEndpoints.Setup.CreatingApp.path)
 
     const appConfig = await exchangeCodeForAppConfig(code);
 
-    createSessionSetupData(user.sessionData, appConfig.id);
+    user.startInstallingApp(appConfig.id);
 
     await GitHubApp.create(appConfig);
 
@@ -79,17 +72,19 @@ router.route(ApiEndpoints.Setup.CreatingApp.path)
       success: true,
       message: `Successfully saved ${appConfig.name}`,
       appInstallUrl,
+      appName: appConfig.name,
     });
   })
   .all(send405([ /* "GET", */ "POST" ]));
 
 router.route(ApiEndpoints.Setup.PreInstallApp.path)
   .post(async (req: express.Request<any, any, ApiRequests.PreInstallApp>, res, next) => {
-    if (!req.session.user) {
-      return res.send401();
+    const user = await req.getUserOrDie();
+    if (!user) {
+      return undefined;
     }
 
-    createSessionSetupData(req.session.user, req.body.appId);
+    user.startInstallingApp(req.body.appId);
     return res.sendStatus(204);
   })
   .all(send405([ "POST" ]));
@@ -110,10 +105,10 @@ router.route(ApiEndpoints.Setup.PostInstallApp.path)
 
     const user = await req.getUserOrDie();
     if (!user) {
-      return res.send401();
+      return undefined;
     }
 
-    const appId = githubUserAddingCache.get(user.uid);
+    const appId = user.getInstallingApp();
     if (appId == null) {
       return res.sendError(400, `No App ID for session. Please restart the app setup process.`);
     }
@@ -135,8 +130,6 @@ router.route(ApiEndpoints.Setup.PostInstallApp.path)
       appInstalled.config.client_secret,
       oauthCode,
     );
-
-    githubUserAddingCache.delete(user.uid);
 
     await user.addGitHubUserInfo({
       id: userData.id,

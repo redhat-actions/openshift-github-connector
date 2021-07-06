@@ -4,7 +4,7 @@ import ApiEndpoints from "common/api-endpoints";
 import ApiResponses from "common/api-responses";
 import { deleteSecrets } from "common/types/gh-types";
 import GitHubApp from "server/lib/github/gh-app";
-import { send405 } from "server/express-extensions";
+import { send405 } from "server/express-extends";
 
 const router = express.Router();
 

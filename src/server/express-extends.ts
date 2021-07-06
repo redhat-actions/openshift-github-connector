@@ -8,14 +8,19 @@ import Log from "server/logger";
 // use express.d.ts to extend the req/res objects for each of these new functions.
 
 export function addCustomExtensions(app: express.Express): void {
+  Log.info(`Add custom extensions`);
   app.use(sendStatus);
   app.use(sendError);
   app.use(send401);
 }
 
 const sendStatus = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
+  // Log.info(`Override res.sendStatus`);
+
   res.sendStatus = (code: StatusCodes): express.Response => {
     res.status(code);
+
+    // Log.info(`sendStatus ${code}`);
 
     const message = code + " " + HttpStatusCodes.getStatusText(code);
 
@@ -25,10 +30,12 @@ const sendStatus = (req: express.Request, res: express.Response, next: express.N
         // status: statusCode,
         success: true,
       };
+      // Log.info(`sendStatus body ${JSON.stringify(resBody)}`);
 
       return res.json(resBody);
     }
 
+    // Log.info(`sendStatus message ${JSON.stringify(message)}`);
     // else, text/plain
     return res.send(message);
   };
@@ -37,6 +44,8 @@ const sendStatus = (req: express.Request, res: express.Response, next: express.N
 };
 
 const sendError = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
+  // Log.info(`Add res.sendError`);
+
   res.sendError = (
     statusCode: StatusCodes,
     detail: string,
@@ -67,6 +76,8 @@ const sendError = (req: express.Request, res: express.Response, next: express.Ne
 };
 
 const send401 = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
+  // Log.info(`Add res.send401`);
+
   res.send401 = () => {
     return res.sendError(401, `Authentication required to access ${req.path}`);
   };

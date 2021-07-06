@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import { IconElement } from "../util/icons";
 
 export function ExternalLink({
@@ -10,21 +11,21 @@ export function ExternalLink({
 
     icon?: {
       position: "left" | "right",
-      icon: IconElement,
+      Icon: IconElement,
     },
   }) {
 
-  const marginSize = "0.6em";
+  // const displayClass = icon != null ? "center-y" : "d-inline";
 
   return (
     <a href={href}
       target="_blank" rel="noopener noreferrer"
-      className={"b" + (className ?? "")}
+      className={classNames("b", className)}
       title={title != null ? title : href}
     >
-      {icon?.position === "left" ? <icon.icon style={{ marginRight: marginSize }} /> : ("")}
+      {icon?.position === "left" ? <icon.Icon className="me-2" /> : ("")}
       {children}
-      {icon?.position === "right" ? <icon.icon style={{ marginLeft: marginSize }} /> : ("")}
+      {icon?.position === "right" ? <icon.Icon className="ms-2" /> : ("")}
     </a>
   );
 }

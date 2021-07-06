@@ -10,7 +10,7 @@ namespace ApiRequests {
     appId: number,
   }
 
-  export interface OAuthCallbackData {
+  export interface GitHubOAuthCallbackData {
     code: string,
     state: string,
   }

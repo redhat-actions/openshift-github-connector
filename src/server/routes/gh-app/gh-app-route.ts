@@ -4,13 +4,13 @@ import ApiEndpoints from "common/api-endpoints";
 import ApiResponses from "common/api-responses";
 import Log from "server/logger";
 import GitHubApp from "server/lib/github/gh-app";
-import { send405 } from "server/express-extensions";
+import { send405 } from "server/express-extends";
 
 const router = express.Router();
 
 // cluster app state
-router.route(ApiEndpoints.App.Existing.path)
-  .get(async (req, res: express.Response<ApiResponses.AllAppsState>, next) => {
+router.route(ApiEndpoints.App.Root.path)
+  .get(async (req, res: express.Response<ApiResponses.ClusterAppState>, next) => {
 
     const apps = await GitHubApp.loadAll();
 
@@ -29,11 +29,25 @@ router.route(ApiEndpoints.App.Existing.path)
 
     Log.info(`There are ${apps.length} apps`);
 
-    const resBody: ApiResponses.AllAppsState = {
+    const resBody: ApiResponses.ClusterAppState = {
       success: true,
-      totalCount: apps.length,
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      visibleApps: apps.filter((_app) => true).map((app) => {
+      // totalCount: apps.length,
+      /*
+      app: {
+        appId: app.id,
+        appUrl: app.urls.app,
+        avatarUrl: app.urls.avatar,
+        created_at: app.config.created_at,
+        name: app.config.name,
+        newInstallationUrl: app.urls.newInstallation,
+        owner: {
+          avatar_url: app.config.owner.avatar_url,
+          login: app.config.owner.login,
+          html_url: app.config.owner.html_url,
+        },
+      },
+      */
+      visibleApps: apps.map((app) => {
         return {
           appId: app.id,
           appUrl: app.urls.app,
@@ -47,6 +61,9 @@ router.route(ApiEndpoints.App.Existing.path)
             html_url: app.config.owner.html_url,
           },
         };
+      }).sort((a, b) => {
+        // sort newest -> oldest
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }),
     };
 

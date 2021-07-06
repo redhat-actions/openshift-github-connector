@@ -8,6 +8,7 @@ export default class StateCache {
   private static readonly TTL_MS = 5 * 60 * 1000;
 
   public add(uid: string, state: string): void {
+    Log.debug(`Saving state ${state} for uid ${uid}`);
     this.states.set(uid, { iat: Date.now(), state });
   }
 

@@ -16,7 +16,7 @@ export interface UserWithGitHubInfo extends User {
   githubUserInfo: GitHubUserInfo
 };
 
-export default class User implements ConnectorUserInfo {
+export default class User {
   /**
   * User's OpenShift username
   */
@@ -31,6 +31,8 @@ export default class User implements ConnectorUserInfo {
   public readonly isAdmin: boolean;
 
   public readonly imageRegistries: ImageRegistryListWrapper;
+
+  private _installingAppId: number | undefined;
 
   private _githubUserInfo: GitHubUserInfo | undefined;
   private _installation: UserInstallation | undefined;
@@ -108,6 +110,7 @@ export default class User implements ConnectorUserInfo {
       await user.addInstallation(installationInfo, false);
     }
 
+    /*
     const apps = await GitHubApp.loadAll();
 
     // see if user owns any apps
@@ -117,11 +120,24 @@ export default class User implements ConnectorUserInfo {
         user._ownsAppId = app.id;
       }
     });
+    */
 
 		await saveUser(user);
 
 		return user;
 	}
+
+  public startInstallingApp(appId: number): void {
+    Log.info(`user ${this.uid} is installing appId ${appId}`);
+    this._installingAppId = appId;
+  }
+
+  public getInstallingApp(): number | undefined {
+    const installatingAppId = this._installingAppId;
+    Log.info(`user ${this.uid} is FINISHED installing appId ${installatingAppId}`);
+    this._installingAppId = undefined;
+    return installatingAppId;
+  }
 
   public async addGitHubUserInfo(githubUserInfo: GitHubUserInfo, save: boolean): Promise<void> {
     this._githubUserInfo = githubUserInfo;
@@ -135,13 +151,26 @@ export default class User implements ConnectorUserInfo {
   public async addInstallation(installationInfo: AddGitHubAppInstallationInfo, save: boolean): Promise<void> {
     const app = await GitHubApp.load(installationInfo.appId);
     if (!app) {
-      throw new Error(`User "${this.name}" has app ${installationInfo.appId} installed, but that app could not be loaded`);
+      // this can happen if the app secret is deleted.
+      const errMsg = `User "${this.name}" has app ${installationInfo.appId} installed, `
+        + `but that app could not be loaded. Removing installation reference.`;
+      Log.warn(errMsg);
+
+      await this.removeInstallation();
+      // throw new Error(errMsg);
+      return;
     }
 
     Log.info(`Add installation of ${app.config.name} to user ${this.name}`);
 
     if (this.githubUserInfo == null) {
-      throw new Error(`Failed to add installation to user ${this.name}: GitHub info not defined for user.`)
+      // this can happen if the install-setup failed.
+      const errMsg = `Failed to add installation to user ${this.name}: GitHub info not defined for user. Removing installation reference.`;
+      Log.warn(errMsg);
+
+      await this.removeInstallation();
+      // throw new Error(errMsg);
+      return;
     }
 
     const thisWithGitHubInfo = this as UserWithGitHubInfo;
@@ -174,16 +203,16 @@ export default class User implements ConnectorUserInfo {
     };
   }
 
-  /*
   public get info(): ConnectorUserInfo {
     return {
       isAdmin: this.isAdmin,
       name: this.name,
       uid: this.uid,
       githubUserInfo: this.githubUserInfo,
+      hasInstallation: this.installation != null,
+      ownsApp: this.ownsAppId != null,
     };
   }
-  */
 
   public get githubUserInfo(): GitHubUserInfo | undefined {
     return this._githubUserInfo;

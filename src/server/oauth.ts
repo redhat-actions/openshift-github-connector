@@ -192,7 +192,9 @@ const getUserOrDie = (req: express.Request, res: express.Response, next: express
       Log.debug(`Failed to look up user; clearing session`);
       req.session.user = undefined;
 
-      res.send401();
+      if (die) {
+        res.send401();
+      }
       return undefined;
     }
 
@@ -204,8 +206,9 @@ const getUserOrDie = (req: express.Request, res: express.Response, next: express
 
 const ENDPOINTS_NO_AUTH: string[] = [
   ApiEndpoints.Auth.Login.path,
-  ApiEndpoints.Auth.LoginStatus.path,
+  // ApiEndpoints.Auth.LoginStatus.path,
   ApiEndpoints.Auth.OAuthCallback.path,
+  ApiEndpoints.Webhook.path,
 ];
 /*
 .reduce((aggregator: string[], item) => {

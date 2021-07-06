@@ -4,7 +4,7 @@ import ApiEndpoints from "common/api-endpoints";
 import ApiResponses from "common/api-responses";
 import ApiRequests from "common/api-requests";
 import { DEFAULT_SECRET_NAMES } from "common/default-secret-names";
-import { send405 } from "server/express-extensions";
+import { send405 } from "server/express-extends";
 
 const router = express.Router();
 
