@@ -6,12 +6,12 @@ import { useContext, useState } from "react";
 import ApiEndpoints from "../../common/api-endpoints";
 import { ConnectorUserInfo } from "../../common/types/user-types";
 import { ObjectTable } from "../components/object-table";
-import { UserContext } from "../contexts";
+import { OpenShiftUserContext } from "../contexts";
 import { fetchJSON } from "../util/client-util";
 
 export function UserPage(): JSX.Element {
 
-  const userContext = useContext(UserContext);
+  const userContext = useContext(OpenShiftUserContext);
 
   const [ error, setError ] = useState<string>();
   const [ isLoggingOut, setIsLoggingOut ] = useState(false);
@@ -99,7 +99,7 @@ function UserInfoCardBody({ userData }: { userData: ConnectorUserInfo }): JSX.El
           obj={{
             Username: userData.name,
             "Connector Administrator": userData.isAdmin ? "Yes" : "No",
-            "GitHub Username": userData.githubUserInfo?.name ?? "Not available",
+            "GitHub Username": userData.githubInfo?.name ?? "Not available",
           }}
         />
       </CardBody>

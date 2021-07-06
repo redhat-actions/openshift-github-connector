@@ -90,7 +90,7 @@ function GitHubAppPageBody({
       </div>
 
       <div className="my-3 center-y">
-        <DataFetcher type="api" endpoint={ApiEndpoints.User.UserGitHubInfo} loadingDisplay="text">{
+        <DataFetcher type="api" endpoint={ApiEndpoints.User.UserGitHubDetails} loadingDisplay="text">{
           (userRes: ApiResponses.GitHubUserDetailsResponse) => {
             return (
               <Title headingLevel="h4" className="d-flex">

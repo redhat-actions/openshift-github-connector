@@ -8,13 +8,13 @@ import {
 import { UserAltIcon } from "@patternfly/react-icons";
 import { getTitle } from "../components/title";
 import ClientPages from "./client-pages";
-import { UserContext, InConsoleContext } from "../contexts";
+import { OpenShiftUserContext, InConsoleContext } from "../contexts";
 
 export function BasePage({ title, content: Content }: { title: string, content: React.ComponentType<any> }): JSX.Element {
   const [ isNavOpen, setIsNavOpen ] = useState(false);
 
   const inConsole = useContext(InConsoleContext);
-  const { user } = useContext(UserContext);
+  const { user } = useContext(OpenShiftUserContext);
 
   if (inConsole) {
     return (

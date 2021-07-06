@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 
 import ApiEndpoints from "../../../../common/api-endpoints";
@@ -6,7 +6,6 @@ import DataFetcher from "../../../components/data-fetcher";
 import { fetchJSON } from "../../../util/client-util";
 import ApiRequests from "../../../../common/api-requests";
 import ApiResponses from "../../../../common/api-responses";
-import { UserContext } from "../../../contexts";
 import { getSetupPagePath } from "../setup";
 
 enum CallbackSearchParams {
@@ -16,14 +15,13 @@ enum CallbackSearchParams {
   SETUP_ACTION = "setup_action",
   STATE = "state",
 
-  REFRESHED_USER = "updated-user",
+  // REFRESHED_USER = "updated-user",
 }
 
-const REFRESHED_USER_VALUE = "true";
+// const REFRESHED_USER_VALUE = "true";
 
 export function PostCreateAppCallbackPage() {
 
-  const userContext = useContext(UserContext);
   const history = useHistory();
 
   const search = useLocation().search;
@@ -31,20 +29,6 @@ export function PostCreateAppCallbackPage() {
   const searchParams = new URLSearchParams(search);
   const code = searchParams.get(CallbackSearchParams.CODE);
   const state = searchParams.get(CallbackSearchParams.STATE);
-
-  const didRefreshUser = searchParams.get(CallbackSearchParams.REFRESHED_USER) === REFRESHED_USER_VALUE;
-
-  if (didRefreshUser) {
-    history.replace({
-      pathname: getSetupPagePath("INSTALL_APP"),
-    });
-
-    return (
-      <p>
-        Redirecting...
-      </p>
-    );
-  }
 
   if (!code) {
     return (<p className="error">GitHub did not provide a {CallbackSearchParams.CODE} parameter in search query</p>);
@@ -65,10 +49,8 @@ export function PostCreateAppCallbackPage() {
           );
 
           history.replace({
-            search: `?${CallbackSearchParams.REFRESHED_USER}=${REFRESHED_USER_VALUE}`,
+            pathname: getSetupPagePath("INSTALL_APP"),
           });
-
-          await userContext.reload();
 
           // return res;
 
@@ -77,7 +59,7 @@ export function PostCreateAppCallbackPage() {
         {() => {
           return (
             <p>
-              Reloading user...
+              Successfully created app, redirecting...
             </p>
           );
           /*
@@ -130,33 +112,22 @@ export function InstalledAppPage(): JSX.Element {
   const history = useHistory();
   const { search } = useLocation();
 
-  const userContext = useContext(UserContext);
-
   useEffect(() => {
     async function submitInstall() {
-      const didRefreshUser = new URLSearchParams(search).get(CallbackSearchParams.REFRESHED_USER) === REFRESHED_USER_VALUE;
-
-      if (didRefreshUser) {
-        history.replace({
-          pathname: getSetupPagePath("VIEW_APP"),
-        });
-      }
 
       const postInstallReqBody = getPostInstallParams(search);
-
-      history.replace({
-        search: `?${CallbackSearchParams.REFRESHED_USER}=${REFRESHED_USER_VALUE}`,
-      });
 
       await fetchJSON<ApiRequests.PostInstall, ApiResponses.Result>(
         "POST", ApiEndpoints.Setup.PostInstallApp.path, postInstallReqBody
       );
 
-      await userContext.reload();
+      history.replace({
+        pathname: getSetupPagePath("VIEW_APP"),
+      });
     }
 
     submitInstall().catch((err) => setError(err));
-  }, [ setError, search, history, userContext ]);
+  }, [ setError, search, history ]);
 
   return (
     <>

@@ -135,6 +135,7 @@ router.route(ApiEndpoints.Setup.PostInstallApp.path)
       id: userData.id,
       name: userData.login,
       type: userData.type as GitHubUserType,
+      // installationInfo: { appId, installationId },
     }, true);
 
     await user.addInstallation({ appId, installationId }, true);

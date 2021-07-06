@@ -58,8 +58,8 @@ const Setup = new ClientPage(Home, "/setup/:page", "Set up", SetupWizard, false)
 const SetupIndex = new ClientPage(Home, "/setup", "Set up", () => (<Redirect to={getSetupPagePath("WELCOME")} />));
 // const SetupWelcome = new ClientPage(SetupIndex, "/welcome", "Welcome", WelcomePage);
 // const SetupCreateApp = new ClientPage(SetupIndex, "/app", "Set up GitHub App", SetupAppPage);
-const CreatingAppCallback = new ClientPage(Home, "/creating-app-callback", "Creating App...", PostCreateAppCallbackPage);
 // const SetupInstallApp = new ClientPage(SetupIndex, "/install-app", "Install App", InstallExistingAppPage);
+const CreatingAppCallback = new ClientPage(Home, "/creating-app-callback", "Creating App...", PostCreateAppCallbackPage);
 const InstalledAppCallback = new ClientPage(Home, "/installed-app-callback", "Installed App", InstalledAppPage);
 // const SetupViewApp = new ClientPage(SetupIndex, "/view-app", "View GitHub App", GitHubAppPage);
 // const SetupConnectRepos = new ClientPage(SetupIndex, "/connect-repos", "Connect Repositories", SelectReposPage);

@@ -5,15 +5,17 @@ import {
 } from "@patternfly/react-core";
 
 import { ArrowLeftIcon, ArrowRightIcon } from "@patternfly/react-icons";
-import { UserContext } from "../../contexts";
+import { OpenShiftUserContext } from "../../contexts";
 import ClientPages from "../client-pages";
-import { ConnectorUserInfo } from "../../../common/types/user-types";
 import BtnBody from "../../components/btn-body";
 import WelcomePage from "./welcome-page";
 import SetupAppPage from "./gh-app/setup-app";
 import { InstallExistingAppPage } from "./gh-app/install-existing-app-card";
 import GitHubAppPage from "../gh-app-page";
 import ConnectReposPage from "./connect-repos-page";
+import DataFetcher from "../../components/data-fetcher";
+import ApiEndpoints from "../../../common/api-endpoints";
+import ApiResponses from "../../../common/api-responses";
 
 type MyWizardStep = WizardStep & { index: number, path: string };
 
@@ -36,45 +38,55 @@ export default function SetupWizard(): JSX.Element {
 
   const history = useHistory();
 
-  const { user } = useContext(UserContext);
-
-  const wizardSteps = getWizardSteps(user);
+  const { user } = useContext(OpenShiftUserContext);
 
   const { page } = useParams<{ page?: string }>();
 
-  const currentStep = wizardSteps.find((s) => s.id === page) ?? wizardSteps[0];
-
   return (
-    <Wizard
-      key={currentStep.index}
-      hideClose={true}
-      // title={"Setup OpenShift GitHub Connector"}
-      // description={"Description"}
-      steps={wizardSteps}
-      // step={currentStep}
-      startAtStep={currentStep.index + 1}
+    <DataFetcher type="api" endpoint={ApiEndpoints.User.UserGitHub} loadingDisplay="spinner">{
+      (userWithGitHub: ApiResponses.UserResponse) => {
+        const wizardSteps = getWizardSteps(
+          user.isAdmin,
+          userWithGitHub.success && userWithGitHub.githubInstallationInfo != null
+        );
+        const currentStep = wizardSteps.find((s) => s.id === page) ?? wizardSteps[0];
 
-      // onSave={() => history.push(ClientPages.SetupFinished.path)}
+        return (
+          <Wizard
+            key={currentStep.index}
+            hideClose={true}
+            // title={"Setup OpenShift GitHub Connector"}
+            // description={"Description"}
+            steps={wizardSteps}
+            // step={currentStep}
+            startAtStep={currentStep.index + 1}
 
-      onGoToStep={
-        (
-          newStep: { id?: string | number | undefined, name: React.ReactNode },
-          _prevStep: { prevId?: string | number | undefined, prevName: React.ReactNode }
-        ) => {
-          const newCurrentStep = wizardSteps.find((s) => s.id === newStep.id);
-          if (!newCurrentStep) {
-            console.error(`Failed to find new step from ${JSON.stringify(newStep)}`);
-            return;
-          }
-          history.push(newCurrentStep.path);
-          // setCurrentStep(newCurrentStep);
-        }
+            // onSave={() => history.push(ClientPages.SetupFinished.path)}
+
+            onGoToStep={
+              (
+                newStep: { id?: string | number | undefined, name: React.ReactNode },
+                _prevStep: { prevId?: string | number | undefined, prevName: React.ReactNode }
+              ) => {
+                const newCurrentStep = wizardSteps.find((s) => s.id === newStep.id);
+                if (!newCurrentStep) {
+                  console.error(`Failed to find new step from ${JSON.stringify(newStep)}`);
+                  return;
+                }
+                history.push(newCurrentStep.path);
+              // setCurrentStep(newCurrentStep);
+              }
+            }
+            footer={<WizardFooter
+              currentStep={currentStep}
+              wizardSteps={wizardSteps}
+            />}
+          />
+        );
       }
-      footer={<WizardFooter
-        currentStep={currentStep}
-        wizardSteps={wizardSteps}
-      />}
-    />
+    }
+    </DataFetcher>
+
   );
 }
 
@@ -101,16 +113,17 @@ function WizardFooter(
         {
           currentStep.enableNext !== false ?
             <Button onClick={() => {
-              const nextStep = wizardSteps[currentStep.index + 1];
-              history.push(nextStep.path);
-
               if (currentStep.index === wizardSteps.length - 1) {
                 history.push(ClientPages.SetupFinished.path);
+                return;
               }
+
+              const nextStep = wizardSteps[currentStep.index + 1];
+              history.push(nextStep.path);
             }}>
               <BtnBody
                 icon={ArrowRightIcon} iconPosition="right"
-                text={currentStep.index === wizardSteps.length ? "Finish" : "Next"}
+                text={currentStep.index === wizardSteps.length - 1 ? "Finish" : "Next"}
               />
             </Button>
             : ""
@@ -130,23 +143,31 @@ export const SetupPagePaths = {
 };
 
 export function getSetupPagePath(page: keyof typeof SetupPagePaths): string {
-  return "/setup/" + SetupPagePaths[page];
+  return ClientPages.SetupIndex.path + SetupPagePaths[page];
 }
 
-function getWizardSteps(user: ConnectorUserInfo): MyWizardStep[] {
+function getWizardSteps(isAdmin: boolean, hasGitHubAppInstallation: boolean): MyWizardStep[] {
   const wizardSteps: MyWizardStep[] = [];
 
   let i = 0;
 
   wizardSteps.push(toWizardStep(WelcomePage, "Welcome", "welcome", i++));
 
-  if (user.isAdmin) {
+  if (isAdmin) {
     wizardSteps.push(toWizardStep(SetupAppPage, "Setup App", "app", i++, { enableNext: false }));
   }
 
   wizardSteps.push(toWizardStep(InstallExistingAppPage, "Install App", "install", i++, { enableNext: false }));
-  wizardSteps.push(toWizardStep(GitHubAppPage, "GitHub App", "view-app", i++, { canJumpTo: user.hasInstallation }));
-  wizardSteps.push(toWizardStep(ConnectReposPage, "Connect Repositories", "connect-repos", i++, { canJumpTo: user.hasInstallation }));
+
+  wizardSteps.push(toWizardStep(
+    GitHubAppPage, "GitHub App", "view-app", i++,
+    { canJumpTo: hasGitHubAppInstallation }
+  ));
+
+  wizardSteps.push(toWizardStep(
+    ConnectReposPage, "Connect Repositories", "connect-repos", i++,
+    { canJumpTo: hasGitHubAppInstallation }
+  ));
 
   return wizardSteps;
 }

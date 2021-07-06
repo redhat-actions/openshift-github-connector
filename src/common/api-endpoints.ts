@@ -30,12 +30,13 @@ const Workflows = new UrlPath(App, "/workflows");
 
 const Cluster = new UrlPath(Root, "/cluster");
 
-const User = new UrlPath(Root, "/user");
-const UserGitHubInfo = new UrlPath(User, "/github");
+const OpenShiftUser = new UrlPath(Root, "/user");
+const UserWithGitHub = new UrlPath(OpenShiftUser, "/github");
+const UserWithGitHubDetails = new UrlPath(OpenShiftUser, "/github/details");
 // const SetUserOAuthState = new UrlPath(User, "/oauth/state");
 // const PostUserOAuth = new UrlPath(User, "/oauth/post-redirect");
-const UserApp = new UrlPath(User, "/app");
-const UserImageRegistries = new UrlPath(User, "/image-registries");
+const UserApp = new UrlPath(OpenShiftUser, "/app");
+const UserImageRegistries = new UrlPath(OpenShiftUser, "/image-registries");
 // const ServiceAccount = new UrlPath(User, "/serviceaccount");
 
 const Webhook = new UrlPath(Root, "/webhook");
@@ -58,8 +59,9 @@ const ApiEndpoints = {
     PostInstallApp,
   },
   User: {
-    Root: User,
-    UserGitHubInfo,
+    Root: OpenShiftUser,
+    UserGitHub: UserWithGitHub,
+    UserGitHubDetails: UserWithGitHubDetails,
     // SetUserOAuthState,
     // PostUserOAuth,
     App: UserApp,

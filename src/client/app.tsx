@@ -9,7 +9,7 @@ import ApiEndpoints from "../common/api-endpoints";
 import { getTitle } from "./components/title";
 import DataFetcher from "./components/data-fetcher";
 import ApiResponses from "../common/api-responses";
-import { InConsoleContext, UserContext } from "./contexts";
+import { InConsoleContext, OpenShiftUserContext } from "./contexts";
 
 export default function App(): JSX.Element {
 
@@ -35,18 +35,18 @@ export default function App(): JSX.Element {
                   </div>
                 </>
               }>{
-                (loginResponse: ApiResponses.UserResponse, reload) => {
+                (loginResponse: ApiResponses.OpenShiftUserResponse, reload) => {
 
                   // console.log(`LOGIN RESPONSE`, loginResponse);
 
                   if (loginResponse.success) {
                     return (
-                      <UserContext.Provider value={{
+                      <OpenShiftUserContext.Provider value={{
                         user: loginResponse,
-                        reload: async () => { console.log("RELOADING USER"); await reload(); },
+                        reload,
                       }}>
                         <AppSwitch />
-                      </UserContext.Provider>
+                      </OpenShiftUserContext.Provider>
                     );
                   }
                   return redirectToLogin();

@@ -203,14 +203,19 @@ export default class User {
     };
   }
 
-  public get info(): ConnectorUserInfo {
+  public get allInfo(): ConnectorUserInfo {
+    return {
+      ...this.openshiftUserInfo,
+      githubInfo: this.githubUserInfo,
+      githubInstallationInfo: this.installation?.info,
+    };
+  }
+
+  public get openshiftUserInfo(): OpenShiftUserInfo {
     return {
       isAdmin: this.isAdmin,
       name: this.name,
       uid: this.uid,
-      githubUserInfo: this.githubUserInfo,
-      hasInstallation: this.installation != null,
-      ownsApp: this.ownsAppId != null,
     };
   }
 

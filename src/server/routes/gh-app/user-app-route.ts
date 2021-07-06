@@ -44,6 +44,22 @@ router.route(ApiEndpoints.User.App.path)
       };
     }
 
+    /*
+    if (user.ownsAppIds.length > 0) {
+      // owned
+      const ownedApps = await Promise.all(user.ownsAppIds.map((appId) => GitHubApp.load(appId))) as Array<GitHubApp>;
+      if (ownedApps.length < user.ownsAppIds.length) {
+        throw new Error(`User "${user.name} owns apps ${user.ownsAppIds.join(", ")} `
+          + `but at least one app was not found. Apps found were ${ownedApps.join(", ")}`);
+      }
+
+      const appData = ownedApps.map((app) => ({
+        html_url: app.config.html_url,
+        name: app.config.name,
+        slug: app.config.slug,
+      }));
+    */
+
     if (user.ownsAppId != null) {
       // owned
       const ownedApp = await GitHubApp.load(user.ownsAppId);

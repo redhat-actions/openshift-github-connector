@@ -3,6 +3,7 @@ import { Octokit } from "@octokit/core";
 import { PaginateInterface } from "@octokit/plugin-paginate-rest";
 
 import { GitHubAppInstallationData, GitHubAppInstallationUrls, GitHubRepo } from "common/types/gh-types";
+import { GitHubAppInstallInfo } from "common/types/user-types";
 import GitHubApp from "server/lib/github/gh-app";
 import { getAppOctokit } from "server/lib/github/gh-util";
 import { UserWithGitHubInfo } from "../user/user";
@@ -60,5 +61,13 @@ export default class UserInstallation {
     });
 
     return installationReq.data;
+  }
+
+  public get info(): GitHubAppInstallInfo {
+    return {
+      appId: this.app.id,
+      appName: this.app.config.name,
+      installationId: this.installationId,
+    }
   }
 }

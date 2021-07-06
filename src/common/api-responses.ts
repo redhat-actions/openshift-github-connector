@@ -12,7 +12,7 @@ import {
   GitHubAppConfigNoSecrets,
 } from "./types/gh-types";
 import ImageRegistry from "./types/image-registries";
-import { ConnectorUserInfo } from "./types/user-types";
+import { ConnectorUserInfo, OpenShiftUserInfo } from "./types/user-types";
 
 namespace ApiResponses {
 
@@ -124,6 +124,9 @@ namespace ApiResponses {
   export interface RemovalResult extends Result {
     removed: boolean,
   }
+
+  export type OpenShiftUser = OpenShiftUserInfo & ResultSuccess;
+  export type OpenShiftUserResponse = OpenShiftUser | ResultFailed;
 
   export type User = ConnectorUserInfo & ResultSuccess;
   export type UserResponse = User | ResultFailed;
