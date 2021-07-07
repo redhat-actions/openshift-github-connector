@@ -16,8 +16,8 @@ export const saveUser = async (user: User): Promise<void> => {
 
 	if (user.githubUserInfo) {
 		memento.githubUserId = user.githubUserInfo.id.toString();
-		// memento.githubUserName = user.githubUserInfo.name;
-		// memento.githubUserType = user.githubUserInfo.type;
+		memento.githubUserName = user.githubUserInfo.name;
+		memento.githubUserType = user.githubUserInfo.type;
 
 		if (user.installation) {
 			memento.installedAppId = user.installation.app.config.id.toString();

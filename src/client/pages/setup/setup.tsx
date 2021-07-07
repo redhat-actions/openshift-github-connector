@@ -144,12 +144,11 @@ function getWizardSteps(isAdmin: boolean, hasGitHubAppInstallation: boolean): My
       { enableNext: hasGitHubAppInstallation }
     ));
   }
-  else {
-    wizardSteps.push(toWizardStep(
-      InstallExistingAppPage, "Install GitHub App", SetupPagePaths.INSTALL_APP, i++,
-      { enableNext: hasGitHubAppInstallation }
-    ));
-  }
+
+  wizardSteps.push(toWizardStep(
+    InstallExistingAppPage, "Install GitHub App", SetupPagePaths.INSTALL_APP, i++,
+    { enableNext: hasGitHubAppInstallation }
+  ));
 
   wizardSteps.push(toWizardStep(
     GitHubAppPage, "View GitHub App", SetupPagePaths.VIEW_APP, i++,

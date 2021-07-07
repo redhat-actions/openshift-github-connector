@@ -93,10 +93,10 @@ function getCreateOrInstallDirection(
 
   if (appExists) {
     if (canCreate) {
-      direction = `You can install the existing GitHub app, or create another one.`;
+      direction = `You can install an existing GitHub app, or create another one.`;
     }
     else {
-      direction = `You must install the existing GitHub app, or have an administrator create another one.`;
+      direction = `You can install an existing GitHub app, or have an administrator create another one.`;
     }
   }
   else if (canCreate) {
@@ -104,7 +104,7 @@ function getCreateOrInstallDirection(
   }
   else {
     direction = `No one has created a GitHub app yet, and you do not have permissions to create one. `
-      + `You must have a cluster administrator create an app and set up the GitHub Connector.`;
+      + `You must have a cluster administrator create an app to set up the GitHub Connector.`;
     isDirectionError = true;
   }
 
