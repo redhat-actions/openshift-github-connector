@@ -42,7 +42,6 @@ export default class User {
     private readonly token: TokenUtil.TokenInfo,
     openshiftUserInfo: OpenShiftUserInfo,
     imageRegistryListStr: string | undefined,
-    githubUserInfo?: ConnectorGitHubUserInfo,
   ) {
     this.name = openshiftUserInfo.name;
     this.uid = openshiftUserInfo.uid;
@@ -51,15 +50,8 @@ export default class User {
     Log.info(`Creating user ${this.name}. isAdmin=${this.isAdmin}`);
 
     this.imageRegistries = new ImageRegistryListWrapper(async () => {
-      await saveUser(this).catch((err) => Log.error(`Error saving user ${this.name}:`, err));
+      await saveUser(this).catch((err) => Log.error(`Error saving user ${this.name} on image registry change:`, err));
     }, imageRegistryListStr);
-
-    if (githubUserInfo) {
-      this.addGitHubUserInfo(githubUserInfo, false);
-    }
-    else {
-      Log.info(`No GitHub info for user ${this.name}`);
-    }
   }
 
   /**
@@ -104,24 +96,24 @@ export default class User {
 		installationInfo?: AddGitHubAppInstallationInfo,
 	): Promise<User> {
 
-		const user = new this(token, openshiftUserInfo, imageRegistryListStr, githubUserInfo);
+		const user = new this(token, openshiftUserInfo, imageRegistryListStr);
 
-		if (installationInfo) {
-      await user.addInstallation(installationInfo, false);
+    if (githubUserInfo) {
+      await user.addGitHubUserInfo(githubUserInfo, false);
+
+      if (installationInfo) {
+        await user.addInstallation(installationInfo, false);
+      }
+      else {
+        Log.info(`User ${openshiftUserInfo.name} does not have an installation.`);
+      }
     }
     else {
-      Log.info(`User ${openshiftUserInfo.name} does not have an installation.`);
-    }
-
-    const apps = await GitHubApp.loadAll();
-
-    // see if user owns any apps
-    apps?.forEach((app) => {
-      if (app.ownerId === user.githubUserInfo?.id) {
-        Log.info(`${user.name} owns ${app.config.name}`);
-        user._ownsAppIds.push(app.id);
+      Log.info(`No GitHub info for user ${user.name}`);
+      if (installationInfo) {
+        Log.error(`Installation info provided for user ${user.name}, but no GitHub user info provided`);
       }
-    });
+    }
 
 		await saveUser(user);
 
@@ -129,7 +121,6 @@ export default class User {
 	}
 
   public async onAppDeleted(appId: number): Promise<void> {
-    Log.info(`App ${appId} deleted`);
     if (this.installation?.app.id === appId) {
       await this.removeInstallation();
     }
@@ -157,12 +148,43 @@ export default class User {
     this._githubUserInfo = githubUserInfo;
     Log.info(`User ${this.name} is GitHub ${this._githubUserInfo.type} ${this._githubUserInfo.name}`);
 
+    await this.refreshOwnedApps();
+
     if (save) {
       await saveUser(this);
     }
   }
 
+  private async refreshOwnedApps(): Promise<void> {
+    Log.info(`Checking if ${this.name} owns any GitHub apps`);
+    const apps = await GitHubApp.loadAll();
+
+    // see if user owns any apps
+    apps?.forEach((app) => {
+      if (app.ownerId === this.githubUserInfo?.id) {
+        Log.info(`${this.name} owns ${app.config.name}`);
+        this._ownsAppIds.push(app.id);
+      }
+    });
+  }
+
+  public addOwnsApp(app: GitHubApp): void {
+    if (app.ownerId !== this.githubUserInfo?.id) {
+      Log.error(`Tried to add owned app ${app.config.name} with ID ${app.config.id} to user ${this.name}, `
+        + `but owner ID ${app.ownerId} does not match github user ID ${this.githubUserInfo?.id}`)
+      return;
+    }
+    else if (this.ownsAppIds.includes(app.id)) {
+      Log.info(`User ${this.name} already owns app ${app.config.name}`);
+      return;
+    }
+
+    Log.info(`${this.name} owns ${app.config.name}`);
+    this.ownsAppIds.push(app.id);
+  }
+
   public async addInstallation(installationInfo: AddGitHubAppInstallationInfo, save: boolean): Promise<void> {
+    Log.info(`Add installation ${installationInfo.installationId} of app ID ${installationInfo.appId} to user ${this.name}`);
     const app = await GitHubApp.load(installationInfo.appId);
     if (!app) {
       // this can happen if the app secret is deleted.

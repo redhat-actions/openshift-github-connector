@@ -110,7 +110,7 @@ router.route(ApiEndpoints.Setup.PostInstallApp.path)
 
     const appId = user.getInstallingApp();
     if (appId == null) {
-      return res.sendError(400, `No App ID for session. Please restart the app setup process.`);
+      return res.sendError(400, `Missing new installation app ID. Please restart the app installation process.`);
     }
 
     Log.info(`Post install is for app ${appId}`);

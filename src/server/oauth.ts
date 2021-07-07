@@ -185,11 +185,11 @@ const getUserOrDie = (req: express.Request, res: express.Response, next: express
       return undefined;
     }
 
-    Log.debug(`Lookup user ${req.session.user.info.uid}`);
+    // Log.debug(`Lookup user ${req.session.user.info.uid}`);
 
     const user = await loadUser(req.session.user);
     if (!user) {
-      Log.debug(`Failed to look up user; clearing session`);
+      Log.warn(`Failed to look up user from data ${JSON.stringify(req.session)}; clearing session`);
       req.session.user = undefined;
 
       if (die) {

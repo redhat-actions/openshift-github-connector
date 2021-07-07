@@ -110,12 +110,18 @@ export function InstalledAppPage(): JSX.Element {
   const { search } = useLocation();
 
   useEffect(() => {
+    const aborter = new AbortController();
+
     async function submitInstall() {
+      if (aborter.signal.aborted) {
+        return;
+      }
 
       const postInstallReqBody = getPostInstallParams(search);
 
       const res = await fetchJSON<ApiRequests.PostInstall, ApiResponses.Result>(
-        "POST", ApiEndpoints.Setup.PostInstallApp.path, postInstallReqBody
+        "POST", ApiEndpoints.Setup.PostInstallApp.path, postInstallReqBody,
+        { signal: aborter.signal }
       );
 
       pushAlert({ severity: "success", title: res.message });
@@ -128,7 +134,13 @@ export function InstalledAppPage(): JSX.Element {
           pathname: getSetupPagePath("VIEW_APP"),
         });
       })
-      .catch((err) => setError(err));
+      .catch((err) => {
+        setError(err);
+      });
+
+    return () => {
+      aborter.abort();
+    };
   }, [ setError, search, history, pushAlert ]);
 
   return (

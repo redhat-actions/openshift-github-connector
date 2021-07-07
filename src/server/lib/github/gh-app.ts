@@ -12,6 +12,7 @@ import SecretUtil from "server/lib/kube/secret-util";
 import { getAppOctokit, getGitHubHostname } from "./gh-util";
 import { fromb64, getFriendlyHTTPError, toValidK8sName } from "server/util/server-util";
 import User from "server/lib/user/user";
+import { loadAllActiveUsers } from "../user/user-serializer";
 
 /**
  * The data we must save in order to be able to reconstruct this GitHub app.
@@ -122,7 +123,7 @@ class GitHubApp {
       subtype: SecretUtil.Subtype.APP,
     });
 
-    Log.info(`Saving app ${this.config.name} into cache after creating`);
+    Log.info(`Saving app ${this.config.name} into cache`);
     GitHubApp.cache.set(appId, this);
   }
 
@@ -130,36 +131,41 @@ class GitHubApp {
     Log.info(`Load app ID ${appId}`);
     const secretName = GitHubApp.getAppSecretName(appId)
 
-    let app = GitHubApp.cache.get(appId);
-    if (!app) {
-      const secret = await SecretUtil.loadFromSecret<AppMemento>(secretName);
-      if (!secret) {
-        Log.warn(`Tried to load app ${appId} from secret but it was not found`);
-        return undefined;
-      }
-
-      const authorizedUsers = JSON.parse(secret.data.authorizedUsers);
-      const memento = {
-        ...secret.data,
-        id: Number(secret.data.id),
-        authorizedUsers,
-      };
-
-      app = await GitHubApp.create(memento);
-
-      Log.info(`Saving app ${app.config.name} into cache after loading`);
-      GitHubApp.cache.set(appId, app);
-    }
-    else {
+    const cachedApp = GitHubApp.cache.get(appId);
+    if (cachedApp) {
       Log.debug(`Loaded app data from cache`);
+      return cachedApp;
     }
+
+    const secret = await SecretUtil.loadFromSecret<AppMemento>(secretName);
+    if (!secret) {
+      Log.warn(`Tried to load app ${appId} from secret but it was not found`);
+      return undefined;
+    }
+
+    const authorizedUsers = JSON.parse(secret.data.authorizedUsers);
+    const appAuth = {
+      ...secret.data,
+      id: Number(secret.data.id),
+      authorizedUsers,
+    };
+
+    const app = await GitHubApp.create(appAuth);
+
+    const activeUsers = await loadAllActiveUsers();
+    const owner = activeUsers.find((user) => user.githubUserInfo?.id === app.ownerId);
+    if (owner) {
+      owner.addOwnsApp(app);
+    }
+
+    app.save();
 
     return app;
   }
 
   public static async loadAll(): Promise<GitHubApp[] | undefined> {
-    const selector = "subtype=" + SecretUtil.Subtype.APP;
-    const matchingSecrets = await SecretUtil.getSecretsMatchingSelector(selector);
+    Log.info(`Load all apps`);
+    const matchingSecrets = await SecretUtil.getSecretsMatchingSelector(SecretUtil.getSubtypeSelector(SecretUtil.Subtype.APP));
 
     if (matchingSecrets.items.length === 0) {
       return undefined;
@@ -172,10 +178,12 @@ class GitHubApp {
       if (appId) {
         const asNumber = Number(fromb64(appId));
         if (isNaN(asNumber)) {
+          Log.error(`Secret ${appSecret.metadata?.name} contains a bad app ID ${appId}`)
           return undefined;
         }
         return asNumber;
       }
+      Log.error(`Secret ${appSecret.metadata?.name} missing app ID`)
       return undefined;
     }).reduce((result: number[], appId: number | undefined) => {
         // remove undefined
@@ -185,6 +193,8 @@ class GitHubApp {
         return result;
       }, []);
 
+    Log.info(`App IDs to be loaded are ${appIds.join(", ")}`);
+
     const apps = (await Promise.all(appIds.map((appId) => this.load(appId))))
       .reduce((result: GitHubApp[], app: GitHubApp | undefined) => {
         // remove undefined
@@ -192,7 +202,7 @@ class GitHubApp {
           result.push(app);
         }
         return result;
-      }, [])
+      }, []);
 
     return apps;
   }

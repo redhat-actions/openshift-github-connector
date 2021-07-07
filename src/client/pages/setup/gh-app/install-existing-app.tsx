@@ -75,7 +75,7 @@ export function InstallExistingAppCard(): JSX.Element {
                       {user.isAdmin ?
                         <div className="centers">
                           <Button isLarge onClick={() => history.push(getSetupPagePath("SETUP_APP"))}>
-                            Set up an app
+                            Set GitHub App
                           </Button>
                         </div>
                         : "Contact an administrator to set up an app so the Connector can be used."

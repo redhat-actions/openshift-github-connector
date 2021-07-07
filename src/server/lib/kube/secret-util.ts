@@ -15,10 +15,16 @@ const ANNOTATION_SERVICEACCOUNT_NAME = "kubernetes.io/service-account.name";
 export type SimpleValue = number | string | boolean | undefined;
 
 namespace SecretUtil {
+  const SUBTYPE_LABEL = "subtype";
+
   export enum Subtype {
     APP = "app",
     USER = "user",
     SA_TOKEN = "repo-serviceaccount-token",
+  }
+
+  export function getSubtypeSelector(subtype: Subtype): string {
+    return `${SUBTYPE_LABEL}=${subtype}`;
   }
 
   const SECRET_LABELS = {
@@ -50,6 +56,7 @@ namespace SecretUtil {
         labels: {
           ...SECRET_LABELS,
           ...labels,
+          [SUBTYPE_LABEL]: labels.subtype,
         },
       },
       data: objValuesTob64(data, false),
@@ -187,7 +194,7 @@ namespace SecretUtil {
       "created-by-github-app": toValidK8sName(meta.createdByApp),
       "created-by-github-user-id": meta.createdByUserId,
       "created-by-github-user": toValidK8sName(meta.createdByUser),
-      subtype,
+      [SUBTYPE_LABEL]: subtype,
     };
 
     let saTokenSecretBody;
