@@ -49,8 +49,8 @@ const User = new ClientPage(Home, "/user", "User", UserPage);
 
 const Setup = new ClientPage(Home, "/setup/:page", "Set up", SetupWizard, false);
 const SetupIndex = new ClientPage(Home, "/setup", "Set up", () => (<Redirect to={getSetupPagePath("WELCOME")} />));
-const CreatingAppCallback = new ClientPage(Home, "/creating-app-callback", "Creating App...", PostCreateAppCallbackPage);
-const InstalledAppCallback = new ClientPage(Home, "/installed-app-callback", "Installed App", InstalledAppPage);
+const CreatingAppCallback = new ClientPage(Home, "/app-callback", "Created App", PostCreateAppCallbackPage);
+const InstalledAppCallback = new ClientPage(Home, "/installation-callback", "Installed App", InstalledAppPage);
 const SetupFinished = new ClientPage(Home, "/setup-complete", "Setup Complete", SetupFinishedPage);
 
 const App = new ClientPage(Home, "/app", "GitHub App", GitHubAppPage);

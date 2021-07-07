@@ -45,6 +45,7 @@ export type GitHubAppConfigNoSecrets = Exclude<GitHubAppConfig, keyof GitHubAppC
 // export type GitHubAppConfigNoSecrets = GitHubAppConfig;
 
 export type GitHubAppPublicData = {
+  id: number,
   name: string,
   slug: string,
   html_url: string,

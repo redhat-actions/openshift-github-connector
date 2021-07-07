@@ -36,7 +36,7 @@ export default class User {
 
   private _githubUserInfo: ConnectorGitHubUserInfo | undefined;
   private _installation: UserInstallation | undefined;
-  private _ownsAppId: number | undefined;
+  private _ownsAppIds: number[] = [];
 
   protected constructor(
     private readonly token: TokenUtil.TokenInfo,
@@ -113,22 +113,33 @@ export default class User {
       Log.info(`User ${openshiftUserInfo.name} does not have an installation.`);
     }
 
-    /*
     const apps = await GitHubApp.loadAll();
 
     // see if user owns any apps
     apps?.forEach((app) => {
       if (app.ownerId === user.githubUserInfo?.id) {
         Log.info(`${user.name} owns ${app.config.name}`);
-        user._ownsAppId = app.id;
+        user._ownsAppIds.push(app.id);
       }
     });
-    */
 
 		await saveUser(user);
 
 		return user;
 	}
+
+  public async onAppDeleted(appId: number): Promise<void> {
+    Log.info(`App ${appId} deleted`);
+    if (this.installation?.app.id === appId) {
+      await this.removeInstallation();
+    }
+
+    const ownedAppIndex = this._ownsAppIds.findIndex((id) => id === appId);
+    if (ownedAppIndex !== -1) {
+      Log.info(`Remove ${appId} from ${this.name} owned apps`);
+      this._ownsAppIds.splice(ownedAppIndex, 1);
+    }
+  }
 
   public startInstallingApp(appId: number): void {
     Log.info(`user ${this.uid} is installing appId ${appId}`);
@@ -230,7 +241,7 @@ export default class User {
     return this._installation;
   }
 
-  public get ownsAppId(): number | undefined {
-    return this._ownsAppId;
+  public get ownsAppIds(): number[] {
+    return this._ownsAppIds;
   }
 }

@@ -7,12 +7,24 @@ import { send405 } from "server/express-extends";
 
 const router = express.Router();
 
-router.route(ApiEndpoints.User.App.path)
+// const PARAM_APPID = "appId";
+
+router.route(ApiEndpoints.User.Installation.path)
   .get(async (req, res: express.Response<ApiResponses.UserAppState>, next) => {
     const user = await req.getUserOrDie();
     if (!user) {
       return undefined;
     }
+
+    // if (!req.params[PARAM_APPID]) {
+    //   return res.sendError(400, `App ID not provided in request path`);
+    // }
+
+    // const appId = Number(req.params[PARAM_APPID]);
+
+    // if (Number.isNaN(appId)) {
+    //   return res.sendError(400, `Invalid app ID "${appId}" provided in request path`);
+    // }
 
     // there are four states which correspond to the subtypes of ApiResponses.GitHubAppState,
     // depending on two variables -
@@ -35,6 +47,7 @@ router.route(ApiEndpoints.User.App.path)
         success: true,
 
         appData: {
+          id: user.installation.app.id,
           html_url: user.installation.app.config.html_url,
           name: user.installation.app.config.name,
           slug: user.installation.app.config.slug,
@@ -59,14 +72,15 @@ router.route(ApiEndpoints.User.App.path)
       }));
     */
 
-    if (user.ownsAppId != null) {
+    if (user.installation && user.ownsAppIds.includes(user.installation.app.id)) {
       // owned
-      const ownedApp = await GitHubApp.load(user.ownsAppId);
+      const ownedApp = await GitHubApp.load(user.installation.app.id);
       if (!ownedApp) {
-        throw new Error(`User "${user.name} owns app ${user.ownsAppId} but that app was not found`);
+        throw new Error(`User ${user.name} owns app ${user.installation.app.id} but that app was not found`);
       }
 
       const appData = {
+        id: user.installation.app.id,
         html_url: ownedApp.config.html_url,
         name: ownedApp.config.name,
         slug: ownedApp.config.slug,
@@ -129,7 +143,7 @@ router.route(ApiEndpoints.User.App.path)
   ) => {
     const user = await req.getUserOrDie();
     if (!user) {
-      return res.sendError(401, `Authentication required`);
+      return undefined;
     }
 
     const removed = await user.removeInstallation();

@@ -29,7 +29,7 @@ type ViewType = "owner" | "user";
 export default function GitHubAppPage() {
   return (
     <>
-      <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.User.App}>
+      <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.User.Installation}>
         {
           (data: ApiResponses.UserAppState, reload) => {
             return (
@@ -90,7 +90,7 @@ function GitHubAppPageBody({
 
                   try {
                     setIsDeleting(true);
-                    await fetchJSON<never, never>("DELETE", ApiEndpoints.App.Root.path);
+                    await fetchJSON<never, never>("DELETE", ApiEndpoints.User.Installation);
                     await reload();
                   }
                   catch (err) {
@@ -112,7 +112,7 @@ function GitHubAppPageBody({
 
                   try {
                     setIsDeleting(true);
-                    await fetchJSON<never, never>("DELETE", ApiEndpoints.App.Root.path);
+                    await fetchJSON<never, never>("DELETE", ApiEndpoints.App.Root.path + "/" + data.appData.id);
                     await reload();
                   }
                   catch (err) {

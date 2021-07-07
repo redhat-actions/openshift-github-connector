@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
   Card, CardTitle, CardBody, Button,
 } from "@patternfly/react-core";
@@ -6,6 +6,7 @@ import { ExternalLinkAltIcon } from "@patternfly/react-icons";
 import {
   RowSelectVariant, TableComposable, Thead, Th, Tbody, Tr, Td,
 } from "@patternfly/react-table";
+import { useHistory } from "react-router-dom";
 
 import ApiEndpoints from "../../../../common/api-endpoints";
 import ApiResponses from "../../../../common/api-responses";
@@ -17,6 +18,8 @@ import { fetchJSON } from "../../../util/client-util";
 import { CommonIcons } from "../../../util/icons";
 import BtnBody from "../../../components/btn-body";
 import Banner from "../../../components/banner";
+import { OpenShiftUserContext } from "../../../contexts";
+import { getSetupPagePath } from "../setup";
 
 export const USE_EXISTING_TITLE = "Install Existing App";
 
@@ -27,6 +30,9 @@ export function InstallExistingAppPage() {
 }
 
 export function InstallExistingAppCard(): JSX.Element {
+
+  const { user } = useContext(OpenShiftUserContext);
+  const history = useHistory();
 
   const [ selectedApp, setSelectedApp ] = useState<ApiResponses.ExistingAppData>();
 
@@ -61,9 +67,21 @@ export function InstallExistingAppCard(): JSX.Element {
             (data: ApiResponses.ClusterAppState) => {
               if (!data.success) {
                 return (
-                  <p className="error">
-                    There are no apps set up on this instance. An administrator must create a new app.
-                  </p>
+                  <>
+                    <p className="error">
+                      There are no apps set up on this instance. An administrator must create a new app.
+                    </p>
+                    <p>
+                      {user.isAdmin ?
+                        <div className="centers">
+                          <Button isLarge onClick={() => history.push(getSetupPagePath("SETUP_APP"))}>
+                            Set up an app
+                          </Button>
+                        </div>
+                        : "Contact an administrator to set up an app so the Connector can be used."
+                      }
+                    </p>
+                  </>
                 );
               }
 
