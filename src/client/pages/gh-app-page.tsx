@@ -269,31 +269,6 @@ function AppInstalledCards(props: ApiResponses.UserAppInstalledData): JSX.Elemen
 }
 
 function NoApp(): JSX.Element {
-
-  /*
-  const history = useHistory();
-
-  const [ countdown, setCountdown ] = useState(3);
-
-  let countdownInterval: NodeJS.Timeout | undefined;
-  useEffect(() => {
-    countdownInterval = setInterval(() => {
-      if (countdown <= 0) {
-        history.push(ClientPages.SetupCreateApp.path);
-      }
-      else {
-        setCountdown(countdown - 1);
-      }
-    }, 1000);
-
-    return function cleanup() {
-      if (countdownInterval) {
-        clearInterval(countdownInterval);
-      }
-    };
-  });
-  */
-
   return (
     <>
       <p>A GitHub App has not yet been added to the connector.</p>

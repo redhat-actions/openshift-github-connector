@@ -20,12 +20,6 @@ export default function SetupAppPage(): JSX.Element {
 
   const [ createOrInstall, setCreateOrInstall ] = useState<CreateOrInstallExisting | undefined>();
 
-  /*
-  const setCreateOrInstall = (newCreateOrInstall: CreateOrInstallExisting) => {
-    _setCreateOrInstall(newCreateOrInstall);
-  };
-  */
-
   return (
     <>
       <DataFetcher type="api" endpoint={ApiEndpoints.App.Root} loadingDisplay="card" >{
@@ -129,9 +123,6 @@ function CreateOrInstallCard({ createOrUse }: { createOrUse: CreateOrInstallExis
 
   return (
     <InstallExistingAppCard />
-    // <p>
-  // Select <b>Next</b> to install an existing app.
-    // </p>
   );
 }
 

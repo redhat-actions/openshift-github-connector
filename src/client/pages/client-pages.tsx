@@ -22,21 +22,15 @@ export class ClientPage extends UrlPath {
     parentPath: UrlPath | undefined,
     endpoint: string,
     public readonly title: string,
-    // type copied from <Route component=> prop
-    // public readonly component: React.ComponentType<RouteComponentProps<any>> | React.ComponentType<any>,
     public readonly component: React.ComponentType<any>,
     private readonly exact: boolean = true,
   ) {
     super(parentPath, endpoint);
   }
 
-  // public get title(): JSX.Element {
-  //   return getTitle(this.pageTitle);
-  // }
-
   public get route(): JSX.Element {
     return (
-      <Route key={this.path} exact={this.exact} path={this.path} /* component={this.component} */ render={(props) => (
+      <Route key={this.path} exact={this.exact} path={this.path} render={(props) => (
         <BasePage content={this.component} title={this.title} {...props} />
       )}/>
     );
@@ -51,20 +45,13 @@ export class ClientPage extends UrlPath {
 const appRootPath = isInOpenShiftConsole() ? "/github-connector" : "/";
 
 const Home = new ClientPage(undefined, appRootPath, "", HomePage);
-// const Login = new ClientPage(Home, "/login", "Log in", LoginPage);
 const User = new ClientPage(Home, "/user", "User", UserPage);
 
 const Setup = new ClientPage(Home, "/setup/:page", "Set up", SetupWizard, false);
 const SetupIndex = new ClientPage(Home, "/setup", "Set up", () => (<Redirect to={getSetupPagePath("WELCOME")} />));
-// const SetupWelcome = new ClientPage(SetupIndex, "/welcome", "Welcome", WelcomePage);
-// const SetupCreateApp = new ClientPage(SetupIndex, "/app", "Set up GitHub App", SetupAppPage);
-// const SetupInstallApp = new ClientPage(SetupIndex, "/install-app", "Install App", InstallExistingAppPage);
 const CreatingAppCallback = new ClientPage(Home, "/creating-app-callback", "Creating App...", PostCreateAppCallbackPage);
 const InstalledAppCallback = new ClientPage(Home, "/installed-app-callback", "Installed App", InstalledAppPage);
-// const SetupViewApp = new ClientPage(SetupIndex, "/view-app", "View GitHub App", GitHubAppPage);
-// const SetupConnectRepos = new ClientPage(SetupIndex, "/connect-repos", "Connect Repositories", SelectReposPage);
 const SetupFinished = new ClientPage(Home, "/setup-complete", "Setup Complete", SetupFinishedPage);
-// const SetupPostOAuth = new ClientPage(Setup, "/oauth-callback", PostOAuthPage);
 
 const App = new ClientPage(Home, "/app", "GitHub App", GitHubAppPage);
 
@@ -91,14 +78,8 @@ const ClientPages = {
 
   SetupIndex,
   Setup,
-  // SetupWelcome,
-  // SetupCreateApp,
   CreatingAppCallback,
-  // SetupPostOAuth,
-  // SetupInstallApp,
   InstalledAppCallback,
-  // SetupViewApp,
-  // SetupConnectRepos,
   SetupFinished,
 
   ConnectRepos,

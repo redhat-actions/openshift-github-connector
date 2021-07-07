@@ -56,37 +56,6 @@ export function UserPage(): JSX.Element {
         </CardTitle>
         <UserInfoCardBody userData={userContext.user} />
       </Card>
-
-      {/* <DataFetcher type="api" endpoint={ApiEndpoints.User.Root}>{
-        (userData: ApiResponses.UserResponse) => {
-          if (!userData.success) {
-            return (
-              <p>
-                {userData.message}
-              </p>
-            );
-          }
-
-          return (
-            <>
-              <Card>
-                <CardTitle>
-                  OpenShift User
-                </CardTitle>
-                <OpenShiftUserInfoCardBody userData={userData} />
-              </Card>
-
-              <Card>
-                <CardTitle>
-                  GitHub User
-                </CardTitle>
-                <GitHubUserInfoCardBody userData={userData} />
-              </Card>
-            </>
-          );
-        }
-      }
-      </DataFetcher> */}
     </>
   );
 }

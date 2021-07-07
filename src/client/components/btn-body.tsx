@@ -2,16 +2,6 @@ import classNames from "classnames";
 import { Spinner } from "@patternfly/react-core";
 import { IconElement } from "../util/icons";
 
-/*
-type IconKeys = keyof typeof icons;
-export const Icons = Object.keys(icons).filter((icon) => {
-  return icon.endsWith("Icon");
-}).reduce((result, key) => {
-  result.push(key as IconKeys);
-  return result;
-}, new Array<IconKeys>());
-*/
-
 export default function BtnBody(props: {
   icon?: IconElement,
   iconPosition?: "left" | "right",

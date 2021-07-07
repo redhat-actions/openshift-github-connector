@@ -109,14 +109,6 @@ export function InstallExistingAppCard(): JSX.Element {
                                 variant: RowSelectVariant.radio,
                               }}>
                             </Td>
-                            {/* <Td>
-                              <img
-                                style={{ width: appAvatarSize, height: appAvatarSize }}
-                                // className="me-4"
-                                src={app.avatarUrl}
-                                alt={app.name + " avatar"}
-                              />
-                            </Td> */}
                             <Td>{app.name}</Td>
                             <Td>{app.owner.login}</Td>
                             <Td>{getFriendlyDateTime(new Date(app.created_at), true)}</Td>
@@ -146,17 +138,13 @@ function ProceedSection({ selectedApp }: { selectedApp?: ApiResponses.ExistingAp
   const [ error, setError ] = useState<string | undefined>();
 
   if (!selectedApp) {
-    return <>Select an app to proceed.</>;
+    return <p>Select an app to proceed.</p>;
   }
 
   return (
     <>
       <div className="my-4 centers">
         <Button isLarge disabled={isLoading} onClick={async () => {
-          // if (props.selectedApp == null) {
-          //   setError("No app selected");
-          //   return;
-          // }
           setIsLoading(true);
           try {
             await fetchJSON<ApiRequests.PreInstallApp, void>("POST", ApiEndpoints.Setup.PreInstallApp, { appId: selectedApp.appId });
