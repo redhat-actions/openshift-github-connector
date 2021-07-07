@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
   Button,
   Title,
@@ -7,7 +7,9 @@ import {
 } from "@patternfly/react-core";
 import classNames from "classnames";
 
-import { BookIcon, UserIcon, UsersIcon } from "@patternfly/react-icons";
+import {
+  BookIcon, TimesIcon, UserIcon, UsersIcon,
+} from "@patternfly/react-icons";
 import AppPageCard from "../components/gh-app-page-card";
 import DataFetcher from "../components/data-fetcher";
 import ApiEndpoints from "../../common/api-endpoints";
@@ -17,6 +19,7 @@ import ClientPages from "./client-pages";
 import { fetchJSON } from "../util/client-util";
 import { ExternalLink } from "../components/external-link";
 import { CommonIcons } from "../util/icons";
+import { ConnectorAlertContext } from "./global-alert-context";
 
 const DOCS_ICON = BookIcon;
 const EDIT_ICON = CommonIcons.Configure;
@@ -46,6 +49,8 @@ function GitHubAppPageBody({
 }): JSX.Element {
 
   const [ viewType, setViewType ] = useState<ViewType>();
+  const [ isDeleting, setIsDeleting ] = useState(false);
+  const pushAlert = useContext(ConnectorAlertContext);
 
   if (!data.success) {
     return (
@@ -75,14 +80,52 @@ function GitHubAppPageBody({
         <div className="ms-auto"></div>
 
         <div className="btn-line even">
-          <Button variant="danger" className={classNames({ "d-none": isSetup })} onClick={
-            async () => {
-              await fetchJSON<{}, void>("DELETE", ApiEndpoints.App.Root.path);
-              await reload();
-            }
-          }>
-            <BtnBody icon={CommonIcons.Delete} text="Unbind"/>
-          </Button>
+          {
+            viewType === "user" ?
+              <Button variant="danger" isLoading={isDeleting} className={classNames({ "d-none": isSetup })} onClick={
+                async () => {
+                  if (isDeleting) {
+                    return;
+                  }
+
+                  try {
+                    setIsDeleting(true);
+                    await fetchJSON<never, never>("DELETE", ApiEndpoints.App.Root.path);
+                    await reload();
+                  }
+                  catch (err) {
+                    pushAlert({ severity: "danger", title: `Error uninstalling app`, body: err.message });
+                  }
+                  finally {
+                    setIsDeleting(false);
+                  }
+                }
+              }>
+                <BtnBody icon={TimesIcon} text="Uninstall"/>
+              </Button>
+              :
+              <Button variant="danger" isLoading={isDeleting} className={classNames({ "d-none": isSetup })} onClick={
+                async () => {
+                  if (isDeleting) {
+                    return;
+                  }
+
+                  try {
+                    setIsDeleting(true);
+                    await fetchJSON<never, never>("DELETE", ApiEndpoints.App.Root.path);
+                    await reload();
+                  }
+                  catch (err) {
+                    pushAlert({ severity: "danger", title: `Error removing app`, body: err.message });
+                  }
+                  finally {
+                    setIsDeleting(false);
+                  }
+                }
+              }>
+                <BtnBody icon={CommonIcons.Delete} text="Remove"/>
+              </Button>
+          }
           <Button onClick={() => reload()}>
             <BtnBody icon={CommonIcons.Reload} text="Reload"/>
           </Button>

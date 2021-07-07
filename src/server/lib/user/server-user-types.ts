@@ -1,5 +1,5 @@
 import k8s from "@kubernetes/client-node";
-import { GitHubUserInfo, OpenShiftUserInfo } from "common/types/user-types";
+import { ConnectorGitHubUserInfo, OpenShiftUserInfo } from "common/types/user-types";
 import TokenUtil from "./token-util";
 
 export interface UserSessionData {
@@ -9,17 +9,20 @@ export interface UserSessionData {
 
 export type UserMementoSaveable = {
   uid: string;
-
-  githubUserId?: string,
-
   imageRegistries: string,
+} & Partial<{
+  githubUserId: string,
+  githubUserName: string,
+  githubUserType: string,
+  installedAppId: string,
+  installationId: string,
+}>
 
-  installedAppId?: string,
-  installationId?: string,
-}
+export type UserMemento = {
+  uid: string;
+  imageRegistries: string;
 
-export type UserMemento = Omit<UserMementoSaveable, "githubUserId" | "githubUserName" | "githubUserType"> & {
-  githubUserInfo?: GitHubUserInfo;
+  githubUserInfo?: ConnectorGitHubUserInfo;
 
   installationInfo?: {
     appId: number,

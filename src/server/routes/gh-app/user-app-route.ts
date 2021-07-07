@@ -2,7 +2,6 @@ import express from "express";
 
 import ApiEndpoints from "common/api-endpoints";
 import ApiResponses from "common/api-responses";
-import { deleteSecrets } from "common/types/gh-types";
 import GitHubApp from "server/lib/github/gh-app";
 import { send405 } from "server/express-extends";
 
@@ -25,7 +24,7 @@ router.route(ApiEndpoints.User.App.path)
 
     if (user.installation != null) {
       installedAppData = {
-        installation: await user.installation.getInstallation(),
+        installation: user.installation.installationData,
         installUrls: user.installation.urls,
         repos: await user.installation.getRepos(),
       };
@@ -74,7 +73,7 @@ router.route(ApiEndpoints.User.App.path)
       };
 
       const ownedAppData: ApiResponses.UserOwnedAppData = {
-        appConfig: deleteSecrets(ownedApp.config),
+        appConfig: ownedApp.getWithoutSecrets,
         installations: await ownedApp.getInstallations(),
         ownerUrls: ownedApp.urls,
       };

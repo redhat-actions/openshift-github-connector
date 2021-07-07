@@ -20,6 +20,16 @@
     }
   }
 
+  &.pf-m-display-lg {
+    font-size: 105%;
+    padding: 1em 1.5em;
+
+    & * svg {
+      height: 1.5em;
+      width: 1.5em;
+    }
+  }
+
   /*
   &.btn-light, &.btn-outline-light {
     &:hover a {
@@ -41,7 +51,8 @@
 $card-border-radius: 0.5rem;
 
 .card, .pf-c-card {
-  // --pf-c-card--BoxShadow: 0.1rem 0.1rem 0.1rem #888 !important;
+  // --pf-c-card--BoxShadow: 0.25rem 0rem 0.1rem 0.2rem #888 !important;
+
 
   border-radius: $card-border-radius;
   // box-shadow: $card-box-shadow;

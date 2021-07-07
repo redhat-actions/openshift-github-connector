@@ -221,6 +221,16 @@ class GitHubApp {
     return this.config.owner.id;
   }
 
+  public get getWithoutSecrets(): GitHubAppConfigNoSecrets {
+    const cfg: Partial<GitHubAppConfig> = { ...this.config };
+    delete cfg.client_id;
+    delete cfg.client_secret;
+    delete cfg.pem;
+    delete cfg.webhook_secret;
+
+    return cfg as GitHubAppConfigNoSecrets;
+  }
+
   public isUserAuthorized(userId: number): boolean {
     return this.authorizedUsers.includes(userId);
   }

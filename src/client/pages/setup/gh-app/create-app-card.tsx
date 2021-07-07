@@ -5,9 +5,6 @@ import {
 } from "@patternfly/react-core";
 import { v4 as uuid } from "uuid";
 
-import {
-  BookOpenIcon, ExclamationTriangleIcon, GithubIcon, PlusIcon,
-} from "@patternfly/react-icons";
 import ApiEndpoints from "../../../../common/api-endpoints";
 import ApiRequests from "../../../../common/api-requests";
 import Banner from "../../../components/banner";
@@ -15,6 +12,7 @@ import { ExternalLink } from "../../../components/external-link";
 import BtnBody from "../../../components/btn-body";
 import { getWindowLocationNoPath, fetchJSON } from "../../../util/client-util";
 import { getGitHubAppManifest } from "../../../util/github-app-manifest";
+import { CommonIcons } from "../../../util/icons";
 
 export const CREATE_NEW_TITLE = "Create New App";
 
@@ -39,7 +37,7 @@ export default function CreateAppCard(): JSX.Element {
 
           <div className="btn-line">
             <Button variant="tertiary">
-              <ExternalLink href="https://github.com/settings/apps/" icon={{ Icon: GithubIcon, position: "left" }} >
+              <ExternalLink href="https://github.com/settings/apps/" icon={{ Icon: CommonIcons.GitHub, position: "left" }} >
                 View your apps
               </ExternalLink>
             </Button>
@@ -54,7 +52,7 @@ export default function CreateAppCard(): JSX.Element {
               label="Public app"
             />
             <p className={classNames({ "d-none": publicChecked })}>
-              <ExclamationTriangleIcon className="text-warning me-2"/>
+              <CommonIcons.Warning className="text-warning me-2"/>
               If you make your app private, no one else will be able to install it.
             </p>
             <p>
@@ -70,7 +68,7 @@ export default function CreateAppCard(): JSX.Element {
             </p>
             <p>
               <ExternalLink href="https://docs.github.com/en/developers/apps/making-a-github-app-public-or-private"
-                icon={{ Icon: BookOpenIcon, position: "left" }}
+                icon={{ Icon: CommonIcons.Documentation, position: "left" }}
               >
                 Read more about public and private apps.
               </ExternalLink>
@@ -105,8 +103,8 @@ export default function CreateAppCard(): JSX.Element {
               <input id={manifestInputId} className="d-none" name="manifest" type="manifest" readOnly={true} />
             </form>
 
-            <Button type="submit" className="mt-2" form={manifestFormId}>
-              <BtnBody icon={PlusIcon} text={CREATE_NEW_TITLE} isLoading={isLoading} />
+            <Button type="submit" isLarge className="mt-2" form={manifestFormId}>
+              <BtnBody icon={CommonIcons.GitHub} iconClasses="text-black" text={CREATE_NEW_TITLE} isLoading={isLoading} />
             </Button>
 
           </div>

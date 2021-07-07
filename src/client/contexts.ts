@@ -1,5 +1,5 @@
 import React from "react";
-import { GitHubUserInfo, OpenShiftUserInfo } from "../common/types/user-types";
+import { ConnectorGitHubUserInfo, OpenShiftUserInfo } from "../common/types/user-types";
 
 export const OpenShiftUserContext = React.createContext<{
   user: OpenShiftUserInfo,
@@ -7,7 +7,7 @@ export const OpenShiftUserContext = React.createContext<{
     }>({} as any);
 
 export const GitHubUserContext = React.createContext<{
-  githubUser: GitHubUserInfo,
+  githubUser: ConnectorGitHubUserInfo,
 }>({} as any);
 
 export const InConsoleContext = React.createContext<boolean>(false);

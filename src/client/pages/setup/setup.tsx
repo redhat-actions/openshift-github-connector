@@ -10,7 +10,7 @@ import ClientPages from "../client-pages";
 import BtnBody from "../../components/btn-body";
 import WelcomePage from "./welcome-page";
 import SetupAppPage from "./gh-app/setup-app";
-import { InstallExistingAppPage } from "./gh-app/install-existing-app-card";
+import { InstallExistingAppPage } from "./gh-app/install-existing-app";
 import GitHubAppPage from "../gh-app-page";
 import ConnectReposPage from "./connect-repos-page";
 import DataFetcher from "../../components/data-fetcher";
@@ -143,7 +143,7 @@ export const SetupPagePaths = {
 };
 
 export function getSetupPagePath(page: keyof typeof SetupPagePaths): string {
-  return ClientPages.SetupIndex.path + SetupPagePaths[page];
+  return ClientPages.SetupIndex.path + "/" + SetupPagePaths[page];
 }
 
 function getWizardSteps(isAdmin: boolean, hasGitHubAppInstallation: boolean): MyWizardStep[] {
@@ -151,21 +151,28 @@ function getWizardSteps(isAdmin: boolean, hasGitHubAppInstallation: boolean): My
 
   let i = 0;
 
-  wizardSteps.push(toWizardStep(WelcomePage, "Welcome", "welcome", i++));
+  wizardSteps.push(toWizardStep(WelcomePage, "Welcome", SetupPagePaths.WELCOME, i++));
 
   if (isAdmin) {
-    wizardSteps.push(toWizardStep(SetupAppPage, "Setup App", "app", i++, { enableNext: false }));
+    wizardSteps.push(toWizardStep(
+      SetupAppPage, "Setup GitHub App", SetupPagePaths.SETUP_APP, i++,
+      { enableNext: hasGitHubAppInstallation }
+    ));
+  }
+  else {
+    wizardSteps.push(toWizardStep(
+      InstallExistingAppPage, "Install GitHub App", SetupPagePaths.INSTALL_APP, i++,
+      { enableNext: hasGitHubAppInstallation }
+    ));
   }
 
-  wizardSteps.push(toWizardStep(InstallExistingAppPage, "Install App", "install", i++, { enableNext: false }));
-
   wizardSteps.push(toWizardStep(
-    GitHubAppPage, "GitHub App", "view-app", i++,
+    GitHubAppPage, "View GitHub App", SetupPagePaths.VIEW_APP, i++,
     { canJumpTo: hasGitHubAppInstallation }
   ));
 
   wizardSteps.push(toWizardStep(
-    ConnectReposPage, "Connect Repositories", "connect-repos", i++,
+    ConnectReposPage, "Connect Repositories", SetupPagePaths.CONNECT_REPOS, i++,
     { canJumpTo: hasGitHubAppInstallation }
   ));
 

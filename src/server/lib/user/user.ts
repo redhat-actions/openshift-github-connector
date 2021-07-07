@@ -6,14 +6,14 @@ import {
 import { loadUser, saveUser } from "./user-serializer";
 import UserInstallation from "../github/user-app-installation";
 import GitHubApp from "../github/gh-app";
-import { ConnectorUserInfo, GitHubUserInfo, OpenShiftUserInfo } from "common/types/user-types";
+import { ConnectorGitHubUserInfo, ConnectorUserInfo, OpenShiftUserInfo } from "common/types/user-types";
 import TokenUtil from "./token-util";
 
 /**
  * This is the User type, but githubUserInfo must be defined.
  */
 export interface UserWithGitHubInfo extends User {
-  githubUserInfo: GitHubUserInfo
+  githubUserInfo: ConnectorGitHubUserInfo,
 };
 
 export default class User {
@@ -34,7 +34,7 @@ export default class User {
 
   private _installingAppId: number | undefined;
 
-  private _githubUserInfo: GitHubUserInfo | undefined;
+  private _githubUserInfo: ConnectorGitHubUserInfo | undefined;
   private _installation: UserInstallation | undefined;
   private _ownsAppId: number | undefined;
 
@@ -42,7 +42,7 @@ export default class User {
     private readonly token: TokenUtil.TokenInfo,
     openshiftUserInfo: OpenShiftUserInfo,
     imageRegistryListStr: string | undefined,
-    githubUserInfo?: GitHubUserInfo,
+    githubUserInfo?: ConnectorGitHubUserInfo,
   ) {
     this.name = openshiftUserInfo.name;
     this.uid = openshiftUserInfo.uid;
@@ -100,7 +100,7 @@ export default class User {
 		token: TokenUtil.TokenInfo,
     openshiftUserInfo: OpenShiftUserInfo,
     imageRegistryListStr?: string,
-		githubUserInfo?: GitHubUserInfo,
+		githubUserInfo?: ConnectorGitHubUserInfo,
 		installationInfo?: AddGitHubAppInstallationInfo,
 	): Promise<User> {
 
@@ -108,6 +108,9 @@ export default class User {
 
 		if (installationInfo) {
       await user.addInstallation(installationInfo, false);
+    }
+    else {
+      Log.info(`User ${openshiftUserInfo.name} does not have an installation.`);
     }
 
     /*
@@ -139,7 +142,7 @@ export default class User {
     return installatingAppId;
   }
 
-  public async addGitHubUserInfo(githubUserInfo: GitHubUserInfo, save: boolean): Promise<void> {
+  public async addGitHubUserInfo(githubUserInfo: ConnectorGitHubUserInfo, save: boolean): Promise<void> {
     this._githubUserInfo = githubUserInfo;
     Log.info(`User ${this.name} is GitHub ${this._githubUserInfo.type} ${this._githubUserInfo.name}`);
 
@@ -219,7 +222,7 @@ export default class User {
     };
   }
 
-  public get githubUserInfo(): GitHubUserInfo | undefined {
+  public get githubUserInfo(): ConnectorGitHubUserInfo | undefined {
     return this._githubUserInfo;
   }
 

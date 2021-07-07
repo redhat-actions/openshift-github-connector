@@ -9,7 +9,7 @@ import ApiEndpoints from "../../../../common/api-endpoints";
 import ApiResponses from "../../../../common/api-responses";
 import DataFetcher from "../../../components/data-fetcher";
 import CreateAppCard, { CREATE_NEW_TITLE } from "./create-app-card";
-import { InstallExistingAppCard, USE_EXISTING_TITLE } from "./install-existing-app-card";
+import { InstallExistingAppCard, USE_EXISTING_TITLE } from "./install-existing-app";
 import { OpenShiftUserContext } from "../../../contexts";
 import BtnBody from "../../../components/btn-body";
 
@@ -19,6 +19,12 @@ export default function SetupAppPage(): JSX.Element {
   const { user } = useContext(OpenShiftUserContext);
 
   const [ createOrInstall, setCreateOrInstall ] = useState<CreateOrInstallExisting | undefined>();
+
+  /*
+  const setCreateOrInstall = (newCreateOrInstall: CreateOrInstallExisting) => {
+    _setCreateOrInstall(newCreateOrInstall);
+  };
+  */
 
   return (
     <>

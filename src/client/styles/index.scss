@@ -12,6 +12,32 @@ html, body, #root, #wrapper, main {
   // line-height: 1.5em;
 }
 
+#page-container {
+  display: grid;
+}
+
+#page-content, #notifications {
+  // overlay the notifications on top of the page-content
+  grid-area: 1 / 1;
+}
+
+#notifications {
+  & .pf-c-alert {
+    // the wizard has a z-index of 200, this should be high enough ??
+    z-index: 999;
+    width: 40%;
+    margin-top: 0.5rem;
+  }
+
+  margin: c.$pf-global--spacer--md;
+
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  flex-direction: column;
+}
+
+
 /*
 main {
   padding: c.$main-vertical-padding 0;

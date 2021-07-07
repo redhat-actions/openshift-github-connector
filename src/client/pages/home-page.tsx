@@ -5,7 +5,7 @@ export default function HomePage(): JSX.Element {
 
   const history = useHistory();
 
-  const setupRoot = ClientPages.Setup.path;
+  const setupRoot = ClientPages.SetupIndex.path;
 
   history.push(setupRoot);
 

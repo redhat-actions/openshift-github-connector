@@ -17,43 +17,41 @@ export default function App(): JSX.Element {
     <>
       <InConsoleContext.Provider value={isInOpenShiftConsole()}>
         {getTitle(undefined)}
-        <div id="wrapper" /* className="d-flex w-100 justify-content-center" */>
-          <main className={getConsoleModifierClass()}>
-            <DataFetcher
-              type="api"
-              endpoint={ApiEndpoints.User.Root}
-              onError={(err) => {
-                if (err.status === 401) {
-                  redirectToLogin();
-                }
-              }}
-              loadingDisplay={
-                <>
-                  <div className="centers flex-column p-5">
-                    <Spinner size="xl" />
-                    {/* <p>Checking login status...</p> */}
-                  </div>
-                </>
-              }>{
-                (loginResponse: ApiResponses.OpenShiftUserResponse, reload) => {
-
-                  // console.log(`LOGIN RESPONSE`, loginResponse);
-
-                  if (loginResponse.success) {
-                    return (
-                      <OpenShiftUserContext.Provider value={{
-                        user: loginResponse,
-                        reload,
-                      }}>
-                        <AppSwitch />
-                      </OpenShiftUserContext.Provider>
-                    );
-                  }
-                  return redirectToLogin();
-                }
+        <div id="wrapper" className={getConsoleModifierClass()} /* className="d-flex w-100 justify-content-center" */>
+          <DataFetcher
+            type="api"
+            endpoint={ApiEndpoints.User.Root}
+            onError={(err) => {
+              if (err.status === 401) {
+                redirectToLogin();
               }
-            </DataFetcher>
-          </main>
+            }}
+            loadingDisplay={
+              <>
+                <div className="centers flex-column p-5">
+                  <Spinner size="xl" />
+                  {/* <p>Checking login status...</p> */}
+                </div>
+              </>
+            }>{
+              (loginResponse: ApiResponses.OpenShiftUserResponse, reload) => {
+
+                // console.log(`LOGIN RESPONSE`, loginResponse);
+
+                if (loginResponse.success) {
+                  return (
+                    <OpenShiftUserContext.Provider value={{
+                      user: loginResponse,
+                      reload,
+                    }}>
+                      <AppSwitch />
+                    </OpenShiftUserContext.Provider>
+                  );
+                }
+                return redirectToLogin();
+              }
+            }
+          </DataFetcher>
         </div>
       </InConsoleContext.Provider>
     </>

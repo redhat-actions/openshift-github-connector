@@ -2,6 +2,7 @@ import User from "./user";
 import { UserMemento, UserMementoSaveable, UserSessionData } from "./server-user-types";
 import Log from "server/logger";
 import SecretUtil from "../kube/secret-util";
+import { GitHubUserType } from "common/types/gh-types";
 
 const userCache = new Map<string, User>();
 
@@ -15,6 +16,8 @@ export const saveUser = async (user: User): Promise<void> => {
 
 	if (user.githubUserInfo) {
 		memento.githubUserId = user.githubUserInfo.id.toString();
+		// memento.githubUserName = user.githubUserInfo.name;
+		// memento.githubUserType = user.githubUserInfo.type;
 
 		if (user.installation) {
 			memento.installedAppId = user.installation.app.config.id.toString();
@@ -40,6 +43,14 @@ async function loadMemento(
 		...secret.data,
 		uid: secret.data.uid,
 	};
+
+	if (secret.data.githubUserId && secret.data.githubUserName && secret.data.githubUserType) {
+		result.githubUserInfo = {
+			id: Number(secret.data.githubUserId),
+			name: secret.data.githubUserName,
+			type: secret.data.githubUserType as GitHubUserType,
+		}
+	}
 
 	if (secret.data.installedAppId != null && secret.data.installationId != null) {
 		result.installationInfo = {

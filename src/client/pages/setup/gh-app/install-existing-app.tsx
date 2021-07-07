@@ -37,6 +37,26 @@ export function InstallExistingAppCard(): JSX.Element {
           {USE_EXISTING_TITLE}
         </CardTitle>
         <CardBody>
+          <DataFetcher type="api" endpoint={ApiEndpoints.User.UserGitHub} loadingDisplay="none">{
+            (res: ApiResponses.UserResponse) => {
+              if (!res.success || !res.githubInstallationInfo) {
+                return <></>;
+              }
+
+              return (
+                <>
+                  <p>
+                    {CommonIcons.Warning} You have already installed <ExternalLink href={res.githubInstallationInfo.app.html_url}>
+                      {res.githubInstallationInfo.app.name}
+                    </ExternalLink>.
+                    Installing an app below will override the existing installation.
+                  </p>
+                </>
+              );
+            }
+          }
+          </DataFetcher>
+
           <DataFetcher type="api" endpoint={ApiEndpoints.App.Root} loadingDisplay="card-body">{
             (data: ApiResponses.ClusterAppState) => {
               if (!data.success) {
@@ -114,7 +134,6 @@ export function InstallExistingAppCard(): JSX.Element {
             }
           }
           </DataFetcher>
-
         </CardBody>
       </Card>
     </>
@@ -158,67 +177,3 @@ function ProceedSection({ selectedApp }: { selectedApp?: ApiResponses.ExistingAp
     </>
   );
 }
-
-/*
-function InstallAppSection({ selectedApp }: { selectedApp: ApiResponses.ExistingAppData }): JSX.Element {
-  const [ isLoading, setIsLoading ] = useState(false);
-  const [ error, setError ] = useState<string>();
-
-  const btnText = `Install ${selectedApp.name}`;
-
-  const btnBody = (
-    <BtnBody text={btnText} icon={CommonIcons.GitHub} iconClasses="text-black" isLoading={isLoading}/>
-  );
-
-  // if (props.selectedApp == null) {
-  //   return (
-  //     <Button isLarge disabled title="Select an app to proceed.">
-  //       {btnBody}
-  //     </Button>
-  //   );
-  // }
-
-  const createdAt = new Date(selectedApp.created_at);
-  const friendlyCreatedAt =
-
-  return (
-    <>
-      <div className="center-y justify-content-center">
-        <div className="center-y">
-
-          <p>
-             was created by <ExternalLink href={selectedApp.owner.html_url}>
-              {selectedApp.owner.login}
-            </ExternalLink>, {friendlyCreatedAt}.
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-4 center-y justify-content-center">
-        <Button isLarge disabled={isLoading} onClick={async () => {
-          // if (props.selectedApp == null) {
-          //   setError("No app selected");
-          //   return;
-          // }
-          setIsLoading(true);
-          try {
-            await fetchJSON<ApiRequests.PreInstallApp, void>("POST", ApiEndpoints.Setup.PreInstallApp, { appId: selectedApp.appId });
-            window.location.href = selectedApp.newInstallationUrl;
-          }
-          catch (err) {
-            setError(err.message);
-          }
-          finally {
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            setIsLoading(false);
-          }
-        }}>
-          {btnBody}
-        </Button>
-      </div>
-      <Banner display={error != null} severity="danger" title={error ?? ""} />
-    </>
-  );
-}
-
-*/

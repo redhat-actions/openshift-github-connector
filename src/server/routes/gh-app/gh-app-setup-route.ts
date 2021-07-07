@@ -8,8 +8,8 @@ import ApiResponses from "common/api-responses";
 import GitHubApp from "server/lib/github/gh-app";
 import { exchangeCodeForUserData } from "server/lib/github/gh-util";
 import StateCache from "server/lib/state-cache";
-import { GitHubUserType } from "common/types/gh-types";
 import { send405 } from "server/express-extends";
+import { GitHubUserType } from "common/types/gh-types";
 
 const router = express.Router();
 
@@ -135,9 +135,7 @@ router.route(ApiEndpoints.Setup.PostInstallApp.path)
       id: userData.id,
       name: userData.login,
       type: userData.type as GitHubUserType,
-      // installationInfo: { appId, installationId },
     }, true);
-
     await user.addInstallation({ appId, installationId }, true);
 
     return res.sendStatus(201);
