@@ -1,4 +1,6 @@
-import { GitHubUserType } from "./gh-types";
+import {
+  GitHubAppConfigNoSecrets, GitHubAppInstallationData, GitHubUserType,
+} from "./gh-types";
 
 export interface OpenShiftUserInfo {
   /**
@@ -15,7 +17,7 @@ export interface OpenShiftUserInfo {
    readonly isAdmin: boolean,
 }
 
-export type GitHubUserInfo = Readonly<{
+export type ConnectorGitHubUserInfo = Readonly<{
   /**
    * GitHub user ID
    */
@@ -30,13 +32,13 @@ export type GitHubUserInfo = Readonly<{
   type: GitHubUserType,
 }>;
 
-export type GitHubAppInstallInfo = Readonly<{
-  appId: number,
-  appName: string,
+export type ConnectorGitHubAppInstallInfo = Readonly<{
+  app: GitHubAppConfigNoSecrets,
+  installation: GitHubAppInstallationData,
   installationId: number,
 }>;
 
 export interface ConnectorUserInfo extends OpenShiftUserInfo {
-  readonly githubInfo?: GitHubUserInfo,
-  readonly githubInstallationInfo?: GitHubAppInstallInfo,
+  readonly githubInfo?: ConnectorGitHubUserInfo,
+  readonly githubInstallationInfo?: ConnectorGitHubAppInstallInfo,
 }

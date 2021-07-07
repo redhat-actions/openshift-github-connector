@@ -31,22 +31,7 @@ router.route(ApiEndpoints.App.Root.path)
 
     const resBody: ApiResponses.ClusterAppState = {
       success: true,
-      // totalCount: apps.length,
-      /*
-      app: {
-        appId: app.id,
-        appUrl: app.urls.app,
-        avatarUrl: app.urls.avatar,
-        created_at: app.config.created_at,
-        name: app.config.name,
-        newInstallationUrl: app.urls.newInstallation,
-        owner: {
-          avatar_url: app.config.owner.avatar_url,
-          login: app.config.owner.login,
-          html_url: app.config.owner.html_url,
-        },
-      },
-      */
+      totalCount: apps.length,
       visibleApps: apps.map((app) => {
         return {
           appId: app.id,

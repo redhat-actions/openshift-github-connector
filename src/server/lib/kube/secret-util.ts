@@ -175,7 +175,7 @@ namespace SecretUtil {
       createdByUserId: string,
     }
   ): Promise<ServiceAccountToken> {
-		const saTokenSecretName = toValidK8sName(`${serviceAccountName}-token-${repo.id}`);
+		const saTokenSecretName = toValidK8sName(`github-repo-sa-token-${repo.id}`);
 
     const subtype: Subtype = Subtype.SA_TOKEN;
 
@@ -229,12 +229,20 @@ namespace SecretUtil {
           + `${createSATokenRes.body.metadata?.namespace}/${createSATokenRes.body.kind}/${createSATokenRes.body.metadata?.name}`
         );
 
-        const newSecret = await SecretUtil.loadFromSecret(saTokenSecretName);
+        let newSecret = await SecretUtil.loadFromSecret(saTokenSecretName);
+        let tries = 1;
+        while (!newSecret && tries++ <= 10) {
+          // after the SA token secret is created, it takes a few moments for the controller to update it with its SA token data.
+          Log.info(`Failed to get secret after it was just created, retrying...`);
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          newSecret = await SecretUtil.loadFromSecret(saTokenSecretName);
+
+        }
         if (!newSecret) {
-          // It appears there is a timing issue where the secret will not have data for a very short time after it is created.
-          // We will have to handle this with a delay or a retry.
           throw new Error(`Failed to load secret "${saTokenSecretName}" after it was just created`);
         }
+        Log.info(`Got SA token secret after ${tries} tries`);
         saTokenSecretBody = newSecret;
       }
       catch (err) {

@@ -41,24 +41,14 @@ export type GitHubAppConfig = components["schemas"]["integration"] & GitHubAppCo
   owner: GitHubUserDetails,
 };
 
-// export type GitHubAppConfigNoSecrets = Omit<GitHubAppConfig, keyof GitHubAppConfigSecrets>;
-export type GitHubAppConfigNoSecrets = GitHubAppConfig;
+export type GitHubAppConfigNoSecrets = Exclude<GitHubAppConfig, keyof GitHubAppConfigSecrets>;
+// export type GitHubAppConfigNoSecrets = GitHubAppConfig;
 
 export type GitHubAppPublicData = {
   name: string,
   slug: string,
   html_url: string,
 };
-
-export function deleteSecrets(config: GitHubAppConfig): GitHubAppConfigNoSecrets {
-  const cfg: Partial<GitHubAppConfig> = { ...config };
-  delete cfg.client_id;
-  delete cfg.client_secret;
-  delete cfg.pem;
-  delete cfg.webhook_secret;
-
-  return cfg as GitHubAppConfigNoSecrets;
-}
 
 // https://docs.github.com/en/rest/reference/repos#get-repository-content
 export type GitHubContentFile = components["schemas"]["content-file"];

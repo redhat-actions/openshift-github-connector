@@ -3,7 +3,7 @@ import { Octokit } from "@octokit/core";
 import { PaginateInterface } from "@octokit/plugin-paginate-rest";
 
 import { GitHubAppInstallationData, GitHubAppInstallationUrls, GitHubRepo } from "common/types/gh-types";
-import { GitHubAppInstallInfo } from "common/types/user-types";
+import { ConnectorGitHubAppInstallInfo } from "common/types/user-types";
 import GitHubApp from "server/lib/github/gh-app";
 import { getAppOctokit } from "server/lib/github/gh-util";
 import { UserWithGitHubInfo } from "../user/user";
@@ -15,6 +15,7 @@ export default class UserInstallation {
   private constructor(
     public readonly user: UserWithGitHubInfo,
     public readonly app: GitHubApp,
+    public readonly installationData: GitHubAppInstallationData,
     public readonly installationId: number,
     public readonly octokit: Octokit & { paginate: PaginateInterface },
   ) {
@@ -36,7 +37,12 @@ export default class UserInstallation {
   public static async create(user: UserWithGitHubInfo, app: GitHubApp, installationId: number): Promise<UserInstallation> {
     const octokit = getAppOctokit(app.config, installationId);
 
-    return new this(user, app, installationId, octokit);
+    const installationReq = await octokit.request(
+      "GET /app/installations/{installation_id}", {
+      installation_id: Number(installationId)
+    });
+
+    return new this(user, app, installationReq.data, installationId, octokit);
   }
 
   public async getRepos(): Promise<GitHubRepo[]> {
@@ -54,19 +60,10 @@ export default class UserInstallation {
   }
   */
 
-  public async getInstallation(): Promise<GitHubAppInstallationData> {
-    const installationReq = await this.app.octokit.request(
-      "GET /app/installations/{installation_id}", {
-      installation_id: Number(this.installationId)
-    });
-
-    return installationReq.data;
-  }
-
-  public get info(): GitHubAppInstallInfo {
+  public get info(): ConnectorGitHubAppInstallInfo {
     return {
-      appId: this.app.id,
-      appName: this.app.config.name,
+      app: this.app.getWithoutSecrets,
+      installation: this.installationData,
       installationId: this.installationId,
     }
   }

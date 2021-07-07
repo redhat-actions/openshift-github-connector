@@ -44,7 +44,7 @@ function Banner(props: Banner.Props): JSX.Element {
       props.className,
       "banner rounded p-3",
       "bg-" + props.severity,
-      "text-" + (props.severity === "warning" ? "black" : "light"),
+      "text-" + ([ "warning", "info" ].includes(props.severity ?? "") ? "black" : "light"),
       { "d-none": !display }
     )}>
       <div className={classNames(

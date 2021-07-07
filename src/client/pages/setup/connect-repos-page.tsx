@@ -347,7 +347,7 @@ export default class ConnectReposPage extends React.Component<RouteComponentProp
                                 this.focusBanner();
                               }
                             }}>
-                              Create Secrets
+                            <BtnBody text="Create Secrets" isLoading={this.state.isSubmitting} icon={CommonIcons.Add} />
                           </Button>
                         </div>
                         <SubmissionResultBanner
@@ -629,7 +629,7 @@ function SubmissionResultBanner(props: {
       <Banner id={props.bannerId}
         display={props.isSubmitting}
         severity={"info"}
-        loading={props.isSubmitting}
+        // loading={props.isSubmitting}
         title={"Creating secrets..."}
       />
     );

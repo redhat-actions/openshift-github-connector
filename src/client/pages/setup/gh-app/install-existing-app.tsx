@@ -1,135 +1,157 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
-  Button, Card, CardTitle, CardBody,
+  Card, CardTitle, CardBody, Button,
 } from "@patternfly/react-core";
+import { ExternalLinkAltIcon } from "@patternfly/react-icons";
+import {
+  RowSelectVariant, TableComposable, Thead, Th, Tbody, Tr, Td,
+} from "@patternfly/react-table";
 
 import ApiEndpoints from "../../../../common/api-endpoints";
-import ApiRequests from "../../../../common/api-requests";
 import ApiResponses from "../../../../common/api-responses";
-import { fetchJSON } from "../../../util/client-util";
-import Banner from "../../../components/banner";
 import DataFetcher from "../../../components/data-fetcher";
 import { ExternalLink } from "../../../components/external-link";
 import { getFriendlyDateTime } from "../../../../common/common-util";
-import BtnBody from "../../../components/btn-body";
+import ApiRequests from "../../../../common/api-requests";
+import { fetchJSON } from "../../../util/client-util";
 import { CommonIcons } from "../../../util/icons";
+import BtnBody from "../../../components/btn-body";
+import Banner from "../../../components/banner";
 
-export const USE_EXISTING_TITLE = "Use Existing App";
+export const USE_EXISTING_TITLE = "Install Existing App";
 
-export default function InstallExistingAppCard(): JSX.Element {
+export function InstallExistingAppPage() {
+  return (
+    <InstallExistingAppCard />
+  );
+}
+
+export function InstallExistingAppCard(): JSX.Element {
 
   const [ selectedApp, setSelectedApp ] = useState<ApiResponses.ExistingAppData>();
 
   return (
-    <React.Fragment>
+    <>
       <Card>
         <CardTitle>
           {USE_EXISTING_TITLE}
         </CardTitle>
         <CardBody>
-          <DataFetcher type="api" endpoint={ApiEndpoints.App.Existing} loadingDisplay="card-body">{
-            (data: ApiResponses.AllAppsState) => {
-              if (!data.success || data.totalCount === 0) {
-                return (
-                  <p>
-                    There are no apps set up on this instance. You must create a new app.
-                  </p>
-                );
-              }
-
-              if (data.visibleApps.length === 1) {
-                setSelectedApp(data.visibleApps[0]);
+          <DataFetcher type="api" endpoint={ApiEndpoints.User.UserGitHub} loadingDisplay="none">{
+            (res: ApiResponses.UserResponse) => {
+              if (!res.success || !res.githubInstallationInfo) {
+                return <></>;
               }
 
               return (
-                <React.Fragment>
-                  {/* <p>
-                    Select an existing app:
-                  </p> */}
-
-                  <div className="d-flex align-items-center justify-content-center">
-                    {/* <ListGroup className="w-50">
-                      {data.visibleApps.map((app) => {
-                        const active = selectedApp != null && selectedApp.appId === app.appId;
-
-                        return (
-                          <ListGroup.Item
-                            key={app.appId}
-                            onClick={() => setSelectedApp(app)}
-                            active={active}
-                            className="bg-darker clickable d-flex justify-content-between align-items-center border-light"
-                          >
-                            <input type="radio" checked={active} />
-                            <div>
-                              {app.name}
-                            </div>
-                            <div className="ml-auto">
-                              <ExternalLink className="text-reset" href={app.appUrl}>
-                                <FontAwesomeIcon icon={"external-link-alt"} fixedWidth />
-                              </ExternalLink>
-                            </div>
-                          </ListGroup.Item>
-                        );
-                      })}
-                    </ListGroup> */}
-                  </div>
-                  {
-                    selectedApp != null ? (<InstallAppSection selectedApp={selectedApp} />) : (<p className="error">No app selected</p>)
-                  }
-                </React.Fragment>
+                <>
+                  <p>
+                    {CommonIcons.Warning} You have already installed <ExternalLink href={res.githubInstallationInfo.app.html_url}>
+                      {res.githubInstallationInfo.app.name}
+                    </ExternalLink>.
+                    Installing an app below will override the existing installation.
+                  </p>
+                </>
               );
             }
           }
           </DataFetcher>
 
+          <DataFetcher type="api" endpoint={ApiEndpoints.App.Root} loadingDisplay="card-body">{
+            (data: ApiResponses.ClusterAppState) => {
+              if (!data.success) {
+                return (
+                  <p className="error">
+                    There are no apps set up on this instance. An administrator must create a new app.
+                  </p>
+                );
+              }
+
+              /*
+              if (data.visibleApps.length === 1) {
+                setSelectedApp(data.visibleApps[0]);
+              }
+              */
+
+              // const appAvatarSize = "2em";
+
+              return (
+                <>
+                  {/* <p>
+                    Select an existing app:
+                  </p> */}
+
+                  <TableComposable aria-label="Available Apps">
+
+                    <Thead>
+                      <Tr>
+                        <Th></Th>
+                        {/* <Th></Th> */}
+                        <Th>Name</Th>
+                        <Th>Owner</Th>
+                        <Th>Creation Date</Th>
+                        <Th></Th>
+                      </Tr>
+                    </Thead>
+
+                    <Tbody>
+                      {
+                        data.visibleApps.map((app, i) => (
+                          <Tr selected={app.appId === selectedApp?.appId} key={i}>
+                            <Td
+                              select={{
+                                rowIndex: i,
+                                onSelect: (e, isSelected, rowIndex) => {
+                                  setSelectedApp(data.visibleApps[rowIndex]);
+                                },
+                                isSelected: app.appId === selectedApp?.appId,
+                                // disable: i === 1,
+                                variant: RowSelectVariant.radio,
+                              }}>
+                            </Td>
+                            {/* <Td>
+                              <img
+                                style={{ width: appAvatarSize, height: appAvatarSize }}
+                                // className="me-4"
+                                src={app.avatarUrl}
+                                alt={app.name + " avatar"}
+                              />
+                            </Td> */}
+                            <Td>{app.name}</Td>
+                            <Td>{app.owner.login}</Td>
+                            <Td>{getFriendlyDateTime(new Date(app.created_at), true)}</Td>
+                            <Td><ExternalLink href={app.appUrl} key={app.appId} icon={{ Icon: ExternalLinkAltIcon, position: "left" }} /></Td>
+                          </Tr>
+                        ))
+                      }
+                    </Tbody>
+                  </TableComposable>
+                  <div className="my-3"></div>
+
+                  <ProceedSection selectedApp={selectedApp} />
+                </>
+              );
+            }
+          }
+          </DataFetcher>
         </CardBody>
       </Card>
-    </React.Fragment>
+    </>
   );
 }
 
-function InstallAppSection({ selectedApp }: { selectedApp: ApiResponses.ExistingAppData }): JSX.Element {
+function ProceedSection({ selectedApp }: { selectedApp?: ApiResponses.ExistingAppData}): JSX.Element {
+
   const [ isLoading, setIsLoading ] = useState(false);
-  const [ error, setError ] = useState<string>();
+  const [ error, setError ] = useState<string | undefined>();
 
-  const btnText = `Install ${selectedApp.name}`;
-
-  const btnBody = (
-    <BtnBody text={btnText} icon={CommonIcons.GitHub} iconClasses="text-black" isLoading={isLoading}/>
-  );
-
-  // if (props.selectedApp == null) {
-  //   return (
-  //     <Button isLarge disabled title="Select an app to proceed.">
-  //       {btnBody}
-  //     </Button>
-  //   );
-  // }
-
-  const createdAt = new Date(selectedApp.created_at);
-  const friendlyCreatedAt = getFriendlyDateTime(createdAt, true);
-  const appAvatarSize = "3rem";
+  if (!selectedApp) {
+    return <>Select an app to proceed.</>;
+  }
 
   return (
-    <React.Fragment>
-      <div className="d-flex align-items-center justify-content-center">
-        <div className="d-flex align-items-center">
-          <img style={{ width: appAvatarSize, height: appAvatarSize }}
-            className="mr-4"
-            src={selectedApp.avatarUrl}
-            alt={selectedApp.name + " avatar"}
-          />
-          <p>
-            <ExternalLink href={selectedApp.appUrl}>
-              {selectedApp.name}
-            </ExternalLink> was created by <ExternalLink href={selectedApp.owner.html_url}>
-              {selectedApp.owner.login}
-            </ExternalLink>, {friendlyCreatedAt}.
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-4 d-flex align-items-center justify-content-center">
+    <>
+      <div className="my-4 centers">
         <Button isLarge disabled={isLoading} onClick={async () => {
           // if (props.selectedApp == null) {
           //   setError("No app selected");
@@ -148,10 +170,10 @@ function InstallAppSection({ selectedApp }: { selectedApp: ApiResponses.Existing
             setIsLoading(false);
           }
         }}>
-          {btnBody}
+          <BtnBody text={"Install " + selectedApp.name} icon={CommonIcons.GitHub} iconClasses="text-black" isLoading={isLoading}/>
         </Button>
       </div>
       <Banner display={error != null} severity="danger" title={error ?? ""} />
-    </React.Fragment>
+    </>
   );
 }

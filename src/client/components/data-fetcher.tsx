@@ -20,7 +20,7 @@ interface BaseDataFetcherProps<Data> {
 
 interface GenericDataFetcherProps<Data> extends BaseDataFetcherProps<Data> {
     type: "generic",
-    fetchData: () => Promise<Data>,
+    fetchData: (abortSignal: AbortSignal) => Promise<Data>,
 }
 
 interface ApiDataFetcherProps<Data> extends BaseDataFetcherProps<Data> {
@@ -80,7 +80,7 @@ export default class DataFetcher<Data> extends React.Component<DataFetcherProps<
         });
       }
       else {
-        data = await this.props.fetchData();
+        data = await this.props.fetchData(this.abortController.signal);
       }
 
       this.setState({

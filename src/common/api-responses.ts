@@ -67,9 +67,8 @@ namespace ApiResponses {
 
   export type ClusterAppState = {
     success: true,
-    // totalCount: number,
+    totalCount: number,
     visibleApps: ExistingAppData[],
-    // app: ExistingAppData,
   } | ResultFailed;
 
   export interface GitHubAppMissing extends Result {

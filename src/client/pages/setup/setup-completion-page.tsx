@@ -18,6 +18,9 @@ export default function SetupFinishedPage(): JSX.Element {
           <Title headingLevel="h3" className="pb-2">{"What's Next"}</Title>
           <ul className="b">
             <li>
+              <Link to={ClientPages.ImageRegistries.path}>Add an Image Registry</Link>
+            </li>
+            <li>
               <Link to={ClientPages.AddWorkflows.path}>Add the OpenShift starter workflow</Link>
             </li>
             <li>
@@ -34,9 +37,6 @@ export default function SetupFinishedPage(): JSX.Element {
             </li>
             <li>
               <Link to={ClientPages.ConnectRepos.path}>Return to the Connect Repositories page</Link>
-            </li>
-            <li>
-              <Link to={ClientPages.ImageRegistries.path}>Return to the Image Registries page</Link>
             </li>
           </ul>
         </CardBody>

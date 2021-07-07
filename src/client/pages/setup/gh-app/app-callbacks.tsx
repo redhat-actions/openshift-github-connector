@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 
 import ApiEndpoints from "../../../../common/api-endpoints";
@@ -7,6 +7,7 @@ import { fetchJSON } from "../../../util/client-util";
 import ApiRequests from "../../../../common/api-requests";
 import ApiResponses from "../../../../common/api-responses";
 import { getSetupPagePath } from "../setup";
+import { ConnectorAlertContext } from "../../global-alert-context";
 
 enum CallbackSearchParams {
   // APP_ID = "app_id",
@@ -24,6 +25,8 @@ export function PostCreateAppCallbackPage() {
 
   const history = useHistory();
 
+  const pushAlert = useContext(ConnectorAlertContext);
+
   const search = useLocation().search;
 
   const searchParams = new URLSearchParams(search);
@@ -40,23 +43,34 @@ export function PostCreateAppCallbackPage() {
   return (
     <>
       <DataFetcher loadingDisplay="spinner" type="generic" fetchData={
-        async () => {
-          await fetchJSON<ApiRequests.GitHubOAuthCallbackData, ApiResponses.CreatingAppResponse>(
+        async (abortSignal: AbortSignal) => {
+          const res = await fetchJSON<ApiRequests.GitHubOAuthCallbackData, ApiResponses.CreatingAppResponse>(
             "POST",
             ApiEndpoints.Setup.CreatingApp.path, {
               code, state,
-            }
+            }, {
+              signal: abortSignal,
+            },
           );
+
+          console.log("ABCDEFG!#$&!#$*");
+          console.log(res.message);
+          pushAlert({ severity: "success", title: res.message });
 
           history.replace({
             pathname: getSetupPagePath("INSTALL_APP"),
           });
 
-          // return res;
-
+          return res;
         }
       }>
-        {() => {
+        {(res: ApiResponses.CreatingAppResponse) => {
+
+          console.log("ABCDEFG");
+          console.log(res.message);
+
+          pushAlert({ severity: "success", title: res.message });
+
           return (
             <p>
               Successfully created app, redirecting...
@@ -107,6 +121,8 @@ function getPostInstallParams(search: string): ApiRequests.PostInstall {
 
 export function InstalledAppPage(): JSX.Element {
 
+  const pushAlert = useContext(ConnectorAlertContext);
+
   const [ error, setError ] = useState<string>();
 
   const history = useHistory();
@@ -117,17 +133,22 @@ export function InstalledAppPage(): JSX.Element {
 
       const postInstallReqBody = getPostInstallParams(search);
 
-      await fetchJSON<ApiRequests.PostInstall, ApiResponses.Result>(
+      const res = await fetchJSON<ApiRequests.PostInstall, ApiResponses.Result>(
         "POST", ApiEndpoints.Setup.PostInstallApp.path, postInstallReqBody
       );
 
-      history.replace({
-        pathname: getSetupPagePath("VIEW_APP"),
-      });
+      pushAlert({ severity: "success", title: res.message });
+
     }
 
-    submitInstall().catch((err) => setError(err));
-  }, [ setError, search, history ]);
+    submitInstall()
+      .then(() => {
+        history.replace({
+          pathname: getSetupPagePath("VIEW_APP"),
+        });
+      })
+      .catch((err) => setError(err));
+  }, [ setError, search, history, pushAlert ]);
 
   return (
     <>
@@ -137,48 +158,4 @@ export function InstalledAppPage(): JSX.Element {
       }
     </>
   );
-
-/*
-  if (didRefreshUser) {
-    history.replace({
-      pathname: getSetupPagePath("VIEW_APP"),
-    });
-    return (
-      <p>
-        Redirecting...
-      </p>
-    );
-  }
-
-  const postInstallReqBody = getPostInstallParams(search);
-
-  return (
-    <>
-      <DataFetcher loadingDisplay="spinner" type="generic" fetchData={
-        async () => {
-          const res = fetchJSON<ApiRequests.PostInstall, ApiResponses.Result>(
-            "POST", ApiEndpoints.Setup.PostInstallApp.path,
-            ,
-          );
-
-          history.replace({
-            search: `?${CallbackSearchParams.REFRESHED_USER}=${REFRESHED_USER_VALUE}`,
-          });
-
-          await userContext.reload();
-
-          return res;
-        }
-      }>{
-          () => (
-            <p>
-              Reloading user...
-            </p>
-          )
-        }
-      </DataFetcher>
-    </>
-  );
-
-  */
 }
