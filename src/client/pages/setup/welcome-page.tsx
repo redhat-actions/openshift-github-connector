@@ -7,7 +7,7 @@ export default function WelcomePage(): JSX.Element {
     <>
       <Card isLarge>
         <CardTitle>
-          Welcome to the OpenShift GitHub Actions Connector
+          Welcome to the OpenShift GitHub Connector
         </CardTitle>
         <CardBody>
           <p className="b">

@@ -12,6 +12,8 @@ import CreateAppCard, { CREATE_NEW_TITLE } from "./create-app-card";
 import { InstallExistingAppCard, USE_EXISTING_TITLE } from "./install-existing-app";
 import { OpenShiftUserContext } from "../../../contexts";
 import BtnBody from "../../../components/btn-body";
+import { ExternalLink } from "../../../components/external-link";
+import { CommonIcons } from "../../../util/icons";
 
 type CreateOrInstallExisting = "create" | "install-existing";
 
@@ -45,7 +47,18 @@ export default function SetupAppPage(): JSX.Element {
                   Set up GitHub App
                 </CardTitle>
                 <CardBody>
-                  <p>This is a description of what an app is, with links to GitHub documentation.</p>
+                  <p>
+                    An administrator must create a GitHub App,
+                    which cluster users can then install on their own GitHub accounts.
+                    <br/>
+                    Installing the app allows the Connector to take actions in GitHub on the user&apos;s behalf.
+                  </p>
+
+                  <ExternalLink icon={{ Icon: CommonIcons.Documentation, position: "left" }}
+                    href="https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps"
+                  >
+                    Read more about GitHub Apps.
+                  </ExternalLink>
 
                   <p className={classNames({ error: isDirectionError })}>
                     {direction}
