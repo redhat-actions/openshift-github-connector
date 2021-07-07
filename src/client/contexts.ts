@@ -1,14 +1,14 @@
 import React from "react";
-import { ConnectorGitHubUserInfo, OpenShiftUserInfo } from "../common/types/user-types";
+import { OpenShiftUserInfo } from "../common/types/user-types";
 
 export const OpenShiftUserContext = React.createContext<{
   user: OpenShiftUserInfo,
   reload:(() => Promise<void>),
     }>({} as any);
 
-export const GitHubUserContext = React.createContext<{
-  githubUser: ConnectorGitHubUserInfo,
-}>({} as any);
+// export const GitHubUserContext = React.createContext<{
+//   githubUser: ConnectorGitHubUserInfo,
+// }>({} as any);
 
 export const InConsoleContext = React.createContext<boolean>(false);
 

@@ -35,7 +35,7 @@ const UserWithGitHub = new UrlPath(OpenShiftUser, "/github");
 const UserWithGitHubDetails = new UrlPath(OpenShiftUser, "/github/details");
 // const SetUserOAuthState = new UrlPath(User, "/oauth/state");
 // const PostUserOAuth = new UrlPath(User, "/oauth/post-redirect");
-const UserApp = new UrlPath(OpenShiftUser, "/app");
+const Installation = new UrlPath(OpenShiftUser, "/installation");
 const UserImageRegistries = new UrlPath(OpenShiftUser, "/image-registries");
 // const ServiceAccount = new UrlPath(User, "/serviceaccount");
 
@@ -64,7 +64,7 @@ const ApiEndpoints = {
     UserGitHubDetails: UserWithGitHubDetails,
     // SetUserOAuthState,
     // PostUserOAuth,
-    App: UserApp,
+    Installation,
     ImageRegistries: UserImageRegistries,
     // ServiceAccount,
   },

@@ -198,12 +198,14 @@ class GitHubApp {
   }
 
   public async delete(requestingUser: User): Promise<void> {
-    if (requestingUser.ownsAppId !== this.id) {
+    if (!requestingUser.ownsAppIds.includes(this.id)) {
       throw new Error(`User ${requestingUser} does not own app ${this.config.name}, and so cannot delete it.`);
     }
 
     GitHubApp.cache.delete(this.id);
     await SecretUtil.deleteSecret(GitHubApp.getAppSecretName(this.id), true);
+
+    await requestingUser.onAppDeleted(this.id);
     // delete all installations, somehow
   }
 

@@ -53,30 +53,44 @@ router.route(ApiEndpoints.App.Root.path)
     };
 
     return res.json(resBody);
-  })
+  });
+
+const PARAM_APPID = "appId";
+
+router.route(ApiEndpoints.App.Root.path + "/:" + PARAM_APPID)
   .delete(async (req, res: express.Response<ApiResponses.RemovalResult>, next) => {
     const user = await req.getUserOrDie();
     if (!user) {
       return undefined;
     }
 
-    const installation = user.installation;
-    if (!installation) {
-      return res.sendError(400, `No app installation for user ${user.name}`);
+    if (!req.params[PARAM_APPID]) {
+      return res.sendError(400, `App ID not provided in request path`);
     }
 
-    if (installation.user.ownsAppId !== installation.app.id) {
+    const appId = Number(req.params[PARAM_APPID]);
+
+    if (Number.isNaN(appId)) {
+      return res.sendError(400, `Invalid app ID "${appId}" provided in request path`);
+    }
+
+    const app = await GitHubApp.load(appId);
+    if (!app) {
+      return res.sendError(404, `App ${appId} not found`);
+    }
+
+    if (!user.ownsAppIds.includes(app.id)) {
       return res.sendError(
         403,
-        `User ${installation.user.name} does not own ${installation.app.config.name}, and so cannot delete it.`
+        `User ${user.name} does not own app ${appId}, and so cannot delete it.`
       );
     }
 
-    await installation.app.delete(installation.user);
+    await app.delete(user);
 
     return res.json({
       removed: true,
-      message: `Removed ${installation.app.config.name}`,
+      message: `Removed ${app.config.name}`,
       success: true,
     });
   })

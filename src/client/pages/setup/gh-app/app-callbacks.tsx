@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 
+import { Spinner } from "@patternfly/react-core";
 import ApiEndpoints from "../../../../common/api-endpoints";
 import DataFetcher from "../../../components/data-fetcher";
 import { fetchJSON } from "../../../util/client-util";
@@ -133,8 +134,11 @@ export function InstalledAppPage(): JSX.Element {
   return (
     <>
       {
-        error ? <p className="error">{error}</p>
-          : <p>Install succeeded, redirecting...</p>
+        error ?
+          <p className="error">{error}</p>
+          : <div className="center-x">
+            <Spinner size="lg" /* match DataFetcher */ />
+          </div>
       }
     </>
   );
