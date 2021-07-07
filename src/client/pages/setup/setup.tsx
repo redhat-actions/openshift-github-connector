@@ -19,21 +19,6 @@ import ApiResponses from "../../../common/api-responses";
 
 type MyWizardStep = WizardStep & { index: number, path: string };
 
-/*
-export function getCurrentSetupStep(search: string, maxStep?: number): number {
-
-  const searchParams = new URLSearchParams(search);
-  let step = Number(searchParams.get(SETUP_STEP_SEARCHPARAM));
-  if (Number.isNaN(step) || step < 1 || (maxStep != null && step > maxStep)) {
-    step = 1;
-  }
-
-  return step;
-}
-*/
-
-// export const SETUP_STEP_SEARCHPARAM = "step";
-
 export default function SetupWizard(): JSX.Element {
 
   const history = useHistory();

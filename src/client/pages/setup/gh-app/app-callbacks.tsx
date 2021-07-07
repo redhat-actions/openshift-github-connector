@@ -15,11 +15,7 @@ enum CallbackSearchParams {
   CODE = "code",
   SETUP_ACTION = "setup_action",
   STATE = "state",
-
-  // REFRESHED_USER = "updated-user",
 }
-
-// const REFRESHED_USER_VALUE = "true";
 
 export function PostCreateAppCallbackPage() {
 
@@ -76,22 +72,6 @@ export function PostCreateAppCallbackPage() {
               Successfully created app, redirecting...
             </p>
           );
-          /*
-          // console.log("Redirect to " + installUrl);
-          return (
-            <>
-              <p>
-                {data.message}
-              </p>
-              <p>
-                (Optional) <ExternalLink href={data.appInstallUrl} icon={{ Icon: GithubIcon, position: "left" }}>Install {data.appName}</ExternalLink>
-              </p>
-              <p>
-                Or, proceed to the next step.
-              </p>
-            </>
-          );
-          */
         }}
       </DataFetcher>
     </>
