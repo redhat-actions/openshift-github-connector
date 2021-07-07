@@ -1,13 +1,13 @@
 import { useContext, useState } from "react";
 import {
-  Card, CardTitle, CardBody, Button, Title,
+  Card, CardTitle, CardBody, Button,
 } from "@patternfly/react-core";
 import { ExternalLinkAltIcon } from "@patternfly/react-icons";
 import {
   RowSelectVariant, TableComposable, Thead, Th, Tbody, Tr, Td,
 } from "@patternfly/react-table";
+import { useHistory } from "react-router-dom";
 
-import { Link } from "react-router-dom";
 import ApiEndpoints from "../../../../common/api-endpoints";
 import ApiResponses from "../../../../common/api-responses";
 import DataFetcher from "../../../components/data-fetcher";
@@ -32,6 +32,7 @@ export function InstallExistingAppPage() {
 export function InstallExistingAppCard(): JSX.Element {
 
   const { user } = useContext(OpenShiftUserContext);
+  const history = useHistory();
 
   const [ selectedApp, setSelectedApp ] = useState<ApiResponses.ExistingAppData>();
 
@@ -72,9 +73,11 @@ export function InstallExistingAppCard(): JSX.Element {
                     </p>
                     <p>
                       {user.isAdmin ?
-                        <Title headingLevel="h2">
-                          <Link to={getSetupPagePath("SETUP_APP")}>Set up an app</Link>
-                        </Title>
+                        <div className="centers">
+                          <Button isLarge onClick={() => history.push(getSetupPagePath("SETUP_APP"))}>
+                            Set up an app
+                          </Button>
+                        </div>
                         : "Contact an administrator to set up an app so the Connector can be used."
                       }
                     </p>
