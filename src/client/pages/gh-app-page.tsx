@@ -1,4 +1,5 @@
 import { useContext, useState } from "react";
+import { useLocation } from "react-router-dom";
 import {
   Button,
   Title,
@@ -8,7 +9,7 @@ import {
 import classNames from "classnames";
 
 import {
-  BookIcon, TimesIcon, UserIcon, UsersIcon,
+  TimesIcon, UserIcon, UsersIcon,
 } from "@patternfly/react-icons";
 import AppPageCard from "../components/gh-app-page-card";
 import DataFetcher from "../components/data-fetcher";
@@ -21,19 +22,19 @@ import { ExternalLink } from "../components/external-link";
 import { CommonIcons } from "../util/icons";
 import { ConnectorAlertContext } from "./global-alert-context";
 
-const DOCS_ICON = BookIcon;
-const EDIT_ICON = CommonIcons.Configure;
-
 type ViewType = "owner" | "user";
 
 export default function GitHubAppPage() {
+
+  const isSetup = useLocation().pathname.startsWith(ClientPages.SetupIndex.path);
+
   return (
     <>
       <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.User.Installation}>
         {
           (data: ApiResponses.UserAppState, reload) => {
             return (
-              <GitHubAppPageBody data={data} reload={reload} isSetup />
+              <GitHubAppPageBody data={data} reload={reload} isSetup={isSetup} />
             );
           }
         }
@@ -137,7 +138,7 @@ function GitHubAppPageBody({
           (userRes: ApiResponses.GitHubUserDetailsResponse) => {
             return (
               <Title headingLevel="h4" className="d-flex">
-                Logged in as&nbsp;<ExternalLink href={userRes.html_url}>{userRes.login}</ExternalLink>
+                GitHub user:&nbsp;<ExternalLink href={userRes.html_url}>{userRes.login}</ExternalLink>
               </Title>
             );
           }
@@ -190,11 +191,11 @@ function AppOwnerCards(props: ApiResponses.UserOwnedAppData): JSX.Element {
     <>
       <AppPageCard header="App Permissions" buttons={[{
         href: "https://docs.github.com/en/developers/apps/creating-a-github-app-using-url-parameters#github-app-permissions",
-        icon: DOCS_ICON,
+        icon: CommonIcons.Documentation,
         text: "Docs",
       }, {
         href: props.ownerUrls.permissions,
-        icon: EDIT_ICON,
+        icon: CommonIcons.Configure,
         text: "Edit",
       }]}>
         <ul>
@@ -207,11 +208,11 @@ function AppOwnerCards(props: ApiResponses.UserOwnedAppData): JSX.Element {
       </AppPageCard>
       <AppPageCard header="App Event Subscriptions" buttons={[{
         href: "https://docs.github.com/en/developers/apps/creating-a-github-app-using-url-parameters#github-app-webhook-events",
-        icon: DOCS_ICON,
+        icon: CommonIcons.Documentation,
         text: "Docs",
       }, {
         href: props.ownerUrls.permissions,
-        icon: EDIT_ICON,
+        icon: CommonIcons.Configure,
         text: "Edit",
       }]}>
         <ul>
@@ -220,7 +221,7 @@ function AppOwnerCards(props: ApiResponses.UserOwnedAppData): JSX.Element {
       </AppPageCard>
       <AppPageCard header="User Installations" buttons={[{
         href: props.ownerUrls.ownerInstallations,
-        icon: EDIT_ICON,
+        icon: CommonIcons.Configure,
         text: "Manage Installations",
       }]}>
         <ul>
@@ -249,7 +250,7 @@ function AppInstalledCards(props: ApiResponses.UserAppInstalledData): JSX.Elemen
     <>
       <AppPageCard header="Enabled Repositories" buttons={[{
         href: props.installUrls.installationSettings,
-        icon: EDIT_ICON,
+        icon: CommonIcons.Configure,
         text: "Edit Installation",
       }]}>
         <ul>

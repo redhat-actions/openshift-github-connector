@@ -84,6 +84,10 @@ export async function loadUser(userSession: UserSessionData): Promise<User | und
 	return user;
 }
 
+export async function loadAllActiveUsers(): Promise<User[]> {
+	return [ ...userCache.values() ];
+}
+
 function getUserSecretName(uid: string) {
 	return `connector-user-${uid}`;
 }

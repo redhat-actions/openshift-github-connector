@@ -4,6 +4,7 @@ import syswidecas from "syswide-cas";
 
 import Log from "server/logger";
 
+// https://kubernetes.io/docs/concepts/configuration/secret/#tls-secrets
 const CERT_FILENAME = "tls.crt";
 const KEY_FILENAME = "tls.key";
 
@@ -18,9 +19,15 @@ export async function loadServingCerts(): Promise<{ cert: string, key: string }>
 
   Log.info(`Reading serving cert data from ${servingCertsDir}`);
 
+  const certFile = path.join(servingCertsDir, CERT_FILENAME);
+  const keyFile = path.join(servingCertsDir, KEY_FILENAME);
+
+  Log.info(`Reading cert from ${certFile}`);
+  Log.info(`Reading key from ${keyFile}`);
+
   const [ cert, key ] = await Promise.all([
-    fs.readFile(path.join(servingCertsDir, CERT_FILENAME)),
-    fs.readFile(path.join(servingCertsDir, KEY_FILENAME)),
+    fs.readFile(certFile),
+    fs.readFile(keyFile),
   ]);
 
   return {
