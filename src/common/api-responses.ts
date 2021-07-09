@@ -188,6 +188,11 @@ namespace ApiResponses {
     //   secretName: string,
     //   created: boolean,
     // }[],
+    serviceAccount: {
+      created: boolean,
+      name: string,
+      namespace: string,
+    },
     successes?: RepoSecretCreationSuccess[],
     failures?: RepoSecretCreationFailure[],
   }
@@ -224,14 +229,21 @@ namespace ApiResponses {
 
   export type ClusterState = ClusterStateDisconnected | ClusterStateConnected;
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  export interface UserNamespaces {
+    namespaces: string[],
+  }
+
+  export interface UserNamespacedServiceAccounts {
+    namespace: string,
+    serviceAccounts: string[],
+  }
+
   interface ImageRegistryCreationSuccess extends ResultSuccess {
     registry: ImageRegistry.Info,
   }
 
   export type ImageRegistryCreationResult = ImageRegistryCreationSuccess | ResultFailed;
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface ImageRegistryListSuccess extends ResultSuccess {
     registries: ImageRegistry.List,
     registryPasswordSecretName: string,

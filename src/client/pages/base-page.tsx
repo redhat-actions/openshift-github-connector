@@ -7,11 +7,11 @@ import {
 } from "@patternfly/react-core";
 import { UserAltIcon } from "@patternfly/react-icons";
 
-import classNames from "classnames";
 import { getTitle } from "../components/title";
 import ClientPages from "./client-pages";
-import { OpenShiftUserContext, InConsoleContext } from "../contexts";
-import { AlertInfo, ConnectorAlertContext } from "./global-alert-context";
+import {
+  OpenShiftUserContext, InConsoleContext, AlertInfo, PushAlertContext,
+} from "../contexts";
 
 export function BasePage({ title, content: Content }: { title: string, content: React.ComponentType<any> }): JSX.Element {
   const [ isNavOpen, setIsNavOpen ] = useState(false);
@@ -69,15 +69,15 @@ export function BasePage({ title, content: Content }: { title: string, content: 
             isNavOpen={isNavOpen}
           />
         }>
-        <ConnectorAlertContext.Provider value={(newAlert: AlertInfo) => setAlerts([ ...alerts, newAlert ])}>
+        <PushAlertContext.Provider value={(newAlert: AlertInfo) => setAlerts([ ...alerts, newAlert ])}>
           <PageSection id="page-content">
             <Content />
           </PageSection>
-          <div id="notifications" className={classNames({ "d-none": alerts.length === 0 })} >
+          <div id="notifications" >
             {
               alerts.map((alert, i) => (
                 <Alert key={i} variant={alert.severity} title={alert.title}
-                  timeout={10000}
+                  timeout={5000}
                   onTimeout={() => {
                     const alertsCopy = [ ...alerts ];
                     alertsCopy.splice(i, 1);
@@ -98,7 +98,7 @@ export function BasePage({ title, content: Content }: { title: string, content: 
               ))
             }
           </div>
-        </ConnectorAlertContext.Provider>
+        </PushAlertContext.Provider>
       </Page>
     </>
   );

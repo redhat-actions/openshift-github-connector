@@ -19,4 +19,8 @@ export default class UrlPath {
   public toString(): string {
     return this.path;
   }
+
+  public withParam(param: string): UrlPath {
+    return new UrlPath(this, param);
+  }
 }

@@ -5,7 +5,6 @@ import https from "https";
 import cookieParser from "cookie-parser";
 import path from "path";
 import cors from "cors";
-import flash from "connect-flash";
 
 import ApiEndpoints from "common/api-endpoints";
 import ApiResponses from "common/api-responses";
@@ -65,7 +64,6 @@ async function main(): Promise<void> {
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
   app.use(getLoggingMiddleware());
-  app.use(flash());
 
   // const allowedOrigins = getAllowedOrigins();
   // Log.info(`Allow origins: ${allowedOrigins.join(" ")}`);

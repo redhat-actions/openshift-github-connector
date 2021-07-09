@@ -255,35 +255,6 @@ export function checkInvalidK8sName(name: string): string | undefined {
   return undefined;
 }
 
-/**
- * Do our best to transform the given string into a valid k8s resource name.
- * Note that since it strips characters, names that were unique before may not be unique after this change.
- */
-export function toValidK8sName(rawName: string): string {
-  // https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#dns-subdomain-names
-
-  let cookedName = rawName;
-  const maxLength = 253;
-  if (rawName.length > maxLength) {
-    cookedName = rawName.substring(0, maxLength - 1);
-  }
-
-  cookedName = cookedName.replace(/[\s/.]/g, "-");
-  cookedName = cookedName.toLowerCase();
-  cookedName = cookedName.replace(/[^a-z0-9-_]/g, "");
-
-  const alphaNumRx = /[a-z0-9]/;
-
-  if (!alphaNumRx.test(cookedName[0])) {
-    cookedName = "0" + cookedName;
-  }
-  if (!alphaNumRx.test(cookedName[cookedName.length - 1])) {
-    cookedName += "0";
-  }
-
-  return cookedName;
-}
-
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function deleteKey<T extends Record<string, unknown>, K extends string>(obj: T, key: K): Omit<T, K> {
   const partial: Partial<T> = obj;

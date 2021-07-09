@@ -54,8 +54,6 @@ oauthRouter.route(ApiEndpoints.Auth.OAuthCallback.path)
     successRedirect: SUCCESS_REDIRECT,
     failureMessage: true,
     failWithError: true,
-    successFlash: true,
-    failureFlash: true,
     session,
   }))
   .all(send405([ "GET" ]));

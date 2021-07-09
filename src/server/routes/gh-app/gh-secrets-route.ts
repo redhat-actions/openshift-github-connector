@@ -5,7 +5,7 @@ import ApiRequests from "common/api-requests";
 import ApiResponses from "common/api-responses";
 import { GitHubActionsSecret, GitHubRepo, RepoSecretsPublicKey } from "common/types/gh-types";
 import { createActionsSecret, getRepoSecretPublicKey } from "server/lib/github/gh-util";
-import KubeWrapper, { ServiceAccountToken } from "server/lib/kube/kube-wrapper";
+import KubeWrapper from "server/lib/kube/kube-wrapper";
 import Log from "server/logger";
 import SecretUtil from "server/lib/kube/secret-util";
 import { Severity } from "common/common-util";
@@ -95,69 +95,69 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
       return res.sendError(400, "No app session is saved. Please connect to a GitHub App before proceeding.");
     }
 
-    const serviceAccountName = KubeWrapper.instance.serviceAccountName;
+    const {
+      namespace, serviceAccount, repos,
+    } = req.body;
 
-    const repos = req.body.repos;
+    const k8sClient = user.makeCoreV1Client();
+
+    const saExists = await KubeWrapper.doesServiceAccountExist(k8sClient, namespace, serviceAccount);
+
+    let serviceAccountCreated = false;
+    if (!saExists) {
+      Log.info(`Creating ${namespace}/serviceaccount/${serviceAccount}`);
+
+      await k8sClient.createNamespacedServiceAccount(namespace, {
+        metadata: {
+          name: serviceAccount,
+          labels: {
+            "created-by": user.name,
+          },
+        },
+      });
+
+      serviceAccountCreated = true;
+    }
 
     let successes: ApiResponses.RepoSecretCreationSuccess[] = [];
     let failures : ApiResponses.RepoSecretCreationFailure[] = [];
 
-    let saTokens: (ServiceAccountToken & { repoId: number } | undefined)[] | undefined;
-    if (req.body.createSATokens) {
-      Log.info(
-        `Creating service account tokens for service account `
-        + `${serviceAccountName} for ${repos.length} repositories`
-      );
+    Log.info(
+      `Creating service account tokens for service account `
+      + `${serviceAccount} for ${repos.length} repositories`
+    );
 
-      saTokens = await Promise.all(repos.map(async (repo) => {
-        try {
-          const saTokenForRepo = await SecretUtil.createSAToken(serviceAccountName, repo, {
-            createdByApp: installation.app.config.name,
-            createdByAppId: installation.app.config.id.toString(),
+    const saTokens = await Promise.all(repos.map(async (repo) => {
+      try {
+        const saTokenForRepo = await SecretUtil.createSAToken(
+          k8sClient, namespace, serviceAccount, repo, {
             createdByUser: user.name,
-            createdByUserId: user.uid.toString(),
-          });
+          }
+        );
 
-          return {
-            ...saTokenForRepo,
-            repoId: repo.id,
-          };
-        }
-        catch (err) {
-          Log.error(`Service account token creation failed for ${repo.owner}/${repo.name}: ${err.message}`);
+        return {
+          ...saTokenForRepo,
+          repoId: repo.id,
+        };
+      }
+      catch (err) {
+        Log.error(`Service account token creation failed for ${repo.owner}/${repo.name}: ${err.message}`);
 
-          failures.push({
-            success: false,
-            repo,
-            err: err.message,
-          });
-          return undefined;
-        }
-      }));
-    }
+        failures.push({
+          success: false,
+          repo,
+          err: err.message,
+        });
+        return undefined;
+      }
+    }));
 
     await Promise.all(repos.map(async (repo) => {
 
-      // Determine which service account token to use
-
-      let saToken: ServiceAccountToken;
-
-      if (saTokens) {
-        const saTokenMaybe = saTokens.find((token) => token?.repoId === repo.id);
-        if (!saTokenMaybe) {
-          Log.info(`Not creating secrets for repo ${repo.owner}/${repo.name} since token creation failed.`);
-          return;
-        }
-        saToken = saTokenMaybe;
-      }
-      else {
-        Log.info(`Using pod's service account token`);
-        const saTokenMaybe = KubeWrapper.instance.getPodSAToken();
-        if (!saTokenMaybe) {
-          failures.push({ success: false, repo, err: `Failed to get pod's service account token` });
-          return;
-        }
-        saToken = saTokenMaybe;
+      const saToken = saTokens.find((token) => token?.repoId === repo.id);
+      if (!saToken) {
+        Log.info(`Not creating secrets for repo ${repo.owner}/${repo.name} since token creation failed.`);
+        return;
       }
 
       // Get Public key used to encrypt secrets
@@ -229,6 +229,7 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
     failures = failures.sort((first, second) => first.repo.full_name.localeCompare(second.repo.full_name));
 
     let message;
+
     let severity: Severity;
     if (failures.length === 0) {
       message = `Successfully created Actions secrets in `
@@ -238,7 +239,7 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
       Log.info(message);
     }
     else if (successes.length === 0) {
-      message = `Failed to create all secrets.`;
+      message = "Failed to create all secrets";
       severity = "danger";
       Log.error(message);
     }
@@ -248,7 +249,7 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
       const failureReposWithDupes = failures.map((failure) => `${failure.repo.owner}/${failure.repo.name}`);
       const failureRepos = [ ...new Set(failureReposWithDupes) ];
 
-      message = `Successfully created secrets in ${successRepos.length} `
+      message = `Created Actions secrets in ${successRepos.length} `
         + `repositor${successRepos.length === 1 ? "y" : "ies"}, `
         + `but failed to create secrets in ${failureRepos.length} `
         + `repositor${failureRepos.length === 1 ? "y" : "ies"}.`;
@@ -261,6 +262,11 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
       success: failures.length === 0,
       severity,
       message,
+      serviceAccount: {
+        created: serviceAccountCreated,
+        name: serviceAccount,
+        namespace,
+      },
       successes,
       failures,
     });

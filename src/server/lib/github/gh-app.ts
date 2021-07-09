@@ -10,9 +10,10 @@ import {
 } from "common/types/gh-types";
 import SecretUtil from "server/lib/kube/secret-util";
 import { getAppOctokit, getGitHubHostname } from "./gh-util";
-import { fromb64, getFriendlyHTTPError, toValidK8sName } from "server/util/server-util";
+import { fromb64, getFriendlyHTTPError } from "server/util/server-util";
 import User from "server/lib/user/user";
 import { loadAllActiveUsers } from "../user/user-serializer";
+import { removeUndefined, toValidK8sName } from "common/common-util";
 
 /**
  * The data we must save in order to be able to reconstruct this GitHub app.
@@ -118,7 +119,9 @@ class GitHubApp {
 
     // Log.debug("APP MEMENTO", memento);
 
-    await SecretUtil.createSecret(GitHubApp.getAppSecretName(appId), memento, {
+    await SecretUtil.createSecret(
+      SecretUtil.getSAClient(),
+      GitHubApp.getAppSecretName(appId), memento, {
       "app.github.com/slug": toValidK8sName(this.config.slug),
       subtype: SecretUtil.Subtype.APP,
     });
@@ -137,7 +140,7 @@ class GitHubApp {
       return cachedApp;
     }
 
-    const secret = await SecretUtil.loadFromSecret<AppMemento>(secretName);
+    const secret = await SecretUtil.loadFromSecret<AppMemento>(SecretUtil.getSAClient(), secretName);
     if (!secret) {
       Log.warn(`Tried to load app ${appId} from secret but it was not found`);
       return undefined;
@@ -165,13 +168,16 @@ class GitHubApp {
 
   public static async loadAll(): Promise<GitHubApp[] | undefined> {
     Log.info(`Load all apps`);
-    const matchingSecrets = await SecretUtil.getSecretsMatchingSelector(SecretUtil.getSubtypeSelector(SecretUtil.Subtype.APP));
+    const matchingSecrets = await SecretUtil.getSecretsMatchingSelector(
+      SecretUtil.getSAClient(),
+      SecretUtil.getSubtypeSelector(SecretUtil.Subtype.APP)
+    );
 
     if (matchingSecrets.items.length === 0) {
       return undefined;
     }
 
-    const appIds = matchingSecrets.items.map((appSecret) => {
+    const appIds = removeUndefined(matchingSecrets.items.map((appSecret) => {
       const data = appSecret.data as AppMemento;
       const appId = data.id;
 
@@ -185,24 +191,14 @@ class GitHubApp {
       }
       Log.error(`Secret ${appSecret.metadata?.name} missing app ID`)
       return undefined;
-    }).reduce((result: number[], appId: number | undefined) => {
-        // remove undefined
-        if (appId != null) {
-          result.push(appId);
-        }
-        return result;
-      }, []);
+    }));
+
 
     Log.info(`App IDs to be loaded are ${appIds.join(", ")}`);
 
-    const apps = (await Promise.all(appIds.map((appId) => this.load(appId))))
-      .reduce((result: GitHubApp[], app: GitHubApp | undefined) => {
-        // remove undefined
-        if (app != null) {
-          result.push(app);
-        }
-        return result;
-      }, []);
+    const apps = removeUndefined(
+      await Promise.all(appIds.map((appId) => this.load(appId)))
+    );
 
     return apps;
   }
@@ -213,7 +209,7 @@ class GitHubApp {
     }
 
     GitHubApp.cache.delete(this.id);
-    await SecretUtil.deleteSecret(GitHubApp.getAppSecretName(this.id), true);
+    await SecretUtil.deleteSecret(SecretUtil.getSAClient(), GitHubApp.getAppSecretName(this.id), true);
 
     await requestingUser.onAppDeleted(this.id);
     // delete all installations, somehow

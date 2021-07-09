@@ -1,12 +1,12 @@
 import * as k8s from "@kubernetes/client-node";
 import fs from "fs/promises";
-import jwt from "jsonwebtoken";
 import { URL } from "url";
 
 import ApiResponses from "common/api-responses";
 import Log from "server/logger";
-import { checkKeys, getFriendlyHTTPError } from "server/util/server-util";
+import { getFriendlyHTTPError } from "server/util/server-util";
 
+/*
 type RawServiceAccountToken = {
 	iss: string;
 	"kubernetes.io/serviceaccount/namespace": string;
@@ -15,6 +15,7 @@ type RawServiceAccountToken = {
 	"kubernetes.io/serviceaccount/service-account.uid": string;
 	sub: string;
 }
+*/
 
 export type ServiceAccountToken = {
 	namespace: string;
@@ -31,7 +32,7 @@ export default class KubeWrapper {
 	private static readonly APISERVER_ENVVAR = "CLUSTER_API_SERVER";
 
 	constructor(
-		private readonly config: k8s.KubeConfig,
+		public readonly config: k8s.KubeConfig,
 		public readonly namespace: string,
 		public readonly isInCluster: boolean,
 		public readonly clusterExternalApiServer: string,
@@ -219,6 +220,7 @@ export default class KubeWrapper {
 		};
 	}
 
+	/*
 	private static decodeServiceAccountToken(serviceAccountToken: string): ServiceAccountToken {
 		// what keys are used to sign the SA token?
 		const decodedTokenUntested = jwt.decode(serviceAccountToken);
@@ -278,20 +280,25 @@ export default class KubeWrapper {
 		const decodedToken = KubeWrapper.decodeServiceAccountToken(user.token);
 		return decodedToken;
 	}
+	*/
+
+	public get cluster(): k8s.Cluster {
+		const cluster = this.config.getCluster(this.config.clusters[0].name);
+		if (!cluster) {
+			throw new Error(`KubeWrapper config has no cluster!`);
+		}
+		return cluster;
+	}
 
 	public get ns() {
 		return this.namespace;
 	}
 
-	public get coreClient() {
-		return this.config.makeApiClient(k8s.CoreV1Api);
-	}
-
 	public static async doesServiceAccountExist(client: k8s.CoreV1Api, namespace: string, serviceAccountName: string): Promise<boolean> {
+		Log.info(`Checking if service account ${serviceAccountName} exists in ${namespace}`);
 		const serviceAccountsRes = await client.listNamespacedServiceAccount(namespace);
 		const serviceAccounts = serviceAccountsRes.body.items;
 
-		Log.info(`Checking if service account ${serviceAccountName} exists`);
 		const serviceAccountNames = serviceAccounts.map((sa) => sa.metadata?.name).filter((saName): saName is string => saName != null);
 		Log.debug(`service accounts: ${serviceAccountNames.join(", ")}`);
 

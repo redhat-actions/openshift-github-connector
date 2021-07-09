@@ -25,6 +25,7 @@
 			"typescript",
 			"typescriptreact",
 		],
+		"eslint.packageManager": "yarn",
 		"editor.codeActionsOnSave": {
 			"source.fixAll.eslint": true,
 		},

@@ -29,6 +29,8 @@ const RepoSecretDefaults = new UrlPath(RepoSecrets, "/defaults");
 const Workflows = new UrlPath(App, "/workflows");
 
 const Cluster = new UrlPath(Root, "/cluster");
+const Namespaces = new UrlPath(Cluster, "/namespaces");
+const ServiceAccounts = new UrlPath(Namespaces, "/service-accounts");
 
 const OpenShiftUser = new UrlPath(Root, "/user");
 const UserWithGitHub = new UrlPath(OpenShiftUser, "/github");
@@ -80,6 +82,10 @@ const ApiEndpoints = {
   },
   Cluster: {
     Root: Cluster,
+    Namespaces: {
+      Root: Namespaces,
+      ServiceAccounts,
+    },
   },
   Webhook,
 };

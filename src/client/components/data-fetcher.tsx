@@ -28,7 +28,7 @@ interface ApiDataFetcherProps<Data> extends BaseDataFetcherProps<Data> {
     endpoint: UrlPath,
 }
 
-type DataFetcherProps<Data> = GenericDataFetcherProps<Data> | ApiDataFetcherProps<Data>;
+export type DataFetcherProps<Data> = GenericDataFetcherProps<Data> | ApiDataFetcherProps<Data>;
 
 interface DataFetcherState<Data> {
     data: Data | undefined,

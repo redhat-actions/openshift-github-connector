@@ -7,9 +7,7 @@ import {
 import { Table } from "@patternfly/react-table";
 import { v4 as uuid } from "uuid";
 
-import {
-  ExternalLinkAltIcon, PlusIcon, RedhatIcon, SyncAltIcon, TimesIcon,
-} from "@patternfly/react-icons";
+import { ExternalLinkAltIcon } from "@patternfly/react-icons";
 import ImageRegistry from "../../common/types/image-registries";
 import { ExternalLink } from "../components/external-link";
 import { TooltipIcon } from "../components/tooltip-icon";
@@ -21,6 +19,7 @@ import ApiEndpoints from "../../common/api-endpoints";
 import ApiRequests from "../../common/api-requests";
 import DataFetcher from "../components/data-fetcher";
 import { containsBannedCharacters } from "../../common/common-util";
+import { CommonIcons } from "../util/icons";
 
 export default function ImageRegistriesPage(): JSX.Element {
 
@@ -41,7 +40,7 @@ export default function ImageRegistriesPage(): JSX.Element {
                     <Button variant="primary"
                       onClick={reload}
                     >
-                      <BtnBody icon={SyncAltIcon} text="Reload"/>
+                      <BtnBody icon={CommonIcons.Reload} text="Reload"/>
                     </Button>
                   </div>
                 </CardTitle>
@@ -134,7 +133,7 @@ function ImageRegistryRow({ registry, onChange }: { registry: ImageRegistry.Info
             setIsDeleting(false);
           }
         }}>
-          <BtnBody icon={TimesIcon} title="Remove" isLoading={isDeleting}/>
+          <BtnBody icon={CommonIcons.Delete} title="Remove" isLoading={isDeleting}/>
         </Button>
       </td>
     </tr>
@@ -179,7 +178,7 @@ function CreateImageRegistryCard({ onChange }: { onChange: () => Promise<void> }
           The starter workflow requires a Container Image Registry to push built images to, and pull images from.
         </p>
         <p>
-          You can use the <ExternalLink icon={{ Icon: RedhatIcon, position: "left" }} href="https://docs.github.com/en/packages/guides/about-github-container-registry">
+          You can use the <ExternalLink href="https://docs.github.com/en/packages/guides/about-github-container-registry">
             GitHub container registry
           </ExternalLink>, the <ExternalLink
             href="https://docs.openshift.com/container-platform/4.7/registry/architecture-component-ImageRegistries.html">
@@ -386,8 +385,8 @@ function CreateImageRegistryCard({ onChange }: { onChange: () => Promise<void> }
             </FormGroup>
 
             <div className="mt-3 center-x align-items-center">
-              <Button isLarge type="submit">
-                <BtnBody text="Add Image Registry" icon={PlusIcon} />
+              <Button type="submit">
+                <BtnBody text="Add Image Registry" icon={CommonIcons.Add} />
               </Button>
             </div>
           </Form>
