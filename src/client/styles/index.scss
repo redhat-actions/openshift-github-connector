@@ -12,24 +12,21 @@ html, body, #root, #wrapper, main {
   // line-height: 1.5em;
 }
 
-#page-container {
-  display: grid;
-}
-
-#page-content, #notifications {
-  // overlay the notifications on top of the page-content
-  grid-area: 1 / 1;
-}
-
 #notifications {
   & .pf-c-alert {
     // the wizard has a z-index of 200, this should be high enough ??
     z-index: 999;
     width: 40%;
-    margin-top: 0.5rem;
+    margin-top: c.$pf-global--spacer--sm;
   }
 
-  margin: c.$pf-global--spacer--md;
+  position: absolute;
+  // top: c.$pf-global--spacer--2xl;
+  bottom: 0;
+  right: c.$pf-global--spacer--md;
+  width: 100%;
+
+  margin: c.$pf-global--spacer--lg;
 
   display: flex;
   justify-content: flex-end;
@@ -37,22 +34,20 @@ html, body, #root, #wrapper, main {
   flex-direction: column;
 }
 
+#page-container {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
 
-/*
-main {
-  padding: c.$main-vertical-padding 0;
+  & > #page-content {
+    // padding: c.$main-vertical-padding 0;
 
-  &.is-standalone {
     min-width: c.$breakpoint-sm;
     width: 80%;
     max-width: c.$breakpoint-lg;
   }
-
-  &.is-console {
-    width: 95%;
-  }
 }
-*/
+
 
 /*
 a {

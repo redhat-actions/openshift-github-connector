@@ -15,9 +15,8 @@ namespace ApiRequests {
     state: string,
   }
 
-  export interface SetServiceAccount {
-    // serviceAccountSecret: k8s.V1Secret & { data: ServiceAccountSecretData };
-    serviceAccountToken: string,
+  export interface GetNamespacedResources {
+    namespace: string,
   }
 
   export interface PostInstall {
@@ -44,8 +43,10 @@ namespace ApiRequests {
   }
 
   export interface CreateActionsSecrets {
+    namespace: string,
+    serviceAccount: string,
+    serviceAccountRole: string,
     repos: GitHubRepoId[],
-    createSATokens: boolean,
   }
 
   export interface CreateWorkflow {

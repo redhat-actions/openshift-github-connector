@@ -20,7 +20,7 @@ import ClientPages from "./client-pages";
 import { fetchJSON } from "../util/client-util";
 import { ExternalLink } from "../components/external-link";
 import { CommonIcons } from "../util/icons";
-import { ConnectorAlertContext } from "./global-alert-context";
+import { PushAlertContext } from "../contexts";
 
 type ViewType = "owner" | "user";
 
@@ -51,7 +51,7 @@ function GitHubAppPageBody({
 
   const [ viewType, setViewType ] = useState<ViewType>();
   const [ isDeleting, setIsDeleting ] = useState(false);
-  const pushAlert = useContext(ConnectorAlertContext);
+  const pushAlert = useContext(PushAlertContext);
 
   if (!data.success) {
     return (

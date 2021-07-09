@@ -1,4 +1,4 @@
-import { components } from "@octokit/openapi-types/dist-types/index";
+import { components } from "@octokit/openapi-types/types";
 
 // we "extract" a series of types from the GitHub schemas, so they're easier to find and reduce imports.
 /* eslint-disable camelcase */

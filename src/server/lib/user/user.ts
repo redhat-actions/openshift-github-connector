@@ -1,3 +1,5 @@
+import * as k8s from "@kubernetes/client-node";
+
 import Log from "server/logger";
 import ImageRegistryListWrapper from "server/lib/user/image-registry-list";
 import {
@@ -8,6 +10,7 @@ import UserInstallation from "../github/user-app-installation";
 import GitHubApp from "../github/gh-app";
 import { ConnectorGitHubUserInfo, ConnectorUserInfo, OpenShiftUserInfo } from "common/types/user-types";
 import TokenUtil from "./token-util";
+import KubeWrapper from "../kube/kube-wrapper";
 
 /**
  * This is the User type, but githubUserInfo must be defined.
@@ -265,5 +268,19 @@ export default class User {
 
   public get ownsAppIds(): number[] {
     return this._ownsAppIds;
+  }
+
+  public makeKubeConfig(): k8s.KubeConfig {
+    const config = new k8s.KubeConfig();
+    config.loadFromClusterAndUser(KubeWrapper.instance.cluster, {
+      name: this.name,
+      token: this.token.accessToken,
+    });
+
+    return config;
+  }
+
+  public makeCoreV1Client(): k8s.CoreV1Api {
+    return this.makeKubeConfig().makeApiClient(k8s.CoreV1Api);
   }
 }

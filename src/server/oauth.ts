@@ -131,6 +131,7 @@ export async function setupPassport(app: express.Application): Promise<void> {
         return done(undefined, sessionData);
       }
       catch (err) {
+        Log.warn(`Authentication error: ${JSON.stringify(err)}`);
         return done(err);
       }
     }

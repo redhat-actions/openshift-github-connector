@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 
 import { Spinner } from "@patternfly/react-core";
@@ -8,7 +8,6 @@ import { fetchJSON } from "../../../util/client-util";
 import ApiRequests from "../../../../common/api-requests";
 import ApiResponses from "../../../../common/api-responses";
 import { getSetupPagePath } from "../setup";
-import { ConnectorAlertContext } from "../../global-alert-context";
 
 enum CallbackSearchParams {
   // APP_ID = "app_id",
@@ -22,7 +21,7 @@ export function PostCreateAppCallbackPage() {
 
   const history = useHistory();
 
-  const pushAlert = useContext(ConnectorAlertContext);
+  // const pushAlert = useContext(ConnectorAlertContext);
 
   const search = useLocation().search;
 
@@ -52,7 +51,7 @@ export function PostCreateAppCallbackPage() {
 
           console.log("ABCDEFG!#$&!#$*");
           console.log(res.message);
-          pushAlert({ severity: "success", title: res.message });
+          // pushAlert({ severity: "success", title: res.message });
 
           history.replace({
             pathname: getSetupPagePath("INSTALL_APP"),
@@ -62,11 +61,7 @@ export function PostCreateAppCallbackPage() {
         }
       }>
         {(res: ApiResponses.CreatingAppResponse) => {
-
-          console.log("ABCDEFG");
-          console.log(res.message);
-
-          pushAlert({ severity: "success", title: res.message });
+          // pushAlert({ severity: "success", title: res.message });
 
           return (
             <p>
@@ -102,7 +97,7 @@ function getPostInstallParams(search: string): ApiRequests.PostInstall {
 
 export function InstalledAppPage(): JSX.Element {
 
-  const pushAlert = useContext(ConnectorAlertContext);
+  // const pushAlert = useContext(ConnectorAlertCntext);
 
   const [ error, setError ] = useState<string>();
 
@@ -119,12 +114,12 @@ export function InstalledAppPage(): JSX.Element {
 
       const postInstallReqBody = getPostInstallParams(search);
 
-      const res = await fetchJSON<ApiRequests.PostInstall, ApiResponses.Result>(
+      await fetchJSON<ApiRequests.PostInstall, ApiResponses.Result>(
         "POST", ApiEndpoints.Setup.PostInstallApp.path, postInstallReqBody,
         { signal: aborter.signal }
       );
 
-      pushAlert({ severity: "success", title: res.message });
+      // pushAlert({ severity: "success", title: res.message });
 
     }
 
@@ -141,7 +136,7 @@ export function InstalledAppPage(): JSX.Element {
     return () => {
       aborter.abort();
     };
-  }, [ setError, search, history, pushAlert ]);
+  }, [ setError, search, history ]);
 
   return (
     <>

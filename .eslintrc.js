@@ -2,10 +2,12 @@ module.exports = {
   extends: [
     "@redhat-actions/eslint-config",
     "plugin:react/recommended",
-    "plugin:react-hooks/recommended"
+    "plugin:react-hooks/recommended",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
   ],
   plugins: [
-    "react", "react-hooks"
+    "react", "react-hooks", "import",
   ],
   ignorePatterns: [
     // "webpack.config*.[tj]s",
@@ -51,7 +53,11 @@ module.exports = {
     "@typescript-eslint/member-ordering": [ 2 ],
 
     // this is to work with @typescript-eslint/floating-promises void behaviour
-    "no-void": [ 2, { allowAsStatement: true }]
+    "no-void": [ 2, { allowAsStatement: true }],
+
+    // doesn't understand ts paths
+    "import/no-unresolved": 0,
+    "import/no-cycle": 0,
   },
   overrides: [{
     files: [ "*.tsx" ],
