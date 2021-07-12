@@ -76,9 +76,8 @@ export async function fetchJSON<
   method: HttpConstants.Methods, url: Stringable, body?: Req, options: Omit<RequestInit, "body" | "method"> = {}
 ): Promise<{ status: number } & Res> {
 
-  const hasBody = body != null;
   let stringifiedBody: string | undefined;
-  if (hasBody) {
+  if (body != null) {
     stringifiedBody = JSON.stringify(body);
   }
 

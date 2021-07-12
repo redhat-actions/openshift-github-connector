@@ -87,7 +87,7 @@ async function getOAuthStrategyOptions(): Promise<passportOAuth2.StrategyOptions
 }
 
 export async function setupPassport(app: express.Application): Promise<void> {
-  Log.info(`Attaching passport...`);
+  Log.info(`Attaching passport`);
 
   Log.info(`Using OpenShift OAuth as authentication strategy`);
   const oauthOptions = await getOAuthStrategyOptions();

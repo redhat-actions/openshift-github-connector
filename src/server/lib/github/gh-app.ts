@@ -121,10 +121,15 @@ class GitHubApp {
 
     await SecretUtil.createSecret(
       SecretUtil.getSAClient(),
-      GitHubApp.getAppSecretName(appId), memento, {
-      "app.github.com/slug": toValidK8sName(this.config.slug),
-      subtype: SecretUtil.Subtype.APP,
-    });
+      SecretUtil.getStorageSecretsNamespace(),
+      GitHubApp.getAppSecretName(appId),
+      memento,
+      SecretUtil.getSAName(),
+      SecretUtil.Subtype.APP,
+      {
+        [SecretUtil.CONNECTOR_LABEL_NAMESPACE + "/app"]: toValidK8sName(this.config.slug),
+      }
+    );
 
     Log.info(`Saving app ${this.config.name} into cache`);
     GitHubApp.cache.set(appId, this);
@@ -140,7 +145,7 @@ class GitHubApp {
       return cachedApp;
     }
 
-    const secret = await SecretUtil.loadFromSecret<AppMemento>(SecretUtil.getSAClient(), secretName);
+    const secret = await SecretUtil.loadFromSecret<AppMemento>(SecretUtil.getSAClient(), SecretUtil.getStorageSecretsNamespace(), secretName);
     if (!secret) {
       Log.warn(`Tried to load app ${appId} from secret but it was not found`);
       return undefined;
@@ -170,6 +175,7 @@ class GitHubApp {
     Log.info(`Load all apps`);
     const matchingSecrets = await SecretUtil.getSecretsMatchingSelector(
       SecretUtil.getSAClient(),
+      SecretUtil.getStorageSecretsNamespace(),
       SecretUtil.getSubtypeSelector(SecretUtil.Subtype.APP)
     );
 
@@ -208,8 +214,15 @@ class GitHubApp {
       throw new Error(`User ${requestingUser} does not own app ${this.config.name}, and so cannot delete it.`);
     }
 
+    Log.info(`Delete app ${this.config.name}`);
+
     GitHubApp.cache.delete(this.id);
-    await SecretUtil.deleteSecret(SecretUtil.getSAClient(), GitHubApp.getAppSecretName(this.id), true);
+    await SecretUtil.deleteSecret(
+      SecretUtil.getSAClient(),
+      SecretUtil.getStorageSecretsNamespace(),
+      GitHubApp.getAppSecretName(this.id),
+      true,
+    );
 
     await requestingUser.onAppDeleted(this.id);
     // delete all installations, somehow

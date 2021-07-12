@@ -26,7 +26,12 @@ export const saveUser = async (user: User): Promise<void> => {
 	}
 
 	await SecretUtil.createSecret(
-		SecretUtil.getSAClient(), getUserSecretName(user.uid), memento, { subtype: SecretUtil.Subtype.USER }
+		SecretUtil.getSAClient(),
+		SecretUtil.getStorageSecretsNamespace(),
+		getUserSecretName(user.uid),
+		memento,
+		SecretUtil.getSAName(),
+		SecretUtil.Subtype.USER,
 	);
 
 	Log.info(`Update user ${user.name} data in cache`);
@@ -38,7 +43,12 @@ async function loadMemento(
 	uid: string,
 ): Promise<UserMemento | undefined> {
 
-	const secret = await SecretUtil.loadFromSecret<UserMementoSaveable>(SecretUtil.getSAClient(), getUserSecretName(uid));
+	const secret = await SecretUtil.loadFromSecret<UserMementoSaveable>(
+		SecretUtil.getSAClient(),
+		SecretUtil.getStorageSecretsNamespace(),
+		getUserSecretName(uid)
+	);
+
 	if (!secret) {
 		return undefined;
 	}

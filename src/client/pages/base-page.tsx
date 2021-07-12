@@ -7,13 +7,17 @@ import {
 } from "@patternfly/react-core";
 import { UserAltIcon } from "@patternfly/react-icons";
 
+import classNames from "classnames";
 import { getTitle } from "../components/title";
-import ClientPages from "./client-pages";
+import ClientPages, { ClientPageOptions } from "./client-pages";
 import {
   OpenShiftUserContext, InConsoleContext, AlertInfo, PushAlertContext,
 } from "../contexts";
 
-export function BasePage({ title, content: Content }: { title: string, content: React.ComponentType<any> }): JSX.Element {
+export function BasePage(
+  { title, options, content: Content }:
+  { title: string, options: ClientPageOptions, content: React.ComponentType<any> }
+): JSX.Element {
   const [ isNavOpen, setIsNavOpen ] = useState(false);
 
   const [ alerts, setAlerts ] = useState<AlertInfo[]>([]);
@@ -70,7 +74,7 @@ export function BasePage({ title, content: Content }: { title: string, content: 
           />
         }>
         <PushAlertContext.Provider value={(newAlert: AlertInfo) => setAlerts([ ...alerts, newAlert ])}>
-          <PageSection id="page-content">
+          <PageSection id="page-content" className={classNames({ "full-width": options.fullWidth })}>
             <Content />
           </PageSection>
           <div id="notifications" >

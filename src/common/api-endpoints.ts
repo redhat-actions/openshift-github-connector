@@ -33,13 +33,12 @@ const Namespaces = new UrlPath(Cluster, "/namespaces");
 const ServiceAccounts = new UrlPath(Namespaces, "/service-accounts");
 
 const OpenShiftUser = new UrlPath(Root, "/user");
-const UserWithGitHub = new UrlPath(OpenShiftUser, "/github");
-const UserWithGitHubDetails = new UrlPath(OpenShiftUser, "/github/details");
-// const SetUserOAuthState = new UrlPath(User, "/oauth/state");
-// const PostUserOAuth = new UrlPath(User, "/oauth/post-redirect");
-const Installation = new UrlPath(OpenShiftUser, "/installation");
 const UserImageRegistries = new UrlPath(OpenShiftUser, "/image-registries");
-// const ServiceAccount = new UrlPath(User, "/serviceaccount");
+
+const UserGitHub = new UrlPath(OpenShiftUser, "/github");
+const UserGitHubDetails = new UrlPath(OpenShiftUser, "/github/details");
+const GitHubInstallation = new UrlPath(UserGitHub, "/installation");
+const GitHubInstallationToken = new UrlPath(GitHubInstallation, "/token");
 
 const Webhook = new UrlPath(Root, "/webhook");
 
@@ -62,11 +61,12 @@ const ApiEndpoints = {
   },
   User: {
     Root: OpenShiftUser,
-    UserGitHub: UserWithGitHub,
-    UserGitHubDetails: UserWithGitHubDetails,
+    UserGitHub,
+    UserGitHubDetails,
     // SetUserOAuthState,
     // PostUserOAuth,
-    Installation,
+    GitHubInstallation,
+    GitHubInstallationToken,
     ImageRegistries: UserImageRegistries,
     // ServiceAccount,
   },

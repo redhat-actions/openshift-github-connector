@@ -130,9 +130,7 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
     const saTokens = await Promise.all(repos.map(async (repo) => {
       try {
         const saTokenForRepo = await SecretUtil.createSAToken(
-          k8sClient, namespace, serviceAccount, repo, {
-            createdByUser: user.name,
-          }
+          k8sClient, namespace, serviceAccount, repo, user.name
         );
 
         return {

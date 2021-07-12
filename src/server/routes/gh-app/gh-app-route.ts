@@ -8,7 +8,6 @@ import { send405 } from "server/express-extends";
 
 const router = express.Router();
 
-// cluster app state
 router.route(ApiEndpoints.App.Root.path)
   .get(async (req, res: express.Response<ApiResponses.ClusterAppState>, next) => {
 
@@ -94,6 +93,6 @@ router.route(ApiEndpoints.App.Root.path + "/:" + PARAM_APPID)
       success: true,
     });
   })
-  .all(send405([ "GET", "DELETE" ]));
+  .all(send405([ "DELETE" ]));
 
 export default router;

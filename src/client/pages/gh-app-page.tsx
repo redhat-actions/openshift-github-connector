@@ -30,7 +30,7 @@ export default function GitHubAppPage() {
 
   return (
     <>
-      <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.User.Installation}>
+      <DataFetcher loadingDisplay="spinner" type="api" endpoint={ApiEndpoints.User.GitHubInstallation}>
         {
           (data: ApiResponses.UserAppState, reload) => {
             return (
@@ -91,7 +91,7 @@ function GitHubAppPageBody({
 
                   try {
                     setIsDeleting(true);
-                    await fetchJSON<never, never>("DELETE", ApiEndpoints.User.Installation);
+                    await fetchJSON<never, never>("DELETE", ApiEndpoints.User.GitHubInstallation);
                     await reload();
                   }
                   catch (err) {
