@@ -17,7 +17,7 @@ export type SimpleValue = number | string | boolean | undefined;
 
 namespace SecretUtil {
   export const CONNECTOR_LABEL_NAMESPACE = "github-connector.openshift.io";
-  type ConnectorLabelName = `${typeof CONNECTOR_LABEL_NAMESPACE}/${string}`;
+  // type ConnectorLabelName = `${typeof CONNECTOR_LABEL_NAMESPACE}/${string}`;
 
   const SUBTYPE_LABEL = `${CONNECTOR_LABEL_NAMESPACE}/subtype`;
 
@@ -35,7 +35,7 @@ namespace SecretUtil {
 
   export function getSecretLabels(subtype: Subtype, createdBy: string): Record<string, string> {
     return {
-      "app.kubernetes.io/part-of": APP_NAME,
+      // "app.kubernetes.io/part-of": APP_NAME,
       "app.kubernetes.io/managed-by": APP_NAME,
       [SUBTYPE_LABEL]: subtype,
       [CONNECTOR_LABEL_NAMESPACE + "/created-by"]: toValidK8sName(createdBy),
@@ -69,10 +69,8 @@ namespace SecretUtil {
     secretName: string, data: Record<string, SimpleValue>,
     createdBy: string,
     subtype: Subtype,
-    labels: Record<ConnectorLabelName, string> = {},
+    labels: Record<string, string> = {},
   ): Promise<void> {
-    await SecretUtil.deleteSecret(client, namespace, secretName, false);
-
     Log.info(`Creating secret ${secretName}`);
 
     const now = new Date().toISOString();
@@ -165,7 +163,7 @@ namespace SecretUtil {
     }
   }
 
-  export async function deleteSecret(client: k8s.CoreV1Api, namespace: string, secretName: string, throwOnErr: boolean): Promise<boolean> {
+  export async function deleteSecret(client: k8s.CoreV1Api, namespace: string, secretName: string): Promise<boolean> {
     Log.info(`Trying to delete ${secretName}`);
     try {
       await client.deleteNamespacedSecret(secretName, namespace);
@@ -178,13 +176,7 @@ namespace SecretUtil {
         return false;
       }
 
-      if (throwOnErr) {
-        throw err;
-      }
-      else {
-        Log.warn(`Error deleting ${secretName}`, err);
-        return false;
-      }
+      throw err;
     }
   }
 

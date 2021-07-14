@@ -46,6 +46,7 @@ async function main(): Promise<void> {
   await KubeWrapper.initialize();
 
   const app = express();
+
   //////////////////////// Middleware ////////////////////////
 
   // Remember order is significant

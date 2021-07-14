@@ -1,9 +1,5 @@
 {
-    "ignore": [
-        "dist/plugin",
-        "webpack.config*"
-    ],
-    "events": {
-    },
-    "ext": "*.js"
+    "watch": [
+        "dist/server/server.js"
+    ]
 }

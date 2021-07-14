@@ -188,7 +188,9 @@ export async function getHttpError(res: Response): Promise<string> {
 export async function throwIfError(res: Response): Promise<void> {
   if (res.status > 399) {
     const errMsg = await getHttpError(res);
-    throw new Error(errMsg);
+    const err = new Error(errMsg);
+    (err as any).status = res.status;
+    throw err;
   }
 }
 

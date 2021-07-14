@@ -39,7 +39,7 @@ router.route(ApiEndpoints.App.Workflows.path)
     // workflow permission scope exists in edit app page but not in documentation
     // https://docs.github.com/en/rest/reference/permissions-required-for-github-apps#permission-on-single-file
 
-    const user = await req.getUserOrDie();
+    const user = await req.getUserOr401();
     if (!user) {
       return undefined;
     }

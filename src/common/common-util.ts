@@ -130,9 +130,9 @@ export function toValidK8sName(rawName: string): string {
     cookedName = rawName.substring(0, maxLength - 1);
   }
 
-  cookedName = cookedName.replace(/[\s/.]/g, "-");
   cookedName = cookedName.toLowerCase();
-  cookedName = cookedName.replace(/[^a-z0-9-_]/g, "");
+  cookedName = cookedName.replace(/[\s/.]/g, "-");
+  cookedName = cookedName.replace(/[^a-z0-9-_]/g, "-");
 
   const alphaNumRx = /[a-z0-9]/;
 

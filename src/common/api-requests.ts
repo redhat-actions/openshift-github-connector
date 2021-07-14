@@ -1,4 +1,4 @@
-import { GitHubRepoId } from "./types/gh-types";
+import { GitHubAppPermissions, GitHubRepoId } from "./types/gh-types";
 import ImageRegistry from "./types/image-registries";
 
 namespace ApiRequests {
@@ -59,6 +59,14 @@ namespace ApiRequests {
     },
     imageRegistryId: string,
     port: number,
+  }
+
+  export interface CreateInstallationToken {
+    namespace: string,
+    secretName: string,
+    overwriteExisting?: boolean,
+    repositories?: string[],
+    permissions?: GitHubAppPermissions,
   }
 }
 

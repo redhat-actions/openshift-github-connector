@@ -3,15 +3,15 @@ import express from "express";
 import ApiEndpoints from "common/api-endpoints";
 import ApiResponses from "common/api-responses";
 import Log from "server/logger";
-import GitHubApp from "server/lib/github/gh-app";
 import { send405 } from "server/express-extends";
+import GitHubAppSerializer from "server/lib/github/gh-app-serializer";
 
 const router = express.Router();
 
 router.route(ApiEndpoints.App.Root.path)
   .get(async (req, res: express.Response<ApiResponses.ClusterAppState>, next) => {
 
-    const apps = await GitHubApp.loadAll();
+    const apps = await GitHubAppSerializer.loadAll();
 
     // no way to detect app public/private ?
     // const publicApps = apps?.filter((app) => {
@@ -58,7 +58,7 @@ const PARAM_APPID = "appId";
 
 router.route(ApiEndpoints.App.Root.path + "/:" + PARAM_APPID)
   .delete(async (req, res: express.Response<ApiResponses.RemovalResult>, next) => {
-    const user = await req.getUserOrDie();
+    const user = await req.getUserOr401();
     if (!user) {
       return undefined;
     }
@@ -73,7 +73,7 @@ router.route(ApiEndpoints.App.Root.path + "/:" + PARAM_APPID)
       return res.sendError(400, `Invalid app ID "${appId}" provided in request path`);
     }
 
-    const app = await GitHubApp.load(appId);
+    const app = await GitHubAppSerializer.load(appId);
     if (!app) {
       return res.sendError(404, `App ${appId} not found`);
     }
@@ -85,7 +85,7 @@ router.route(ApiEndpoints.App.Root.path + "/:" + PARAM_APPID)
       );
     }
 
-    await app.delete(user);
+    await GitHubAppSerializer.remove(app, user);
 
     return res.json({
       removed: true,

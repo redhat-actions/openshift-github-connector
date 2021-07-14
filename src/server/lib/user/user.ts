@@ -5,12 +5,13 @@ import ImageRegistryListWrapper from "server/lib/user/image-registry-list";
 import {
   AddGitHubAppInstallationInfo, UserSessionData,
 } from "./server-user-types";
-import { loadUser, saveUser } from "./user-serializer";
 import UserInstallation from "../github/user-app-installation";
 import GitHubApp from "../github/gh-app";
 import { ConnectorGitHubUserInfo, ConnectorUserInfo, OpenShiftUserInfo } from "common/types/user-types";
 import TokenUtil from "./token-util";
 import KubeWrapper from "../kube/kube-wrapper";
+import UserSerializer from "./user-serializer";
+import GitHubAppSerializer from "../github/gh-app-serializer";
 
 /**
  * This is the User type, but githubUserInfo must be defined.
@@ -53,7 +54,7 @@ export default class User {
     Log.info(`Creating user ${this.name}. isAdmin=${this.isAdmin}`);
 
     this.imageRegistries = new ImageRegistryListWrapper(async () => {
-      await saveUser(this).catch((err) => Log.error(`Error saving user ${this.name} on image registry change:`, err));
+      await UserSerializer.save(this).catch((err) => Log.error(`Error saving user ${this.name} on image registry change:`, err));
     }, imageRegistryListStr);
   }
 
@@ -83,7 +84,7 @@ export default class User {
   public static async loadOrCreate(
     userSessionData: UserSessionData,
   ): Promise<User> {
-		const loaded = await loadUser(userSessionData);
+		const loaded = await UserSerializer.load(userSessionData);
 		if (loaded) {
 			return loaded;
 		}
@@ -118,7 +119,7 @@ export default class User {
       }
     }
 
-		await saveUser(user);
+		await UserSerializer.save(user);
 
 		return user;
 	}
@@ -154,13 +155,13 @@ export default class User {
     await this.refreshOwnedApps();
 
     if (save) {
-      await saveUser(this);
+      await UserSerializer.save(this);
     }
   }
 
   private async refreshOwnedApps(): Promise<void> {
     Log.info(`Checking if ${this.name} owns any GitHub apps`);
-    const apps = await GitHubApp.loadAll();
+    const apps = await GitHubAppSerializer.loadAll();
 
     // see if user owns any apps
     apps?.forEach((app) => {
@@ -188,7 +189,7 @@ export default class User {
 
   public async addInstallation(installationInfo: AddGitHubAppInstallationInfo, save: boolean): Promise<void> {
     Log.info(`Add installation ${installationInfo.installationId} of app ID ${installationInfo.appId} to user ${this.name}`);
-    const app = await GitHubApp.load(installationInfo.appId);
+    const app = await GitHubAppSerializer.load(installationInfo.appId);
     if (!app) {
       // this can happen if the app secret is deleted.
       const errMsg = `User "${this.name}" has app ${installationInfo.appId} installed, `
@@ -217,7 +218,7 @@ export default class User {
     this._installation = await UserInstallation.create(thisWithGitHubInfo, app, installationInfo.installationId);
 
     if (save) {
-      await saveUser(this);
+      await UserSerializer.save(this);
     }
   }
 
@@ -225,7 +226,7 @@ export default class User {
     if (this.installation) {
       Log.info(`Remove installation of ${this.installation.app.config.name} from ${this.name}`);
       this._installation = undefined;
-      await saveUser(this);
+      await UserSerializer.save(this);
       return true;
     }
     return false;

@@ -7,8 +7,8 @@ import ApiEndpoints from "common/api-endpoints";
 import Log from "./logger";
 import { fetchFromOpenShiftApiServer } from "./util/server-util";
 import TokenUtil from "./lib/user/token-util";
-import { loadUser } from "./lib/user/user-serializer";
 import { UserSessionData } from "./lib/user/server-user-types";
+import UserSerializer from "./lib/user/user-serializer";
 
 export const OAUTH2_STRATEGY_NAME = "oauth2";
 // export const MOCK_STRATEGY_NAME = "mock";
@@ -102,11 +102,8 @@ export async function setupPassport(app: express.Application): Promise<void> {
       done: VerifyCallback
     ) => {
 
-      const now = Date.now();
-
       Log.info(`OAuth callback received`);
-
-      Log.info(`Access token`, accessToken);
+      // Log.info(`Access token`, accessToken);
 
       // empty
       // Log.info(`Req body`, req.body);
@@ -116,14 +113,7 @@ export async function setupPassport(app: express.Application): Promise<void> {
       // Log.info(`PROFILE`, profile);
 
       try {
-        const tokenInfo = await TokenUtil.introspectToken({ accessToken, createdAtEstimate: now });
-        const userInfo = await TokenUtil.introspectUser(accessToken);
-
-        const sessionData: UserSessionData = {
-          token: tokenInfo,
-          info: userInfo,
-        };
-
+        const sessionData = await buildUserSessionFromToken(accessToken);
         req.session.user = sessionData;
 
         await User.loadOrCreate(sessionData);
@@ -153,8 +143,8 @@ export async function setupPassport(app: express.Application): Promise<void> {
   // app.use(passport.session());
 
   // redirect unauthenticated requests to the login page
-  app.use((req, res, next) => {
-    const shouldRedirect = shouldAuthRedirect(req);
+  app.use(async (req, res, next) => {
+    const shouldRedirect = await shouldAuthRedirect(req);
 
     if (shouldRedirect.reason) {
       Log.debug(
@@ -170,30 +160,44 @@ export async function setupPassport(app: express.Application): Promise<void> {
     return next();
   });
 
-  app.use(getUserOrDie);
+  app.use(getUserOr401);
 
   Log.info(`Finished attaching passport`);
 }
 
-const getUserOrDie = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
+async function buildUserSessionFromToken(accessToken: string): Promise<UserSessionData> {
+  const now = Date.now();
 
-  req.getUserOrDie = async (die: boolean = true): Promise<User | undefined> => {
+  const userInfo = await TokenUtil.introspectUser(accessToken);
+  const tokenInfo = await TokenUtil.introspectToken({ accessToken, createdAtEstimate: now });
+
+  const sessionData: UserSessionData = {
+    token: tokenInfo,
+    info: userInfo,
+  };
+
+  return sessionData;
+}
+
+const getUserOr401 = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
+
+  req.getUserOr401 = async (send401: boolean = true): Promise<User | undefined> => {
 
     if (!req.session.user) {
-      if (die) {
+      if (send401) {
         res.send401();
       }
       return undefined;
     }
 
-    // Log.debug(`Lookup user ${req.session.user.info.uid}`);
+    Log.debug(`Lookup user ${req.session.user.info.uid}`);
 
-    const user = await loadUser(req.session.user);
+    const user = await UserSerializer.load(req.session.user);
     if (!user) {
       Log.warn(`Failed to look up user from data ${JSON.stringify(req.session)}; clearing session`);
       req.session.user = undefined;
 
-      if (die) {
+      if (send401) {
         res.send401();
       }
       return undefined;
@@ -220,7 +224,7 @@ const ENDPOINTS_NO_AUTH: string[] = [
 }, []);
 */
 
-function shouldAuthRedirect(req: express.Request): { redirect: boolean, reason?: string } {
+async function shouldAuthRedirect(req: express.Request): Promise<{ redirect: boolean, reason?: string }> {
   if (req.path.startsWith(ApiEndpoints.Root.path)) {
     if (ENDPOINTS_NO_AUTH.includes(req.path)
       || (req.path.endsWith("/") && ENDPOINTS_NO_AUTH.includes(req.path.substring(0, req.path.length - 1)))
@@ -232,6 +236,25 @@ function shouldAuthRedirect(req: express.Request): { redirect: boolean, reason?:
     }
 
     if (req.session.user == null) {
+      const bearer = "Bearer";
+      const authHeader = req.headers.authorization;
+      if (authHeader) {
+        if (authHeader.startsWith(bearer)) {
+          const token = authHeader.substring(bearer.length + 1);
+
+          Log.info(`Authorization header is present; exchanging token for session data`);
+
+          req.session.user = await buildUserSessionFromToken(token);
+
+          Log.info(`Successfully built user session from token, user is ${req.session.user.info.name}`);
+
+          // recursively call with the now-present session data.
+          return shouldAuthRedirect(req);
+        }
+
+        Log.warn(`Authorization header is set but not recognized`);
+      }
+
       return {
         redirect: true,
         reason: `there is no user session`,

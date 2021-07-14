@@ -2,10 +2,12 @@ import express from "express";
 
 import ApiEndpoints from "common/api-endpoints";
 import ApiResponses from "common/api-responses";
-import GitHubApp from "server/lib/github/gh-app";
 import { send405 } from "server/express-extends";
 import SecretUtil from "server/lib/kube/secret-util";
-import { GitHubAppPermissions } from "common/types/gh-types";
+import GitHubAppSerializer from "server/lib/github/gh-app-serializer";
+import ApiRequests from "common/api-requests";
+import Log from "server/logger";
+import { toValidK8sName } from "common/common-util";
 
 const router = express.Router();
 
@@ -13,7 +15,7 @@ const router = express.Router();
 
 router.route(ApiEndpoints.User.GitHubInstallation.path)
   .get(async (req, res: express.Response<ApiResponses.UserAppState>, next) => {
-    const user = await req.getUserOrDie();
+    const user = await req.getUserOr401();
     if (!user) {
       return undefined;
     }
@@ -61,7 +63,9 @@ router.route(ApiEndpoints.User.GitHubInstallation.path)
     /*
     if (user.ownsAppIds.length > 0) {
       // owned
-      const ownedApps = await Promise.all(user.ownsAppIds.map((appId) => GitHubApp.load(appId))) as Array<GitHubApp>;
+      const ownedApps = await Promise.all(
+        user.ownsAppIds.map((appId) => GitHubAppSerializer.load(appId))
+      ) as Array<GitHubApp>;
       if (ownedApps.length < user.ownsAppIds.length) {
         throw new Error(`User "${user.name} owns apps ${user.ownsAppIds.join(", ")} `
           + `but at least one app was not found. Apps found were ${ownedApps.join(", ")}`);
@@ -76,7 +80,7 @@ router.route(ApiEndpoints.User.GitHubInstallation.path)
 
     if (user.installation && user.ownsAppIds.includes(user.installation.app.id)) {
       // owned
-      const ownedApp = await GitHubApp.load(user.installation.app.id);
+      const ownedApp = await GitHubAppSerializer.load(user.installation.app.id);
       if (!ownedApp) {
         throw new Error(`User ${user.name} owns app ${user.installation.app.id} but that app was not found`);
       }
@@ -143,7 +147,7 @@ router.route(ApiEndpoints.User.GitHubInstallation.path)
   .delete(async (
     req, res: express.Response<ApiResponses.RemovalResult>, next
   ) => {
-    const user = await req.getUserOrDie();
+    const user = await req.getUserOr401();
     if (!user) {
       return undefined;
     }
@@ -163,64 +167,78 @@ router.route(ApiEndpoints.User.GitHubInstallation.path)
 
 router.route(ApiEndpoints.User.GitHubInstallationToken.path)
   .post(
-    async (req, res, next) => {
+    async (req: express.Request<any, any, ApiRequests.CreateInstallationToken>, res, next) => {
 
-      const user = await req.getUserOrDie();
+      const user = await req.getUserOr401();
       if (!user) {
         return undefined;
       }
 
-      const { namespace, secretName } = req.body;
+      const installation = user.installation;
+      if (!installation) {
+        return res.sendError(400, `No app installation for user ${user.name}`);
+      }
+
+      const {
+        namespace,
+        overwriteExisting,
+        repositories,
+      } = req.body;
+
+      let { secretName, permissions } = req.body;
+
       if (!namespace) {
         return res.sendError(400, `Missing req body parameter "namespace"`);
       }
+
       if (!secretName) {
-        return res.sendError(400, `Missing req body parameter "secretName"`);
+        secretName = `${installation.app.config.name}-token`;
       }
+      secretName = toValidK8sName(secretName);
+
+      if (permissions == null || Object.keys(permissions).length === 0) {
+        permissions = {
+          contents: "read",
+          pull_requests: "write",
+        };
+      }
+      Log.info(`Giving installation token permissions ${JSON.stringify(permissions)}`);
 
       const k8sClient = user.makeCoreV1Client();
 
       const secretExists = (await SecretUtil.loadFromSecret(k8sClient, namespace, secretName)) != null;
 
       if (secretExists) {
-        return res.sendError(409, `Secret ${namespace}/${secretName} already exists`);
-      }
-
-      const installation = user.installation;
-      if (!installation) {
-        return res.sendError(400, `No installation for user ${user.name}`);
+        if (overwriteExisting) {
+          await SecretUtil.deleteSecret(k8sClient, namespace, secretName);
+        }
+        else {
+          return res.sendError(409, `Secret ${namespace}/${secretName} already exists`);
+        }
       }
 
       // https://docs.github.com/en/rest/reference/apps#create-an-installation-access-token-for-an-app
 
-      const tokenPermissions: GitHubAppPermissions = {
-        // as per the feature request https://github.com/redhat-actions/openshift-github-connector/issues/17
-        contents: "read",
-        pull_requests: "write",
-      };
-
       const tokenRes = await installation.octokit.request("POST /app/installations/{installation_id}/access_tokens", {
         installation_id: installation.installationId,
-        tokenPermissions,
+        repositories,
+        permissions,
       });
 
       const installationToken = tokenRes.data;
 
-      // if there is no 'repositories' field, it defaults to all repos
-      // https://docs.github.com/en/rest/reference/apps#create-an-installation-access-token-for-an-app
-      const repositories = installationToken.repositories ?? await installation.getRepos();
-      const repoNames = repositories.map((repo) => repo.full_name);
-
       const tokenSecretBody = {
         token: installationToken.token,
         expires_at: installationToken.expires_at,
-        repositories: JSON.stringify(repoNames),
+        repositories: JSON.stringify(installationToken.repositories),
         permissions: JSON.stringify(installationToken.permissions),
       };
 
       await SecretUtil.createSecret(
         k8sClient, namespace, secretName,
-        tokenSecretBody, user.name, SecretUtil.Subtype.INSTALL_TOKEN
+        tokenSecretBody, user.name, SecretUtil.Subtype.INSTALL_TOKEN, {
+          [SecretUtil.CONNECTOR_LABEL_NAMESPACE + `/expires_at`]: toValidK8sName(installationToken.expires_at),
+        },
       );
 
       return res.status(201).json({
@@ -228,6 +246,8 @@ router.route(ApiEndpoints.User.GitHubInstallationToken.path)
         message: `Created installation token into ${namespace}/${secretName}`,
         namespace,
         secretName,
+        repositories: installationToken.repositories,
+        permissions: installationToken.permissions,
       });
     }
   ).all(send405([ "POST" ]));
