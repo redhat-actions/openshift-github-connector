@@ -5,7 +5,7 @@ import { BasePage } from "../base-page";
 export default function notFound(props: { path: string }): JSX.Element {
   return (
     <>
-      <BasePage title="Not Found" content={
+      <BasePage title="Not Found" options={{ fullWidth: false }} content={
         () => (
           <>
             <Title headingLevel="h2">404 Not Found</Title>

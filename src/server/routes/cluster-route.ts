@@ -62,7 +62,7 @@ async function getReadableNamespaces(user: User): Promise<string[]> {
 
 router.route(ApiEndpoints.Cluster.Namespaces.Root.path)
   .get(async (req, res: express.Response<ApiResponses.UserNamespaces>, next) => {
-    const user = await req.getUserOrDie();
+    const user = await req.getUserOr401();
     if (!user) {
       return undefined;
     }
@@ -81,7 +81,7 @@ router.route(ApiEndpoints.Cluster.Namespaces.ServiceAccounts.path + "/:namespace
     res: express.Response<ApiResponses.UserNamespacedServiceAccounts>,
     next
   ) => {
-    const user = await req.getUserOrDie();
+    const user = await req.getUserOr401();
     if (!user) {
       return undefined;
     }

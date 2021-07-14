@@ -5,11 +5,11 @@ import { exchangeCodeForAppConfig } from "server/lib/github/gh-app-config";
 import Log from "server/logger";
 import ApiRequests from "common/api-requests";
 import ApiResponses from "common/api-responses";
-import GitHubApp from "server/lib/github/gh-app";
 import { exchangeCodeForUserData } from "server/lib/github/gh-util";
 import StateCache from "server/lib/state-cache";
 import { send405 } from "server/express-extends";
 import { GitHubUserType } from "common/types/gh-types";
+import GitHubAppSerializer from "server/lib/github/gh-app-serializer";
 
 const router = express.Router();
 
@@ -17,7 +17,7 @@ const stateCache = new StateCache();
 
 router.route(ApiEndpoints.Setup.SetCreateAppState.path)
   .post(async (req, res, next) => {
-    const user = await req.getUserOrDie();
+    const user = await req.getUserOr401();
     if (!user) {
       return undefined;
     }
@@ -38,7 +38,7 @@ router.route(ApiEndpoints.Setup.CreatingApp.path)
     res: express.Response<ApiResponses.CreatingAppResponse>,
     next
   ) => {
-    const user = await req.getUserOrDie();
+    const user = await req.getUserOr401();
     if (!user) {
       return undefined;
     }
@@ -61,7 +61,7 @@ router.route(ApiEndpoints.Setup.CreatingApp.path)
 
     user.startInstallingApp(appConfig.id);
 
-    await GitHubApp.create(appConfig);
+    await GitHubAppSerializer.create(appConfig);
 
     Log.info(`Saved app ${appConfig.name} into secret`);
 
@@ -79,7 +79,7 @@ router.route(ApiEndpoints.Setup.CreatingApp.path)
 
 router.route(ApiEndpoints.Setup.PreInstallApp.path)
   .post(async (req: express.Request<any, any, ApiRequests.PreInstallApp>, res, next) => {
-    const user = await req.getUserOrDie();
+    const user = await req.getUserOr401();
     if (!user) {
       return undefined;
     }
@@ -103,7 +103,7 @@ router.route(ApiEndpoints.Setup.PostInstallApp.path)
       return res.sendError(400, `Installation ID "${installationId}" is not a number`);
     }
 
-    const user = await req.getUserOrDie();
+    const user = await req.getUserOr401();
     if (!user) {
       return undefined;
     }
@@ -115,7 +115,7 @@ router.route(ApiEndpoints.Setup.PostInstallApp.path)
 
     Log.info(`Post install is for app ${appId}`);
 
-    const appInstalled = await GitHubApp.load(appId);
+    const appInstalled = await GitHubAppSerializer.load(appId);
 
     if (appInstalled == null) {
       return res.sendError(500, `Failed to look up GitHub app "${appId}". Please restart the app setup process.`);

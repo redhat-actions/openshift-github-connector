@@ -17,6 +17,10 @@ import AddWorkflowsPage from "./add-workflows-page";
 import SetupFinishedPage from "./setup/setup-completion-page";
 import { PostCreateAppCallbackPage, InstalledAppPage } from "./setup/gh-app/app-callbacks";
 
+export type ClientPageOptions = Partial<{
+  fullWidth: boolean,
+}>;
+
 export class ClientPage extends UrlPath {
   constructor(
     parentPath: UrlPath | undefined,
@@ -24,6 +28,7 @@ export class ClientPage extends UrlPath {
     public readonly title: string,
     public readonly component: React.ComponentType<any>,
     private readonly exact: boolean = true,
+    private readonly options: ClientPageOptions = {},
   ) {
     super(parentPath, endpoint);
   }
@@ -31,14 +36,9 @@ export class ClientPage extends UrlPath {
   public get route(): JSX.Element {
     return (
       <Route key={this.path} exact={this.exact} path={this.path} render={(props) => (
-        <BasePage content={this.component} title={this.title} {...props} />
+        <BasePage options={this.options} content={this.component} title={this.title} {...props} />
       )}/>
     );
-  }
-
-  public withQuery(query: Record<string, string>): string {
-    const qp = new URLSearchParams(query);
-    return this.path + `?${qp.toString()}`;
   }
 }
 
@@ -47,7 +47,7 @@ const appRootPath = isInOpenShiftConsole() ? "/github-connector" : "/";
 const Home = new ClientPage(undefined, appRootPath, "", HomePage);
 const User = new ClientPage(Home, "/user", "User", UserPage);
 
-const Setup = new ClientPage(Home, "/setup/:page", "Set up", SetupWizard, false);
+const Setup = new ClientPage(Home, "/setup/:page", "Set up", SetupWizard, false, { fullWidth: true });
 const SetupIndex = new ClientPage(Home, "/setup", "Set up", () => (<Redirect to={getSetupPagePath("WELCOME")} />));
 const CreatingAppCallback = new ClientPage(Home, "/app-callback", "Created App", PostCreateAppCallbackPage);
 const InstalledAppCallback = new ClientPage(Home, "/installation-callback", "Installed App", InstalledAppPage);

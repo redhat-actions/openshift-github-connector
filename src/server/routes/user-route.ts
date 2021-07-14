@@ -41,7 +41,7 @@ router.route(ApiEndpoints.User.PostUserOAuth.path)
       return res.sendError(400, `App ID not provided in session cookie. Please try to log in again.`);
     }
 
-    const appData = await GitHubApp.load(appId);
+    const appData = await GitHubAppSerializer.load(appId);
     if (!appData) {
       return res.sendError(500, `App with ID "${appId}" is not set up.`);
     }
@@ -67,7 +67,7 @@ router.route(ApiEndpoints.User.Root.path)
     res: express.Response<ApiResponses.OpenShiftUserResponse>,
     next
   ) => {
-    const user = await req.getUserOrDie();
+    const user = await req.getUserOr401();
     if (!user) {
       /*
       return res.json({
@@ -91,7 +91,7 @@ router.route(ApiEndpoints.User.UserGitHub.path)
     res: express.Response<ApiResponses.UserResponse>,
     next
   ) => {
-    const user = await req.getUserOrDie();
+    const user = await req.getUserOr401();
     if (!user) {
       /*
       return res.json({
@@ -123,7 +123,7 @@ router.route(ApiEndpoints.User.UserGitHubDetails.path)
     res: express.Response<ApiResponses.GitHubUserDetailsResponse>,
     next,
   ) => {
-    const user = await req.getUserOrDie();
+    const user = await req.getUserOr401();
     if (!user) {
       return undefined;
     }

@@ -21,7 +21,7 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
     next
   ) => {
 
-    const user = await req.getUserOrDie();
+    const user = await req.getUserOr401();
     if (!user) {
       return res.send401();
     }
@@ -85,7 +85,7 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
     res: express.Response<ApiResponses.RepoSecretsCreationSummary>,
     next
   ) => {
-    const user = await req.getUserOrDie();
+    const user = await req.getUserOr401();
     if (!user) {
       return res.sendError(401, "No user session is saved. Please start the setup again.");
     }
@@ -130,9 +130,7 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
     const saTokens = await Promise.all(repos.map(async (repo) => {
       try {
         const saTokenForRepo = await SecretUtil.createSAToken(
-          k8sClient, namespace, serviceAccount, repo, {
-            createdByUser: user.name,
-          }
+          k8sClient, namespace, serviceAccount, repo, user.name
         );
 
         return {

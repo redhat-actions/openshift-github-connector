@@ -43,8 +43,16 @@ html, body, #root, #wrapper, main {
     // padding: c.$main-vertical-padding 0;
 
     min-width: c.$breakpoint-sm;
-    width: 80%;
-    max-width: c.$breakpoint-lg;
+
+    &.full-width {
+      width: 100%;
+      // flex-basis: 100%;
+    }
+
+    &:not(.full-width) {
+      width: 80%;
+      max-width: c.$breakpoint-xl;
+    }
   }
 }
 

@@ -11,7 +11,7 @@ const router = express.Router();
 router.route(ApiEndpoints.User.ImageRegistries.path)
   .get(async (req, res: express.Response<ApiResponses.ImageRegistryListResult>, next) => {
 
-    const user = await req.getUserOrDie();
+    const user = await req.getUserOr401();
     if (!user) {
       return undefined;
     }
@@ -31,7 +31,7 @@ router.route(ApiEndpoints.User.ImageRegistries.path)
     res: express.Response<ApiResponses.ImageRegistryCreationResult>,
     next,
   ) => {
-    const user = await req.getUserOrDie();
+    const user = await req.getUserOr401();
     if (!user) {
       return undefined;
     }
@@ -50,7 +50,7 @@ router.route(ApiEndpoints.User.ImageRegistries.path)
     res: express.Response<ApiResponses.Result>,
     next,
   ) => {
-    const user = await req.getUserOrDie();
+    const user = await req.getUserOr401();
     if (!user) {
       return undefined;
     }

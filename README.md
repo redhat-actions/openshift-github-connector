@@ -39,7 +39,7 @@ then
 
 ```sh
 oc create sa github-connector-dev-sa
-oc policy add-role-to-user edit -z github-connector-dev-sa -z
+oc policy add-role-to-user edit -z github-connector-dev-sa
 ```
 
 This service account name is then passed through the environment, in the `deployment.yaml` or `.env`.
@@ -48,6 +48,8 @@ This service account name is then passed through the environment, in the `deploy
 1. Use [Telepresence](https://www.telepresence.io/docs/latest/howtos/intercepts/) to proxy the OpenShift API server out of the cluster to your local development environment. Otherwise, it will not know how to resolve the `openshift.default` host.
 2. Create an OAuthClient:
 ```sh
+# One-liner to generate a UUID
+export OAUTH_CLIENT_SECRET=$(node -e 'console.log(require("uuid").v4())') && echo "$OAUTH_CLIENT_SECRET"
 cat <<EOF | oc create -f-
 apiVersion: oauth.openshift.io/v1
 kind: OAuthClient
@@ -55,14 +57,14 @@ metadata:
   # must match .env OAUTH_CLIENT_ID
   name: github-connector-oauth-client-dev
 # substitute your own uuid
-secret: <a uuid>
+secret: ${OAUTH_CLIENT_SECRET}
 redirectURIs:
   # must match .env callback
   - https://localhost:3000/api/v1/auth/callback
 grantMethod: auto
 EOF
 ```
-3. Add the client secret UUID to `.env.local` as `OAUTH_CLIENT_SECRET=<uuid from OAuthClient>`
+3. Add the client secret UUID to `.env.local` as `OAUTH_CLIENT_SECRET=<the OAUTH_CLIENT_SECRET UUID>`
 
 ### Fix TLS self-signed cert rejection
 If the cluster uses self-signed certs, the OAuth client will not trust the certs.
@@ -78,13 +80,15 @@ For in-cluster deployment (using the Helm chart), copy the serving cert from the
 ```sh
 oc get secret v4-0-config-system-router-certs -n openshift-authentication -o yaml | sed 's/namespace: openshift-authentication/namespace: github-connector/g' | oc apply -f-
 ```
-If the secrets exists in the same namespace as the deployment, it will be mounted into the pod and trusted at runtime. Refer to the `deployment.yaml`.
+If the secrets exists in the same namespace as the deployment, it will be mounted into the pod and trusted when the server starts. Refer to the `deployment.yaml`.
 
 For local development, copy out the secret to a file eg:
 ```
 oc get secret v4-0-config-system-router-certs -o jsonpath='{.data.apps-crc\.testing}' | base64 -d
 ```
 Paste the cert into `/var/certs/crc/crc.pem`, matching `.env.local` `ROUTER_CA_DIRECTORY=/var/certs/crc/`.
+
+Refer to `certs.ts` for the logic that loads this file.
 
 A different CA will be used by the API server, eg `kubernetes.default` or `openshift.default`. Certificate validation for that server can be disabled by setting `INSECURE_TRUST_APISERVER_CERT=true` in the environment.
 

@@ -12,6 +12,8 @@ export type GitHubAppInstallationData = components["schemas"]["installation"];
 export type GitHubActionsSecret = components["schemas"]["actions-secret"];
 export type GitHubActionsOrgSecret = components["schemas"]["organization-actions-secret"];
 export type RepoSecretsPublicKey = components["schemas"]["actions-public-key"];
+export type InstallationToken = components["schemas"]["installation-token"];
+export type GitHubAppPermissions = components["schemas"]["app-permissions"];
 
 export type WebhookReqBody = components["schemas"]["hook"];
 
