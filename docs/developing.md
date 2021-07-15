@@ -1,5 +1,7 @@
 # Developing locally
 
+The steps below are to prepare your cluster to serve as a development environment. Most of these steps will have to be performed once per cluster you develop against.
+
 ## Log in and set namespace
 
 You have to be logged into a cluster and have your current context's namespace set:
@@ -10,8 +12,6 @@ oc config set-context $(kubectl config current-context) --namespace="$namespace"
 
 ## Yarn install
 `yarn install`
-
-The steps below are to prepare your cluster to serve as a development environment. Most of these steps will have to be performed once per cluster you develop against.
 
 ## Set up a service account
 
