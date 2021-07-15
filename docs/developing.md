@@ -76,10 +76,10 @@ OAUTH_CLIENT_SECRET=<uuid from OAuthClient above>
 CONNECTOR_SERVICEACCOUNT_NAME=<service account from above>
 
 # Steps below are necessary only if your cluster uses untrusted TLS certs
-# See 'Router CA' above
+# See [certs.md](./certs.md)
 ROUTER_CA_DIRECTORY=/var/certs/crc/
 INSECURE_TRUST_APISERVER_CERT: true
-# See 'Serving CA' above
+# See [certs.md](./certs.md)
 SERVING_CA_DIRECTORY=/var/certs/localhost
 ```
 
