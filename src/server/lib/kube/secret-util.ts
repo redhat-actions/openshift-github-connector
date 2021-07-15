@@ -66,10 +66,14 @@ namespace SecretUtil {
   export async function createSecret(
     client: k8s.CoreV1Api,
     namespace: string,
-    secretName: string, data: Record<string, SimpleValue>,
+    secretName: string,
+    data: Record<string, SimpleValue>,
     createdBy: string,
     subtype: Subtype,
-    labels: Record<string, string> = {},
+    options: {
+      labels?: Record<string, string>,
+      annotations?: Record<string, string>,
+    } = {}
   ): Promise<void> {
     Log.info(`Creating secret ${secretName}`);
 
@@ -83,10 +87,10 @@ namespace SecretUtil {
         annotations: {
           [ANNOTATION_CREATED_AT]: now,
           [ANNOTATION_UPDATED_AT]: now,
-          // ...annotations,
+          ...options.annotations,
         },
         labels: {
-          ...labels,
+          ...options.labels,
           ...getSecretLabels(subtype, createdBy),
         }
       },

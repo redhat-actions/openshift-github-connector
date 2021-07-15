@@ -237,15 +237,18 @@ router.route(ApiEndpoints.User.GitHubInstallationToken.path)
       await SecretUtil.createSecret(
         k8sClient, namespace, secretName,
         tokenSecretBody, user.name, SecretUtil.Subtype.INSTALL_TOKEN, {
-          [SecretUtil.CONNECTOR_LABEL_NAMESPACE + `/expires_at`]: toValidK8sName(installationToken.expires_at),
+          annotations: {
+            [SecretUtil.CONNECTOR_LABEL_NAMESPACE + `/expires-at`]: toValidK8sName(installationToken.expires_at),
+          },
         },
       );
 
       return res.status(201).json({
         success: true,
-        message: `Created installation token into ${namespace}/${secretName}`,
+        message: `Created installation token into ${namespace}/secret/${secretName}`,
         namespace,
         secretName,
+        expiresAt: installationToken.expires_at,
         repositories: installationToken.repositories,
         permissions: installationToken.permissions,
       });
