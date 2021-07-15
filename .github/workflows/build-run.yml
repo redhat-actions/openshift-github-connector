@@ -64,7 +64,9 @@ jobs:
         run: |
           set -eEx
           curl -sSfk https://localhost:${{ env.PORT }}
-          curl -sSfk https://localhost:${{ env.PORT }}/api/v1/
+
+          # Broken because the server crashes due to no OpenShift cluster.
+          # curl -sSfk https://localhost:${{ env.PORT }}/api/v1/
 
       - name: Stop
         if: always()

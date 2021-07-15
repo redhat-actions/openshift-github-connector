@@ -33,8 +33,8 @@
     "container-build": "docker build -f Containerfile --build-arg VCS_REF=$(git rev-parse HEAD | cut -c -7) -t openshift-github-connector:latest .",
     "container-run": "docker run --rm --name openshift-github-connector -p 3443:3443 openshift-github-connector:latest",
     "container-run-d": "docker run -d --rm --name openshift-github-connector -p 3443:3443 openshift-github-connector:latest",
-    "container-tag": "export TAG=quay.io/tetchell/openshift-github-connector:latest && buildah tag openshift-github-connector:latest $TAG",
-    "container-push": "export TAG=quay.io/tetchell/openshift-github-connector:latest && buildah push $TAG",
+    "container-tag": "export TAG=quay.io/tetchell/openshift-github-connector:latest && docker tag openshift-github-connector:latest $TAG",
+    "container-push": "export TAG=quay.io/tetchell/openshift-github-connector:latest && docker push $TAG",
     "container-e2e": "yarn container-build && yarn container-tag && yarn container-push",
     "helm-install": "export RELEASE_NAME=github-connector && helm upgrade --install --create-namespace $RELEASE_NAME chart/openshift-github-connector --set insecureTrustApiServerCert=true"
   },
