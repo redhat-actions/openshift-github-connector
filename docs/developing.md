@@ -75,12 +75,13 @@ SESSION_STORE_SECRET=<another uuid>
 OAUTH_CLIENT_SECRET=<uuid from OAuthClient above>
 CONNECTOR_SERVICEACCOUNT_NAME=<service account from above>
 
+# See certs.md
+SERVING_CA_DIRECTORY=/var/certs/localhost
+
 # Steps below are necessary only if your cluster uses untrusted TLS certs
 # See certs.md
 ROUTER_CA_DIRECTORY=/var/certs/crc/
 INSECURE_TRUST_APISERVER_CERT: true
-# See certs.md
-SERVING_CA_DIRECTORY=/var/certs/localhost
 ```
 
 Then run `yarn dev` to run the development server.
