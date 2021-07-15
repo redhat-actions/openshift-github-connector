@@ -41,9 +41,9 @@ metadata:
 # substitute your own uuid
 secret: ${OAUTH_CLIENT_SECRET}
 redirectURIs:
-  # must match .env callback
-  - https://localhost:3000/api/v1/auth/callback
 	# You can put any number of callback URLs in this array
+  # the env callback must be one of these
+  - https://localhost:3000/api/v1/auth/callback
 grantMethod: auto
 EOF
 ```
