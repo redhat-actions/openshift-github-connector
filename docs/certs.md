@@ -1,15 +1,15 @@
-### Fix TLS self-signed cert rejection
-If the cluster uses self-signed certs, the OAuth client will not trust the certs.
+# TLS Certificates
+If the cluster uses **self-signed** certs, the OAuth client will not trust the certs.
 
-There are two different TLS keys and CAs used.
+There are two different TLS keys and CAs used, the Router Cert and the Serving Cert.
 
 TLS cert checking can be disabled globally using [this hack](https://stackoverflow.com/a/21961005), but this is not a suitable production solution.
 
-#### Router CA
+## Router Cert
 
-The **Router CA** is the CA used for the OpenShift authentication routes.
+The **Router Cert** is used for the OpenShift authentication routes. The
 
-This needs to be trusted by the Connector when it acts as an OAuth client, or the TLS handshake will fail and authentication will not work.
+This needs to be trusted by the Connector when it acts as an OAuth **client**, or the TLS handshake will fail and authentication will not work.
 
 For in-cluster deployment (using the Helm chart), copy the serving cert from the `openshift-authentication` namespace into the namespace of your deployment.
 
@@ -28,8 +28,8 @@ Refer to `certs.ts` for the logic that loads this file.
 
 A different CA will be used by the API server, eg `kubernetes.default` or `openshift.default`. Certificate validation for that server can be disabled by setting `INSECURE_TRUST_APISERVER_CERT=true` in the environment.
 
-#### Serving CA
-The **Serving CA** is used by the Connector's HTTPS server. It is then up to the client (eg. the user's browser) to trust the certificate.
+## Serving Cert
+The **Serving Cert** is used by the Connector's HTTPS server. It is then up to the client (eg. the user's browser) to trust the certificate.
 
 Obviously, this would ideally be a certificate issued by a proper authority so it would be trusted by default.
 

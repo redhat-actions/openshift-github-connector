@@ -58,7 +58,7 @@ Passport is poor at error reporting. Make sure that:
 
 ## TLS Certificates
 
-Refer to [certs.md](./certs.md)
+Refer to [certs.md](./certs.md).
 
 <a id="environment"></a>
 
