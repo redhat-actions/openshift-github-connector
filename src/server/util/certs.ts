@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import Log from "server/logger";
 import syswidecas from "syswide-cas";
+import { fileExists, isProduction } from "./server-util";
 
 // https://kubernetes.io/docs/concepts/configuration/secret/#tls-secrets
 interface TLSSecretData {
@@ -47,36 +48,33 @@ export async function loadTLSSecretData(dir: string): Promise<TLSSecretData> {
   };
 }
 
-const CA_DIRS_ENVVAR = "SECRETS_CA_DIRECTORIES";
+const CA_FILES_ENVVAR = "TRUST_CERT_FILES";
+
+// https://docs.openshift.com/container-platform/3.11/dev_guide/secrets.html#service-serving-certificate-secrets
+const SERVICE_CA_FILE = "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt";
 
 /**
  * Load certificates for services/routes that this container should trust, as a client.
  */
 export async function loadCerts(): Promise<void> {
-  Log.info(`Trusting mounted certs`);
-  const certsDirs = process.env[CA_DIRS_ENVVAR];
-  if (!certsDirs) {
-    Log.warn(`process.env.${CA_DIRS_ENVVAR} is not set; skipping certificate loading step`);
+  Log.info(`Loading certs`);
+
+  if (await fileExists(SERVICE_CA_FILE, isProduction())) {
+    Log.info(`Reading service certs from ${SERVICE_CA_FILE}`);
+    syswidecas.addCAs(SERVICE_CA_FILE);
+  }
+
+  const certFiles = process.env[CA_FILES_ENVVAR];
+  if (!certFiles) {
     return;
   }
 
-  Log.info(`process.env.${CA_DIRS_ENVVAR} is "${certsDirs}"`);
+  Log.info(`process.env.${CA_FILES_ENVVAR} is "${certFiles}"`);
 
-  const split = certsDirs.split(",");
+  const split = certFiles.split(",");
 
-  await Promise.all(split.map(async (dir) => {
-    Log.info(`Reading certs from ${dir}`);
-
-    (await fs.readdir(dir)).forEach((file) => {
-      // do not load files starting with ".." (special files that appear when secrets are mounted)
-      // and do not load tls.key because it is not a CA
-      if (file.startsWith("..") || file === "tls.key") {
-        return;
-      }
-
-      const fileAbsPath = path.join(dir, file);
-      Log.info(`Reading cert from ${fileAbsPath}`);
-      syswidecas.addCAs(fileAbsPath);
-    });
+  await Promise.all(split.map(async (file) => {
+    Log.info(`Reading certs from ${file}`);
+    syswidecas.addCAs(file);
   }));
 }
