@@ -11,22 +11,29 @@ The **Router Cert** is used for the OpenShift authentication routes. The
 
 This needs to be trusted by the Connector when it acts as an OAuth **client**, or the TLS handshake will fail and authentication will not work.
 
-For in-cluster deployment (using the Helm chart), copy the serving cert from the `openshift-authentication` namespace into the namespace of your deployment.
+For in-cluster deployment (using the Helm chart), copy the serving cert from the `openshift-authentication` namespace into the namespace of your deployment. You must do this **before** installing the Helm chart so the secret exists when the chart is rendering.
 
 ```sh
 oc get secret v4-0-config-system-router-certs -n openshift-authentication -o yaml | sed 's/namespace: openshift-authentication/namespace: github-connector/g' | oc apply -f-
 ```
 If the secrets exists in the same namespace as the deployment, it will be mounted into the pod and trusted when the server starts. Refer to the `deployment.yaml`.
 
+Repeat this step for the API server cert.
+```sh
+oc get secret service-network-serving-signer -n openshift-kube-apiserver-operator -o yaml | sed 's/namespace: openshift-kube-apiserver-operator/namespace: github-connector/g' | oc apply -f-
+```
+
 For local development, copy out the secret to a file eg:
 ```
 oc get secret v4-0-config-system-router-certs -o jsonpath='{.data.apps-crc\.testing}' | base64 -d
 ```
-Paste the cert into `/var/certs/crc/crc.pem`, matching `.env.local` `ROUTER_CA_DIRECTORY=/var/certs/crc/`.
+Paste the cert into any file, such as `/var/certs/crc/crc.pem`, and refer to that directory in `.env.local`. For example, `SECRETS_CA_DIRECTORY=/var/certs/crc/`.
 
-Refer to `certs.ts` for the logic that loads this file.
+Do the same for `tls.crt` (but not `tls.key`) from the apiserver cert secret. You can use the same directory or a comma-separated different one.
 
-A different CA will be used by the API server, eg `kubernetes.default` or `openshift.default`. Certificate validation for that server can be disabled by setting `INSECURE_TRUST_APISERVER_CERT=true` in the environment.
+Refer to `certs.ts` for the logic that loads these files.
+
+You can also disable TLS cert checking altogether by setting `NODE_TLS_REJECT_UNAUTHORIZED=0` in the environment. Obviously, this is not a proper solution and should be only used as a last resort for development.
 
 ## Serving Cert
 The **Serving Cert** is used by the Connector's HTTPS server. It is then up to the client (eg. the user's browser) to trust the certificate.

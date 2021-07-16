@@ -36,7 +36,7 @@
     "container-tag": "export TAG=quay.io/tetchell/openshift-github-connector:latest && docker tag openshift-github-connector:latest $TAG",
     "container-push": "export TAG=quay.io/tetchell/openshift-github-connector:latest && docker push $TAG",
     "container-e2e": "yarn container-build && yarn container-tag && yarn container-push",
-    "helm-install": "export RELEASE_NAME=github-connector && helm upgrade --install --create-namespace $RELEASE_NAME chart/openshift-github-connector --set insecureTrustApiServerCert=true"
+    "helm-install": "export RELEASE_NAME=github-connector && helm upgrade --install --create-namespace $RELEASE_NAME chart/openshift-github-connector"
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.15.0",
