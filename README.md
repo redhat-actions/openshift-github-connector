@@ -18,7 +18,7 @@ If you are using CRC, you can omit the two `--set` statements, since the default
 
 You need to be a cluster administrator to create an `OAuthClient` since it is a cluster-scoped resource.
 
-See the [`values.yaml`](./chart/values.yaml) for an explanation of these values and the others you may set.
+See the [`values.yaml`](./chart/openshift-github-connector/values.yaml) for an explanation of these values and the others you may set.
 
 The chart creates a Route through which the app can be accessed. The route host is `github-connector.<clusterAppsSubdomain>`. For example, for CRC, the host is `github-connector.apps-crc.testing`.
 
