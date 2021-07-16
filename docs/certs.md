@@ -1,32 +1,31 @@
 # TLS Certificates
 If the cluster uses **self-signed** certs, the system will not trust the certs.
 
-The connector must trust the API Server certificate, and the OpenShift Authentication route's certificate.
-
-The connector must also generate its own certificate authority so it can sign its HTTPS traffic.
+If certs are not properly configured, the server will crash on startup due to not being able to determine the cluster's OAuth server configuration.
 
 ## OpenShift Certs to Trust
 
-For in-cluster deployment (using the Helm chart), copy the serving cert from the `openshift-authentication` namespace into the namespace of your deployment. You must do this **before** installing the Helm chart so the secret exists when the chart is rendering.
+For in-cluster deployment (using the Helm chart), the serving cert bundle is copied into the pod and trusted at runtime. Refer to [the OpenShift documentation](https://docs.openshift.com/container-platform/3.11/dev_guide/secrets.html#service-serving-certificate-secrets).
 
-You need administrator permissions to access these namespaces.
+For local development, copy out that file to your local system:
 
 ```sh
-# Authentication route cert
-oc get secret v4-0-config-system-router-certs -n openshift-authentication -o yaml | sed 's/namespace: openshift-authentication/namespace: github-connector/g' | oc apply -f-
-# API server service cert
-oc get secret service-network-serving-signer -n openshift-kube-apiserver-operator -o yaml | sed 's/namespace: openshift-kube-apiserver-operator/namespace: github-connector/g' | oc apply -f-
+oc exec github-connector-<pod-id> -- cat /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt > service-ca.crt
 ```
 
-If the secrets exist in the same namespace as the deployment, they will be mounted into the pod and trusted when the server starts. Refer to the `deployment.yaml`.
-
-For local development, copy out these secret to a two files, eg:
+Move the file somewhere suitable, eg:
 ```sh
-oc get secret v4-0-config-system-router-certs -o jsonpath='{.data.apps-crc\.testing}' | base64 -d > auth-router-cert.pem
-oc get secret service-network-serving-signer -n openshift-kube-apiserver-operator -o jsonpath='{.data.tls\.crt}' | base64 -d > api-server.crt
+chmod 644 service-ca.crt
+sudo mv service-ca.crt /var/certs/crc/
 ```
 
-Move these two files to any directory, and refer to that directory in `.env.local`. For example, `SECRETS_CA_DIRECTORY=/var/certs/crc/`.
+Refer to this file in `.env.local`:
+```properties
+# For multiple files, can be comma-separated
+TRUST_CERT_FILES=/var/certs/crc/service-ca.crt
+```
+
+This step must be repeated when your change your current cluster, so you can keep a directory for each cluster and just change the `.env.local` entry.
 
 Refer to `certs.ts` for the logic that loads these files.
 

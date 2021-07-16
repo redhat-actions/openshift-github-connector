@@ -199,12 +199,21 @@ export function checkInvalidK8sName(name: string): string | undefined {
   return undefined;
 }
 
-export async function loadEnv(envPath: string): Promise<void> {
+export async function fileExists(filePath: string, warn: boolean = false): Promise<boolean> {
   try {
-    await fs.access(envPath);
+    await fs.access(filePath);
+    return true;
   }
   catch (err) {
-    Log.warn(`${envPath} does not exist.`);
+    if (warn) {
+      Log.warn(`${filePath} does not exist.`);
+    }
+    return false;
+  }
+}
+
+export async function loadEnv(envPath: string): Promise<void> {
+  if (!await fileExists(envPath, true)) {
     return;
   }
 
