@@ -21,6 +21,7 @@ sudo mv service-ca.crt /var/certs/crc/
 
 Refer to this file in `.env.local`:
 ```properties
+# For multiple files, can be comma-separated
 TRUST_CERT_FILES=/var/certs/crc/service-ca.crt
 ```
 
