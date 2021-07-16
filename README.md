@@ -14,9 +14,15 @@ helm upgrade --install github-connector \
   --set clusterApiServer=$(oc whoami --show-server)
 ```
 
+If you are using CRC, you can omit the two `--set` statements, since the defaults are for CRC. However, you will still have to trust the openshift-autentication router's certificate since CRC uses self-signed certs. Refer to [certs.md](./docs/certs.md).
+
 You need to be a cluster administrator to create an `OAuthClient` since it is a cluster-scoped resource.
 
 See the [`values.yaml`](./chart/values.yaml) for an explanation of these values and the others you may set.
+
+The chart creates a Route through which the app can be accessed. The route host is `github-connector.<clusterAppsSubdomain>`. For example, for CRC, the host is `github-connector.apps-crc.testing`.
+
+The route must be accessible from the internet, so GitHub can call back to it when the GitHub app is created.
 
 ## Developing
 See [developing.md](./docs/developing.md).

@@ -84,9 +84,7 @@ oauthRouter.route(ApiEndpoints.Auth.LoginStatus.path)
   .all(send405([ "GET", "DELETE" ]));
 */
 
-Log.info(
-  `Started authentication route, `
-  + `login endpoint is ${ApiEndpoints.Auth.Login} and callback is ${ApiEndpoints.Auth.OAuthCallback}`
-);
+Log.info(`Login endpoint is ${ApiEndpoints.Auth.Login}`);
+Log.info(`Callback is ${ApiEndpoints.Auth.OAuthCallback}`);
 
 export default oauthRouter;

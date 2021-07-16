@@ -22,19 +22,27 @@ spec:
         - emptyDir: {}
           name: tmp
 
-        - emptyDir: {}
-          name: certs
+        # - emptyDir: {}
+        #   name: certs
 
         - name: {{ .Values.servingCertSecret }}
           secret:
             secretName: {{ .Values.servingCertSecret }}
             defaultMode: 420
 
-        {{- $addRouterCerts := lookup "v1" "Secret" .Release.Namespace "v4-0-config-system-router-certs" }}
-        {{- if $addRouterCerts }}
-        - name: router-cert
+        {{- $addOAuthCert := lookup "v1" "Secret" .Release.Namespace "v4-0-config-system-router-certs" }}
+        {{- if $addOAuthCert }}
+        - name: oauth-route-cert
           secret:
             secretName: v4-0-config-system-router-certs
+            defaultMode: 420
+        {{ end }}
+
+        {{- $addApiServerCert := lookup "v1" "Secret" .Release.Namespace "service-network-serving-signer" }}
+        {{- if $addApiServerCert }}
+        - name: apiserver-cert
+          secret:
+            secretName: service-network-serving-signer
             defaultMode: 420
         {{ end }}
 
@@ -68,17 +76,23 @@ spec:
             - mountPath: /tmp
               name: tmp
 
-            - mountPath: /var/certs
-              name: certs
+            # - mountPath: /var/certs
+            #   name: certs
 
             - name: {{ .Values.servingCertSecret }}
               readOnly: true
               mountPath: {{ .Values.servingCADirectory }}
 
-            {{- if $addRouterCerts }}
-            - name: router-cert
+            {{- if $addOAuthCert }}
+            - name: oauth-route-cert
               readOnly: true
-              mountPath: {{ .Values.routerCADirectory }}
+              mountPath: {{ .Values.oauthCADirectory }}
+            {{ end }}
+
+            {{- if $addApiServerCert }}
+            - name: apiserver-cert
+              readOnly: true
+              mountPath: {{ .Values.apiserverCADirectory }}
             {{ end }}
 
           env:
@@ -98,18 +112,15 @@ spec:
                   key: {{ .Values.oauthClientSecretKeyName }}
 
             - name: OAUTH_CALLBACK_URL
-              value: {{ tpl .Values.oauthCallbackUrl . }}
+              value: {{ tpl .Values.oauthCallbackUrl . | quote }}
 
             - name: SERVING_CA_DIRECTORY
               value: {{ .Values.servingCADirectory }}
 
-            {{- if $addRouterCerts }}
-            - name: ROUTER_CA_DIRECTORY
-              value: {{ .Values.routerCADirectory }}
+            {{- if or $addOAuthCert $addApiServerCert }}
+            - name: SECRETS_CA_DIRECTORIES
+              value: {{ printf "%s,%s" .Values.oauthCADirectory .Values.apiserverCADirectory | quote }}
             {{ end }}
-
-            - name: INSECURE_TRUST_APISERVER_CERT
-              value: {{ .Values.insecureTrustApiServerCert | quote }}
 
             - name: SESSION_SECRET
               valueFrom:

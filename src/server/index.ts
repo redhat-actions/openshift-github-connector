@@ -14,7 +14,7 @@ import {
   getFriendlyHTTPError, isProduction, loadEnv,
 } from "./util/server-util";
 import getSessionMiddleware from "./session-mw";
-import { loadServingCerts, loadRouterCerts } from "./util/certs";
+import { loadCerts, loadServingCerts } from "./util/certs";
 import { setupPassport } from "./oauth";
 import KubeWrapper from "./lib/kube/kube-wrapper";
 import { addCustomExtensions, send405 } from "./express-extends";
@@ -42,7 +42,7 @@ async function main(): Promise<void> {
   const pluginPath = path.join(__dirname, PLUGIN_ROOT_DIR);
   Log.info(`Plugin path is ${pluginPath}`);
 
-  await loadRouterCerts();
+  await loadCerts();
   await KubeWrapper.initialize();
 
   const app = express();
@@ -177,9 +177,9 @@ async function main(): Promise<void> {
   Log.info(`HTTPS Port is ${httpsPort}`);
 
   try {
-    const tlsOptions = await loadServingCerts();
+    const servingCertData = await loadServingCerts();
 
-    https.createServer(tlsOptions, app).listen(httpsPort)
+    https.createServer(servingCertData, app).listen(httpsPort)
       .on("listening", () => {
         Log.info(`HTTPS listening on port ${httpsPort}`);
       })

@@ -1,48 +1,12 @@
+import { Stringable } from "common/common-util";
+import HttpConstants from "common/http-constants";
+import dotenv from "dotenv";
 import express from "express";
 import fs from "fs/promises";
-import https from "https";
 import fetch, { RequestInit, Response } from "node-fetch";
-import dotenv from "dotenv";
-
 import Log from "server/logger";
-import HttpConstants from "common/http-constants";
-import { Stringable } from "common/common-util";
 
 /*
-export function getFrontendUrl(req: express.Request): string {
-  const referrer = req.headers.referer;
-  if (!referrer) {
-    throw new Error(`Failed to get client URL; 'Referer' header missing!`);
-  }
-
-  const clientUrl = new URL(referrer);
-  clientUrl.pathname = "";
-
-  const clientUrlStr = clientUrl.toString();
-  Log.info(`Client URL is ${clientUrlStr}`);
-  return clientUrlStr;
-}
-*/
-
-// These should be set by Containerfile in prod
-
-// CORS code below is dead now since the front & back ends have the same origin
-
-/*
-const FRONTEND_PROTOCOL_ENVVAR = "FRONTEND_PROTOCOL";
-const FRONTEND_PORT_ENVVAR = "FRONTEND_PORT";
-
-const FRONTEND_PROTOCOL_DEFAULT = "http";
-const FRONTEND_PORT_DEFAULT = "3000";
-
-export function getFrontendOrigin(hostname: string): string {
-  const frontendProtocol = process.env[FRONTEND_PROTOCOL_ENVVAR] || FRONTEND_PROTOCOL_DEFAULT;
-  const frontendPort = process.env[FRONTEND_PORT_ENVVAR] || FRONTEND_PORT_DEFAULT;
-
-  const frontendOrigin = `${frontendProtocol}://${hostname}:${frontendPort}`;
-  return frontendOrigin;
-}
-
 export function getAllowedOrigins(): string[] {
   return [
     getFrontendOrigin(os.hostname()),
@@ -78,17 +42,6 @@ export function getServerUrl(req: express.Request, includePath: boolean = false)
   Log.info(`Server URL is ${serverUrl}`);
   return serverUrl;
 }
-
-/*
-export function getClientUrl(req: express.Request): string {
-  const proto = req.secure ? "https" : "http";
-  // this may fail if the request is cross-origin
-  const host = req.header("X-Forwarded-Host") || req.header("Host");
-  const clientUrl = `${proto}://${host}`;
-  Log.info(`Client URL is ${clientUrl}`);
-  return clientUrl;
-}
-*/
 
 export function tob64(s: string): string {
   return Buffer.from(s).toString("base64");
@@ -195,25 +148,6 @@ export async function throwIfError(res: Response): Promise<void> {
 }
 
 /*
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function removeErrorGarbage(err_: any): Record<string, unknown> {
-  const err = { ...err_ };
-
-  if (err.response) {
-    // delete http response data that results in a nasty long log
-    delete err.response._readableState;
-    delete err.response._events;
-    delete err.response_eventsCount;
-    delete err.response._eventsCount;
-    delete err.response.socket;
-    delete err.response.client;
-    delete err.response.req;
-  }
-
-  return err;
-}
-*/
-
 // https://github.com/microsoft/TypeScript/issues/20965#issuecomment-354858633
 type ValuesOf<T extends any[]> = T[number];
 
@@ -233,6 +167,14 @@ export function checkKeys<
   }
   return true;
 }
+
+export function deleteKey<T extends Record<string, unknown>, K extends string>(obj: T, key: K): Omit<T, K> {
+  const partial: Partial<T> = obj;
+  delete partial[key];
+
+  return partial as Omit<T, typeof key>;
+}
+*/
 
 /**
  * @returns an error message describing why the name is invalid, or undefined if the name is valid.
@@ -255,14 +197,6 @@ export function checkInvalidK8sName(name: string): string | undefined {
     return `Invalid resource name: ${subMsg}`;
   }
   return undefined;
-}
-
-// eslint-disable-next-line @typescript-eslint/ban-types
-export function deleteKey<T extends Record<string, unknown>, K extends string>(obj: T, key: K): Omit<T, K> {
-  const partial: Partial<T> = obj;
-  delete partial[key];
-
-  return partial as Omit<T, typeof key>;
 }
 
 export async function loadEnv(envPath: string): Promise<void> {
@@ -294,7 +228,7 @@ export async function fetchFromOpenShiftApiServer(
 
   Log.info(`${options?.method ?? "GET"} ${url}`);
 
-  const insecureTrustApiServer = process.env.INSECURE_TRUST_APISERVER_CERT === "true";
+  // const insecureTrustApiServer = process.env.INSECURE_TRUST_APISERVER_CERT === "true";
 
   const response = await fetch(url, {
     ...options,
@@ -302,9 +236,9 @@ export async function fetchFromOpenShiftApiServer(
       Authorization: authorization ?? "",
       [HttpConstants.Headers.ContentType]: HttpConstants.ContentTypes.Json,
     },
-    agent: new https.Agent({
-      rejectUnauthorized: !insecureTrustApiServer,
-    }),
+    // agent: new https.Agent({
+    // rejectUnauthorized: !insecureTrustApiServer,
+    // }),
   });
 
   await throwIfError(response);
