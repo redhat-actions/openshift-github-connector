@@ -3,12 +3,12 @@ entries:
   openshift-github-connector:
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2021-07-21T17:37:02.124742915Z"
+    created: "2021-07-21T18:21:49.777217947Z"
     description: A Helm chart for Kubernetes
-    digest: cd72242bf1fc26b997d02497c1cc80e2b6d89bf959dabbecc45f8b193b0fd1d1
+    digest: 737bd095c496688290e7317847e846654a3324b04e090408d8538f7612167a1d
     name: openshift-github-connector
     type: application
     urls:
     - https://redhat-actions.github.io/openshift-github-connector/chart/openshift-github-connector/packages/openshift-github-connector-0.0.0.tgz
     version: 0.0.0
-generated: "2021-07-21T17:37:02.124001507Z"
+generated: "2021-07-21T18:21:49.776551035Z"

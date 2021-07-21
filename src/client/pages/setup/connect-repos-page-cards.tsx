@@ -1,6 +1,5 @@
 import {
-  Card, CardBody, CardTitle, Divider,
-  Select, SelectOption, SelectVariant
+  Card, CardBody, CardTitle, Divider, Select, SelectOption, SelectVariant,
 } from "@patternfly/react-core";
 import { useState } from "react";
 import ApiEndpoints from "../../../common/api-endpoints";
