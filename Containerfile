@@ -26,8 +26,8 @@ ARG VCS_REF
 
 LABEL org.label-schema.schema-version="1.0"
 # LABEL org.label-schema.build-date=$BUILD_DATE
-LABEL org.label-schema.name="redhat-actions/openshift-actions-connector"
-LABEL org.label-schema.url="https://github.com/redhat-actions/openshift-actions-connector"
+LABEL org.label-schema.name="redhat-actions/openshift-github-connector"
+LABEL org.label-schema.url="https://github.com/redhat-actions/openshift-github-connector"
 LABEL org.label-schema.vsc-ref=$VSC_REF
 
 # ARG USER=node

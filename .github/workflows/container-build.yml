@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: openshift-actions-connector
+  IMAGE_NAME: openshift-github-connector
   REGISTRY_HOSTNAME: quay.io
   REGISTRY_USER: tetchell
   # PORT: 3443
