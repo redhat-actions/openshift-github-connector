@@ -1,4 +1,4 @@
-FROM node:14-alpine as builder
+FROM docker.io/library/node:14-alpine as builder
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ RUN mv -v dist/server server/
 
 ##################################################
 
-FROM node:14-alpine
+FROM docker.io/library/node:14-alpine
 
 # ARG BUILD_DATE
 ARG VCS_REF
