@@ -1,5 +1,5 @@
 import {
-  Card, CardTitle, CardBody, Select, SelectVariant, SelectOption, Divider,
+  Card, CardBody, CardTitle, Divider, Select, SelectOption, SelectVariant,
 } from "@patternfly/react-core";
 import { useState } from "react";
 import ApiEndpoints from "../../../common/api-endpoints";
@@ -184,8 +184,6 @@ export function ServiceAccountCard(
 
             <ServiceAccountSection namespace={namespace} serviceAccount={serviceAccount} setServiceAccount={setServiceAccount} />
 
-            <Divider className="my-3"/>
-
             <ExternalLink
               href={"https://github.com/redhat-actions/oc-login/wiki/Using-a-Service-Account-for-GitHub-Actions"}
             >
@@ -280,6 +278,9 @@ export function ServiceAccountSection(
                   </p>
                   : ""
               }
+
+              <Divider className="my-3"/>
+
             </>
           );
         }
