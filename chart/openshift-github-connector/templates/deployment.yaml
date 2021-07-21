@@ -34,10 +34,11 @@ spec:
         - name: {{ .Values.appName }}
           imagePullPolicy: Always
           image: {{ .Values.serverImage }}:{{ .Values.serverTag }}
+
+          # For debugging startup crashes
           # command: [ "sleep", "infinity" ]
+
           ports:
-            # - name: {{ .Values.serverHttpPortName }}
-            #   containerPort: {{ .Values.serverHttpPort }}
             - name: {{ .Values.serverHttpsPortName }}
               containerPort: {{ .Values.serverHttpsPort }}
 

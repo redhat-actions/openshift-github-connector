@@ -50,8 +50,11 @@ export async function loadTLSSecretData(dir: string): Promise<TLSSecretData> {
 
 const CA_FILES_ENVVAR = "TRUST_CERT_FILES";
 
+const serviceAccountMountDir = "/var/run/secrets/kubernetes.io/serviceaccount/";
+
 // https://docs.openshift.com/container-platform/3.11/dev_guide/secrets.html#service-serving-certificate-secrets
-const SERVICE_CA_FILE = "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt";
+const SERVICE_CA_FILE = path.join(serviceAccountMountDir, "service-ca.crt");
+const CA_FILE = path.join(serviceAccountMountDir, "/ca.crt");
 
 /**
  * Load certificates for services/routes that this container should trust, as a client.
@@ -62,6 +65,11 @@ export async function loadCerts(): Promise<void> {
   if (await fileExists(SERVICE_CA_FILE, isProduction())) {
     Log.info(`Reading service certs from ${SERVICE_CA_FILE}`);
     syswidecas.addCAs(SERVICE_CA_FILE);
+  }
+
+  if (await fileExists(CA_FILE, isProduction())) {
+    Log.info(`Reading certs from ${CA_FILE}`);
+    syswidecas.addCAs(CA_FILE);
   }
 
   const certFiles = process.env[CA_FILES_ENVVAR];
