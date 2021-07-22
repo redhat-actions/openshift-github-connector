@@ -95,7 +95,12 @@ export function getLoggingMiddleware(): any {
         fmt += `\nRequest body was:\n${JSON.stringify(bodyCopy)}`;
       }
 
-      fmt += `\ncookie: ${JSON.stringify(req.headers.cookie)}`;
+      // if (req.headers.cookie) {
+      // fmt += `\ncookie: ${JSON.stringify(req.headers.cookie)}`;
+      // }
+      // if (req.session) {
+      // fmt += `\nsession: ${JSON.stringify(req.session)}`;
+      // }
       return format(fmt);
     },
   });

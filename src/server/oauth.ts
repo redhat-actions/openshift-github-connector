@@ -166,6 +166,7 @@ export async function setupPassport(app: express.Application): Promise<void> {
 }
 
 async function buildUserSessionFromToken(accessToken: string): Promise<UserSessionData> {
+  Log.info(`Build user session from access token`);
   const now = Date.now();
 
   const userInfo = await TokenUtil.introspectUser(accessToken);

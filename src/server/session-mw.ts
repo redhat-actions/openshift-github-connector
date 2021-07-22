@@ -4,7 +4,8 @@ import sessionFileStore from "session-file-store";
 import { v4 as uuid } from "uuid";
 import { tmpdir } from "os";
 
-import Log from "./logger";
+import Log from "server/logger";
+import ApiEndpoints from "common/api-endpoints";
 
 const dayMs = 1000 * 60 * 60 * 24;
 const FileStore = sessionFileStore(session);
@@ -53,16 +54,19 @@ function getSessionMw(): express.RequestHandler {
     resave: false,
     saveUninitialized: true,
     rolling: true,
+    unset: "destroy",
     genid: (req): string => {
       const id = uuid();
       return id;
     },
     cookie: {
+      // do not send the cookie on requests for static content (no need)
+      path: ApiEndpoints.Root.path,
       httpOnly: true,
       maxAge: dayMs,
       // https://github.com/auth0/passport-auth0/issues/70#issuecomment-432895163
-      sameSite: false,
-      secure: "auto",
+      sameSite: true,
+      secure: true,
       signed: true,
     },
   });
