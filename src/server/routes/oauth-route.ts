@@ -6,6 +6,7 @@ import ApiEndpoints from "common/api-endpoints";
 import { OAUTH2_STRATEGY_NAME } from "server/oauth";
 import ApiResponses from "common/api-responses";
 import { send405 } from "server/express-extends";
+import { UserSessionData } from "server/lib/user/server-user-types";
 
 const oauthRouter = express.Router();
 
@@ -47,15 +48,39 @@ oauthRouter.route(ApiEndpoints.Auth.Login.path)
       success: false,
     });
   })
-  .all(send405([ "GET" ]));
+  .all(send405([ "GET", "DELETE" ]));
 
 oauthRouter.route(ApiEndpoints.Auth.OAuthCallback.path)
-  .get(passport.authenticate(strategy, {
-    successRedirect: SUCCESS_REDIRECT,
-    failureMessage: true,
-    failWithError: true,
-    session,
-  }))
+  .get((req, res, next) => {
+    passport.authenticate(strategy, {
+      successRedirect: SUCCESS_REDIRECT,
+      failureMessage: true,
+      failWithError: true,
+      session,
+    },
+    (err: any, user: UserSessionData | undefined | false, info: Record<string, unknown> | undefined) => {
+      const infoMsg = info?.message as string | undefined;
+
+      if (err) {
+        if (infoMsg) {
+          // eslint-disable-next-line no-param-reassign
+          err.message += ": " + infoMsg;
+        }
+        return res.sendError(401, err.message);
+      }
+
+      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+      if (!user) {
+        const errMsg = `Authentication failed: ${infoMsg ?? `User is ${user}`}`;
+        Log.warn(errMsg);
+        return res.sendError(401, errMsg);
+      }
+
+      Log.info(`Auth successful, user obj is ${JSON.stringify(user)}`);
+
+      return res.redirect(SUCCESS_REDIRECT);
+    })(req, res, next);
+  })
   .all(send405([ "GET" ]));
 
 /*
@@ -84,7 +109,7 @@ oauthRouter.route(ApiEndpoints.Auth.LoginStatus.path)
   .all(send405([ "GET", "DELETE" ]));
 */
 
-Log.info(`Login endpoint is ${ApiEndpoints.Auth.Login}`);
-Log.info(`Callback is ${ApiEndpoints.Auth.OAuthCallback}`);
+// Log.info(`Login endpoint is ${ApiEndpoints.Auth.Login}`);
+// Log.info(`Callback is ${ApiEndpoints.Auth.OAuthCallback}`);
 
 export default oauthRouter;
