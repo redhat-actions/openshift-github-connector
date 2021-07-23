@@ -10,11 +10,11 @@ Install from the root of the repo as follows:
 ```sh
 helm upgrade --install github-connector \
   chart/openshift-github-connector \
-  --set clusterAppsSubdomain=apps.<your-openshift-server>.com
+  --set clusterAppsSubdomain=apps.<your-openshift-server>.com \
   --set clusterApiServer=$(oc whoami --show-server)
 ```
 
-If you are using CRC, you can omit the two `--set` statements, since the defaults are for CRC. However, you will still have to trust the openshift-autentication router's certificate since CRC uses self-signed certs. Refer to [certs.md](./docs/certs.md).
+If you are using CRC, you can omit the two `--set` statements, since the defaults are for CRC.
 
 You need to be a cluster administrator to create an `OAuthClient` since it is a cluster-scoped resource.
 
