@@ -10,7 +10,7 @@ Install from the root of the repo as follows:
 ```sh
 helm upgrade --install github-connector \
   chart/openshift-github-connector \
-  --set clusterAppsSubdomain=apps.<your-openshift-server>.com
+  --set clusterAppsSubdomain=apps.<your-openshift-server>.com \
   --set clusterApiServer=$(oc whoami --show-server)
 ```
 
