@@ -44,6 +44,7 @@ namespace ApiRequests {
 
   export interface CreateActionsSecrets {
     namespace: string,
+    createNamespaceSecret: boolean,
     serviceAccount: string,
     serviceAccountRole: string,
     repos: GitHubRepoId[],

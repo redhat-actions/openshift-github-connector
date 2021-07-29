@@ -1,5 +1,4 @@
 import express from "express";
-import * as k8s from "@kubernetes/client-node";
 
 import ApiEndpoints from "common/api-endpoints";
 import ApiRequests from "common/api-requests";
@@ -12,6 +11,7 @@ import SecretUtil from "server/lib/kube/secret-util";
 import { Severity } from "common/common-util";
 import { DEFAULT_SECRET_NAMES, getDefaultSecretNames } from "common/default-secret-names";
 import { send405 } from "server/express-extends";
+import KubeUtil from "server/lib/kube/kube-util";
 
 const router = express.Router();
 
@@ -97,50 +97,23 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
     }
 
     const {
-      namespace, serviceAccount, serviceAccountRole, repos,
+      namespace, createNamespaceSecret, serviceAccount, serviceAccountRole, repos,
     } = req.body;
 
     const k8sClient = user.makeCoreV1Client();
 
-    const saExists = await KubeWrapper.doesServiceAccountExist(k8sClient, namespace, serviceAccount);
+    const saExists = await KubeUtil.doesServiceAccountExist(k8sClient, namespace, serviceAccount);
 
     let serviceAccountCreated = false;
     if (!saExists) {
-      Log.info(`Creating ${namespace}/serviceaccount/${serviceAccount}`);
 
-      await k8sClient.createNamespacedServiceAccount(namespace, {
-        metadata: {
-          name: serviceAccount,
-          labels: {
-            [SecretUtil.CONNECTOR_LABEL_NAMESPACE + "/created-by"]: user.name,
-          },
-        },
-      });
-
-      Log.info(`Successfully created serviceaccount`);
-
-      if (serviceAccountRole) {
-        const rolebinding: k8s.V1RoleBinding = {
-          subjects: [{
-            kind: "ServiceAccount",
-            name: serviceAccount,
-            namespace,
-          }],
-          roleRef: {
-            apiGroup: "rbac.authorization.k8s.io",
-            name: serviceAccountRole,
-            kind: "ClusterRole",
-          },
-        };
-
-        Log.info(`Adding ${rolebinding.roleRef.kind}/${rolebinding.roleRef.name} to ${serviceAccount}`);
-
-        const authClient = user.makeKubeConfig().makeApiClient(k8s.RbacAuthorizationV1Api);
-
-        await authClient.createNamespacedRoleBinding(namespace, rolebinding);
-      }
-
-      Log.info(`Successfully added role to serviceaccount`);
+      await KubeUtil.createServiceAccount(
+        user.makeKubeConfig(),
+        user.name,
+        namespace,
+        serviceAccount,
+        serviceAccountRole
+      );
 
       serviceAccountCreated = true;
     }
@@ -213,6 +186,14 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
         { name: DEFAULT_SECRET_NAMES.clusterServerUrl, plaintextValue: clusterServerUrl },
         { name: DEFAULT_SECRET_NAMES.clusterToken, plaintextValue: saToken.token },
       ];
+
+      if (createNamespaceSecret) {
+        secretsToCreate.push({ name: DEFAULT_SECRET_NAMES.namespace, plaintextValue: namespace });
+        Log.info(`Creating namespace secret with namespace ${namespace}`);
+      }
+      else {
+        Log.info(`Not creating namespace secret`);
+      }
 
       Log.info(`Creating ${secretsToCreate.length} secrets into ${repo.owner}/${repo.name}`);
       Log.info(`SA token to be used is "${saToken.tokenSecretName}"`);

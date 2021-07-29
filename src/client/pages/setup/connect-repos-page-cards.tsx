@@ -1,5 +1,5 @@
 import {
-  Card, CardBody, CardTitle, Divider, Select, SelectOption, SelectVariant,
+  Card, CardBody, CardTitle, Checkbox, Divider, Select, SelectOption, SelectVariant,
 } from "@patternfly/react-core";
 import { useState } from "react";
 import ApiEndpoints from "../../../common/api-endpoints";
@@ -67,7 +67,10 @@ export function ConnectReposIntroCard(): JSX.Element {
   );
 }
 
-export function DefaultSecretsCard({ namespace, serviceAccount }: { namespace?: string, serviceAccount?: string }) {
+export function DefaultSecretsCard(
+  { namespace, createNamespaceSecret, serviceAccount }:
+  { namespace?: string, createNamespaceSecret: boolean, serviceAccount?: string }
+) {
   return (
     <Card>
       <CardTitle>
@@ -80,59 +83,75 @@ export function DefaultSecretsCard({ namespace, serviceAccount }: { namespace?: 
           loadingDisplay="card-body"
         >
           {
-            (res: ApiResponses.DefaultSecretsResponse) => (
-              <div>
-                <p>
-                  To each repository, two secrets will be added:
-                </p>
-                <ol>
-                  <li>
-                    <code>{res.defaultSecrets.clusterServerUrl}</code> will
-                    contain the URL to this OpenShift {"cluster's"} API server
-                    <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root} loadingDisplay="none">{
-                      (clusterData: ApiResponses.ClusterState) => {
-                        if (!clusterData.connected) {
-                          return ".";
-                        }
+            (res: ApiResponses.DefaultSecretsResponse) => {
 
-                        return (
-                          <>
+              const count = createNamespaceSecret ? "three" : "two";
+
+              return (
+                <div>
+                  <p>
+                  To each repository, {count} secrets will be added:
+                  </p>
+                  <ol>
+                    <li>
+                      <code>{res.defaultSecrets.clusterServerUrl}</code> will
+                    contain the URL to this OpenShift {"cluster's"} API server
+                      <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root} loadingDisplay="none">{
+                        (clusterData: ApiResponses.ClusterState) => {
+                          if (!clusterData.connected) {
+                            return ".";
+                          }
+
+                          return (
+                            <>
                             : <ExternalLink href={clusterData.clusterInfo.externalServer}>
-                              {clusterData.clusterInfo.externalServer}
-                            </ExternalLink>
-                          </>
-                        );
+                                {clusterData.clusterInfo.externalServer}
+                              </ExternalLink>
+                            </>
+                          );
+                        }
                       }
-                    }
-                    </DataFetcher>
-                  </li>
-                  <li>
-                    <code>{res.defaultSecrets.clusterToken}</code> will
-                    contain a Service Account Token for&nbsp;
+                      </DataFetcher>
+                    </li>
+                    <li>
+                      <code>{res.defaultSecrets.clusterToken}</code> will
+                      contain a Service Account Token for the service account,&nbsp;
+                      {
+                        namespace && serviceAccount ? <b>{namespace}/{serviceAccount} </b> : ""
+                      }
+                      which can be used to log into the OpenShift API server.
+                      A different service account token is generated for each repository, but they all log in as the same service account.
+                    </li>
                     {
-                      namespace && serviceAccount ? <b>{namespace}/{serviceAccount} </b> : "the service account "
+                      createNamespaceSecret ?
+                        <li>
+                          <code>{res.defaultSecrets.namespace}</code> will contain the configured namespace{
+                            namespace ? <>, <b>{namespace}</b></> : ""
+                          }.
+                        </li>
+                        : ""
                     }
-                    which can be used to log into the OpenShift API server.
-                    The token will be different for each repository, but have the same permissions.
-                  </li>
-                </ol>
-              </div>
-            )
-          }
+                  </ol>
+                </div>
+              );
+            }}
         </DataFetcher>
       </CardBody>
     </Card>
   );
 }
 
-export function ServiceAccountCard(
+export function NamespaceSACards(
   {
     namespace, setNamespace, serviceAccount, setServiceAccount,
+    createNamespaceSecret, setCreateNamespaceSecret,
   }: {
     namespace: string | undefined,
     setNamespace: (namespace: string | undefined) => void,
     serviceAccount: string | undefined,
     setServiceAccount: (serviceAccount: string | undefined, role: string | undefined) => void,
+    createNamespaceSecret: boolean,
+    setCreateNamespaceSecret: (createNamespaceSecret: boolean) => void,
   }
 ): JSX.Element {
 
@@ -181,6 +200,14 @@ export function ServiceAccountCard(
                 ))
               }
             </Select>
+
+            <Checkbox
+              id="create-ns-secret-cb"
+              className="my-3"
+              label={"Create an Actions secret containing this namespace"}
+              isChecked={createNamespaceSecret}
+              onChange={(checked) => { setCreateNamespaceSecret(checked); }}
+            />
 
             <Divider className="my-4"/>
 

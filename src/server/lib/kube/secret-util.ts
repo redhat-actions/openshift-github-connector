@@ -4,7 +4,7 @@ import Log from "server/logger";
 import HttpConstants from "common/http-constants";
 import { GitHubRepoId } from "common/types/gh-types";
 import { getFriendlyHTTPError, objValuesFromb64, objValuesTob64 } from "server/util/server-util";
-import KubeWrapper, { ServiceAccountToken } from "./kube-wrapper";
+import KubeWrapper from "./kube-wrapper";
 import { toValidK8sName } from "common/common-util";
 
 const APP_NAME = "openshift-github-connector";
@@ -60,7 +60,7 @@ namespace SecretUtil {
    * @returns The namespaced used for the connector's internal "storage secrets". NOT for user secrets!
    */
   export function getStorageSecretsNamespace(): string {
-    return KubeWrapper.instance.ns;
+    return KubeWrapper.instance.namespace;
   }
 
   export async function createSecret(
@@ -205,6 +205,13 @@ namespace SecretUtil {
     return selector;
   }
   */
+
+  type ServiceAccountToken = {
+    namespace: string;
+    serviceAccountName: string;
+    token: string;
+    tokenSecretName: string;
+  }
 
   const LABEL_CREATED_FOR_REPO_ID = CONNECTOR_LABEL_NAMESPACE + "/repo-id";
 
