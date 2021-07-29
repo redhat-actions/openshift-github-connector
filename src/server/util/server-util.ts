@@ -1,7 +1,6 @@
 import { Stringable } from "common/common-util";
 import HttpConstants from "common/http-constants";
 import dotenv from "dotenv";
-import express from "express";
 import fs from "fs/promises";
 import fetch, { RequestInit, Response } from "node-fetch";
 import Log from "server/logger";
@@ -32,6 +31,7 @@ export function removeTrailingSlash(s: string): string {
   return s;
 }
 
+/*
 export function getServerUrl(req: express.Request, includePath: boolean = false): string {
   let reqPath = "/";
   if (includePath) {
@@ -42,6 +42,7 @@ export function getServerUrl(req: express.Request, includePath: boolean = false)
   Log.info(`Server URL is ${serverUrl}`);
   return serverUrl;
 }
+*/
 
 export function tob64(s: string): string {
   return Buffer.from(s).toString("base64");

@@ -77,7 +77,7 @@ export function BasePage(
           <PageSection id="page-content" className={classNames({ "full-width": options.fullWidth })}>
             <Content />
           </PageSection>
-          <div id="notifications" >
+          <div id="notifications">
             {
               alerts.map((alert, i) => (
                 <Alert key={i} variant={alert.severity} title={alert.title}

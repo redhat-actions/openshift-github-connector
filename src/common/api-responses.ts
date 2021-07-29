@@ -192,6 +192,7 @@ namespace ApiResponses {
       created: boolean,
       name: string,
       namespace: string,
+      role: string,
     },
     successes?: RepoSecretCreationSuccess[],
     failures?: RepoSecretCreationFailure[],

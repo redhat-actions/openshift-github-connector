@@ -11,8 +11,9 @@ import Banner from "../../../components/banner";
 import { ExternalLink } from "../../../components/external-link";
 import BtnBody from "../../../components/btn-body";
 import { getWindowLocationNoPath, fetchJSON } from "../../../util/client-util";
-import { getGitHubAppManifest } from "../../../util/github-app-manifest";
+import { getGitHubAppManifest, GitHubAppManifestSettings } from "../../../util/github-app-manifest";
 import { CommonIcons } from "../../../util/icons";
+import ApiResponses from "../../../../common/api-responses";
 
 export const CREATE_NEW_TITLE = "Create New App";
 
@@ -80,8 +81,26 @@ export default function CreateAppCard(): JSX.Element {
               async (e) => {
                 e.preventDefault();
                 setIsLoading(true);
+
+                let appName = "OpenShift Connector";
                 try {
-                  const appManifest = getGitHubAppManifest(getWindowLocationNoPath(), { public: publicChecked });
+                  const user = await fetchJSON<never, ApiResponses.OpenShiftUserResponse>("GET", ApiEndpoints.User.Root);
+                  if (user.success) {
+                    appName = user.name + "'s " + appName;
+                  }
+                }
+                catch (err) {
+                  // nothing
+                  console.error(err);
+                }
+
+                const manifestSettings: GitHubAppManifestSettings = {
+                  name: appName,
+                  public: publicChecked,
+                };
+
+                try {
+                  const appManifest = getGitHubAppManifest(getWindowLocationNoPath(), manifestSettings);
                   const manifestInput = document.getElementById(manifestInputId) as HTMLInputElement;
                   manifestInput.value = JSON.stringify(appManifest);
 

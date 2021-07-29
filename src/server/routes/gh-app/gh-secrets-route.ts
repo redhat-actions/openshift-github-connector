@@ -1,4 +1,5 @@
 import express from "express";
+import * as k8s from "@kubernetes/client-node";
 
 import ApiEndpoints from "common/api-endpoints";
 import ApiRequests from "common/api-requests";
@@ -16,7 +17,7 @@ const router = express.Router();
 
 router.route(ApiEndpoints.App.Repos.Secrets.path)
   .get(async (
-    req: express.Request<any, ApiResponses.ReposSecretsStatus, void /* ApiRequests.RepoIDsList */>,
+    req: express.Request,
     res: express.Response<ApiResponses.ReposSecretsStatus>,
     next
   ) => {
@@ -96,7 +97,7 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
     }
 
     const {
-      namespace, serviceAccount, repos,
+      namespace, serviceAccount, serviceAccountRole, repos,
     } = req.body;
 
     const k8sClient = user.makeCoreV1Client();
@@ -111,10 +112,35 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
         metadata: {
           name: serviceAccount,
           labels: {
-            "created-by": user.name,
+            [SecretUtil.CONNECTOR_LABEL_NAMESPACE + "/created-by"]: user.name,
           },
         },
       });
+
+      Log.info(`Successfully created serviceaccount`);
+
+      if (serviceAccountRole) {
+        const rolebinding: k8s.V1RoleBinding = {
+          subjects: [{
+            kind: "ServiceAccount",
+            name: serviceAccount,
+            namespace,
+          }],
+          roleRef: {
+            apiGroup: "rbac.authorization.k8s.io",
+            name: serviceAccountRole,
+            kind: "ClusterRole",
+          },
+        };
+
+        Log.info(`Adding ${rolebinding.roleRef.kind}/${rolebinding.roleRef.name} to ${serviceAccount}`);
+
+        const authClient = user.makeKubeConfig().makeApiClient(k8s.RbacAuthorizationV1Api);
+
+        await authClient.createNamespacedRoleBinding(namespace, rolebinding);
+      }
+
+      Log.info(`Successfully added role to serviceaccount`);
 
       serviceAccountCreated = true;
     }
@@ -263,6 +289,7 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
       serviceAccount: {
         created: serviceAccountCreated,
         name: serviceAccount,
+        role: serviceAccountRole,
         namespace,
       },
       successes,

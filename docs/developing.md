@@ -86,6 +86,8 @@ INSECURE_TRUST_APISERVER_CERT: true
 
 Then run `yarn dev` to run the development server.
 
+The project runs at [https://localhost:3000](https://localhost:3000). You will not get a response if you use regular HTTP.
+
 ## Project Structure
 
 The backend is in Express, and the frontend is in React using create-react-app (CRA). Code can be shared across the stack from the `common/` directory.

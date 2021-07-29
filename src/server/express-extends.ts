@@ -17,7 +17,7 @@ export function addCustomExtensions(app: express.Express): void {
 const sendStatus = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
   // Log.info(`Override res.sendStatus`);
 
-  res.sendStatus = (code: StatusCodes): express.Response => {
+  res.sendStatus = (code: StatusCodes): express.Response<ApiResponses.Result> => {
     res.status(code);
 
     // Log.info(`sendStatus ${code}`);

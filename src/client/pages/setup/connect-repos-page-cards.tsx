@@ -34,7 +34,7 @@ export function ConnectReposIntroCard(): JSX.Element {
           </p>
           <p>
             <ExternalLink
-              href={"https://github.com/redhat-actions/oc-login"}
+              href={"https://github.com/redhat-actions/oc-login#readme"}
             >
               <CommonIcons.Documentation className="me-2" />
             Read More about using oc-login to log in to OpenShift from GitHub Actions.
@@ -149,6 +149,8 @@ export function ServiceAccountCard(
           );
         }
 
+        const selectPlaceholder = "Select a namespace, or start typing to filter";
+
         return (
           <>
             <p>
@@ -158,11 +160,11 @@ export function ServiceAccountCard(
             </p>
             <Select
               variant={SelectVariant.typeahead}
-              typeAheadAriaLabel={"Select a namespace"}
+              typeAheadAriaLabel={selectPlaceholder}
               isCreatable={false}
               onToggle={(isExpanded) => setIsOpen(isExpanded)}
               isOpen={isOpen}
-              placeholderText={"Select a namespace"}
+              placeholderText={selectPlaceholder}
               selections={namespace}
               onSelect={(_event, selection, isPlaceholder) => {
                 setIsOpen(false);
@@ -229,6 +231,8 @@ export function ServiceAccountSection(
             );
           }
 
+          const selectPlaceholder = "Select a Service Account, or start typing to filter";
+
           return (
             <>
               <p>
@@ -236,16 +240,16 @@ export function ServiceAccountSection(
                 <br/>
                 The service account must be granted the permissions it needs to execute workflows.
                 <br/>
-                You may enter the name of a new Service Account. It will be created with the <b>{DEFAULT_SA_ROLE}</b> ClusterRole.
+                You may enter the name of a new Service Account. It will be bound to the <b>{DEFAULT_SA_ROLE}</b> ClusterRole in its namespace.
               </p>
               <Select
                 variant={SelectVariant.typeahead}
-                typeAheadAriaLabel={"Select a Service Account"}
+                typeAheadAriaLabel={selectPlaceholder}
                 isCreatable={true}
                 onToggle={(isExpanded) => setIsOpen(isExpanded)}
                 onClear={() => setServiceAccount(undefined, undefined)}
                 isOpen={isOpen}
-                placeholderText={"Select a Service Account"}
+                placeholderText={selectPlaceholder}
                 selections={serviceAccount}
                 onSelect={(_event, selection, isPlaceholder) => {
                   setIsOpen(false);
@@ -257,8 +261,8 @@ export function ServiceAccountSection(
                 }}
               >
                 {
-                  serviceAccounts.map((ns, i) => (
-                    <SelectOption key={i} value={ns} />
+                  serviceAccounts.map((sa, i) => (
+                    <SelectOption key={i} value={sa} />
                   ))
                 }
               </Select>
