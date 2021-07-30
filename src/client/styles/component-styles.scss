@@ -126,6 +126,10 @@ input {
 .pf-c-form__group, .pf-c-form-control {
   margin-bottom: c.$pf-global--spacer--sm;
 
+  .pf-c-form__group-label {
+    font-weight: bold;
+  }
+
   &-label {
     display: inline-flex;
     align-items: center;

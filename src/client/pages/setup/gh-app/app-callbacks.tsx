@@ -130,7 +130,7 @@ export function InstalledAppPage(): JSX.Element {
         });
       })
       .catch((err) => {
-        setError(err);
+        setError(err.toString());
       });
 
     return () => {

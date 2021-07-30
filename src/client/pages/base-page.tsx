@@ -1,9 +1,8 @@
 import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Alert, Brand,
-  Page, PageHeader, PageHeaderTools, PageSection,
-  PageSidebar, Title, AlertActionCloseButton,
+  Brand, Page, PageHeader, PageHeaderTools,
+  PageSection, PageSidebar, Title,
 } from "@patternfly/react-core";
 import { UserAltIcon } from "@patternfly/react-icons";
 
@@ -11,8 +10,9 @@ import classNames from "classnames";
 import { getTitle } from "../components/title";
 import ClientPages, { ClientPageOptions } from "./client-pages";
 import {
-  OpenShiftUserContext, InConsoleContext, AlertInfo, PushAlertContext,
+  OpenShiftUserContext, InConsoleContext, PushAlertContext,
 } from "../contexts";
+import AlertDisplayer, { AlertInfo } from "../components/alerts";
 
 export function BasePage(
   { title, options, content: Content }:
@@ -27,7 +27,12 @@ export function BasePage(
 
   if (inConsole) {
     return (
-      <Content />
+      <>
+        <PushAlertContext.Provider value={(newAlert: AlertInfo) => setAlerts([ ...alerts, newAlert ])}>
+          <Content />
+          <AlertDisplayer alerts={alerts} setAlerts={(newAlerts) => setAlerts(newAlerts)} />
+        </PushAlertContext.Provider>
+      </>
     );
   }
 
@@ -77,31 +82,7 @@ export function BasePage(
           <PageSection id="page-content" className={classNames({ "full-width": options.fullWidth })}>
             <Content />
           </PageSection>
-          <div id="notifications" >
-            {
-              alerts.map((alert, i) => (
-                <Alert key={i} variant={alert.severity} title={alert.title}
-                  timeout={5000}
-                  onTimeout={() => {
-                    const alertsCopy = [ ...alerts ];
-                    alertsCopy.splice(i, 1);
-                    setAlerts(alertsCopy);
-                  }}
-                  actionClose={
-                    <AlertActionCloseButton
-                      onClose={() => {
-                        const alertsCopy = [ ...alerts ];
-                        alertsCopy.splice(i, 1);
-                        setAlerts(alertsCopy);
-                      }}
-                    />
-                  }
-                >
-                  {alert.body ? <p>{alert.body}</p> : ""}
-                </Alert>
-              ))
-            }
-          </div>
+          <AlertDisplayer alerts={alerts} setAlerts={(newAlerts) => setAlerts(newAlerts)} />
         </PushAlertContext.Provider>
       </Page>
     </>

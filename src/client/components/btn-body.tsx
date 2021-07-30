@@ -6,6 +6,7 @@ export default function BtnBody(props: {
   icon?: IconElement,
   iconPosition?: "left" | "right",
   iconClasses?: string,
+  // Better than Patternfly's because the loading icon goes on the opposite side from the icon.
   isLoading?: boolean,
   text?: string,
   title?: string,

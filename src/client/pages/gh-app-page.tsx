@@ -83,7 +83,7 @@ function GitHubAppPageBody({
         <div className="btn-line even">
           {
             viewType === "user" ?
-              <Button variant="danger" isLoading={isDeleting} className={classNames({ "d-none": isSetup })} onClick={
+              <Button variant="danger" className={classNames({ "d-none": isSetup })} onClick={
                 async () => {
                   if (isDeleting) {
                     return;
@@ -102,10 +102,10 @@ function GitHubAppPageBody({
                   }
                 }
               }>
-                <BtnBody icon={TimesIcon} text="Uninstall"/>
+                <BtnBody icon={TimesIcon} text="Uninstall" isLoading={isDeleting} />
               </Button>
               :
-              <Button variant="danger" isLoading={isDeleting} className={classNames({ "d-none": isSetup })} onClick={
+              <Button variant="danger" className={classNames({ "d-none": isSetup })} onClick={
                 async () => {
                   if (isDeleting) {
                     return;
@@ -124,7 +124,7 @@ function GitHubAppPageBody({
                   }
                 }
               }>
-                <BtnBody icon={CommonIcons.Delete} text="Remove"/>
+                <BtnBody icon={CommonIcons.Delete} text="Remove" isLoading={isDeleting} />
               </Button>
           }
           <Button onClick={() => reload()}>

@@ -27,7 +27,7 @@ import Banner from "../../components/banner";
 import { getSecretsUrlForRepo, GitHubRepoId } from "../../../common/types/gh-types";
 import DataFetcher from "../../components/data-fetcher";
 import { CommonIcons, IconElement } from "../../util/icons";
-import { ConnectReposIntroCard, DefaultSecretsCard, ServiceAccountCard } from "./connect-repos-page-cards";
+import { ConnectReposIntroCard, DefaultSecretsCard, NamespaceSACards } from "./connect-repos-page-cards";
 import { PushAlertContext } from "../../contexts";
 
 interface RepoCheckedMap {
@@ -65,7 +65,7 @@ function setOneChecked(
 function buildSubmission(
   checkedStates: RepoCheckedMap,
   reposSecretsData: ApiResponses.ReposSecretsStatus,
-  serviceAccountData: Partial<Omit<ApiRequests.CreateActionsSecrets, "repos">>,
+  reqBody: Partial<Omit<ApiRequests.CreateActionsSecrets, "repos">>,
 ): ApiRequests.CreateActionsSecrets | undefined {
 
   const checkedRepos: GitHubRepoId[] = reposSecretsData.repos.filter((repoWithSecrets) => {
@@ -79,11 +79,7 @@ function buildSubmission(
     };
   });
 
-  if (checkedRepos.length === 0) {
-    throw new Error("No repositories selected");
-  }
-
-  const { namespace, serviceAccount, serviceAccountRole } = serviceAccountData;
+  const { namespace, serviceAccount, serviceAccountRole } = reqBody;
   if (!namespace) {
     throw new Error("No namespace selected");
   }
@@ -94,9 +90,19 @@ function buildSubmission(
     throw new Error("No service account role selected");
   }
 
+  if (checkedRepos.length === 0) {
+    throw new Error("No repositories selected");
+  }
+
+  let { createNamespaceSecret } = reqBody;
+  if (!createNamespaceSecret) {
+    createNamespaceSecret = false;
+  }
+
   return {
     repos: checkedRepos,
     namespace,
+    createNamespaceSecret,
     serviceAccount,
     serviceAccountRole,
   };
@@ -113,6 +119,7 @@ export default function ConnectReposPage(): JSX.Element {
 
   const [ reposCheckedMap, setReposCheckedMap ] = useState<RepoCheckedMap>({});
   const [ namespace, setNamespace ] = useState<string>();
+  const [ createNamespaceSecret, setCreateNamespaceSecret ] = useState(false);
   const [ serviceAccount, setServiceAccount ] = useState<string>();
   const [ serviceAccountRole, setServiceAccountRole ] = useState<string>();
 
@@ -122,10 +129,15 @@ export default function ConnectReposPage(): JSX.Element {
   return (
     <>
       <ConnectReposIntroCard />
-      <ServiceAccountCard
+      <NamespaceSACards
         namespace={namespace}
         setNamespace={(newNs) => {
           setNamespace(newNs);
+          setSubmissionResult(undefined);
+        }}
+        createNamespaceSecret={createNamespaceSecret}
+        setCreateNamespaceSecret={(newCreateNsSecret) => {
+          setCreateNamespaceSecret(newCreateNsSecret);
           setSubmissionResult(undefined);
         }}
         serviceAccount={serviceAccount}
@@ -135,7 +147,7 @@ export default function ConnectReposPage(): JSX.Element {
           setSubmissionResult(undefined);
         }}
       />
-      <DefaultSecretsCard serviceAccount={serviceAccount} namespace={namespace} />
+      <DefaultSecretsCard serviceAccount={serviceAccount} namespace={namespace} createNamespaceSecret={createNamespaceSecret} />
 
       <DataFetcher loadingDisplay="card" type="generic" fetchData={async () => {
         const reposSecretsData = await fetchJSON<never, ApiResponses.ReposSecretsStatus>("GET", ApiEndpoints.App.Repos.Secrets);
@@ -152,141 +164,143 @@ export default function ConnectReposPage(): JSX.Element {
       }}>{
           (reposSecretsData: ApiResponses.ReposSecretsStatus, reload) => {
             return (
-              <Card>
-                <CardTitle>
-                  <div>
+              <>
+                <Card>
+                  <CardTitle>
+                    <div>
                     Repositories
-                  </div>
-                  <div className="ms-auto">
-                    <div className="btn-line">
-                      <Button variant="primary">
-                        <ExternalLink
-                          href={reposSecretsData.urls.installationSettings}
-                          title="Edit Installation"
-                        >
-                          <BtnBody icon={CommonIcons.Configure} text="Edit Installation" />
-                        </ExternalLink>
-                      </Button>
-                      <Button variant="primary"
+                    </div>
+                    <div className="ms-auto">
+                      <div className="btn-line">
+                        <Button variant="primary">
+                          <ExternalLink
+                            href={reposSecretsData.urls.installationSettings}
+                            title="Edit Installation"
+                          >
+                            <BtnBody icon={CommonIcons.Configure} text="Edit Installation" />
+                          </ExternalLink>
+                        </Button>
+                        <Button variant="primary"
                         // onClick={props.onReload}
-                        onClick={async () => {
-                          await reload();
+                          onClick={async () => {
+                            await reload();
+                          }}
+                        >
+                          <BtnBody icon={CommonIcons.Reload} text="Reload"/>
+                        </Button>
+                      </div>
+                    </div>
+                  </CardTitle>
+                  <CardBody>
+                    <p>
+                    Select the repositories to create secrets in.
+                    </p>
+                    <p>
+                    Then, click <b>Create Secrets</b>.
+                    </p>
+                    <div className="text-md my-4 btn-line">
+                      <Button variant="tertiary"
+                        onClick={(_e) => {
+                          setReposCheckedMap(setAllChecked(true, reposCheckedMap));
                         }}
                       >
-                        <BtnBody icon={CommonIcons.Reload} text="Reload"/>
+                        <BtnBody icon={CheckSquareIcon} text="Select All" />
+                      </Button>
+
+                      <Button variant="tertiary"
+                        onClick={(_e) => {
+                          setReposCheckedMap(setAllChecked(false, reposCheckedMap));
+                        }}
+                        title="Deselect All"
+                      >
+                        <BtnBody icon={MinusSquareIcon} text="Deselect All"/>
                       </Button>
                     </div>
-                  </div>
-                </CardTitle>
-                <CardBody>
-                  <p>
-                    Select the repositories to create secrets in.
-                  </p>
-                  <p>
-                    Then, click <b>Create Secrets</b>.
-                  </p>
-                  <div className="text-md my-4 btn-line">
-                    <Button variant="tertiary"
-                      onClick={(_e) => {
-                        setReposCheckedMap(setAllChecked(true, reposCheckedMap));
-                      }}
-                    >
-                      <BtnBody icon={CheckSquareIcon} text="Select All" />
-                    </Button>
-
-                    <Button variant="tertiary"
-                      onClick={(_e) => {
-                        setReposCheckedMap(setAllChecked(false, reposCheckedMap));
-                      }}
-                      title="Deselect All"
-                    >
-                      <BtnBody icon={MinusSquareIcon} text="Deselect All"/>
-                    </Button>
-                  </div>
-                  <div className="long-content">
-                    {
-                      reposSecretsData.repos.length === 0
-                        ? (
-                          <p>
+                    <div className="long-content">
+                      {
+                        reposSecretsData.repos.length === 0
+                          ? (
+                            <p>
                             The app does not have permissions to access any repositories. Click Edit Installation to add repositories.
-                          </p>
-                        )
-                        : reposSecretsData.repos.map((repoWithSecrets, i) => {
-                          const repoId = repoWithSecrets.repo.id;
-                          return (
-                            <RepoWithSecretsItem key={i}
-                              repoWithSecrets={repoWithSecrets}
-                              submissionResult={submissionResult}
-                              i={i}
-                              checked={reposCheckedMap[repoId] === true}
-                              defaultSecrets={reposSecretsData.defaultSecretNames}
-                              onCheckChanged={(checked: boolean) => { setReposCheckedMap(setOneChecked(repoId, checked, reposCheckedMap)); }}
-                            />
-                          );
-                        })
-                    }
-                  </div>
-
-                  <div className="d-flex justify-content-center align-items-center py-3">
-                    <Button className="btn-lg b"
-                      title={Object.values(reposCheckedMap).some((checked) => checked)
-                        ? "Create Secrets"
-                        : "Select at least one repository."
+                            </p>
+                          )
+                          : reposSecretsData.repos.map((repoWithSecrets, i) => {
+                            const repoId = repoWithSecrets.repo.id;
+                            return (
+                              <RepoWithSecretsItem key={i}
+                                repoWithSecrets={repoWithSecrets}
+                                submissionResult={submissionResult}
+                                i={i}
+                                checked={reposCheckedMap[repoId] === true}
+                                defaultSecrets={reposSecretsData.defaultSecretNames}
+                                onCheckChanged={(checked: boolean) => { setReposCheckedMap(setOneChecked(repoId, checked, reposCheckedMap)); }}
+                              />
+                            );
+                          })
                       }
-                      disabled={isSubmitting || !Object.values(reposCheckedMap).some((checked) => checked)}
-                      isLoading={isSubmitting}
-                      onClick={async () => {
-                        let submission;
-                        try {
-                          submission = buildSubmission(
-                            reposCheckedMap,
-                            reposSecretsData,
-                            { namespace, serviceAccount, serviceAccountRole },
-                          );
-                        }
-                        catch (err) {
-                          pushAlert({ severity: "warning", title: err.message });
-                          return;
-                        }
+                    </div>
+                  </CardBody>
+                </Card>
 
-                        try {
-                          setIsSubmitting(true);
-                          setSubmissionResult(undefined);
+                <div className="center-y justify-content-end pb-4">
+                  <Button
+                    disabled={isSubmitting || !Object.values(reposCheckedMap).some((checked) => checked)}
+                    isLarge={true}
+                    onClick={async () => {
+                      let submission;
+                      try {
+                        submission = buildSubmission(
+                          reposCheckedMap,
+                          reposSecretsData, {
+                            namespace,
+                            createNamespaceSecret,
+                            serviceAccount,
+                            serviceAccountRole,
+                          }
+                        );
+                      }
+                      catch (err) {
+                        pushAlert({ severity: "warning", title: err.message });
+                        return;
+                      }
 
-                          const res = await fetchJSON<ApiRequests.CreateActionsSecrets, ApiResponses.RepoSecretsCreationSummary>(
-                            "POST",
-                            ApiEndpoints.App.Repos.Secrets.path,
-                            submission,
-                          );
+                      try {
+                        setIsSubmitting(true);
+                        setSubmissionResult(undefined);
 
-                          setSubmissionResult(res);
-                        }
-                        catch (err) {
-                          pushAlert({ severity: err.severity ?? "danger", title: `Creating secrets failed`, body: err.message });
-                        }
-                        finally {
-                          setIsSubmitting(false);
-                        }
+                        const res = await fetchJSON<ApiRequests.CreateActionsSecrets, ApiResponses.RepoSecretsCreationSummary>(
+                          "POST",
+                          ApiEndpoints.App.Repos.Secrets.path,
+                          submission,
+                        );
 
-                        await reload();
+                        setSubmissionResult(res);
+                      }
+                      catch (err) {
+                        pushAlert({ severity: err.severity ?? "danger", title: `Creating secrets failed`, body: err.message });
+                      }
+                      finally {
+                        setIsSubmitting(false);
+                      }
 
-                        if (submissionResult) {
-                          focusBanner();
-                        }
-                      }}>
-                      <BtnBody text="Create Secrets" icon={CommonIcons.Add} />
-                    </Button>
-                  </div>
+                      await reload();
 
-                  {
-                    submissionResult
-                      ? <SubmissionResultBanner
-                        result={submissionResult}
-                      />
-                      : <></>
-                  }
-                </CardBody>
-              </Card>
+                      if (submissionResult) {
+                        focusBanner();
+                      }
+                    }}>
+                    <BtnBody text="Create Secrets" icon={CommonIcons.Add} isLoading={isSubmitting} />
+                  </Button>
+                </div>
+
+                {
+                  submissionResult
+                    ? <SubmissionResultBanner
+                      result={submissionResult}
+                    />
+                    : <></>
+                }
+              </>
             );
           }
         }
@@ -426,6 +440,7 @@ function RepoWithSecretsItem({
                               {[
                                 defaultSecrets.defaultSecrets.clusterServerUrl,
                                 defaultSecrets.defaultSecrets.clusterToken,
+                                defaultSecrets.defaultSecrets.namespace,
                               ].includes(secret.name)
                                 ? getSecretNameWarning([ secret.name ])
                                 : ("")
@@ -490,7 +505,7 @@ function getSecretNameWarning(_secretNames: string[]): JSX.Element {
 
   return (
     <div>
-      <InfoCircleIcon className="me-2 text-success" title={msg} />
+      <InfoCircleIcon className="me-2" title={msg} />
       {msg}
     </div>
   );

@@ -2,6 +2,7 @@
 export const DEFAULT_SECRET_NAMES = {
   clusterServerUrl: "OPENSHIFT_SERVER",
   clusterToken: "OPENSHIFT_TOKEN",
+  namespace: "OPENSHIFT_NAMESPACE",
 
   registryPassword: "REGISTRY_PASSWORD",
 };

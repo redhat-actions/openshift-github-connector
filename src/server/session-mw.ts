@@ -6,6 +6,7 @@ import { tmpdir } from "os";
 
 import Log from "server/logger";
 import ApiEndpoints from "common/api-endpoints";
+import { isProduction } from "./util/server-util";
 
 const dayMs = 1000 * 60 * 60 * 24;
 const FileStore = sessionFileStore(session);
@@ -65,8 +66,8 @@ function getSessionMw(): express.RequestHandler {
       httpOnly: true,
       maxAge: dayMs,
       // https://github.com/auth0/passport-auth0/issues/70#issuecomment-432895163
-      sameSite: true,
-      secure: true,
+      sameSite: isProduction(),
+      secure: "auto",
       signed: true,
     },
   });

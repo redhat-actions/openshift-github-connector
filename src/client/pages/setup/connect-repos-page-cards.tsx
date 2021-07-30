@@ -1,5 +1,5 @@
 import {
-  Card, CardBody, CardTitle, Divider, Select, SelectOption, SelectVariant,
+  Card, CardBody, CardTitle, Checkbox, Divider, Select, SelectOption, SelectVariant,
 } from "@patternfly/react-core";
 import { useState } from "react";
 import ApiEndpoints from "../../../common/api-endpoints";
@@ -8,6 +8,7 @@ import { toValidK8sName } from "../../../common/common-util";
 import DataFetcher from "../../components/data-fetcher";
 import { DataFetcherCard } from "../../components/data-fetcher-card";
 import { ExternalLink } from "../../components/external-link";
+import NamespaceSelect from "../../components/namespace-select";
 import { CommonIcons } from "../../util/icons";
 
 export function ConnectReposIntroCard(): JSX.Element {
@@ -34,7 +35,7 @@ export function ConnectReposIntroCard(): JSX.Element {
           </p>
           <p>
             <ExternalLink
-              href={"https://github.com/redhat-actions/oc-login"}
+              href={"https://github.com/redhat-actions/oc-login#readme"}
             >
               <CommonIcons.Documentation className="me-2" />
             Read More about using oc-login to log in to OpenShift from GitHub Actions.
@@ -67,7 +68,10 @@ export function ConnectReposIntroCard(): JSX.Element {
   );
 }
 
-export function DefaultSecretsCard({ namespace, serviceAccount }: { namespace?: string, serviceAccount?: string }) {
+export function DefaultSecretsCard(
+  { namespace, createNamespaceSecret, serviceAccount }:
+  { namespace?: string, createNamespaceSecret: boolean, serviceAccount?: string }
+) {
   return (
     <Card>
       <CardTitle>
@@ -80,74 +84,81 @@ export function DefaultSecretsCard({ namespace, serviceAccount }: { namespace?: 
           loadingDisplay="card-body"
         >
           {
-            (res: ApiResponses.DefaultSecretsResponse) => (
-              <div>
-                <p>
-                  To each repository, two secrets will be added:
-                </p>
-                <ol>
-                  <li>
-                    <code>{res.defaultSecrets.clusterServerUrl}</code> will
-                    contain the URL to this OpenShift {"cluster's"} API server
-                    <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root} loadingDisplay="none">{
-                      (clusterData: ApiResponses.ClusterState) => {
-                        if (!clusterData.connected) {
-                          return ".";
-                        }
+            (res: ApiResponses.DefaultSecretsResponse) => {
 
-                        return (
-                          <>
+              const count = createNamespaceSecret ? "three" : "two";
+
+              return (
+                <div>
+                  <p>
+                  To each repository, {count} secrets will be added:
+                  </p>
+                  <ol>
+                    <li>
+                      <code>{res.defaultSecrets.clusterServerUrl}</code> will
+                    contain the URL to this OpenShift {"cluster's"} API server
+                      <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root} loadingDisplay="none">{
+                        (clusterData: ApiResponses.ClusterState) => {
+                          if (!clusterData.connected) {
+                            return ".";
+                          }
+
+                          return (
+                            <>
                             : <ExternalLink href={clusterData.clusterInfo.externalServer}>
-                              {clusterData.clusterInfo.externalServer}
-                            </ExternalLink>
-                          </>
-                        );
+                                {clusterData.clusterInfo.externalServer}
+                              </ExternalLink>
+                            </>
+                          );
+                        }
                       }
-                    }
-                    </DataFetcher>
-                  </li>
-                  <li>
-                    <code>{res.defaultSecrets.clusterToken}</code> will
-                    contain a Service Account Token for&nbsp;
+                      </DataFetcher>
+                    </li>
+                    <li>
+                      <code>{res.defaultSecrets.clusterToken}</code> will
+                      contain a Service Account Token for the service account,&nbsp;
+                      {
+                        namespace && serviceAccount ? <b>{namespace}/{serviceAccount} </b> : ""
+                      }
+                      which can be used to log into the OpenShift API server.
+                      A different service account token is generated for each repository, but they all log in as the same service account.
+                    </li>
                     {
-                      namespace && serviceAccount ? <b>{namespace}/{serviceAccount} </b> : "the service account "
+                      createNamespaceSecret ?
+                        <li>
+                          <code>{res.defaultSecrets.namespace}</code> will contain the configured namespace{
+                            namespace ? <>, <b>{namespace}</b></> : ""
+                          }.
+                        </li>
+                        : ""
                     }
-                    which can be used to log into the OpenShift API server.
-                    The token will be different for each repository, but have the same permissions.
-                  </li>
-                </ol>
-              </div>
-            )
-          }
+                  </ol>
+                </div>
+              );
+            }}
         </DataFetcher>
       </CardBody>
     </Card>
   );
 }
 
-export function ServiceAccountCard(
+export function NamespaceSACards(
   {
     namespace, setNamespace, serviceAccount, setServiceAccount,
+    createNamespaceSecret, setCreateNamespaceSecret,
   }: {
     namespace: string | undefined,
     setNamespace: (namespace: string | undefined) => void,
     serviceAccount: string | undefined,
     setServiceAccount: (serviceAccount: string | undefined, role: string | undefined) => void,
+    createNamespaceSecret: boolean,
+    setCreateNamespaceSecret: (createNamespaceSecret: boolean) => void,
   }
 ): JSX.Element {
 
-  const [ isOpen, setIsOpen ] = useState(false);
-
   return (
     <DataFetcherCard type="api" title="Service Account for Workflow Authentication" endpoint={ApiEndpoints.Cluster.Namespaces.Root}>{
-      ({ namespaces }: ApiResponses.UserNamespaces) => {
-        if (namespaces.length === 0) {
-          return (
-            <p className="error">
-              You do not have access to any namespaces!
-            </p>
-          );
-        }
+      (namespacesRes: ApiResponses.UserNamespaces) => {
 
         return (
           <>
@@ -156,29 +167,16 @@ export function ServiceAccountCard(
               <br/>
               Workflows will execute in this namespace, and will not be able to access other namespaces.
             </p>
-            <Select
-              variant={SelectVariant.typeahead}
-              typeAheadAriaLabel={"Select a namespace"}
-              isCreatable={false}
-              onToggle={(isExpanded) => setIsOpen(isExpanded)}
-              isOpen={isOpen}
-              placeholderText={"Select a namespace"}
-              selections={namespace}
-              onSelect={(_event, selection, isPlaceholder) => {
-                setIsOpen(false);
-                if (isPlaceholder) {
-                  setNamespace(undefined);
-                  return;
-                }
-                setNamespace(selection.toString());
-              }}
-            >
-              {
-                namespaces.map((ns, i) => (
-                  <SelectOption key={i} value={ns} />
-                ))
-              }
-            </Select>
+
+            <NamespaceSelect namespacesRes={namespacesRes} namespace={namespace} setNamespace={setNamespace} />
+
+            <Checkbox
+              id="create-ns-secret-cb"
+              className="my-3"
+              label={"Create an Actions secret containing this namespace"}
+              isChecked={createNamespaceSecret}
+              onChange={(checked) => { setCreateNamespaceSecret(checked); }}
+            />
 
             <Divider className="my-4"/>
 
@@ -229,6 +227,8 @@ export function ServiceAccountSection(
             );
           }
 
+          const selectPlaceholder = "Select a Service Account, or start typing to filter";
+
           return (
             <>
               <p>
@@ -236,16 +236,16 @@ export function ServiceAccountSection(
                 <br/>
                 The service account must be granted the permissions it needs to execute workflows.
                 <br/>
-                You may enter the name of a new Service Account. It will be created with the <b>{DEFAULT_SA_ROLE}</b> ClusterRole.
+                You may enter the name of a new Service Account. It will be bound to the <b>{DEFAULT_SA_ROLE}</b> ClusterRole in its namespace.
               </p>
               <Select
                 variant={SelectVariant.typeahead}
-                typeAheadAriaLabel={"Select a Service Account"}
+                typeAheadAriaLabel={selectPlaceholder}
                 isCreatable={true}
                 onToggle={(isExpanded) => setIsOpen(isExpanded)}
                 onClear={() => setServiceAccount(undefined, undefined)}
                 isOpen={isOpen}
-                placeholderText={"Select a Service Account"}
+                placeholderText={selectPlaceholder}
                 selections={serviceAccount}
                 onSelect={(_event, selection, isPlaceholder) => {
                   setIsOpen(false);
@@ -257,8 +257,8 @@ export function ServiceAccountSection(
                 }}
               >
                 {
-                  serviceAccounts.map((ns, i) => (
-                    <SelectOption key={i} value={ns} />
+                  serviceAccounts.map((sa, i) => (
+                    <SelectOption key={i} value={sa} />
                   ))
                 }
               </Select>

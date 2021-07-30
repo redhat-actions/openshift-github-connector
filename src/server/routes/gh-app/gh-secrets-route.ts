@@ -11,12 +11,13 @@ import SecretUtil from "server/lib/kube/secret-util";
 import { Severity } from "common/common-util";
 import { DEFAULT_SECRET_NAMES, getDefaultSecretNames } from "common/default-secret-names";
 import { send405 } from "server/express-extends";
+import KubeUtil from "server/lib/kube/kube-util";
 
 const router = express.Router();
 
 router.route(ApiEndpoints.App.Repos.Secrets.path)
   .get(async (
-    req: express.Request<any, ApiResponses.ReposSecretsStatus, void /* ApiRequests.RepoIDsList */>,
+    req: express.Request,
     res: express.Response<ApiResponses.ReposSecretsStatus>,
     next
   ) => {
@@ -96,25 +97,23 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
     }
 
     const {
-      namespace, serviceAccount, repos,
+      namespace, createNamespaceSecret, serviceAccount, serviceAccountRole, repos,
     } = req.body;
 
     const k8sClient = user.makeCoreV1Client();
 
-    const saExists = await KubeWrapper.doesServiceAccountExist(k8sClient, namespace, serviceAccount);
+    const saExists = await KubeUtil.doesServiceAccountExist(k8sClient, namespace, serviceAccount);
 
     let serviceAccountCreated = false;
     if (!saExists) {
-      Log.info(`Creating ${namespace}/serviceaccount/${serviceAccount}`);
 
-      await k8sClient.createNamespacedServiceAccount(namespace, {
-        metadata: {
-          name: serviceAccount,
-          labels: {
-            "created-by": user.name,
-          },
-        },
-      });
+      await KubeUtil.createServiceAccount(
+        user.makeKubeConfig(),
+        user.name,
+        namespace,
+        serviceAccount,
+        serviceAccountRole
+      );
 
       serviceAccountCreated = true;
     }
@@ -187,6 +186,14 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
         { name: DEFAULT_SECRET_NAMES.clusterServerUrl, plaintextValue: clusterServerUrl },
         { name: DEFAULT_SECRET_NAMES.clusterToken, plaintextValue: saToken.token },
       ];
+
+      if (createNamespaceSecret) {
+        secretsToCreate.push({ name: DEFAULT_SECRET_NAMES.namespace, plaintextValue: namespace });
+        Log.info(`Creating namespace secret with namespace ${namespace}`);
+      }
+      else {
+        Log.info(`Not creating namespace secret`);
+      }
 
       Log.info(`Creating ${secretsToCreate.length} secrets into ${repo.owner}/${repo.name}`);
       Log.info(`SA token to be used is "${saToken.tokenSecretName}"`);
@@ -263,6 +270,7 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
       serviceAccount: {
         created: serviceAccountCreated,
         name: serviceAccount,
+        role: serviceAccountRole,
         namespace,
       },
       successes,

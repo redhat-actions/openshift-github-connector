@@ -6,7 +6,6 @@ import ApiRequests from "common/api-requests";
 import ApiResponses from "common/api-responses";
 import Log from "server/logger";
 import { getFriendlyHTTPError, tob64 } from "server/util/server-util";
-import KubeWrapper from "server/lib/kube/kube-wrapper";
 import { GitHubContentFile, getSecretsUrlForRepo } from "common/types/gh-types";
 import { editWorkflow, getStarterWorkflowContents } from "server/lib/github/starter-workflow";
 import { createActionsSecret } from "server/lib/github/gh-util";
@@ -97,7 +96,7 @@ router.route(ApiEndpoints.App.Workflows.path)
           `"${workflowFilePath}" already exists in repository ${req.body.repo.full_name}`, "warning"
         );
       }
-      // TOOD
+      // TODO
     }
     catch (err) {
       if (err.status !== 404) {
@@ -106,9 +105,6 @@ router.route(ApiEndpoints.App.Workflows.path)
 
       // the file does not exist
     }
-
-    const namespace = KubeWrapper.instance.namespace;
-    req.body.namespace = namespace;
 
     const workflowFileContents = await getStarterWorkflowContents(installation);
     const workflowEdited = editWorkflow(req.body, imageRegistry, [ defaultBranch ], workflowFileContents);

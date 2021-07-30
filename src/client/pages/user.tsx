@@ -1,10 +1,12 @@
 import {
   Button, Card, CardBody, CardTitle,
 } from "@patternfly/react-core";
+import { SignOutAltIcon } from "@patternfly/react-icons";
 import { useContext, useState } from "react";
 
 import ApiEndpoints from "../../common/api-endpoints";
 import { ConnectorUserInfo } from "../../common/types/user-types";
+import BtnBody from "../components/btn-body";
 import { ObjectTable } from "../components/object-table";
 import { OpenShiftUserContext } from "../contexts";
 import { fetchJSON } from "../util/client-util";
@@ -45,7 +47,7 @@ export function UserPage(): JSX.Element {
                 setIsLoggingOut(false);
               }
             }}>
-            Log Out
+            <BtnBody icon={SignOutAltIcon} text="Log Out" isLoading={isLoggingOut} />
           </Button>
         </div>
       </div>
