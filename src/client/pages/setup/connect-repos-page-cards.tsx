@@ -8,6 +8,7 @@ import { toValidK8sName } from "../../../common/common-util";
 import DataFetcher from "../../components/data-fetcher";
 import { DataFetcherCard } from "../../components/data-fetcher-card";
 import { ExternalLink } from "../../components/external-link";
+import NamespaceSelect from "../../components/namespace-select";
 import { CommonIcons } from "../../util/icons";
 
 export function ConnectReposIntroCard(): JSX.Element {
@@ -155,20 +156,9 @@ export function NamespaceSACards(
   }
 ): JSX.Element {
 
-  const [ isOpen, setIsOpen ] = useState(false);
-
   return (
     <DataFetcherCard type="api" title="Service Account for Workflow Authentication" endpoint={ApiEndpoints.Cluster.Namespaces.Root}>{
-      ({ namespaces }: ApiResponses.UserNamespaces) => {
-        if (namespaces.length === 0) {
-          return (
-            <p className="error">
-              You do not have access to any namespaces!
-            </p>
-          );
-        }
-
-        const selectPlaceholder = "Select a namespace, or start typing to filter";
+      (namespacesRes: ApiResponses.UserNamespaces) => {
 
         return (
           <>
@@ -177,29 +167,8 @@ export function NamespaceSACards(
               <br/>
               Workflows will execute in this namespace, and will not be able to access other namespaces.
             </p>
-            <Select
-              variant={SelectVariant.typeahead}
-              typeAheadAriaLabel={selectPlaceholder}
-              isCreatable={false}
-              onToggle={(isExpanded) => setIsOpen(isExpanded)}
-              isOpen={isOpen}
-              placeholderText={selectPlaceholder}
-              selections={namespace}
-              onSelect={(_event, selection, isPlaceholder) => {
-                setIsOpen(false);
-                if (isPlaceholder) {
-                  setNamespace(undefined);
-                  return;
-                }
-                setNamespace(selection.toString());
-              }}
-            >
-              {
-                namespaces.map((ns, i) => (
-                  <SelectOption key={i} value={ns} />
-                ))
-              }
-            </Select>
+
+            <NamespaceSelect namespacesRes={namespacesRes} namespace={namespace} setNamespace={setNamespace} />
 
             <Checkbox
               id="create-ns-secret-cb"

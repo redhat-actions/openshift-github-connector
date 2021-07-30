@@ -16,15 +16,16 @@ html, body, #root, #wrapper, main {
   & .pf-c-alert {
     // the wizard has a z-index of 200, this should be high enough ??
     z-index: 999;
-    width: 40%;
+    width: 100%;
     margin-top: c.$pf-global--spacer--sm;
   }
 
   position: absolute;
   // top: c.$pf-global--spacer--2xl;
   bottom: 0;
-  right: c.$pf-global--spacer--md;
-  width: 100%;
+  // right: c.$pf-global--spacer--md;
+  left: c.$pf-global--spacer--md;
+  width: 40%;
 
   margin: c.$pf-global--spacer--lg;
 
@@ -127,6 +128,7 @@ code, pre {
     color: white;
     border-radius: 0.33em;
     padding: 0.15em 0.5em;
+    margin: 0 0.15em;
   }
 }
 

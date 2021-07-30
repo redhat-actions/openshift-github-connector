@@ -16,6 +16,7 @@ import SetupWizard, { getSetupPagePath } from "./setup/setup";
 import AddWorkflowsPage from "./add-workflows-page";
 import SetupFinishedPage from "./setup/setup-completion-page";
 import { PostCreateAppCallbackPage, InstalledAppPage } from "./setup/gh-app/app-callbacks";
+import InjectWorkflowsPage from "./inject-workflow-steps-page";
 
 export type ClientPageOptions = Partial<{
   fullWidth: boolean,
@@ -56,6 +57,7 @@ const SetupFinished = new ClientPage(Home, "/setup-complete", "Setup Complete", 
 const App = new ClientPage(Home, "/app", "GitHub App", GitHubAppPage);
 
 const AddWorkflows = new ClientPage(Home, "/add-workflows", "Add Workflows", AddWorkflowsPage);
+const InjectWorkflowSteps = new ClientPage(Home, "/inject-steps", "Inject Workflow Steps", InjectWorkflowsPage);
 const ConnectRepos = new ClientPage(Home, "/connect-repos", "Connect Repositories", SelectReposPage);
 const Cluster = new ClientPage(Home, "/cluster", "Cluster Info", ClusterPage);
 
@@ -87,6 +89,7 @@ const ClientPages = {
   App,
   Cluster,
   AddWorkflows,
+  InjectWorkflowSteps,
 
   ImageRegistries,
 

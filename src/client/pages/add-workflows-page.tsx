@@ -1,10 +1,13 @@
 import classNames from "classnames";
-import React from "react";
+import React, { useState } from "react";
 import {
-  Button, Card, CardTitle, CardBody, Form, FormGroup, TextInput, FormSelect, Checkbox, Radio,
+  Button, Card, CardTitle, CardBody,
+  FormGroup, TextInput, FormSelect, Checkbox,
+  Radio,
 } from "@patternfly/react-core";
 import {
-  BookOpenIcon, CogIcon, ExclamationTriangleIcon, GithubIcon, PlusIcon, SyncAltIcon, YoutubeIcon,
+  BookOpenIcon, CogIcon, ExclamationTriangleIcon, GithubIcon,
+  PlusIcon, SyncAltIcon, YoutubeIcon,
 } from "@patternfly/react-icons";
 import { Link } from "react-router-dom";
 import ApiEndpoints from "../../common/api-endpoints";
@@ -19,12 +22,14 @@ import BtnBody from "../components/btn-body";
 import { fetchJSON } from "../util/client-util";
 import ClientPages from "./client-pages";
 import { CommonIcons } from "../util/icons";
+import NamespaceSelect from "../components/namespace-select";
+import { PushAlertContext } from "../contexts";
 
 const DEFAULT_WORKFLOW_FILE_BASENAME = "openshift";
 const WORKFLOW_FILE_EXTENSION = ".yml";
 const WORKFLOWS_DIR = ".github/workflows/";
 
-const DEFAULT_PORT = 3003;
+const DEFAULT_PORT = 3000;
 
 interface AddWorkflowsPageState {
   repo?: GitHubRepoId,
@@ -36,12 +41,16 @@ interface AddWorkflowsPageState {
   overwriteExistingWorkflow: boolean,
   imageRegistryId?: string,
   port: string,
+  namespace?: string,
 
   isSubmitting: boolean,
   submissionResult?: ApiResponses.WorkflowCreationResult,
 }
 
 export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPageState> {
+
+  static override contextType = PushAlertContext;
+  override context!: React.ContextType<typeof PushAlertContext>;
 
   private readonly bannerId = "submission-banner";
   private readonly fileNameInputId = "filename-input";
@@ -110,26 +119,39 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
               Workflow files are kept in the {`repository's`} <code>{WORKFLOWS_DIR}</code> directory.
               The directory will be created if it does not exist.
             </p>
-            <Form className="pt-2">
-              <FormGroup
-                fieldId={this.fileNameInputId}
+            <FormGroup
+              className="pt-2"
+              fieldId={this.fileNameInputId}
+              validated={this.state.workflowFile.validationErr == null ? "success" : "error"}
+              helperTextInvalid={this.state.workflowFile.validationErr}
+              label={"File name"}
+            >
+              <TextInput
+                style={{ width: "20ch" }}
+                className="me-0"
+                id={this.fileNameInputId}
                 validated={this.state.workflowFile.validationErr == null ? "success" : "error"}
-                helperTextInvalid={this.state.workflowFile.validationErr}
-              >
-                <TextInput
-                  className="col-4 me-0"
-                  id={this.fileNameInputId}
-                  validated={this.state.workflowFile.validationErr == null ? "success" : "error"}
-                  defaultValue={DEFAULT_WORKFLOW_FILE_BASENAME}
-                  onChange={(value) => this.setWorkflowFileName(value)}
-                />
-                <TextInput isReadOnly
-                  className="col-1"
-                  type="text"
-                  value={this.state.workflowFile.extension}
-                />
-              </FormGroup>
-            </Form>
+                defaultValue={DEFAULT_WORKFLOW_FILE_BASENAME}
+                onChange={(value) => this.setWorkflowFileName(value)}
+              />
+              <TextInput isReadOnly
+                style={{ width: "8ch" }}
+                type="text"
+                value={this.state.workflowFile.extension}
+              />
+              <Checkbox
+                className="my-3"
+                id="overwrite-workflow-file"
+                isChecked={this.state.overwriteExistingWorkflow}
+                onChange={(checked) => this.setState({ overwriteExistingWorkflow: checked })}
+                label={
+                  <>
+                    Overwrite <code>
+                      {WORKFLOWS_DIR + (this.state.workflowFile.name || "(invalid)") + this.state.workflowFile.extension}
+                    </code> if it exists
+                  </>}
+              />
+            </FormGroup>
           </CardBody>
         </Card>
 
@@ -182,18 +204,19 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                         <>
                           <FormGroup
                             fieldId="registry"
-                            label="Image Registry"
                             helperText={<div>
                               An Actions secret called &quot;<b>{registriesRes.registryPasswordSecretName}</b>&quot; containing
                               the password for this registry will be created.
                             </div>
                             }
                           >
-                            <FormSelect id={this.imageRegistrySelectId}
+                            <FormSelect
+                              id={this.imageRegistrySelectId}
                               onChange={(value) => {
                                 this.setState({ imageRegistryId: value });
                               }}
                               className="col-6"
+                              label="Image Registry"
                             >
                               <option disabled selected value={undefined}>
                                 Select an Image Registry
@@ -220,35 +243,21 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
 
                   <FormGroup
                     fieldId="port"
-                    label="Application Port"
                     helperTextInvalid="Port must be a number between 1024 and 65536."
+                    label="Application Port"
                   >
                     <TextInput
-                      className="col-6"
+                      className="w-50"
                       validated={validatePort(this.state.port) ? "success" : "error"}
                       value={this.state.port}
                       onChange={(value) => this.setState({ port: value })}
                     />
                   </FormGroup>
 
-                  <FormGroup fieldId="project" label="OpenShift Project">
-                    <DataFetcher loadingDisplay="text" type="api" endpoint={ApiEndpoints.Cluster.Root}>{
-                      (clusterRes: ApiResponses.ClusterState) => {
-                        if (!clusterRes.connected) {
-                          return (<></>);
-                        }
-
-                        return (
-                          <TextInput
-                            className="col-6"
-                            defaultValue={clusterRes.namespace}
-                            isReadOnly
-                          />
-                        );
-                      }
-                    }
-                    </DataFetcher>
-                  </FormGroup>
+                  <NamespacePickerWithSecretOption
+                    namespace={this.state.namespace}
+                    setNamespace={(newNamespace) => this.setState({ namespace: newNamespace })}
+                  />
                 </CardBody>
               </Card>
             );
@@ -258,7 +267,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
         <DataFetcher type="api" endpoint={ApiEndpoints.App.Repos.Secrets} loadingDisplay="card">{
           (reposWithSecrets: ApiResponses.ReposSecretsStatus, reload) => {
             return (
-              <>
+              <div className="pb-4">
                 <Card>
                   <CardTitle>
                     <div>
@@ -290,7 +299,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                           return (
                             <div key={repo.repo.id}
                               className={classNames(
-                                "center-y row m-0 p-3 rounded",
+                                "center-y m-0 p-3 rounded",
                                 { "bg-darker": !isEven }
                               )}
                             >
@@ -338,51 +347,44 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
                         })
                       }
                     </div>
-
-                    <div className="mt-4 d-flex justify-content-between align-items-center">
-                      <Checkbox
-                        id="overwrite-workflow-file"
-                        isChecked={this.state.overwriteExistingWorkflow}
-                        onChange={(checked) => this.setState({ overwriteExistingWorkflow: checked })}
-                        label={
-                          <>
-                          Overwrite <code>
-                              {WORKFLOWS_DIR + (this.state.workflowFile.name || "(invalid)") + this.state.workflowFile.extension}
-                            </code> if it exists
-                          </>}
-                      />
-                      <Button
-                        disabled={this.state.repo == null}
-                        onClick={async (_e) => {
-                          this.setState({ isSubmitting: true, submissionResult: undefined });
-                          try {
-                            await this.submitCreateWorkflow();
-                          }
-                          catch (err) {
-                            this.setState({ submissionResult: { message: err.message, success: false, severity: err.severity ?? "danger" } });
-                          }
-                          finally {
-                            this.setState({ isSubmitting: false });
-                            const banner = document.getElementById(this.bannerId);
-                            // banner?.focus();
-                            banner?.scrollIntoView();
-                          }
-                        }}>
-                        <BtnBody
-                          icon={PlusIcon} text="Create Workflow"
-                          title={this.state.repo == null ? "Select a repository to proceed" : "Create Workflow"}
-                        />
-                      </Button>
-                    </div>
-
-                    <SubmissionStatusBanner
-                      bannerId={this.bannerId}
-                      isSubmitting={this.state.isSubmitting}
-                      submissionResult={this.state.submissionResult}
-                    />
                   </CardBody>
                 </Card>
-              </>
+
+                <div className="my-3">
+                  <div className="center-y justify-content-end">
+                    <Button
+                      disabled={this.state.repo == null}
+                      onClick={async (_e) => {
+                        this.setState({ isSubmitting: true, submissionResult: undefined });
+                        try {
+                          await this.submitCreateWorkflow();
+                        }
+                        catch (err) {
+                          this.context({ severity: "warning", title: err.message });
+                        }
+                        finally {
+                          this.setState({ isSubmitting: false });
+                          const banner = document.getElementById(this.bannerId);
+                          if (banner && banner.style.display !== "none") {
+                            banner.scrollIntoView();
+                          }
+                        }
+                      }}>
+                      <BtnBody
+                        icon={PlusIcon} text="Create Workflow"
+                        title={this.state.repo == null ? "Select a repository to proceed" : "Create Workflow"}
+                        isLoading={this.state.isSubmitting}
+                      />
+                    </Button>
+                  </div>
+                </div>
+
+                <SubmissionStatusBanner
+                  bannerId={this.bannerId}
+                  isSubmitting={this.state.isSubmitting}
+                  submissionResult={this.state.submissionResult}
+                />
+              </div>
             );
           }
         }
@@ -435,6 +437,7 @@ export default class AddWorkflowsPage extends React.Component<{}, AddWorkflowsPa
       overwriteExisting: this.state.overwriteExistingWorkflow,
       imageRegistryId: this.state.imageRegistryId,
       port: Number(this.state.port),
+      namespace: this.state.namespace,
     };
 
     const res = await fetchJSON<typeof reqBody, ApiResponses.WorkflowCreationResult>("POST", ApiEndpoints.App.Workflows, reqBody);
@@ -448,6 +451,54 @@ function validatePort(portStr: string | number): boolean {
   return !Number.isNaN(port) && port > 1024 && port < 65536;
 }
 
+function NamespacePickerWithSecretOption({
+  namespace, setNamespace,
+}: {
+  namespace: string | undefined,
+  setNamespace: (newNamespace: string | undefined) => void,
+}): JSX.Element {
+
+  const [ isUsingSecret, setIsUsingSecret ] = useState(false);
+
+  return (
+    <FormGroup fieldId="namespace" label="Namespace">
+      <DataFetcher loadingDisplay="text" type="api" endpoint={ApiEndpoints.Cluster.Namespaces.Root}>{
+        (namespacesRes: ApiResponses.UserNamespaces) => {
+          const nsSecretName = "OPENSHIFT_NAMESPACE";
+
+          return (
+            <>
+              <Checkbox
+                className="py-2"
+                id="use-namespace-secret"
+                label={<>Use value of <code>{nsSecretName}</code> secret as namespace</>}
+                isChecked={isUsingSecret}
+                onChange={(checked) => {
+                  if (checked) {
+                    setIsUsingSecret(true);
+                    setNamespace(`\${{ secrets.${nsSecretName} }}`);
+                  }
+                  else {
+                    setIsUsingSecret(false);
+                    setNamespace(undefined);
+                  }
+                }}
+              />
+              <NamespaceSelect
+                isDisabled={isUsingSecret}
+                namespacesRes={namespacesRes}
+                namespace={isUsingSecret ? `${nsSecretName} secret ` : namespace}
+                setNamespace={setNamespace}
+              />
+            </>
+          );
+        }
+      }
+      </DataFetcher>
+    </FormGroup>
+  );
+}
+
 function SubmissionStatusBanner(props: {
   bannerId: string,
   isSubmitting: boolean,
@@ -457,7 +508,6 @@ function SubmissionStatusBanner(props: {
   if (props.isSubmitting) {
     return (
       <Banner id={props.bannerId}
-        className="my-3"
         display={props.isSubmitting}
         severity={"info"}
         loading={props.isSubmitting}
@@ -472,7 +522,6 @@ function SubmissionStatusBanner(props: {
   return (
     <>
       <Banner
-        className="my-3"
         id={props.bannerId}
         display={true}
         severity={props.submissionResult.severity}
