@@ -1,6 +1,9 @@
 name: Publish chart to Pages
 on:
   push:
+    paths:
+      - README.md
+      - chart/
 env:
   PAGES_BRANCH: release-chart
   PAGES_URL: https://redhat-actions.github.io/openshift-github-connector
