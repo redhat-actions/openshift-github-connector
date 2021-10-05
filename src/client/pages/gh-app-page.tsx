@@ -18,7 +18,7 @@ import BtnBody from "../components/btn-body";
 import ApiResponses from "../../common/api-responses";
 import ClientPages from "./client-pages";
 import { fetchJSON } from "../util/client-util";
-import { ExternalLink } from "../components/external-link";
+import { NewTabLink } from "../components/external-link";
 import { CommonIcons } from "../util/icons";
 import { PushAlertContext } from "../contexts";
 
@@ -72,9 +72,9 @@ function GitHubAppPageBody({
     <>
       <div className="center-y my-4">
         <Title headingLevel="h2" className="m-0">
-          <ExternalLink href={data.appData.html_url}>
+          <NewTabLink href={data.appData.html_url}>
             {data.appData.name}
-          </ExternalLink>
+          </NewTabLink>
           {/* The app avatar can be fetched from /identicons/app/app/<slug> */}
         </Title>
 
@@ -113,7 +113,7 @@ function GitHubAppPageBody({
 
                   try {
                     setIsDeleting(true);
-                    await fetchJSON<never, never>("DELETE", ApiEndpoints.App.Root.path + "/" + data.appData.id);
+                    await fetchJSON<{ appId: number }, never>("DELETE", ApiEndpoints.App.Root.path, { appId: data.appData.id });
                     await reload();
                   }
                   catch (err) {
@@ -138,7 +138,7 @@ function GitHubAppPageBody({
           (userRes: ApiResponses.GitHubUserDetailsResponse) => {
             return (
               <Title headingLevel="h4" className="d-flex">
-                GitHub user:&nbsp;<ExternalLink href={userRes.html_url}>{userRes.login}</ExternalLink>
+                GitHub user:&nbsp;<NewTabLink href={userRes.html_url}>{userRes.login}</NewTabLink>
               </Title>
             );
           }
@@ -232,9 +232,9 @@ function AppOwnerCards(props: ApiResponses.UserOwnedAppData): JSX.Element {
 
             return (
               <li key={installation.account.html_url}>
-                <ExternalLink href={installation.account.html_url ?? ""}>
+                <NewTabLink href={installation.account.html_url ?? ""}>
                   {installation.account.login}
-                </ExternalLink>
+                </NewTabLink>
               </li>
             );
           })}
@@ -257,9 +257,9 @@ function AppInstalledCards(props: ApiResponses.UserAppInstalledData): JSX.Elemen
           {props.repos.map((repo) => {
             return (
               <li key={repo.full_name}>
-                <ExternalLink href={repo.html_url}>
+                <NewTabLink href={repo.html_url}>
                   {repo.full_name}
-                </ExternalLink>
+                </NewTabLink>
               </li>
             );
           })}

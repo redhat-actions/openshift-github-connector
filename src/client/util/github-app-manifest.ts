@@ -12,8 +12,8 @@ export function getDefaultAppPermissions(): GitHubAppPermissions {
     actions: "write",
     secrets: "write",
     // TODO
-    // contents: "write",
-    contents: "read",
+    contents: "write",
+    // contents: "read",
     pull_requests: "write",
     workflows: "write",
   };

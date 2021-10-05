@@ -3,6 +3,7 @@ import { Title, Tooltip, TooltipPosition } from "@patternfly/react-core";
 import classNames from "classnames";
 import { QuestionCircleIcon } from "@patternfly/react-icons";
 import { IconElement } from "../util/icons";
+import { NewTabLink } from "./external-link";
 
 interface TooltipProps {
   icon?: IconElement,
@@ -11,6 +12,8 @@ interface TooltipProps {
 
   title?: string,
   body?: React.ReactNode,
+
+  href?: string,
 }
 
 export function TooltipIcon(props: TooltipProps) {
@@ -19,6 +22,9 @@ export function TooltipIcon(props: TooltipProps) {
 
   const position = props.position ?? "top";
   const Icon = props.icon ?? QuestionCircleIcon;
+  const IconElem = (
+    <Icon className={classNames("tooltip-icon", props.iconClasses)} />
+  );
 
   return (
     <Tooltip
@@ -32,7 +38,10 @@ export function TooltipIcon(props: TooltipProps) {
       }
       position={position}
     >
-      <Icon className={classNames("mx-3 tooltip-icon", props.iconClasses)} />
+      {
+        props.href ? (<NewTabLink href={props.href}>{IconElem}</NewTabLink>) : IconElem
+      }
+
     </Tooltip>
   );
 }

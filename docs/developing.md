@@ -32,29 +32,23 @@ This service account name is then passed through the environment, in the `deploy
 ```sh
 # One-liner to generate a UUID
 export OAUTH_CLIENT_SECRET=$(node -e 'console.log(require("uuid").v4())') && echo "$OAUTH_CLIENT_SECRET"
+# Create the OAuthClient
 cat <<EOF | oc create -f-
 apiVersion: oauth.openshift.io/v1
 kind: OAuthClient
 metadata:
   # must match .env OAUTH_CLIENT_ID
   name: github-connector-oauth-client-dev
+grantMethod: auto
 # substitute your own uuid
 secret: ${OAUTH_CLIENT_SECRET}
 redirectURIs:
 	# You can put any number of callback URLs in this array
   # the env callback must be one of these
   - https://localhost:3000/api/v1/auth/callback
-grantMethod: auto
 EOF
 ```
 3. Add the client secret UUID to `.env.local` as `OAUTH_CLIENT_SECRET=<the OAUTH_CLIENT_SECRET UUID>`
-
-### Debugging OAuth Problems
-Passport is poor at error reporting. Make sure that:
-- The redirect URI is in the OAuthClient object, as above.
-- The redirect URI in the environment matches the OAuthClient.
-- The client ID and client secret in the environment match the OAuthClient.
-- The cluster's authentication route's TLS certificates are trusted by the connector (see [TLS Certificates](./certs.md))
 
 ## TLS Certificates
 
@@ -87,6 +81,13 @@ INSECURE_TRUST_APISERVER_CERT: true
 Then run `yarn dev` to run the development server.
 
 The project runs at [https://localhost:3000](https://localhost:3000). You will not get a response if you use regular HTTP.
+
+### Debugging OAuth Problems
+Passport is poor at error reporting. Make sure that:
+- The redirect URI is in the OAuthClient object, as above.
+- The redirect URI in the environment matches the OAuthClient.
+- The client ID and client secret in the environment match the OAuthClient.
+- The cluster's authentication route's TLS certificates are trusted by the connector (see [TLS Certificates](./certs.md))
 
 ## Project Structure
 

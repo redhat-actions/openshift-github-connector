@@ -9,7 +9,7 @@ const router = express.Router();
 router.route(ApiEndpoints.User.Root.path)
   .get(async (
     req: express.Request<any, void>,
-    res: express.Response<ApiResponses.OpenShiftUserResponse>,
+    res: express.Response<ApiResponses.UserResponse>,
     next
   ) => {
     const user = await req.getUserOr401();
@@ -26,14 +26,16 @@ router.route(ApiEndpoints.User.Root.path)
       success: true,
       message: `User is ${user.name}`,
       severity: "info",
-      ...user.openshiftUserInfo,
+      ...user.allInfo,
+      // ...user.githubUserInfo,
     });
   }).all(send405([ "GET" ]));
 
+/*
 router.route(ApiEndpoints.User.UserGitHub.path)
   .get(async (
     req: express.Request<any, void>,
-    res: express.Response<ApiResponses.UserResponse>,
+    res: express.Response<ApiResponses.OpenShiftUserResponse>,
     next
   ) => {
     const user = await req.getUserOr401();
@@ -56,6 +58,7 @@ router.route(ApiEndpoints.User.UserGitHub.path)
       ...user.allInfo,
     });
   }).all(send405([ "GET" ]));
+  */
 
 router.route(ApiEndpoints.User.UserGitHubDetails.path)
   .get(async (

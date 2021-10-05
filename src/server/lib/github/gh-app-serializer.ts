@@ -137,7 +137,7 @@ namespace GitHubAppSerializer {
 			owner.addOwnsApp(app);
 		}
 
-		save(app);
+		// save(app);
 
 		return app;
 	}

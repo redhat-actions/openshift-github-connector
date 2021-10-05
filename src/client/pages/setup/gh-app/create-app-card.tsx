@@ -7,8 +7,8 @@ import { v4 as uuid } from "uuid";
 
 import ApiEndpoints from "../../../../common/api-endpoints";
 import ApiRequests from "../../../../common/api-requests";
-import Banner from "../../../components/banner";
-import { ExternalLink } from "../../../components/external-link";
+import MyBanner from "../../../components/banner";
+import { NewTabLink } from "../../../components/external-link";
 import BtnBody from "../../../components/btn-body";
 import { getWindowLocationNoPath, fetchJSON } from "../../../util/client-util";
 import { getGitHubAppManifest, GitHubAppManifestSettings } from "../../../util/github-app-manifest";
@@ -38,9 +38,9 @@ export default function CreateAppCard(): JSX.Element {
 
           <div className="btn-line">
             <Button variant="tertiary">
-              <ExternalLink href="https://github.com/settings/apps/" icon={{ Icon: CommonIcons.GitHub, position: "left" }} >
+              <NewTabLink href="https://github.com/settings/apps/" icon={{ Icon: CommonIcons.GitHub, position: "left" }} >
                 View your apps
-              </ExternalLink>
+              </NewTabLink>
             </Button>
           </div>
         </CardTitle>
@@ -57,10 +57,6 @@ export default function CreateAppCard(): JSX.Element {
               If you make your app private, no one else will be able to install it.
             </p>
             <p>
-              Public apps do not give users that install your app any access.
-              Rather, users who install your app are giving the app permission to act on their behalf.
-            </p>
-            <p>
               A public app is recommended so your team members can share it.
             </p>
 
@@ -68,11 +64,11 @@ export default function CreateAppCard(): JSX.Element {
               You can change this later in the GitHub app settings.
             </p>
             <p>
-              <ExternalLink href="https://docs.github.com/en/developers/apps/making-a-github-app-public-or-private"
+              <NewTabLink href="https://docs.github.com/en/developers/apps/making-a-github-app-public-or-private"
                 icon={{ Icon: CommonIcons.Documentation, position: "left" }}
               >
                 Read more about public and private apps.
-              </ExternalLink>
+              </NewTabLink>
             </p>
           </div>
 
@@ -84,9 +80,9 @@ export default function CreateAppCard(): JSX.Element {
 
                 let appName = "OpenShift Connector";
                 try {
-                  const user = await fetchJSON<never, ApiResponses.OpenShiftUserResponse>("GET", ApiEndpoints.User.Root);
+                  const user = await fetchJSON<never, ApiResponses.UserResponse>("GET", ApiEndpoints.User.Root);
                   if (user.success) {
-                    appName = user.name + "'s " + appName;
+                    appName = user.name + "s " + appName;
                   }
                 }
                 catch (err) {
@@ -128,7 +124,7 @@ export default function CreateAppCard(): JSX.Element {
 
           </div>
 
-          <Banner title={error ?? ""} display={error != null} severity="danger" />
+          <MyBanner title={error ?? ""} display={error != null} severity="danger" />
 
         </CardBody>
       </Card>

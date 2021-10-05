@@ -3,18 +3,18 @@ import classNames from "classnames";
 import {
   Button, Card, CardTitle, CardBody,
 } from "@patternfly/react-core";
-import { ExternalLink } from "./external-link";
+import { NewTabLink } from "./external-link";
 import BtnBody from "./btn-body";
 import { IconElement } from "../util/icons";
 
 export default function appPageCard(props: {
-    header: string,
-    buttons: {
-      href: string,
-      icon: IconElement,
-      text: string,
-    }[],
-    children: React.ReactNode,
+  header: string,
+  buttons: {
+    href: string,
+    icon: IconElement,
+    text: string,
+  }[],
+  children: React.ReactNode,
 }): JSX.Element {
   return (
     <Card>
@@ -31,9 +31,9 @@ export default function appPageCard(props: {
                   className={classNames("flex-grow-1")}
                   title={btnProps.text}
                 >
-                  <ExternalLink href={btnProps.href}>
+                  <NewTabLink href={btnProps.href}>
                     <BtnBody icon={btnProps.icon} text={btnProps.text} />
-                  </ExternalLink>
+                  </NewTabLink>
                 </Button>
               );
             })

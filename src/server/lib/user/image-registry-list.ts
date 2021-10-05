@@ -34,9 +34,13 @@ export default class ImageRegistryListWrapper {
   public async add(info: ImageRegistry.Inputs): Promise<ImageRegistry.List[number]> {
     const id = uuid();
 
+    const fullPath = `${info.hostname}/${info.namespace}`;
+    const fullPathAsUser = `${info.username}@${fullPath}`;
+
     this.imageRegistries.push({
       id,
-      fullPath: info.hostname + "/" + info.namespace,
+      fullPath,
+      fullPathAsUser,
       ...info,
     });
 

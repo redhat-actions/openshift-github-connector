@@ -21,7 +21,7 @@ export default function SetupFinishedPage(): JSX.Element {
               <Link to={ClientPages.ImageRegistries.path}>Add an Image Registry</Link>
             </li>
             <li>
-              <Link to={ClientPages.AddWorkflows.path}>Add the OpenShift starter workflow</Link>
+              <Link to={ClientPages.AddWorkflowsIndex.path}>Add Workflow</Link>
             </li>
             <li>
               <Link to={ClientPages.NotImplemented.path}>Connect your OpenShift Image Registry</Link>

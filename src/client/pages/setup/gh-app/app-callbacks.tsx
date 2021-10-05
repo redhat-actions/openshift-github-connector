@@ -49,10 +49,6 @@ export function PostCreateAppCallbackPage() {
             },
           );
 
-          console.log("ABCDEFG!#$&!#$*");
-          console.log(res.message);
-          // pushAlert({ severity: "success", title: res.message });
-
           history.replace({
             pathname: getSetupPagePath("INSTALL_APP"),
           });
@@ -60,7 +56,7 @@ export function PostCreateAppCallbackPage() {
           return res;
         }
       }>
-        {(res: ApiResponses.CreatingAppResponse) => {
+        {(_res: ApiResponses.CreatingAppResponse) => {
           // pushAlert({ severity: "success", title: res.message });
 
           return (

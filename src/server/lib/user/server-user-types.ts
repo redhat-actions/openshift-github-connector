@@ -13,7 +13,10 @@ export type UserMementoSaveable = {
 } & Partial<{
   githubUserId: string,
   githubUserName: string,
+  githubUserEmail: string,
   githubUserType: string,
+  githubUserUrl: string,
+
   installedAppId: string,
   installationId: string,
 }>

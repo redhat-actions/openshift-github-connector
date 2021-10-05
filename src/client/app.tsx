@@ -34,7 +34,7 @@ export default function App(): JSX.Element {
                 </div>
               </>
             }>{
-              (loginResponse: ApiResponses.OpenShiftUserResponse, reload) => {
+              (loginResponse: ApiResponses.UserResponse, reload) => {
 
                 // console.log(`LOGIN RESPONSE`, loginResponse);
 

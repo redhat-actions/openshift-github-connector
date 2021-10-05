@@ -68,7 +68,8 @@ const sendError = (req: express.Request, res: express.Response, next: express.Ne
     };
 
     res
-      .header(HttpConstants.Headers.ContentType, HttpConstants.ContentTypes.Problem)
+      // .header(HttpConstants.Headers.ContentType, HttpConstants.ContentTypes.Problem)
+      .header(HttpConstants.Headers.ContentType, HttpConstants.ContentTypes.Json)
       .json(resBody);
   };
 

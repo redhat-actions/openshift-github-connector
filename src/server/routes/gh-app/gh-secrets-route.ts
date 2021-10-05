@@ -9,9 +9,9 @@ import KubeWrapper from "server/lib/kube/kube-wrapper";
 import Log from "server/logger";
 import SecretUtil from "server/lib/kube/secret-util";
 import { Severity } from "common/common-util";
-import { DEFAULT_SECRET_NAMES, getDefaultSecretNames } from "common/default-secret-names";
 import { send405 } from "server/express-extends";
 import KubeUtil from "server/lib/kube/kube-util";
+import { DEFAULT_SECRET_NAMES } from "common/default-secret-names";
 
 const router = express.Router();
 
@@ -24,7 +24,7 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
 
     const user = await req.getUserOr401();
     if (!user) {
-      return res.send401();
+      return undefined;
     }
 
     const installation = user.installation;
@@ -66,9 +66,12 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
 
         const hasRegistrySecret = secretNames.includes(DEFAULT_SECRET_NAMES.registryPassword);
 
+        const hasNamespaceSecret = secretNames.includes(DEFAULT_SECRET_NAMES.namespace);
+
         return {
           repo,
           hasClusterSecrets,
+          hasNamespaceSecret,
           hasRegistrySecret,
           secrets,
         };
@@ -76,7 +79,7 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
     );
 
     return res.json({
-      defaultSecretNames: getDefaultSecretNames(),
+      // DEFAULT_SECRET_NAMES: DEFAULT_SECRET_NAMES,
       repos: reposWithSecrets,
       urls: installation.urls,
     });
@@ -279,14 +282,16 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
   })
   .all(send405([ "GET", "POST" ]));
 
+/*
 router.route(ApiEndpoints.App.Repos.RepoSecretDefaults.path)
   .get(async (
     req,
     res: express.Response<ApiResponses.DefaultSecretsResponse>,
     next
   ) => {
-    return res.json(getDefaultSecretNames());
+    return res.json(DEFAULT_SECRET_NAMES);
   })
   .all(send405([ "GET" ]));
+*/
 
 export default router;

@@ -52,25 +52,20 @@ router.route(ApiEndpoints.App.Root.path)
     };
 
     return res.json(resBody);
-  });
-
-const PARAM_APPID = "appId";
-
-router.route(ApiEndpoints.App.Root.path + "/:" + PARAM_APPID)
+  })
   .delete(async (req, res: express.Response<ApiResponses.RemovalResult>, next) => {
     const user = await req.getUserOr401();
     if (!user) {
       return undefined;
     }
 
-    if (!req.params[PARAM_APPID]) {
+    const { appId } = req.body;
+
+    if (appId == null) {
       return res.sendError(400, `App ID not provided in request path`);
     }
-
-    const appId = Number(req.params[PARAM_APPID]);
-
-    if (Number.isNaN(appId)) {
-      return res.sendError(400, `Invalid app ID "${appId}" provided in request path`);
+    else if (Number.isNaN(appId)) {
+      return res.sendError(400, `Invalid app ID "${appId}" provided in request path - not a number`);
     }
 
     const app = await GitHubAppSerializer.load(appId);

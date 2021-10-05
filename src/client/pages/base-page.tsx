@@ -13,11 +13,12 @@ import {
   OpenShiftUserContext, InConsoleContext, PushAlertContext,
 } from "../contexts";
 import AlertDisplayer, { AlertInfo } from "../components/alerts";
+import NotificationErrorBoundary from "../components/err-notification-boundary";
 
-export function BasePage(
-  { title, options, content: Content }:
-  { title: string, options: ClientPageOptions, content: React.ComponentType<any> }
-): JSX.Element {
+export function BasePage(props: {
+  // title, options, children,
+  title: string, options: ClientPageOptions, children: React.ReactNode,
+}): JSX.Element {
   const [ isNavOpen, setIsNavOpen ] = useState(false);
 
   const [ alerts, setAlerts ] = useState<AlertInfo[]>([]);
@@ -29,7 +30,9 @@ export function BasePage(
     return (
       <>
         <PushAlertContext.Provider value={(newAlert: AlertInfo) => setAlerts([ ...alerts, newAlert ])}>
-          <Content />
+          <NotificationErrorBoundary severity="danger">
+            {props.children}
+          </NotificationErrorBoundary>
           <AlertDisplayer alerts={alerts} setAlerts={(newAlerts) => setAlerts(newAlerts)} />
         </PushAlertContext.Provider>
       </>
@@ -38,7 +41,7 @@ export function BasePage(
 
   return (
     <>
-      {getTitle(title)}
+      {getTitle(props.title)}
 
       <Page
         mainContainerId="page-container"
@@ -79,8 +82,10 @@ export function BasePage(
           />
         }>
         <PushAlertContext.Provider value={(newAlert: AlertInfo) => setAlerts([ ...alerts, newAlert ])}>
-          <PageSection id="page-content" className={classNames({ "full-width": options.fullWidth })}>
-            <Content />
+          <PageSection id="page-content" className={classNames({ "full-width": props.options.fullWidth })}>
+            <NotificationErrorBoundary severity="danger">
+              {props.children}
+            </NotificationErrorBoundary>
           </PageSection>
           <AlertDisplayer alerts={alerts} setAlerts={(newAlerts) => setAlerts(newAlerts)} />
         </PushAlertContext.Provider>

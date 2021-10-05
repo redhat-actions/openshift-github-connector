@@ -9,6 +9,7 @@ import { fetchFromOpenShiftApiServer } from "./util/server-util";
 import TokenUtil from "./lib/user/token-util";
 import { UserSessionData } from "./lib/user/server-user-types";
 import UserSerializer from "./lib/user/user-serializer";
+import UserInstallation from "./lib/github/user-app-installation";
 
 export const OAUTH2_STRATEGY_NAME = "oauth2";
 // export const MOCK_STRATEGY_NAME = "mock";
@@ -161,6 +162,7 @@ export async function setupPassport(app: express.Application): Promise<void> {
   });
 
   app.use(getUserOr401);
+  app.use(getInstallationOr400);
 
   Log.info(`Finished attaching passport`);
 }
@@ -205,6 +207,30 @@ const getUserOr401 = (req: express.Request, res: express.Response, next: express
     }
 
     return user;
+  };
+
+  next();
+};
+
+const getInstallationOr400 = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
+
+  req.getInstallationOr400 = async (die: boolean = true): Promise<UserInstallation | undefined> => {
+
+    const user = await req.getUserOr401(die);
+    if (!user) {
+      return undefined;
+    }
+
+    Log.debug(`Get installation for user ${user.name}`);
+
+    if (!user.installation) {
+      if (die) {
+        res.sendError(400, `No GitHub app installation for OpenShift user ${user.name}`);
+      }
+      return undefined;
+    }
+
+    return user.installation;
   };
 
   next();

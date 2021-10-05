@@ -248,6 +248,7 @@ export default class User {
       ...this.openshiftUserInfo,
       githubInfo: this.githubUserInfo,
       githubInstallationInfo: this.installation?.info,
+      ownsAppIds: this.ownsAppIds,
     };
   }
 

@@ -65,6 +65,8 @@ function getSessionMw(): express.RequestHandler {
       path: ApiEndpoints.Root.path,
       httpOnly: true,
       maxAge: dayMs,
+      // samesite can cause problems in dev with the oauth lib,
+      // but has to be enabled in production to protect against csrf
       // https://github.com/auth0/passport-auth0/issues/70#issuecomment-432895163
       sameSite: isProduction(),
       secure: "auto",

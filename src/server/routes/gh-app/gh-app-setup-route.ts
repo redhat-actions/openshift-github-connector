@@ -134,8 +134,11 @@ router.route(ApiEndpoints.Setup.PostInstallApp.path)
     await user.addGitHubUserInfo({
       id: userData.id,
       name: userData.login,
+      email: userData.email ?? undefined,
       type: userData.type as GitHubUserType,
+      html_url: userData.html_url,
     }, true);
+
     await user.addInstallation({ appId, installationId }, true);
 
     return res.sendStatus(201);

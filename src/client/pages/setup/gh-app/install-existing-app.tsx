@@ -11,13 +11,13 @@ import { useHistory } from "react-router-dom";
 import ApiEndpoints from "../../../../common/api-endpoints";
 import ApiResponses from "../../../../common/api-responses";
 import DataFetcher from "../../../components/data-fetcher";
-import { ExternalLink } from "../../../components/external-link";
+import { NewTabLink } from "../../../components/external-link";
 import { getFriendlyDateTime } from "../../../../common/common-util";
 import ApiRequests from "../../../../common/api-requests";
 import { fetchJSON } from "../../../util/client-util";
 import { CommonIcons } from "../../../util/icons";
 import BtnBody from "../../../components/btn-body";
-import Banner from "../../../components/banner";
+import MyBanner from "../../../components/banner";
 import { OpenShiftUserContext } from "../../../contexts";
 import { getSetupPagePath } from "../setup";
 
@@ -43,7 +43,7 @@ export function InstallExistingAppCard(): JSX.Element {
           {USE_EXISTING_TITLE}
         </CardTitle>
         <CardBody>
-          <DataFetcher type="api" endpoint={ApiEndpoints.User.UserGitHub} loadingDisplay="none">{
+          <DataFetcher type="api" endpoint={ApiEndpoints.User.Root} loadingDisplay="none">{
             (res: ApiResponses.UserResponse) => {
               if (!res.success || !res.githubInstallationInfo) {
                 return <></>;
@@ -52,9 +52,9 @@ export function InstallExistingAppCard(): JSX.Element {
               return (
                 <>
                   <p>
-                    {CommonIcons.Warning} You have already installed <ExternalLink href={res.githubInstallationInfo.app.html_url}>
-                      {res.githubInstallationInfo.app.name}
-                    </ExternalLink>.
+                    {CommonIcons.Warning} You have already installed <NewTabLink href={res.githubInstallationInfo.installedApp.html_url}>
+                      {res.githubInstallationInfo.installedApp.name}
+                    </NewTabLink>.
                     Installing an app below will override the existing installation.
                   </p>
                 </>
@@ -85,11 +85,9 @@ export function InstallExistingAppCard(): JSX.Element {
                 );
               }
 
-              /*
               if (data.visibleApps.length === 1) {
                 setSelectedApp(data.visibleApps[0]);
               }
-              */
 
               // const appAvatarSize = "2em";
 
@@ -130,7 +128,7 @@ export function InstallExistingAppCard(): JSX.Element {
                             <Td>{app.name}</Td>
                             <Td>{app.owner.login}</Td>
                             <Td>{getFriendlyDateTime(new Date(app.created_at), true)}</Td>
-                            <Td><ExternalLink href={app.appUrl} key={app.appId} icon={{ Icon: ExternalLinkAltIcon, position: "left" }} /></Td>
+                            <Td><NewTabLink href={app.appUrl} key={app.appId} icon={{ Icon: ExternalLinkAltIcon, position: "left" }} /></Td>
                           </Tr>
                         ))
                       }
@@ -179,7 +177,7 @@ function ProceedSection({ selectedApp }: { selectedApp?: ApiResponses.ExistingAp
           <BtnBody text={"Install " + selectedApp.name} icon={CommonIcons.GitHub} iconClasses="text-black" isLoading={isLoading}/>
         </Button>
       </div>
-      <Banner display={error != null} severity="danger" title={error ?? ""} />
+      <MyBanner display={error != null} severity="danger" title={error ?? ""} />
     </>
   );
 }

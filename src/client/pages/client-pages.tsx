@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-classes-per-file
 import React from "react";
 import {
   Link, Redirect, Route,
@@ -12,13 +13,15 @@ import ImageRegistriesPage from "./image-registries-page";
 import { isInOpenShiftConsole } from "../util/client-util";
 import { UserPage } from "./user";
 import { BasePage } from "./base-page";
-import SetupWizard, { getSetupPagePath } from "./setup/setup";
-import AddWorkflowsPage from "./add-workflows-page";
 import SetupFinishedPage from "./setup/setup-completion-page";
 import { PostCreateAppCallbackPage, InstalledAppPage } from "./setup/gh-app/app-callbacks";
-import InjectWorkflowsPage from "./inject-workflow-steps-page";
+import WorkflowsWizard, { getWorkflowsWizardFirstPagePath } from "./workflows-wizard/workflows-wizard";
+import SetupWizard, { getSetupPagePath } from "./setup/setup";
+
+const WIZARD_PAGE_PARAM = "page";
 
 export type ClientPageOptions = Partial<{
+  contentProps: Record<string, unknown>,
   fullWidth: boolean,
 }>;
 
@@ -28,8 +31,8 @@ export class ClientPage extends UrlPath {
     endpoint: string,
     public readonly title: string,
     public readonly component: React.ComponentType<any>,
-    private readonly exact: boolean = true,
-    private readonly options: ClientPageOptions = {},
+    protected readonly exact: boolean = true,
+    protected readonly options: ClientPageOptions = {},
   ) {
     super(parentPath, endpoint);
   }
@@ -37,27 +40,67 @@ export class ClientPage extends UrlPath {
   public get route(): JSX.Element {
     return (
       <Route key={this.path} exact={this.exact} path={this.path} render={(props) => (
-        <BasePage options={this.options} content={this.component} title={this.title} {...props} />
+        <BasePage options={this.options} title={this.title} {...props}>
+          <this.component />
+        </BasePage>
       )}/>
     );
   }
 }
+
+/*
+export class WizardClientPage extends ClientPage {
+  public override readonly component: React.ComponentType<MyWizardProps>;
+
+  public readonly indexPath: string;
+
+  constructor(
+    path: UrlPath,
+    title: string,
+    private readonly fetchSteps: () => Promise<MyWizardStep[]>,
+    // private readonly steps: MyWizardStep[],
+  ) {
+    super(path, path.withParam(WIZARD_PAGE_PARAM).path, title, MyWizard, false, { fullWidth: true });
+
+    this.indexPath = path.path;
+    this.component = MyWizard;
+  }
+
+  public override get route(): JSX.Element {
+    return (
+      <>
+        <DataF
+        <Route path={this.indexPath} exact={true}>
+          <Redirect to={this.steps[0].path} />
+        </Route>
+        <Route key={this.path} exact={this.exact} path={this.path} render={(props) => (
+          <BasePage options={this.options} title={this.title} {...props} childrenProps={{ steps: this.steps }}>
+            {this.component}
+          </BasePage>
+        )}/>
+      </>
+    );
+  }
+}
+*/
 
 const appRootPath = isInOpenShiftConsole() ? "/github-connector" : "/";
 
 const Home = new ClientPage(undefined, appRootPath, "", HomePage);
 const User = new ClientPage(Home, "/user", "User", UserPage);
 
-const Setup = new ClientPage(Home, "/setup/:page", "Set up", SetupWizard, false, { fullWidth: true });
 const SetupIndex = new ClientPage(Home, "/setup", "Set up", () => (<Redirect to={getSetupPagePath("WELCOME")} />));
+const Setup = new ClientPage(Home, "/setup/:" + WIZARD_PAGE_PARAM, "Set up", SetupWizard, false, { fullWidth: true });
+
 const CreatingAppCallback = new ClientPage(Home, "/app-callback", "Created App", PostCreateAppCallbackPage);
 const InstalledAppCallback = new ClientPage(Home, "/installation-callback", "Installed App", InstalledAppPage);
 const SetupFinished = new ClientPage(Home, "/setup-complete", "Setup Complete", SetupFinishedPage);
 
 const App = new ClientPage(Home, "/app", "GitHub App", GitHubAppPage);
 
-const AddWorkflows = new ClientPage(Home, "/add-workflows", "Add Workflows", AddWorkflowsPage);
-const InjectWorkflowSteps = new ClientPage(Home, "/inject-steps", "Inject Workflow Steps", InjectWorkflowsPage);
+const AddWorkflowsIndex = new ClientPage(Home, "/add-workflows", "Add Workflow", () => (<Redirect to={getWorkflowsWizardFirstPagePath()} />));
+const AddWorkflows = new ClientPage(Home, "/add-workflows/:" + WIZARD_PAGE_PARAM, "Add Workflow", WorkflowsWizard, false, { fullWidth: true });
+
 const ConnectRepos = new ClientPage(Home, "/connect-repos", "Connect Repositories", SelectReposPage);
 const Cluster = new ClientPage(Home, "/cluster", "Cluster Info", ClusterPage);
 
@@ -88,8 +131,9 @@ const ClientPages = {
 
   App,
   Cluster,
+
+  AddWorkflowsIndex,
   AddWorkflows,
-  InjectWorkflowSteps,
 
   ImageRegistries,
 

@@ -62,9 +62,9 @@ export default class UserInstallation {
 
   public get info(): ConnectorGitHubAppInstallInfo {
     return {
-      app: this.app.getWithoutSecrets,
+      installedApp: this.app.getWithoutSecrets,
       installation: this.installationData,
-      installationId: this.installationId,
+      // installationId: this.installationId,
     }
   }
 }

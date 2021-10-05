@@ -4,18 +4,13 @@ export const DEFAULT_SECRET_NAMES = {
   clusterToken: "OPENSHIFT_TOKEN",
   namespace: "OPENSHIFT_NAMESPACE",
 
-  registryPassword: "REGISTRY_PASSWORD",
+  registryPassword: "IMAGE_REGISTRY_PASSWORD",
+
+  synkToken: "SYNK_TOKEN",
+  crdaKey: "CRDA_KEY",
 };
 
 export interface DefaultSecrets {
-  count: number,
+  // count: number,
   defaultSecrets: typeof DEFAULT_SECRET_NAMES,
-}
-
-export function getDefaultSecretNames(): DefaultSecrets {
-  const count = Object.keys(DEFAULT_SECRET_NAMES).length;
-  return {
-    count,
-    defaultSecrets: DEFAULT_SECRET_NAMES,
-  };
 }

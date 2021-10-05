@@ -39,6 +39,7 @@ namespace ImageRegistry {
   export interface Info extends ImageRegistry.Inputs {
     id: string,
     fullPath: string,
+    fullPathAsUser: string,
   }
 
   export type List = ImageRegistry.Info[];

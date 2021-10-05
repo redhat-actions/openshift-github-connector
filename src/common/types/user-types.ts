@@ -1,20 +1,21 @@
 import {
-  GitHubAppConfigNoSecrets, GitHubAppInstallationData, GitHubUserType,
+  GitHubAppConfigNoSecrets,
+  GitHubAppInstallationData, GitHubUserType,
 } from "./gh-types";
 
 export interface OpenShiftUserInfo {
   /**
    * User's OpenShift username
    */
-   readonly name: string,
-   /**
+  readonly name: string,
+  /**
     * User's OpenShift UID
     */
-   readonly uid: string,
-   /**
+  readonly uid: string,
+  /**
     * If the user has permissions to administrate the Connector
     */
-   readonly isAdmin: boolean,
+  readonly isAdmin: boolean,
 }
 
 export type ConnectorGitHubUserInfo = Readonly<{
@@ -26,19 +27,22 @@ export type ConnectorGitHubUserInfo = Readonly<{
    * GitHub user name (login)
    */
   name: string,
+  email: string | undefined,
   /**
    * Whether the user is a regular user or an organization
    */
   type: GitHubUserType,
+  html_url: string,
 }>;
 
 export type ConnectorGitHubAppInstallInfo = Readonly<{
-  app: GitHubAppConfigNoSecrets,
   installation: GitHubAppInstallationData,
-  installationId: number,
+  installedApp: GitHubAppConfigNoSecrets,
+  // installationId: number,
 }>;
 
 export interface ConnectorUserInfo extends OpenShiftUserInfo {
   readonly githubInfo?: ConnectorGitHubUserInfo,
   readonly githubInstallationInfo?: ConnectorGitHubAppInstallInfo,
+  readonly ownsAppIds: number[],
 }

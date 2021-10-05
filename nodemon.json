@@ -1,5 +1,7 @@
 {
     "watch": [
-        "dist/server/server.js"
+        "dist/server/server.js",
+        ".env",
+        ".env.local"
     ]
 }

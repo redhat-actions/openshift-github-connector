@@ -4,7 +4,7 @@ import { Spinner } from "@patternfly/react-core";
 import { CommonIcons, IconElement } from "../util/icons";
 import { Severity } from "../../common/common-util";
 
-namespace Banner {
+namespace MyBanner {
   export type Props = {
     display?: boolean,
     severity?: Severity,
@@ -15,8 +15,8 @@ namespace Banner {
   } & React.HTMLAttributes<HTMLDivElement>;
 }
 
-function Banner(props: Banner.Props): JSX.Element {
-  const divProps: Partial<Banner.Props> = { ...props };
+function MyBanner(props: MyBanner.Props): JSX.Element {
+  const divProps: Partial<MyBanner.Props> = { ...props };
   // delete divProps.message;
   delete divProps.display;
   delete divProps.severity;
@@ -71,4 +71,4 @@ function Banner(props: Banner.Props): JSX.Element {
   );
 }
 
-export default Banner;
+export default MyBanner;

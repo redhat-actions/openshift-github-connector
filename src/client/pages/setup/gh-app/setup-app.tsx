@@ -12,7 +12,7 @@ import CreateAppCard, { CREATE_NEW_TITLE } from "./create-app-card";
 import { InstallExistingAppCard, USE_EXISTING_TITLE } from "./install-existing-app";
 import { OpenShiftUserContext } from "../../../contexts";
 import BtnBody from "../../../components/btn-body";
-import { ExternalLink } from "../../../components/external-link";
+import { NewTabLink } from "../../../components/external-link";
 import { CommonIcons } from "../../../util/icons";
 
 type CreateOrInstallExisting = "create" | "install-existing";
@@ -54,11 +54,11 @@ export default function SetupAppPage(): JSX.Element {
                     Installing the app allows the Connector to take actions in GitHub on the user&apos;s behalf.
                   </p>
 
-                  <ExternalLink icon={{ Icon: CommonIcons.Documentation, position: "left" }}
+                  <NewTabLink icon={{ Icon: CommonIcons.Documentation, position: "left" }}
                     href="https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps"
                   >
                     Read more about GitHub Apps.
-                  </ExternalLink>
+                  </NewTabLink>
 
                   <p className={classNames({ error: isDirectionError })}>
                     {direction}
@@ -113,10 +113,10 @@ function getCreateOrInstallDirection(
     }
   }
   else if (canCreate) {
-    direction = `No one has created a GitHub app yet, so you must create one now.`;
+    direction = `No one has created a GitHub app for this cluster yet, so you must create one now.`;
   }
   else {
-    direction = `No one has created a GitHub app yet, and you do not have permissions to create one. `
+    direction = `No one has created a GitHub app for this cluster yet, and you do not have permissions to create one. `
       + `You must have a cluster administrator create an app to set up the GitHub Connector.`;
     isDirectionError = true;
   }

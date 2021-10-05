@@ -1,18 +1,12 @@
 import { Severity } from "./common-util";
-import { DefaultSecrets } from "./default-secret-names";
 import {
-  GitHubAppOwnerUrls,
-  GitHubAppInstallationData,
-  GitHubRepo,
-  GitHubActionsSecret,
-  GitHubRepoId,
-  GitHubUserDetails,
-  GitHubAppInstallationUrls,
-  GitHubAppPublicData,
-  GitHubAppConfigNoSecrets,
+  GitHubAppConfigNoSecrets, GitHubAppInstallationData, GitHubAppInstallationUrls, GitHubAppOwnerUrls,
+  GitHubAppPublicData, GitHubRepo, GitHubRepoId,
+  GitHubUserDetails, RepoWithSecrets,
 } from "./types/gh-types";
 import ImageRegistry from "./types/image-registries";
-import { ConnectorUserInfo, OpenShiftUserInfo } from "./types/user-types";
+import { ConnectorUserInfo } from "./types/user-types";
+import { WorkflowIDs } from "./workflows/workflows";
 
 namespace ApiResponses {
 
@@ -124,11 +118,8 @@ namespace ApiResponses {
     removed: boolean,
   }
 
-  export type OpenShiftUser = OpenShiftUserInfo & ResultSuccess;
-  export type OpenShiftUserResponse = OpenShiftUser | ResultFailed;
-
-  export type User = ConnectorUserInfo & ResultSuccess;
-  export type UserResponse = User | ResultFailed;
+  type OpenShiftUser = ConnectorUserInfo & ResultSuccess;
+  export type UserResponse = OpenShiftUser | ResultFailed;
 
   // extending githubuser type here in case we want to add more fields to this response later
 
@@ -144,24 +135,12 @@ namespace ApiResponses {
 
   export type GitHubAppReposState = GitHubAppMissing | GitHubAppRepos;
 
-  export interface RepoWithSecrets {
-    repo: GitHubRepo,
-    hasClusterSecrets: boolean,
-    hasRegistrySecret: boolean,
-    secrets: GitHubActionsSecret[],
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  export interface DefaultSecretsResponse extends DefaultSecrets {
-
-  }
-
   export interface ReposSecretsStatus {
     // orgs: [{
     //   org: GitHubOrg;
     //   secrets: GitHubActionsOrgSecret[];
     // }],
-    defaultSecretNames: DefaultSecrets,
+    // DEFAULT_SECRET_NAMES: DefaultSecrets,
     repos: RepoWithSecrets[],
     urls: GitHubAppInstallationUrls,
   }
@@ -199,9 +178,16 @@ namespace ApiResponses {
   }
 
   export interface WorkflowCreationResultSuccess extends ResultSuccess {
-    secretsUrl: string,
-    workflowFileUrl: string,
-    registrySecret: string,
+    id: WorkflowIDs,
+    repo: GitHubRepoId,
+    createdSecrets: string[],
+    prNumber: number,
+    urls: {
+      pullRequest: string,
+      // repo: string,
+      secrets: string,
+      workflowFile: string,
+    },
   }
 
   export type WorkflowCreationResult = ResultFailed | WorkflowCreationResultSuccess;

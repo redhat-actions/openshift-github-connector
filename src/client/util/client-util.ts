@@ -12,7 +12,7 @@ export function isJsonContentType(res: Response): boolean {
   return !!contentType
     && (
       contentType.startsWith(HttpConstants.ContentTypes.Json)
-      || contentType.startsWith(HttpConstants.ContentTypes.Problem)
+      // || contentType.startsWith(HttpConstants.ContentTypes.Problem)
     );
 }
 
@@ -129,4 +129,26 @@ export function isInOpenShiftConsole(): boolean {
 export function getConsoleModifierClass(): string {
   // "console" class is already used by bootstrap so we add 'is'
   return isInOpenShiftConsole() ? "is-console" : "is-standalone";
+}
+
+export function tryFocusElement(id: string, severity: Severity | "primary" = "primary"): void {
+  const elem = document.getElementById(id);
+  if (!elem) {
+    return;
+  }
+
+  // https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
+  elem.scrollIntoView({
+    behavior: "auto",
+    block: "center",
+    inline: "center",
+  });
+
+  if (elem.style.display === "none") {
+    return;
+  }
+
+  const classes = [ "border", "border-" + severity ];
+  elem.classList.add(...classes);
+  setTimeout(() => elem.classList.remove(...classes), 1000);
 }
