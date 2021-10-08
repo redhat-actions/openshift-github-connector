@@ -2,7 +2,9 @@ import { createContext } from "react";
 import { ConnectorUserInfo } from "../common/types/user-types";
 import { AlertInfo } from "./components/alerts";
 
-export const OpenShiftUserContext = createContext<{
+export const RELOAD_USER_SEARCH = "reload-user";
+
+export const ConnectorUserContext = createContext<{
   user: ConnectorUserInfo,
   reload:(() => Promise<void>),
 }>({} as any);

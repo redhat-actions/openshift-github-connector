@@ -10,7 +10,7 @@ For in-cluster deployment (using the Helm chart), the serving cert bundle is cop
 For local development, copy out that file to your local system:
 
 ```sh
-oc exec github-connector-<pod-id> -- cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt > ca.crt
+oc exec -n openshift-authentication oauth-openshift-<id> -- cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt > ca.crt
 ```
 
 You can use any pod; they should all have this file.

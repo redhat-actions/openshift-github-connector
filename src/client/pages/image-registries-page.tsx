@@ -218,6 +218,8 @@ function CreateImageRegistryCard({ onChange }: { onChange: () => Promise<void> }
             catch (err) {
               setSubmissionResult({
                 message: err.message,
+                status: err.status,
+                statusMessage: err.statusMessage,
                 success: false,
                 severity: "danger",
               });

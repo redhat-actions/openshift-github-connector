@@ -6,6 +6,7 @@ import ApiEndpoints from "../../common/api-endpoints";
 
 import ApiResponses from "../../common/api-responses";
 import { fetchJSON } from "../util/client-util";
+import MyBanner from "./banner";
 
 export const NAMESPACE_SELECT_ID = "namespace-select";
 
@@ -51,9 +52,7 @@ export default function NamespaceSelect(props: NamespaceSelectProps): JSX.Elemen
 
   if (namespaceList.namespaces.length === 0) {
     return (
-      <p className="error">
-        You do not have access to any namespaces!
-      </p>
+      <MyBanner severity="warning" title={"You do not have access to any namespaces!"} />
     );
   }
 

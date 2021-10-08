@@ -1,15 +1,7 @@
 export type Stringable = { toString(): string };
 
-// these map to Bootstrap colours
+// these map to Bootstrap and PF colours
 export type Severity = "success" | "info" | "warning" | "danger";
-
-export const STARTER_WORKFLOW = {
-  raw: "https://raw.githubusercontent.com/actions/starter-workflows/main/deployments/openshift.yml",
-  htmlFile: "https://github.com/actions/starter-workflows/blob/main/deployments/openshift.yml",
-
-  blog: "https://www.openshift.com/blog/deploying-to-openshift-using-github-actions",
-  youtube: "https://www.youtube.com/watch?v=6hgBO-1pKho",
-};
 
 /**
  * Joins a string array into a user-friendly list.

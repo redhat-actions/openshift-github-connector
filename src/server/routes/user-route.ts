@@ -60,6 +60,7 @@ router.route(ApiEndpoints.User.UserGitHub.path)
   }).all(send405([ "GET" ]));
   */
 
+/*
 router.route(ApiEndpoints.User.UserGitHubDetails.path)
   .get(async (
     req: express.Request<any, void>,
@@ -89,5 +90,7 @@ router.route(ApiEndpoints.User.UserGitHubDetails.path)
     return res.json(resBody);
   })
   .all(send405([ "GET" ]));
+
+*/
 
 export default router;

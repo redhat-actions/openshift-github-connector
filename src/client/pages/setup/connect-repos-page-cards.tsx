@@ -41,6 +41,13 @@ export function ConnectReposIntroCard(): JSX.Element {
               <CommonIcons.Documentation className="me-2" />
             Read More about using oc-login to log in to OpenShift from GitHub Actions.
             </NewTabLink>
+            <br/>
+            <NewTabLink
+              href={"https://github.com/redhat-actions/oc-login/wiki/Using-a-Service-Account-for-GitHub-Actions"}
+            >
+              <CommonIcons.Documentation className="me-2" />
+                Read More about authenticating using a service account for GitHub Actions.
+            </NewTabLink>
           </p>
 
           {/* <p>
@@ -160,24 +167,19 @@ export function NamespaceSACards(
 
             <NamespaceSelect namespacesRes={namespacesRes} namespace={namespace} setNamespace={setNamespace} />
 
-            <Checkbox
-              id="create-ns-secret-cb"
-              className="my-3"
-              label={"Create an Actions secret containing this namespace"}
-              isChecked={createNamespaceSecret}
-              onChange={(checked) => { setCreateNamespaceSecret(checked); }}
-            />
+            {
+              namespacesRes.namespaces.length > 0 ? (
+                <Checkbox
+                  id="create-ns-secret-cb"
+                  className="my-3"
+                  label={"Create an Actions secret containing this namespace"}
+                  isChecked={createNamespaceSecret}
+                  onChange={(checked) => { setCreateNamespaceSecret(checked); }}
+                />
+              ) : <></>
+            }
 
             <ServiceAccountSection namespace={namespace} serviceAccount={serviceAccount} setServiceAccount={setServiceAccount} />
-
-            <p>
-              <NewTabLink
-                href={"https://github.com/redhat-actions/oc-login/wiki/Using-a-Service-Account-for-GitHub-Actions"}
-              >
-                <CommonIcons.Documentation className="me-2" />
-                Read More about authenticating using a service account for GitHub Actions.
-              </NewTabLink>
-            </p>
           </>
         );
       }

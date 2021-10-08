@@ -2,10 +2,6 @@ import ApiResponses from "../../common/api-responses";
 import { Severity, Stringable } from "../../common/common-util";
 import HttpConstants from "../../common/http-constants";
 
-export function getSearchParam(param: string): string | null {
-  return new URLSearchParams(window.location.search).get(param);
-}
-
 export function isJsonContentType(res: Response): boolean {
   const contentType = res.headers.get(HttpConstants.Headers.ContentType);
 
@@ -22,8 +18,8 @@ async function getHttpError(res: Response): Promise<Error> {
   let severity: Severity | undefined;
   if (isJsonContentType(res)) {
     const resBody = await res.json();
-    if ((resBody as ApiResponses.Error).message) {
-      const errorBody = resBody as ApiResponses.Error;
+    if ((resBody as ApiResponses.ResultFailed).message) {
+      const errorBody = resBody as ApiResponses.ResultFailed;
       message = `${errorBody.message}`;
       severity = errorBody.severity;
       statusMessage = errorBody.statusMessage;

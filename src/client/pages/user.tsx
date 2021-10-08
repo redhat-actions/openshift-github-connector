@@ -10,13 +10,13 @@ import { ConnectorUserInfo } from "../../common/types/user-types";
 import BtnBody from "../components/btn-body";
 import { NewTabLink } from "../components/external-link";
 import { ObjectTable } from "../components/object-table";
-import { OpenShiftUserContext } from "../contexts";
+import { ConnectorUserContext } from "../contexts";
 import { fetchJSON } from "../util/client-util";
 import { CommonIcons } from "../util/icons";
 
 export function UserPage(): JSX.Element {
 
-  const userContext = useContext(OpenShiftUserContext);
+  const userContext = useContext(ConnectorUserContext);
 
   const [ error, setError ] = useState<string>();
   const [ isLoggingOut, setIsLoggingOut ] = useState(false);

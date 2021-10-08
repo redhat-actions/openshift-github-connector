@@ -1,15 +1,12 @@
+import ApiEndpoints from "common/api-endpoints";
 import express from "express";
 import passport from "passport";
 import passportOAuth2, { VerifyCallback } from "passport-oauth2";
-
 import User from "server/lib/user/user";
-import ApiEndpoints from "common/api-endpoints";
+import { UserSessionData } from "./lib/user/server-user-types";
+import TokenUtil from "./lib/user/token-util";
 import Log from "./logger";
 import { fetchFromOpenShiftApiServer } from "./util/server-util";
-import TokenUtil from "./lib/user/token-util";
-import { UserSessionData } from "./lib/user/server-user-types";
-import UserSerializer from "./lib/user/user-serializer";
-import UserInstallation from "./lib/github/user-app-installation";
 
 export const OAUTH2_STRATEGY_NAME = "oauth2";
 // export const MOCK_STRATEGY_NAME = "mock";
@@ -128,6 +125,8 @@ export async function setupPassport(app: express.Application): Promise<void> {
     }
   ));
 
+  // we do not use the passport session middleware and rather manage the session ourselves.
+  // so, we do not need to serialize/deserialize.
   /*
   passport.serializeUser((user: UserSessionData, done: (err: any, session: UserSessionData) => void) => {
     Log.info(`Serialize user ${user.info.uid}`);
@@ -139,11 +138,11 @@ export async function setupPassport(app: express.Application): Promise<void> {
     return done(undefined, userData);
   });
   */
-
-  app.use(passport.initialize());
   // app.use(passport.session());
 
-  // redirect unauthenticated requests to the login page
+  app.use(passport.initialize());
+
+  // send unauthenticated requests a 401. The frontend will redirect to the login page.
   app.use(async (req, res, next) => {
     const shouldRedirect = await shouldAuthRedirect(req);
 
@@ -160,9 +159,6 @@ export async function setupPassport(app: express.Application): Promise<void> {
     }
     return next();
   });
-
-  app.use(getUserOr401);
-  app.use(getInstallationOr400);
 
   Log.info(`Finished attaching passport`);
 }
@@ -181,60 +177,6 @@ async function buildUserSessionFromToken(accessToken: string): Promise<UserSessi
 
   return sessionData;
 }
-
-const getUserOr401 = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
-
-  req.getUserOr401 = async (send401: boolean = true): Promise<User | undefined> => {
-
-    if (!req.session.user) {
-      if (send401) {
-        res.send401();
-      }
-      return undefined;
-    }
-
-    Log.debug(`Lookup user ${req.session.user.info.uid}`);
-
-    const user = await UserSerializer.load(req.session.user);
-    if (!user) {
-      Log.warn(`Failed to look up user from data ${JSON.stringify(req.session)}; clearing session`);
-      req.session.user = undefined;
-
-      if (send401) {
-        res.send401();
-      }
-      return undefined;
-    }
-
-    return user;
-  };
-
-  next();
-};
-
-const getInstallationOr400 = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
-
-  req.getInstallationOr400 = async (die: boolean = true): Promise<UserInstallation | undefined> => {
-
-    const user = await req.getUserOr401(die);
-    if (!user) {
-      return undefined;
-    }
-
-    Log.debug(`Get installation for user ${user.name}`);
-
-    if (!user.installation) {
-      if (die) {
-        res.sendError(400, `No GitHub app installation for OpenShift user ${user.name}`);
-      }
-      return undefined;
-    }
-
-    return user.installation;
-  };
-
-  next();
-};
 
 const ENDPOINTS_NO_AUTH: string[] = [
   ApiEndpoints.Auth.Login.path,

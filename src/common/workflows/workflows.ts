@@ -12,6 +12,7 @@ export interface WorkflowInfo {
   description: string,
   defaultFilename: string,
   templateFileLocation: GitHubFileLocation,
+  requiresClusterSecrets: boolean,
   disabled?: boolean,
 }
 
@@ -22,6 +23,7 @@ export const WORKFLOW_INFOS: { [key in WorkflowIDs]: WorkflowInfo } = {
     name: "OpenShift Application Starter",
     description: "Log in to OpenShift, build a container image, "
       + "push the container image, and deploy an app from the new image.",
+    requiresClusterSecrets: true,
     templateFileLocation: {
       owner: "actions",
       repo: "starter-workflows",
@@ -34,6 +36,7 @@ export const WORKFLOW_INFOS: { [key in WorkflowIDs]: WorkflowInfo } = {
     defaultFilename: "openshift_login",
     name: "OpenShift Login",
     description: "Log in to OpenShift.",
+    requiresClusterSecrets: true,
     templateFileLocation: {
       owner: RHA_ORG,
       repo: "oc-login",
@@ -46,6 +49,7 @@ export const WORKFLOW_INFOS: { [key in WorkflowIDs]: WorkflowInfo } = {
     defaultFilename: "crda_scan",
     name: "Scan with CodeReady Dependency Analytics",
     description: "Perform security scans on the repository's dependencies.",
+    requiresClusterSecrets: false,
     templateFileLocation: {
       owner: RHA_ORG,
       repo: "crda",
@@ -58,6 +62,7 @@ export const WORKFLOW_INFOS: { [key in WorkflowIDs]: WorkflowInfo } = {
     defaultFilename: "openshift_self_hosted",
     name: "Self-Hosted Runner",
     description: "Launch a self-hosted runner on OpenShift and run a workflow job on the new runner.",
+    requiresClusterSecrets: true,
     disabled: true,
     templateFileLocation: {
       owner: RHA_ORG,

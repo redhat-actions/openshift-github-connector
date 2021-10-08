@@ -5,9 +5,9 @@ import _ from "lodash";
 import React from "react";
 import ApiEndpoints from "../../../common/api-endpoints";
 import ApiResponses from "../../../common/api-responses";
-import { STARTER_WORKFLOW, validatePath } from "../../../common/common-util";
-import { GitHubRepo } from "../../../common/types/gh-types";
-import { StarterWorkflowConfig } from "../../../common/workflows/workflows";
+import { validatePath } from "../../../common/common-util";
+import { GitHubRepo, resolveGitHubFileUrl } from "../../../common/types/gh-types";
+import { StarterWorkflowConfig, WORKFLOW_INFOS } from "../../../common/workflows/workflows";
 import MyBanner from "../../components/banner";
 import BtnBody from "../../components/btn-body";
 import DataFetcher from "../../components/data-fetcher";
@@ -44,7 +44,7 @@ export default class ConfigureStarterWorkflow extends React.Component<ConfigureW
         <p>
           This is the same workflow created by GitHub&apos;s <b>New workflow</b> feature, if you select the OpenShift workflow.
         </p>
-        <NewTabLink href={STARTER_WORKFLOW.htmlFile}>
+        <NewTabLink href={resolveGitHubFileUrl(WORKFLOW_INFOS[this.state.id].templateFileLocation)}>
           <CommonIcons.GitHub className="me-2" />
           View the workflow on GitHub
         </NewTabLink>

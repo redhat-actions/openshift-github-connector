@@ -16,6 +16,7 @@ export type MyWizardStep = WizardStep & {
 export interface MyWizardProps<ResultType> {
   steps: MyWizardStep[],
   submit: () => Promise<ResultType>,
+  submittingMsg?: string,
   // statusComponent?: React.ReactNode,
   ResultModal?: React.ComponentType<{ result: ResultType | undefined, onReset: () => void }>,
   // postPagePath: string,
@@ -40,7 +41,7 @@ export function toWizardStep(
 }
 
 export default function MyWizard<ResultType>({
-  steps, submit, ResultModal,
+  steps, submit, submittingMsg, ResultModal,
 }: MyWizardProps<ResultType>) {
 
   const history = useHistory();
@@ -97,6 +98,7 @@ export default function MyWizard<ResultType>({
             currentStep={currentStep}
             wizardSteps={steps}
             isLoading={isLoading}
+            submittingMsg={submittingMsg}
             // statusComponent={statusComponent}
             nextStepCallback={async (isFinalStep) => {
               // no throw
@@ -129,11 +131,13 @@ function WizardFooter({
   wizardSteps,
   // statusComponent,
   isLoading,
+  submittingMsg,
   nextStepCallback,
 }: {
   currentStep: MyWizardStep,
   wizardSteps: MyWizardStep[],
   // statusComponent: React.ReactNode,
+  submittingMsg?: string,
   isLoading: boolean,
   nextStepCallback: (isFinalStep: boolean) => Promise<void>,
 }): JSX.Element {
@@ -160,7 +164,7 @@ function WizardFooter({
           <>
             <div className="centers">
               <Spinner size="lg" className="mx-3" />
-              Submitting...
+              {submittingMsg || "Submitting..."}
             </div>
           </>
           : ""

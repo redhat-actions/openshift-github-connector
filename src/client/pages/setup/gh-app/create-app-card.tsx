@@ -131,3 +131,31 @@ export default function CreateAppCard(): JSX.Element {
     </>
   );
 }
+
+export function GHECard(): JSX.Element {
+
+  const [ enterpriseChecked, setEnterpriseChecked ] = useState(false);
+
+  return (
+    <Card>
+      <CardTitle>
+        GitHub Enterprise
+      </CardTitle>
+      <CardBody>
+        <Checkbox
+          id="use-ghe"
+          isDisabled={true}
+          isChecked={enterpriseChecked}
+          onChange={(checked) => setEnterpriseChecked(checked)}
+          label="Use GitHub Enterprise"
+        />
+        <p>
+          Use a GitHub Enterprise (GHE) instance instead of <b>github.com</b>. The GHE instance must be reachable from this cluster.
+        </p>
+        <p>
+          This cannot be changed later without creating another app.
+        </p>
+      </CardBody>
+    </Card>
+  );
+}

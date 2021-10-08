@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   Button,
   Title,
@@ -20,13 +20,11 @@ import ClientPages from "./client-pages";
 import { fetchJSON } from "../util/client-util";
 import { NewTabLink } from "../components/external-link";
 import { CommonIcons } from "../util/icons";
-import { PushAlertContext } from "../contexts";
+import { ConnectorUserContext, PushAlertContext } from "../contexts";
 
 type ViewType = "owner" | "user";
 
 export default function GitHubAppPage() {
-
-  const isSetup = useLocation().pathname.startsWith(ClientPages.SetupIndex.path);
 
   return (
     <>
@@ -34,7 +32,7 @@ export default function GitHubAppPage() {
         {
           (data: ApiResponses.UserAppState, reload) => {
             return (
-              <GitHubAppPageBody data={data} reload={reload} isSetup={isSetup} />
+              <GitHubAppPageBody data={data} reload={reload} />
             );
           }
         }
@@ -44,28 +42,23 @@ export default function GitHubAppPage() {
 }
 
 function GitHubAppPageBody({
-  data, reload, isSetup,
+  data, reload,
 }: {
-  data: ApiResponses.UserAppState, reload: () => Promise<void>, isSetup: boolean,
+  data: ApiResponses.UserAppState, reload: () => Promise<void>,
 }): JSX.Element {
 
-  const [ viewType, setViewType ] = useState<ViewType>();
+  const isSetup = useLocation().pathname.startsWith(ClientPages.SetupIndex.path);
+
+  const [ viewType, setViewType ] = useState<ViewType>((data as ApiResponses.UserAppExists).owned ? "owner" : "user");
+
   const [ isDeleting, setIsDeleting ] = useState(false);
   const pushAlert = useContext(PushAlertContext);
+  const { user } = useContext(ConnectorUserContext);
 
   if (!data.success) {
     return (
       <NoApp />
     );
-  }
-
-  if (!viewType) {
-    if (data.installed) {
-      setViewType("user");
-    }
-    if (data.owned) {
-      setViewType("owner");
-    }
   }
 
   return (
@@ -81,52 +74,29 @@ function GitHubAppPageBody({
         <div className="ms-auto"></div>
 
         <div className="btn-line even">
-          {
-            viewType === "user" ?
-              <Button variant="danger" className={classNames({ "d-none": isSetup })} onClick={
-                async () => {
-                  if (isDeleting) {
-                    return;
-                  }
+          <Button variant="danger" disabled={isDeleting} className={classNames({ "d-none": isSetup })} onClick={
+            async () => {
+              if (isDeleting) {
+                return;
+              }
 
-                  try {
-                    setIsDeleting(true);
-                    await fetchJSON<never, never>("DELETE", ApiEndpoints.User.GitHubInstallation);
-                    await reload();
-                  }
-                  catch (err) {
-                    pushAlert({ severity: "danger", title: `Error uninstalling app`, body: err.message });
-                  }
-                  finally {
-                    setIsDeleting(false);
-                  }
-                }
-              }>
-                <BtnBody icon={TimesIcon} text="Uninstall" isLoading={isDeleting} />
-              </Button>
-              :
-              <Button variant="danger" className={classNames({ "d-none": isSetup })} onClick={
-                async () => {
-                  if (isDeleting) {
-                    return;
-                  }
+              const endpoint = viewType === "user" ? ApiEndpoints.User.GitHubInstallation : ApiEndpoints.App.Root;
 
-                  try {
-                    setIsDeleting(true);
-                    await fetchJSON<{ appId: number }, never>("DELETE", ApiEndpoints.App.Root.path, { appId: data.appData.id });
-                    await reload();
-                  }
-                  catch (err) {
-                    pushAlert({ severity: "danger", title: `Error removing app`, body: err.message });
-                  }
-                  finally {
-                    setIsDeleting(false);
-                  }
-                }
-              }>
-                <BtnBody icon={CommonIcons.Delete} text="Remove" isLoading={isDeleting} />
-              </Button>
-          }
+              try {
+                setIsDeleting(true);
+                await fetchJSON<never, never>("DELETE", endpoint);
+                await reload();
+              }
+              catch (err) {
+                pushAlert({ severity: "danger", title: `Error removing app`, body: err.message });
+              }
+              finally {
+                setIsDeleting(false);
+              }
+            }
+          }>
+            <BtnBody icon={TimesIcon} text="Uninstall" isLoading={isDeleting} />
+          </Button>
           <Button onClick={() => reload()}>
             <BtnBody icon={CommonIcons.Reload} text="Reload"/>
           </Button>
@@ -134,16 +104,14 @@ function GitHubAppPageBody({
       </div>
 
       <div className="my-3 center-y">
-        <DataFetcher type="api" endpoint={ApiEndpoints.User.UserGitHubDetails} loadingDisplay="text">{
-          (userRes: ApiResponses.GitHubUserDetailsResponse) => {
-            return (
-              <Title headingLevel="h4" className="d-flex">
-                GitHub user:&nbsp;<NewTabLink href={userRes.html_url}>{userRes.login}</NewTabLink>
-              </Title>
-            );
-          }
+        {
+          user.githubInfo ?
+            <Title headingLevel="h4" className="d-flex">
+              GitHub user:&nbsp;<NewTabLink href={user.githubInfo.html_url}>{user.githubInfo.name}</NewTabLink>
+            </Title>
+            : <></>
         }
-        </DataFetcher>
+
         <div className="ms-auto">
           {
             data.installed && data.owned ?
@@ -165,7 +133,7 @@ function GitHubAppPageBody({
   );
 }
 
-function SwitchViewButton(props: { currentView: ViewType | undefined, onSwitchViewType: (newViewType: ViewType) => void }): JSX.Element {
+function SwitchViewButton(props: { currentView: ViewType, onSwitchViewType: (newViewType: ViewType) => void }): JSX.Element {
 
   const isOwnerActive = props.currentView === "owner";
   const isUserActive = !isOwnerActive;
@@ -186,9 +154,40 @@ function SwitchViewButton(props: { currentView: ViewType | undefined, onSwitchVi
   );
 }
 
-function AppOwnerCards(props: ApiResponses.UserOwnedAppData): JSX.Element {
+function AppOwnerCards(props: ApiResponses.UserOwnedAppData) {
   return (
     <>
+      <AppPageCard header="User Installations" buttons={[{
+        href: props.ownerUrls.ownerInstallations,
+        icon: CommonIcons.Configure,
+        text: "Manage Installations",
+      }]}>
+        {
+          props.installations.length === 0 ? (
+            <p>
+          No one has installed this app. Click <b>Manage Installations</b> to install the app on your GitHub account or organization.
+            </p>
+          ) : (
+            <ul>
+              {props.installations.map((installation) => {
+                if (installation.account == null) {
+                  return (<li className="text-danger">Installation {installation.id} missing {`"account"`}</li>);
+                }
+
+                return (
+                  <li key={installation.account.html_url}>
+                    <NewTabLink href={installation.account.html_url ?? ""}>
+                      {installation.account.login}
+                    </NewTabLink>
+                  </li>
+                );
+              })}
+            </ul>
+          )
+
+        }
+
+      </AppPageCard>
       <AppPageCard header="App Permissions" buttons={[{
         href: "https://docs.github.com/en/developers/apps/creating-a-github-app-using-url-parameters#github-app-permissions",
         icon: CommonIcons.Documentation,
@@ -217,27 +216,6 @@ function AppOwnerCards(props: ApiResponses.UserOwnedAppData): JSX.Element {
       }]}>
         <ul>
           {props.appConfig.events.map((event) => <li key={event}>{event}</li>)}
-        </ul>
-      </AppPageCard>
-      <AppPageCard header="User Installations" buttons={[{
-        href: props.ownerUrls.ownerInstallations,
-        icon: CommonIcons.Configure,
-        text: "Manage Installations",
-      }]}>
-        <ul>
-          {props.installations.map((installation) => {
-            if (installation.account == null) {
-              return (<li className="text-danger">Installation {installation.id} missing {`"account"`}</li>);
-            }
-
-            return (
-              <li key={installation.account.html_url}>
-                <NewTabLink href={installation.account.html_url ?? ""}>
-                  {installation.account.login}
-                </NewTabLink>
-              </li>
-            );
-          })}
         </ul>
       </AppPageCard>
     </>
@@ -274,7 +252,7 @@ function NoApp(): JSX.Element {
     <>
       <p>A GitHub App has not yet been added to the connector.</p>
       <h2 className="my-3">
-        <a href={ClientPages.SetupIndex.path}>Go to the Setup</a>
+        <Link to={ClientPages.SetupIndex.path}>Go to the Setup</Link>
       </h2>
       {/* <p>You will be redirected in {countdown} ...</p> */}
     </>

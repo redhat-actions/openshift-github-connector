@@ -51,11 +51,22 @@ router.route(ApiEndpoints.Cluster.Root.path)
   .all(send405([ "GET", "PUT" ]));
 
 async function getReadableNamespaces(user: User): Promise<string[]> {
-  // this should really be 'getWritableNamespaces'
-
+  let namespaces: string[];
   const k8sClient = user.makeKubeConfig().makeApiClient(k8s.CoreV1Api);
-  const namespacesRes = await k8sClient.listNamespace();
-  const namespaces = removeUndefined(namespacesRes.body.items.map((ns) => ns.metadata?.name));
+  try {
+    const namespacesRes = await k8sClient.listNamespace();
+    namespaces = removeUndefined(namespacesRes.body.items.map((ns) => ns.metadata?.name));
+  }
+  catch (err) {
+    Log.warn(`User ${user.name} encountered error listing namespaces: ${err}`);
+    // eslint-disable-next-line eqeqeq
+    if (err.statusCode == "403") {
+      namespaces = [];
+    }
+    else {
+      throw err;
+    }
+  }
 
   return namespaces;
 }

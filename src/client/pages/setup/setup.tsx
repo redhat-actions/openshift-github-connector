@@ -4,35 +4,43 @@ import ApiEndpoints from "../../../common/api-endpoints";
 import ApiResponses from "../../../common/api-responses";
 import DataFetcher from "../../components/data-fetcher";
 import MyWizard, { MyWizardStep, toWizardStep } from "../../components/my-wizard";
-import { OpenShiftUserContext } from "../../contexts";
+import { ConnectorUserContext } from "../../contexts";
 import ClientPages from "../client-pages";
 import GitHubAppPage from "../gh-app-page";
 import ConnectReposPage from "./connect-repos-page";
-import { InstallExistingAppPage } from "./gh-app/install-existing-app";
-import SetupAppPage from "./gh-app/setup-app";
+import { InstallExistingAppCard } from "./gh-app/install-existing-app";
+import AdminSetupAppPage from "./gh-app/setup-app";
 import WelcomePage from "./welcome-page";
 
-export default function SetupWizard(): JSX.Element {
+export default function SetupWizard() {
 
   const history = useHistory();
 
-  const { user } = useContext(OpenShiftUserContext);
+  const { user } = useContext(ConnectorUserContext);
 
   return (
-    <DataFetcher type="api" endpoint={ApiEndpoints.User.Root} loadingDisplay="spinner">{
-      (userWithGitHub: ApiResponses.UserResponse) => {
-        const wizardSteps = getWizardSteps(
-          user.isAdmin,
-          userWithGitHub.success && userWithGitHub.githubInstallationInfo != null
-        );
+    <DataFetcher type="api" endpoint={ApiEndpoints.App.Root} loadingDisplay="spinner">{
+      (appState: ApiResponses.AllConnectorApps, reload) => {
+        const wizardSteps = getWizardSteps({
+          isAdmin: user.isAdmin,
+          hasInstallation: user.githubInstallationInfo != null,
+          ownsAppOrInstall: user.githubInstallationInfo != null || user.ownsAppIds.length > 0,
+        }, appState, reload);
 
         return (
-          <MyWizard steps={wizardSteps} submit={async () => { history.push(ClientPages.SetupFinished.path); } } />
+          <MyWizard steps={wizardSteps} submit={async () => {
+            if (user.githubInstallationInfo) {
+              history.push(ClientPages.SetupFinished.path);
+            }
+            else {
+              history.push(ClientPages.App.path);
+            }
+          }}
+          />
         );
       }
     }
     </DataFetcher>
-
   );
 }
 
@@ -48,34 +56,41 @@ export function getSetupPagePath(page: keyof typeof SetupPagePaths): string {
   return ClientPages.SetupIndex.path + "/" + SetupPagePaths[page];
 }
 
-function getWizardSteps(isAdmin: boolean, hasGitHubAppInstallation: boolean): MyWizardStep[] {
+function getWizardSteps(
+  userInfo: { isAdmin: boolean, hasInstallation: boolean, ownsAppOrInstall: boolean },
+  appState: ApiResponses.AllConnectorApps, reloadAppState: () => void
+): MyWizardStep[] {
   const wizardSteps: MyWizardStep[] = [];
 
   let i = 0;
 
   wizardSteps.push(toWizardStep(<WelcomePage />, "Welcome", SetupPagePaths.WELCOME, i++));
 
-  if (isAdmin) {
+  if (userInfo.isAdmin) {
     wizardSteps.push(toWizardStep(
-      <SetupAppPage />, "Setup GitHub App", SetupPagePaths.SETUP_APP, i++,
-      { enableNext: hasGitHubAppInstallation }
+      <AdminSetupAppPage appState={appState} reloadAppState={reloadAppState} />, "Setup GitHub App", SetupPagePaths.SETUP_APP, i++,
+      { enableNext: userInfo.ownsAppOrInstall }
     ));
   }
 
   wizardSteps.push(toWizardStep(
-    <InstallExistingAppPage />, "Install GitHub App", SetupPagePaths.INSTALL_APP, i++,
-    { enableNext: hasGitHubAppInstallation }
+    <InstallExistingAppCard appState={appState} reloadAppState={reloadAppState} />, "Install GitHub App", SetupPagePaths.INSTALL_APP, i++,
+    { enableNext: userInfo.ownsAppOrInstall, canJumpTo: appState.success && appState.doesAnyAppExist }
   ));
 
   wizardSteps.push(toWizardStep(
-    <GitHubAppPage />, "View GitHub App", SetupPagePaths.VIEW_APP, i++,
-    { canJumpTo: hasGitHubAppInstallation }
+    <GitHubAppPage />, "View GitHub App", SetupPagePaths.VIEW_APP, i++, {
+      enableNext: userInfo.ownsAppOrInstall,
+      canJumpTo: userInfo.ownsAppOrInstall,
+    }
   ));
 
-  wizardSteps.push(toWizardStep(
-    <ConnectReposPage />, "Connect Repositories", SetupPagePaths.CONNECT_REPOS, i++,
-    { canJumpTo: hasGitHubAppInstallation }
-  ));
+  if (userInfo.hasInstallation) {
+    wizardSteps.push(toWizardStep(
+      <ConnectReposPage />, "Connect Repositories", SetupPagePaths.CONNECT_REPOS, i++,
+      { canJumpTo: userInfo.hasInstallation }
+    ));
+  }
 
   return wizardSteps;
 }

@@ -18,28 +18,28 @@ export interface OpenShiftUserInfo {
   readonly isAdmin: boolean,
 }
 
-export type ConnectorGitHubUserInfo = Readonly<{
+export interface ConnectorGitHubUserInfo {
   /**
    * GitHub user ID
    */
-  id: number,
+  readonly id: number,
   /**
    * GitHub user name (login)
    */
-  name: string,
-  email: string | undefined,
+  readonly name: string,
+  readonly email: string | undefined,
   /**
    * Whether the user is a regular user or an organization
    */
-  type: GitHubUserType,
-  html_url: string,
-}>;
+  readonly type: GitHubUserType,
+  readonly html_url: string,
+}
 
-export type ConnectorGitHubAppInstallInfo = Readonly<{
-  installation: GitHubAppInstallationData,
-  installedApp: GitHubAppConfigNoSecrets,
+export interface ConnectorGitHubAppInstallInfo {
+  readonly installation: GitHubAppInstallationData,
+  readonly installedApp: GitHubAppConfigNoSecrets,
   // installationId: number,
-}>;
+}
 
 export interface ConnectorUserInfo extends OpenShiftUserInfo {
   readonly githubInfo?: ConnectorGitHubUserInfo,

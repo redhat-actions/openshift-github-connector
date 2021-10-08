@@ -28,7 +28,7 @@ declare global {
       getUserOr401: (die?: boolean) => Promise<MyUser | undefined>,
 
       /**
-       * Similar to getUserOr401, but tries to get the user's github app installation.
+       * Similar to getUserOr401, but tries to get the user's GitHub app installation.
        */
       getInstallationOr400: (die?: boolean) => Promise<UserInstallation | undefined>,
     }

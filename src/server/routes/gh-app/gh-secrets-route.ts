@@ -22,14 +22,9 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
     next
   ) => {
 
-    const user = await req.getUserOr401();
-    if (!user) {
-      return undefined;
-    }
-
-    const installation = user.installation;
+    const installation = await req.getInstallationOr400();
     if (!installation) {
-      return res.sendError(400, `No installation for user ${user.name}`);
+      return undefined;
     }
 
     /*

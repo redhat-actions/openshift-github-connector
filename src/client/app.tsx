@@ -1,4 +1,6 @@
-import { Route, Switch } from "react-router-dom";
+import {
+  Route, Switch, useHistory, useLocation,
+} from "react-router-dom";
 import { Spinner } from "@patternfly/react-core";
 
 import ClientPages from "./pages/client-pages";
@@ -9,9 +11,12 @@ import ApiEndpoints from "../common/api-endpoints";
 import { getTitle } from "./components/title";
 import DataFetcher from "./components/data-fetcher";
 import ApiResponses from "../common/api-responses";
-import { InConsoleContext, OpenShiftUserContext } from "./contexts";
+import { InConsoleContext, ConnectorUserContext, RELOAD_USER_SEARCH } from "./contexts";
 
 export default function App(): JSX.Element {
+
+  const history = useHistory();
+  const { search } = useLocation();
 
   return (
     <>
@@ -36,16 +41,19 @@ export default function App(): JSX.Element {
             }>{
               (loginResponse: ApiResponses.UserResponse, reload) => {
 
-                // console.log(`LOGIN RESPONSE`, loginResponse);
+                if (search.includes(RELOAD_USER_SEARCH)) {
+                  history.replace({ search: search.replace(RELOAD_USER_SEARCH, "") });
+                  reload().catch(console.error);
+                }
 
                 if (loginResponse.success) {
                   return (
-                    <OpenShiftUserContext.Provider value={{
+                    <ConnectorUserContext.Provider value={{
                       user: loginResponse,
                       reload,
                     }}>
                       <AppSwitch />
-                    </OpenShiftUserContext.Provider>
+                    </ConnectorUserContext.Provider>
                   );
                 }
                 return redirectToLogin();

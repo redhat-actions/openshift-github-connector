@@ -31,21 +31,27 @@ namespace UserSerializer {
 
 		const secretName = getUserSecretName(user.uid);
 
-		await SecretUtil.deleteSecret(
-			SecretUtil.getSAClient(),
-			SecretUtil.getStorageSecretsNamespace(),
-			secretName,
-		);
+		if (userCache.has(user.uid)) {
+			// this means the user has been saved, and the secret already exists
+			await SecretUtil.patchSecret(SecretUtil.getSAClient(), SecretUtil.getStorageSecretsNamespace(), secretName, memento);
+		}
+		else {
+			// the secret may or may not exist
+			await SecretUtil.deleteSecret(
+				SecretUtil.getSAClient(),
+				SecretUtil.getStorageSecretsNamespace(),
+				secretName,
+			);
 
-		await SecretUtil.createSecret(
-			SecretUtil.getSAClient(),
-			SecretUtil.getStorageSecretsNamespace(),
-			secretName,
-			memento,
-			SecretUtil.getSAName(),
-			SecretUtil.Subtype.USER,
-		);
-		Log.info(`Done saving ${user.name}`);
+			await SecretUtil.createSecret(
+				SecretUtil.getSAClient(),
+				SecretUtil.getStorageSecretsNamespace(),
+				secretName,
+				memento,
+				SecretUtil.getSAName(),
+				SecretUtil.Subtype.USER,
+			);
+		}
 
 		Log.info(`Update user ${user.name} data in cache`);
 		userCache.set(user.uid, user);

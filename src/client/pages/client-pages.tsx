@@ -96,7 +96,7 @@ const CreatingAppCallback = new ClientPage(Home, "/app-callback", "Created App",
 const InstalledAppCallback = new ClientPage(Home, "/installation-callback", "Installed App", InstalledAppPage);
 const SetupFinished = new ClientPage(Home, "/setup-complete", "Setup Complete", SetupFinishedPage);
 
-const App = new ClientPage(Home, "/app", "GitHub App", GitHubAppPage);
+const App = new ClientPage(Home, "/app", "View GitHub App", GitHubAppPage);
 
 const AddWorkflowsIndex = new ClientPage(Home, "/add-workflows", "Add Workflow", () => (<Redirect to={getWorkflowsWizardFirstPagePath()} />));
 const AddWorkflows = new ClientPage(Home, "/add-workflows/:" + WIZARD_PAGE_PARAM, "Add Workflow", WorkflowsWizard, false, { fullWidth: true });

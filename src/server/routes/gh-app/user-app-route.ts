@@ -1,4 +1,5 @@
 import express from "express";
+import _ from "lodash";
 
 import ApiEndpoints from "common/api-endpoints";
 import ApiResponses from "common/api-responses";
@@ -78,19 +79,17 @@ router.route(ApiEndpoints.User.GitHubInstallation.path)
       }));
     */
 
-    if (user.installation && user.ownsAppIds.includes(user.installation.app.id)) {
+    if (user.ownsAppIds.length > 0) {
+      // todo they could own more than one
+      const ownedAppId = user.ownsAppIds[0];
+
       // owned
-      const ownedApp = await GitHubAppSerializer.load(user.installation.app.id);
+      const ownedApp = await GitHubAppSerializer.load(ownedAppId);
       if (!ownedApp) {
-        throw new Error(`User ${user.name} owns app ${user.installation.app.id} but that app was not found`);
+        throw new Error(`User ${user.name} owns app "${ownedAppId}" but that app was not found`);
       }
 
-      const appData = {
-        id: user.installation.app.id,
-        html_url: ownedApp.config.html_url,
-        name: ownedApp.config.name,
-        slug: ownedApp.config.slug,
-      };
+      const appData = _.pick(ownedApp.config, [ "id", "html_url", "name", "slug" ]);
 
       const ownedAppData: ApiResponses.UserOwnedAppData = {
         appConfig: ownedApp.getWithoutSecrets,
@@ -99,7 +98,7 @@ router.route(ApiEndpoints.User.GitHubInstallation.path)
       };
 
       if (installedAppData != null) {
-        // owned and installed
+        // owned AND installed
 
         const combinedData: ApiResponses.UserAppOwnedAndInstalled = {
           success: true,
@@ -115,6 +114,7 @@ router.route(ApiEndpoints.User.GitHubInstallation.path)
         return res.json(combinedData);
       }
 
+      // owned but not installed
       const ownedAppResponse: ApiResponses.UserAppOwned = {
         success: true,
         installed: false,
@@ -124,7 +124,6 @@ router.route(ApiEndpoints.User.GitHubInstallation.path)
         ownedAppData,
       };
 
-      // owned but not installed
       return res.json(ownedAppResponse);
     }
 
@@ -132,13 +131,7 @@ router.route(ApiEndpoints.User.GitHubInstallation.path)
 
     if (!installedAppResponse) {
       // neither owned nor installed
-
-      const resBody: ApiResponses.GitHubAppMissing = {
-        message: `User "${user.name}" does not own an app, or have an app installed.`,
-        success: false,
-      };
-
-      return res.json(resBody);
+      return res.sendError(400, `User "${user.name}" does not own an app, or have an app installed.`);
     }
 
     // not owned, but installed

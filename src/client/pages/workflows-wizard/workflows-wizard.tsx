@@ -23,10 +23,11 @@ import {
   clearWizardState, getWorkflowsWizardInitialState, WorkflowsWizardContext, workflowsWizardReducer,
 } from "./workflows-wizard-state";
 
+const SELECT_WORKFLOW_PATH = "select-workflow";
 const SELECT_REPO_PATH = "select-repo";
 
 export function getWorkflowsWizardFirstPagePath(): string {
-  return ClientPages.AddWorkflowsIndex.path + "/" + SELECT_REPO_PATH;
+  return ClientPages.AddWorkflowsIndex.path + "/" + SELECT_WORKFLOW_PATH;
 }
 
 export default function WorkflowsWizard() {
@@ -37,23 +38,23 @@ export default function WorkflowsWizard() {
   let i = 0;
 
   steps.push(toWizardStep(
+    <WorkflowsWizardSelectWorkflow />,
+    "Select Workflow",
+    SELECT_WORKFLOW_PATH,
+    i++, {
+      canJumpTo: state.repo != null,
+      enableNext: state.workflow != null,
+      // isFinishedStep: state.workflow != null,
+    }
+  ));
+
+  steps.push(toWizardStep(
     <WorkflowsWizardSelectRepo />,
     "Select Repository",
     SELECT_REPO_PATH,
     i++, {
       enableNext: state.repo != null,
       // isFinishedStep: state.repo != null,
-    }
-  ));
-
-  steps.push(toWizardStep(
-    <WorkflowsWizardSelectWorkflow />,
-    "Select Workflow",
-    "select-workflow",
-    i++, {
-      canJumpTo: state.repo != null,
-      enableNext: state.workflow != null,
-      // isFinishedStep: state.workflow != null,
     }
   ));
 
@@ -83,6 +84,7 @@ export default function WorkflowsWizard() {
       <WorkflowsWizardContext.Provider value={store}>
         <MyWizard
           steps={steps}
+          submittingMsg={`Creating workflow, this will take a few seconds...`}
           submit={async () => {
             const result = finishWizard(store);
             clearWizardState();
@@ -139,7 +141,7 @@ function WorkflowsWizardSelectRepo() {
           wizardContext.dispatch({ repo: newRepo, canFinish: false });
         }}
         clusterSecrets={{
-          requiredForSelection: true,
+          requiredForSelection: wizardContext.state.workflow?.requiresClusterSecrets ?? false,
         }}
         selectType="single"
       />

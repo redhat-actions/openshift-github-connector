@@ -1,8 +1,7 @@
 import { Severity } from "./common-util";
 import {
   GitHubAppConfigNoSecrets, GitHubAppInstallationData, GitHubAppInstallationUrls, GitHubAppOwnerUrls,
-  GitHubAppPublicData, GitHubRepo, GitHubRepoId,
-  GitHubUserDetails, RepoWithSecrets,
+  GitHubAppPublicData, GitHubRepo, GitHubRepoId, RepoWithSecrets,
 } from "./types/gh-types";
 import ImageRegistry from "./types/image-registries";
 import { ConnectorUserInfo } from "./types/user-types";
@@ -27,9 +26,6 @@ namespace ApiResponses {
   export interface ResultFailed extends Result {
     success: false,
     severity?: "warning" | "danger",
-  }
-
-  export interface Error extends ResultFailed {
     status: number,
     statusMessage: string,
   }
@@ -39,10 +35,10 @@ namespace ApiResponses {
   //   state: string;
   // }
 
-  export interface CreatingAppResponse extends Result {
+  export type CreatingAppResponse = (ResultSuccess & {
     appInstallUrl: string,
     appName: string,
-  }
+  }) | ResultFailed;
 
   export interface ExistingAppData {
     // client_id: string,
@@ -59,15 +55,12 @@ namespace ApiResponses {
     },
   }
 
-  export type ClusterAppState = {
+  export type AllConnectorApps = {
     success: true,
-    totalCount: number,
+    doesAnyAppExist: boolean,
+    // totalCount: number,
     visibleApps: ExistingAppData[],
   } | ResultFailed;
-
-  export interface GitHubAppMissing extends Result {
-    success: false,
-  }
 
   export interface UserAppExists {
     // discriminators
@@ -112,7 +105,7 @@ namespace ApiResponses {
     ownedAppData: UserOwnedAppData,
   }
 
-  export type UserAppState = GitHubAppMissing | UserAppOwned | UserAppInstalled | UserAppOwnedAndInstalled;
+  export type UserAppState = UserAppOwned | UserAppInstalled | UserAppOwnedAndInstalled | ResultFailed;
 
   export interface RemovalResult extends Result {
     removed: boolean,
@@ -121,19 +114,11 @@ namespace ApiResponses {
   type OpenShiftUser = ConnectorUserInfo & ResultSuccess;
   export type UserResponse = OpenShiftUser | ResultFailed;
 
-  // extending githubuser type here in case we want to add more fields to this response later
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  export interface GitHubUserDetailsResponse extends GitHubUserDetails {
-
-  }
-
-  export interface GitHubAppRepos {
-    app: true,
+  export interface GitHubAppRepos extends ResultSuccess {
     repos: GitHubRepo[],
   }
 
-  export type GitHubAppReposState = GitHubAppMissing | GitHubAppRepos;
+  export type GitHubAppReposState = GitHubAppRepos | ResultFailed;
 
   export interface ReposSecretsStatus {
     // orgs: [{
