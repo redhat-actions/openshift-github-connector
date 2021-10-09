@@ -49,7 +49,6 @@ export default class CopyToClipboardBtn extends React.Component<CopyBtnProps, Co
     return (
       <Button
         title="Copy"
-        className="copy-btn"
         {...childBtnProps}
         onClick={() => this.onCopy()}>
         <BtnBody icon={icon} text={renderText ? text : undefined} />

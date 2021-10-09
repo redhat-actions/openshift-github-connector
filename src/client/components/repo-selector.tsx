@@ -1,8 +1,8 @@
 import {
-  Badge, Button, Card, CardBody, CardTitle, Checkbox, ExpandableSection, ExpandableSectionToggle, FormGroup, Radio,
+  Badge, Button, Card, CardBody, CardTitle, Checkbox, ExpandableSection, ExpandableSectionToggle, FormGroup, Radio, SearchInput,
 } from "@patternfly/react-core";
 import {
-  CheckSquareIcon, EyeIcon, EyeSlashIcon, MinusCircleIcon, MinusSquareIcon,
+  CheckSquareIcon, EyeIcon, EyeSlashIcon, IconSize, MinusCircleIcon, MinusSquareIcon,
 } from "@patternfly/react-icons";
 import { Table } from "@patternfly/react-table";
 import classNames from "classnames";
@@ -11,10 +11,12 @@ import ApiEndpoints from "../../common/api-endpoints";
 import ApiResponses from "../../common/api-responses";
 import { getFriendlyDateTime } from "../../common/common-util";
 import { getSecretsUrlForRepo, RepoWithSecrets } from "../../common/types/gh-types";
+import ClientPages from "../pages/client-pages";
 import { CommonIcons, IconElement } from "../util/icons";
 import BtnBody from "./btn-body";
 import DataFetcher from "./data-fetcher";
 import { NewTabLink } from "./external-link";
+import { TooltipIcon } from "./tooltip-icon";
 
 export const REPO_SELECTOR_CARD_ID = "repo-selector-card";
 
@@ -62,6 +64,8 @@ export default function RepoSelectorCard({
   setSelection: (repos: RepoSelectionState) => void,
 }) {
 
+  const [ search, setSearch ] = useState<string>();
+
   return (
     <DataFetcher type="api" endpoint={ApiEndpoints.App.Repos.Secrets} loadingDisplay="card">{
       (reposWithSecrets: ApiResponses.ReposSecretsStatus, reload): JSX.Element => {
@@ -101,7 +105,7 @@ export default function RepoSelectorCard({
                     <NewTabLink
                       href={reposWithSecrets.urls.installationSettings}
                     >
-                      <BtnBody icon={CommonIcons.Configure} text="Edit Installation" />
+                      <BtnBody icon={CommonIcons.Configure} text="Add/Remove Repositories" />
                     </NewTabLink>
                   </Button>
                   <Button variant="primary"
@@ -113,6 +117,13 @@ export default function RepoSelectorCard({
               </div>
             </CardTitle>
             <CardBody>
+              <SearchInput className="mb-3"
+                placeholder="Filter Repositories"
+                value={search}
+                onChange={setSearch}
+                onClear={() => setSearch(undefined)}
+              />
+
               {
                 selectType === "multi"
                   ? <div className="my-3 btn-line">
@@ -155,7 +166,12 @@ export default function RepoSelectorCard({
                       The app does not have permissions to access any repositories. Click Edit Installation to add repositories.
                     </p>
                     : (
-                      reposWithSecrets.repos.map((repoWithSecrets, i) => {
+                      reposWithSecrets.repos.filter((repoWithSecrets) => {
+                        if (!search) {
+                          return true;
+                        }
+                        return repoWithSecrets.repo.full_name.toLowerCase().includes(search.trim().toLowerCase());
+                      }).map((repoWithSecrets, i) => {
                         return (
                           <RepoWithSecretsItem
                             clusterSecrets={clusterSecrets}
@@ -216,6 +232,8 @@ function RepoWithSecretsItem({
 
   const [ isShowingSecrets, setIsShowingSecrets ] = useState(false);
 
+  const hasSecretsMissing = clusterSecrets.requiredForSelection && !repo.hasClusterSecrets;
+
   return (
     <>
       <div
@@ -244,10 +262,10 @@ function RepoWithSecretsItem({
                     onChange={(newChecked: boolean) => {
                       onCheckChanged(newChecked);
                     }}
-                    isDisabled={!repo.hasClusterSecrets}
-                    title={
-                      clusterSecrets.requiredForSelection
-                      && !repo.hasClusterSecrets ? "Cannot select - Missing required secrets" : repo.repo.full_name
+                    isDisabled={hasSecretsMissing}
+                    title={hasSecretsMissing ?
+                      "Cannot select - Missing required secrets. Use the Connect Repositories page to add the required secrets."
+                      : repo.repo.full_name
                     }
                     label={repo.repo.full_name}
                   /> :
@@ -263,16 +281,22 @@ function RepoWithSecretsItem({
             </FormGroup>
 
             {
-              clusterSecrets.requiredForSelection && !repo.hasClusterSecrets ?
-                <div className="col-4 mx-3 centers">
-                  <CommonIcons.Warning className="text-warning me-2" />
-                  Missing cluster secrets
+              hasSecretsMissing ?
+                <div className="mx-2 center-y">
+                  <TooltipIcon
+                    icon={CommonIcons.Warning}
+                    iconClasses={"text-warning me-2"}
+                    iconSize={IconSize.lg}
+                    title="Missing required OpenShift Secrets"
+                    body={"Use the Connect Repositories page to add the required secrets."}
+                    href={ClientPages.ConnectRepos.path}
+                  />
                 </div>
                 : <></>
             }
           </div>
 
-          <div className="me-4">
+          <div className="btn-line">
             <ShowSecretsButton
               noSecrets={repo.secrets.length}
               isShowingSecrets={isShowingSecrets}
@@ -280,9 +304,7 @@ function RepoWithSecretsItem({
                 setIsShowingSecrets(!isShowingSecrets);
               }}
             />
-          </div>
 
-          <div className="btn-line">
             <Button variant="tertiary"
               title="GitHub Repository"
             >

@@ -109,10 +109,6 @@ li {
   line-height: 1.75em;
 }
 
-.copy-btn {
-  min-width: 12ch;
-}
-
 .no-bullets {
   list-style-type: none;
   padding-left: 0;
@@ -128,7 +124,6 @@ code, pre {
     color: white;
     border-radius: 0.33em;
     padding: 0.15em 0.5em;
-    margin: 0 0.15em;
   }
 }
 
@@ -212,7 +207,7 @@ label {
   }
 
   &.flex-column {
-    & > :not(:last-child).btn {
+    & > :not(:last-child) {
       &.btn, &.pf-c-button {
         margin-bottom: c.$pf-global--spacer--md;
       }

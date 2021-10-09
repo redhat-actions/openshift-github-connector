@@ -119,8 +119,8 @@ Sometimes VS Code intellisense stops working altogether, particularly when using
 ## Resources
 
 ### Frontend
-- https://react-bootstrap.github.io/components/alerts/
-- https://getbootstrap.com/docs/5.0/getting-started/introduction/
+- Patternfly for components https://www.patternfly.org/v4/components/about-modal
+- Bootstrap for utility classes https://getbootstrap.com/docs/5.0/getting-started/introduction/
 
 ### Backend
 - https://docs.github.com/en/rest/reference

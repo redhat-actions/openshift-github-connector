@@ -52,7 +52,7 @@ function MyBanner(props: MyBanner.Props): JSX.Element {
       )}>
         <div>
           {BannerIcon != null
-            ? <BannerIcon className="fa-lg me-3" />
+            ? <BannerIcon className="fa-lg me-2" />
             : ("")
           }
         </div>

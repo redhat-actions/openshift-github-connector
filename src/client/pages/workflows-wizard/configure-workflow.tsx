@@ -7,7 +7,7 @@ import {
 import { GitHubRepo } from "../../../common/types/gh-types";
 import { LoginWorkflowConfig } from "../../../common/workflows/workflows";
 import { NewTabLink } from "../../components/external-link";
-import NamespaceSelect from "../../components/namespace-select";
+import ProjectSelect from "../../components/project-select";
 import { ConfigureCRDAWorkflow } from "./configure-crda";
 import { NamespaceSelectWithSecretOption } from "./namespace-select-secret";
 import ConfigureStarterWorkflow from "./starter-workflow";
@@ -105,9 +105,9 @@ function ConfigureLoginWorkflow(/* {}: WorkflowConfigPageProps */) {
     <>
       {description}
       <p>
-        <NamespaceSelect
-          namespace={workflowConfig?.namespace}
-          setNamespace={(namespace) => {
+        <ProjectSelect
+          project={workflowConfig?.namespace}
+          setProject={(namespace) => {
             if (namespace !== workflowConfig?.namespace) {
               dispatch({ workflowConfig: { id, namespace, isConfigured: true } });
             }

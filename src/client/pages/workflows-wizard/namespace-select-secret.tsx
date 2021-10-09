@@ -1,6 +1,6 @@
 import { Checkbox, FormGroup } from "@patternfly/react-core";
 import { useState } from "react";
-import NamespaceSelect from "../../components/namespace-select";
+import ProjectSelect from "../../components/project-select";
 
 export function NamespaceSelectWithSecretOption({
   isOptional,
@@ -33,12 +33,12 @@ export function NamespaceSelectWithSecretOption({
           }
         }}
       />
-      <NamespaceSelect
+      <ProjectSelect
         selectProps={{
           isDisabled: isUsingSecret,
         }}
-        namespace={isUsingSecret ? `${nsSecretName} secret ` : namespace}
-        setNamespace={setNamespace}
+        project={isUsingSecret ? `${nsSecretName} secret ` : namespace}
+        setProject={setNamespace}
       />
     </FormGroup>
   );

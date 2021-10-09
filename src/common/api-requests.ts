@@ -44,7 +44,7 @@ namespace ApiRequests {
   }
 
   export interface CreateActionsSecrets {
-    namespace: string,
+    project: string,
     createNamespaceSecret: boolean,
     serviceAccount: string,
     serviceAccountRole: string,

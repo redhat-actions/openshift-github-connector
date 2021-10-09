@@ -42,7 +42,6 @@ export default function WorkflowsWizard() {
     "Select Workflow",
     SELECT_WORKFLOW_PATH,
     i++, {
-      canJumpTo: state.repo != null,
       enableNext: state.workflow != null,
       // isFinishedStep: state.workflow != null,
     }
@@ -53,7 +52,8 @@ export default function WorkflowsWizard() {
     "Select Repository",
     SELECT_REPO_PATH,
     i++, {
-      enableNext: state.repo != null,
+      canJumpTo: state.workflow != null,
+      enableNext: state.workflow != null && state.repo != null,
       // isFinishedStep: state.repo != null,
     }
   ));
@@ -126,12 +126,12 @@ async function finishWizard(context: WorkflowsWizardContext): Promise<ApiRespons
 function WorkflowsWizardSelectRepo() {
 
   const wizardContext = useContext(WorkflowsWizardContext);
-  const repo = wizardContext.state.repo;
+  const { repo, workflow } = wizardContext.state;
 
   return (
     <>
       <Title headingLevel="h2">
-        Add Workflow
+        Add {workflow ? workflow.name + " " : ""}Workflow
       </Title>
 
       <RepoSelectorCard

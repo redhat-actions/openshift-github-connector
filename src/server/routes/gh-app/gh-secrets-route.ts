@@ -95,7 +95,7 @@ router.route(ApiEndpoints.App.Repos.Secrets.path)
     }
 
     const {
-      namespace, createNamespaceSecret, serviceAccount, serviceAccountRole, repos,
+      project: namespace, createNamespaceSecret, serviceAccount, serviceAccountRole, repos,
     } = req.body;
 
     const k8sClient = user.makeCoreV1Client();

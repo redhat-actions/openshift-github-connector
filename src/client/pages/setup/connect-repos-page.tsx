@@ -1,6 +1,7 @@
 import {
   Button,
 } from "@patternfly/react-core";
+import classNames from "classnames";
 import { useContext, useState } from "react";
 import ApiEndpoints from "../../../common/api-endpoints";
 import ApiRequests from "../../../common/api-requests";
@@ -9,13 +10,13 @@ import { DEFAULT_SECRET_NAMES } from "../../../common/default-secret-names";
 import { toGitHubRepoId } from "../../../common/types/gh-types";
 import MyBanner from "../../components/banner";
 import BtnBody from "../../components/btn-body";
-import { NAMESPACE_SELECT_ID } from "../../components/namespace-select";
+import { PROJECT_SELECT_ID } from "../../components/project-select";
 import RepoSelectorCard, { RepoSelectionState, REPO_SELECTOR_CARD_ID } from "../../components/repo-selector";
 import { PushAlertContext } from "../../contexts";
 import { fetchJSON, tryFocusElement } from "../../util/client-util";
 import { CommonIcons } from "../../util/icons";
 import {
-  ConnectReposIntroCard, SecretsWillBeCreatedCard, NamespaceSACards, SERVICEACCOUNT_SELECT_ID,
+  ConnectReposIntroCard, SecretsWillBeCreatedCard, ProjectSACards, SERVICEACCOUNT_SELECT_ID,
 } from "./connect-repos-page-cards";
 
 const BANNER_ID = "create-secrets-status-banner";
@@ -37,10 +38,10 @@ function buildSubmission(
   //   };
   // });
 
-  const { namespace, serviceAccount, serviceAccountRole } = reqBody;
-  if (!namespace) {
-    tryFocusElement(NAMESPACE_SELECT_ID);
-    throw new Error("No namespace selected");
+  const { project, serviceAccount, serviceAccountRole } = reqBody;
+  if (!project) {
+    tryFocusElement(PROJECT_SELECT_ID);
+    throw new Error("No project selected");
   }
   if (!serviceAccount) {
     tryFocusElement(SERVICEACCOUNT_SELECT_ID);
@@ -63,7 +64,7 @@ function buildSubmission(
 
   return {
     repos: selectedRepos.map((rws) => toGitHubRepoId(rws.repoWithSecrets.repo)),
-    namespace,
+    project,
     createNamespaceSecret,
     serviceAccount,
     serviceAccountRole,
@@ -80,7 +81,7 @@ export default function ConnectReposPage(): JSX.Element {
   const pushAlert = useContext(PushAlertContext);
 
   const [ selectedRepos, setSelectedRepos ] = useState<RepoSelectionState>([]);
-  const [ namespace, setNamespace ] = useState<string>();
+  const [ project, setProject ] = useState<string>();
   const [ createNamespaceSecret, setCreateNamespaceSecret ] = useState(false);
   const [ serviceAccount, setServiceAccount ] = useState<string>();
   const [ serviceAccountRole, setServiceAccountRole ] = useState<string>();
@@ -91,14 +92,14 @@ export default function ConnectReposPage(): JSX.Element {
   return (
     <>
       <ConnectReposIntroCard />
-      <NamespaceSACards
-        namespace={namespace}
-        setNamespace={(newNs) => {
-          setNamespace(newNs);
+      <ProjectSACards
+        project={project}
+        setProject={(newNs) => {
+          setProject(newNs);
           setSubmissionResult(undefined);
         }}
-        createNamespaceSecret={createNamespaceSecret}
-        setCreateNamespaceSecret={(newCreateNsSecret) => {
+        createProjectSecret={createNamespaceSecret}
+        setCreateProjectSecret={(newCreateNsSecret) => {
           setCreateNamespaceSecret(newCreateNsSecret);
           setSubmissionResult(undefined);
         }}
@@ -109,9 +110,10 @@ export default function ConnectReposPage(): JSX.Element {
           setSubmissionResult(undefined);
         }}
       />
-      <SecretsWillBeCreatedCard serviceAccount={serviceAccount} namespace={namespace} createNamespaceSecret={createNamespaceSecret} />
 
-      <>
+      <div className={classNames({ "d-none": serviceAccount == null })}>
+        <SecretsWillBeCreatedCard serviceAccount={serviceAccount} project={project} createProjectSecret={createNamespaceSecret} />
+
         <RepoSelectorCard
           selection={selectedRepos}
           setSelection={(repos) => setSelectedRepos(repos)}
@@ -135,7 +137,7 @@ export default function ConnectReposPage(): JSX.Element {
               try {
                 submission = buildSubmission(
                   selectedRepos, {
-                    namespace,
+                    project,
                     createNamespaceSecret,
                     serviceAccount,
                     serviceAccountRole,
@@ -183,7 +185,7 @@ export default function ConnectReposPage(): JSX.Element {
             />
             : <></>
         }
-      </>
+      </div>
     </>
   );
 }

@@ -33,7 +33,7 @@ export function getWorkflowsWizardInitialState(): WorkflowsWizardState {
   if (savedStateStr) {
     const savedState = JSON.parse(savedStateStr);
 
-    if (savedState.workflowConfig !== null) {
+    if (savedState != null) {
       return savedState;
     }
     // if the saved config is null, the saved state is invalid and we have to clear it

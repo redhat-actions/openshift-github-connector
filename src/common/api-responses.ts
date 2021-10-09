@@ -201,8 +201,8 @@ namespace ApiResponses {
 
   export type ClusterState = ClusterStateDisconnected | ClusterStateConnected;
 
-  export interface UserNamespaces {
-    namespaces: string[],
+  export interface UserProjects {
+    projects: string[],
   }
 
   export interface UserNamespacedServiceAccounts {

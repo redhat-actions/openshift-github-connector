@@ -26,6 +26,7 @@
     }
   }
 
+
   /*
   &.btn-light, &.btn-outline-light {
     &:hover a {
@@ -46,25 +47,6 @@
 
 $card-border-radius: 0.5rem;
 $card-border: 2px solid c.$rh-gray;
-
-.pf-c-wizard__main-body {
-  max-width: c.$breakpoint-lg;
-
-  & .pf-c-card {
-    box-shadow: none;
-    border-radius: 0;
-
-    &__title, &__body {
-      $card-padding-y: 0.25rem;
-
-      padding-top: $card-padding-y !important;
-      padding-bottom: $card-padding-y !important;
-    }
-
-    --pf-c-card--child--PaddingRight: 0;
-    --pf-c-card--child--PaddingLeft: 0;
-  }
-}
 
 .pf-c-card {
   // --pf-c-card--BoxShadow: 0.25rem 0rem 0.1rem 0.2rem #888 !important;
@@ -109,6 +91,25 @@ $card-border: 2px solid c.$rh-gray;
   &__footer {
     border-top: $card-border;
     margin: 0;
+  }
+}
+
+.pf-c-wizard__main-body {
+  max-width: c.$breakpoint-xl;
+
+  & .pf-c-card {
+    box-shadow: none;
+    border-radius: 0;
+
+    &__title, &__body {
+      // $card-padding-y: 0.25rem;
+
+      // padding-top: 0.5rem;
+      padding-bottom: 0;
+    }
+
+    --pf-c-card--child--PaddingRight: 0;
+    --pf-c-card--child--PaddingLeft: 0;
   }
 }
 

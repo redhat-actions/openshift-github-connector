@@ -29,8 +29,8 @@ const RepoSecrets = new UrlPath(AppRepos, "/secrets");
 const Workflows = new UrlPath(App, "/workflows");
 
 const Cluster = new UrlPath(Root, "/cluster");
-const Namespaces = new UrlPath(Cluster, "/namespaces");
-const ServiceAccounts = new UrlPath(Namespaces, "/service-accounts");
+const Projects = new UrlPath(Cluster, "/projects");
+const ServiceAccounts = new UrlPath(Projects, "/service-accounts");
 
 const OpenShiftUser = new UrlPath(Root, "/user");
 const UserImageRegistries = new UrlPath(OpenShiftUser, "/image-registries");
@@ -82,8 +82,8 @@ const ApiEndpoints = {
   },
   Cluster: {
     Root: Cluster,
-    Namespaces: {
-      Root: Namespaces,
+    Projects: {
+      Root: Projects,
       ServiceAccounts,
     },
   },

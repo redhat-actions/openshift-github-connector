@@ -9,7 +9,7 @@ import { DEFAULT_SECRET_NAMES } from "../../../common/default-secret-names";
 import DataFetcher from "../../components/data-fetcher";
 import { DataFetcherCard } from "../../components/data-fetcher-card";
 import { NewTabLink } from "../../components/external-link";
-import NamespaceSelect from "../../components/namespace-select";
+import ProjectSelect from "../../components/project-select";
 import { CommonIcons } from "../../util/icons";
 
 export function ConnectReposIntroCard(): JSX.Element {
@@ -77,11 +77,11 @@ export function ConnectReposIntroCard(): JSX.Element {
 }
 
 export function SecretsWillBeCreatedCard(
-  { namespace, createNamespaceSecret, serviceAccount }:
-  { namespace?: string, createNamespaceSecret: boolean, serviceAccount?: string }
+  { project, createProjectSecret, serviceAccount }:
+  { project?: string, createProjectSecret: boolean, serviceAccount?: string }
 ) {
 
-  const count = createNamespaceSecret ? "three" : "two";
+  const count = createProjectSecret ? "three" : "two";
 
   return (
     <Card>
@@ -118,16 +118,16 @@ export function SecretsWillBeCreatedCard(
               <code>{DEFAULT_SECRET_NAMES.clusterToken}</code> will
               contain a Service Account Token for the service account,&nbsp;
               {
-                namespace && serviceAccount ? <b>{namespace}/{serviceAccount} </b> : ""
+                project && serviceAccount ? <b>{project}/{serviceAccount} </b> : ""
               }
               which can be used to log into the OpenShift API server.
               A different service account token is generated for each repository, but they all log in as the same service account.
             </li>
             {
-              createNamespaceSecret ?
+              createProjectSecret ?
                 <li>
-                  <code>{DEFAULT_SECRET_NAMES.namespace}</code> will contain the configured namespace{
-                    namespace ? <>, <b>{namespace}</b></> : ""
+                  <code>{DEFAULT_SECRET_NAMES.namespace}</code> will contain the configured project{
+                    project ? <>, <b>{project}</b></> : ""
                   }.
                 </li>
                 : ""
@@ -139,47 +139,47 @@ export function SecretsWillBeCreatedCard(
   );
 }
 
-export function NamespaceSACards(
+export function ProjectSACards(
   {
-    namespace, setNamespace, serviceAccount, setServiceAccount,
-    createNamespaceSecret, setCreateNamespaceSecret,
+    project, setProject, serviceAccount, setServiceAccount,
+    createProjectSecret, setCreateProjectSecret,
   }: {
-    namespace: string | undefined,
-    setNamespace: (namespace: string | undefined) => void,
+    project: string | undefined,
+    setProject: (project: string | undefined) => void,
     serviceAccount: string | undefined,
     setServiceAccount: (serviceAccount: string | undefined, role: string | undefined) => void,
-    createNamespaceSecret: boolean,
-    setCreateNamespaceSecret: (createNamespaceSecret: boolean) => void,
+    createProjectSecret: boolean,
+    setCreateProjectSecret: (createProjectSecret: boolean) => void,
   }
 ): JSX.Element {
 
   return (
-    <DataFetcherCard type="api" title="Service Account for Workflow Authentication" endpoint={ApiEndpoints.Cluster.Namespaces.Root}>{
-      (namespacesRes: ApiResponses.UserNamespaces) => {
+    <DataFetcherCard type="api" title="Service Account for Workflow Authentication" endpoint={ApiEndpoints.Cluster.Projects.Root}>{
+      (projectsRes: ApiResponses.UserProjects) => {
 
         return (
           <>
             <p>
-              Select the namespace you want these repositories&apos; workflows to use for authentication.
+              Select the project you want these repositories&apos; workflows to use for authentication.
               <br/>
-              Workflows will execute in this namespace, and will not be able to access other namespaces.
+              Workflows will execute in this project, and will not be able to access other projects.
             </p>
 
-            <NamespaceSelect namespacesRes={namespacesRes} namespace={namespace} setNamespace={setNamespace} />
+            <ProjectSelect projectsRes={projectsRes} project={project} setProject={setProject} />
 
             {
-              namespacesRes.namespaces.length > 0 ? (
+              projectsRes.projects.length > 0 ? (
                 <Checkbox
                   id="create-ns-secret-cb"
                   className="my-3"
-                  label={"Create an Actions secret containing this namespace"}
-                  isChecked={createNamespaceSecret}
-                  onChange={(checked) => { setCreateNamespaceSecret(checked); }}
+                  label={"Create an Actions secret containing this project"}
+                  isChecked={createProjectSecret}
+                  onChange={(checked) => { setCreateProjectSecret(checked); }}
                 />
               ) : <></>
             }
 
-            <ServiceAccountSection namespace={namespace} serviceAccount={serviceAccount} setServiceAccount={setServiceAccount} />
+            <ServiceAccountSection project={project} serviceAccount={serviceAccount} setServiceAccount={setServiceAccount} />
           </>
         );
       }
@@ -193,15 +193,15 @@ export const SERVICEACCOUNT_SELECT_ID = "service-account-select";
 const DEFAULT_SA_ROLE = "edit";
 
 export function ServiceAccountSection({
-  namespace, serviceAccount, setServiceAccount,
+  project, serviceAccount, setServiceAccount,
 }: {
-  namespace: string | undefined, serviceAccount: string | undefined,
+  project: string | undefined, serviceAccount: string | undefined,
   setServiceAccount: (serviceAccount: string | undefined, role: string | undefined) => void,
 }): JSX.Element {
 
   const [ isOpen, setIsOpen ] = useState(false);
 
-  if (!namespace) {
+  if (!project) {
     return (
       <></>
     );
@@ -211,28 +211,28 @@ export function ServiceAccountSection({
     <>
       <Divider className="my-4"/>
       <DataFetcher
-        key={namespace} loadingDisplay="card-body" type="api"
-        endpoint={ApiEndpoints.Cluster.Namespaces.ServiceAccounts.withParam(namespace)}
+        key={project} loadingDisplay="card-body" type="api"
+        endpoint={ApiEndpoints.Cluster.Projects.ServiceAccounts.withParam(project)}
       >{
           ({ serviceAccounts }: ApiResponses.UserNamespacedServiceAccounts) => {
             if (serviceAccounts.length === 0) {
               return (
                 <p className="error">
-              There are no service account in {namespace}
+              There are no service account in {project}
                 </p>
               );
             }
 
-            const selectPlaceholder = "Select a Service Account, or start typing to filter";
+            const selectPlaceholder = "Select a Service Account, or start typing";
 
             return (
               <>
                 <p>
-                Select the Service Account in <b>{namespace}</b> you want these repositories to have access to.
+                Select the Service Account in <b>{project}</b> you want these repositories to have access to.
                   <br/>
                 The service account must be granted the permissions it needs to execute workflows.
                   <br/>
-                You may enter the name of a new Service Account. It will be bound to the <b>{DEFAULT_SA_ROLE}</b> ClusterRole in its namespace.
+                You may enter the name of a new Service Account.
                 </p>
                 <div id={SERVICEACCOUNT_SELECT_ID}>
                   <Select
@@ -265,12 +265,13 @@ export function ServiceAccountSection({
                   serviceAccount && !serviceAccounts.includes(serviceAccount) ?
                     <p>
                       <CommonIcons.Info className="me-2"/>
-                      <b>{serviceAccount}</b> will be created in the <b>{namespace}</b> namespace.
+                      A new Service Account <b>{serviceAccount}</b> will be created in the <b>{project}</b>{" "}
+                      project and given the <b>{DEFAULT_SA_ROLE}</b> role.
                     </p>
                     : ""
                 }
                 {
-                  namespace && serviceAccount ?
+                  project && serviceAccount ?
                     <p>
                   The Service Account tokens created, and copied into the Actions secrets, will belong to this service account.
                     </p>

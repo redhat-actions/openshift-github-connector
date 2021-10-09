@@ -52,15 +52,17 @@ router.route(ApiEndpoints.Cluster.Root.path)
 
 async function getReadableNamespaces(user: User): Promise<string[]> {
   let namespaces: string[];
-  const k8sClient = user.makeKubeConfig().makeApiClient(k8s.CoreV1Api);
+  // const k8sClient = user.makeKubeConfig().makeApiClient(k8s.CoreV1Api);
+  const crsClient = user.makeKubeConfig().makeApiClient(k8s.CustomObjectsApi);
   try {
-    const namespacesRes = await k8sClient.listNamespace();
-    namespaces = removeUndefined(namespacesRes.body.items.map((ns) => ns.metadata?.name));
+    const projectsRes = await crsClient.listClusterCustomObject("project.openshift.io", "v1", "projects");
+    const projects = (projectsRes.body as any).items as { metadata: k8s.V1ObjectMeta }[];
+    namespaces = removeUndefined(projects.map((proj) => proj.metadata.name));
   }
   catch (err) {
     Log.warn(`User ${user.name} encountered error listing namespaces: ${err}`);
     // eslint-disable-next-line eqeqeq
-    if (err.statusCode == "403") {
+    if (err.statusCode == 403) {
       namespaces = [];
     }
     else {
@@ -71,8 +73,8 @@ async function getReadableNamespaces(user: User): Promise<string[]> {
   return namespaces;
 }
 
-router.route(ApiEndpoints.Cluster.Namespaces.Root.path)
-  .get(async (req, res: express.Response<ApiResponses.UserNamespaces>, next) => {
+router.route(ApiEndpoints.Cluster.Projects.Root.path)
+  .get(async (req, res: express.Response<ApiResponses.UserProjects>, next) => {
     const user = await req.getUserOr401();
     if (!user) {
       return undefined;
@@ -81,12 +83,12 @@ router.route(ApiEndpoints.Cluster.Namespaces.Root.path)
     const namespaces = await getReadableNamespaces(user);
 
     return res.json({
-      namespaces,
+      projects: namespaces,
     });
   })
   .all(send405([ "GET" ]));
 
-router.route(ApiEndpoints.Cluster.Namespaces.ServiceAccounts.path + "/:namespace")
+router.route(ApiEndpoints.Cluster.Projects.ServiceAccounts.path + "/:namespace")
   .get(async (
     req: express.Request<ApiRequests.GetNamespacedResources>,
     res: express.Response<ApiResponses.UserNamespacedServiceAccounts>,
