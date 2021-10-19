@@ -15,7 +15,7 @@ helm upgrade --install github-connector \
   --set clusterApiServer=$(oc whoami --show-server)
 ```
 
-![./cluster-values.png](How to get 'cluster' chart values for your cluster)
+![How to get 'cluster' chart values for your cluster](./cluster-values.png)
 
 If you are using CRC, you can omit the two `--set` statements, since the defaults are for CRC.
 
