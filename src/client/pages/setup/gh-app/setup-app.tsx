@@ -27,6 +27,10 @@ export default function AdminSetupAppPage(
   const canCreate = user.isAdmin;
   const appExists = appState.success && appState.doesAnyAppExist;
 
+  if (!appExists) {
+    setShowCreateCard(true);
+  }
+
   const { direction, isDirectionError } = getCreateOrInstallDirection({ appExists, canCreate });
 
   return (
