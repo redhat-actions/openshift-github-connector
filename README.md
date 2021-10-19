@@ -6,13 +6,16 @@ The OpenShift GitHub Connector provides a webapp on your OpenShift cluster which
 See [the chart](./chart/openshift-github-connector).
 The inputs are described in [`values.yaml`](./chart/openshift-github-connector/values.yaml).
 
-Install from the root of the repo as follows:
+Install from the root of the repo as follows, while logged in as a cluster administrator:
 ```sh
+oc create namespace github-connector
 helm upgrade --install github-connector \
   chart/openshift-github-connector \
   --set clusterAppsSubdomain=apps.<your-openshift-server>.com \
   --set clusterApiServer=$(oc whoami --show-server)
 ```
+
+![How to get 'cluster' chart values for your cluster](./cluster-values.png)
 
 If you are using CRC, you can omit the two `--set` statements, since the defaults are for CRC.
 
