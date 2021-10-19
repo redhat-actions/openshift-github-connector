@@ -1,5 +1,6 @@
 import { GitHubAppPermissions, GitHubRepoId } from "./types/gh-types";
 import ImageRegistry from "./types/image-registries";
+import { WorkflowConfig } from "./workflows/workflows";
 
 namespace ApiRequests {
   export interface CreateCallbackState {
@@ -43,7 +44,7 @@ namespace ApiRequests {
   }
 
   export interface CreateActionsSecrets {
-    namespace: string,
+    project: string,
     createNamespaceSecret: boolean,
     serviceAccount: string,
     serviceAccountRole: string,
@@ -52,14 +53,9 @@ namespace ApiRequests {
 
   export interface CreateWorkflow {
     repo: GitHubRepoId,
-    namespace?: string,
-    overwriteExisting: boolean,
-    workflowFile: {
-      name: string,
-      extension: string,
-    },
-    imageRegistryId: string,
-    port: number,
+    fileBasename: string,
+    fileExtension: string,
+    workflowConfig: WorkflowConfig,
   }
 
   export interface CreateInstallationToken {

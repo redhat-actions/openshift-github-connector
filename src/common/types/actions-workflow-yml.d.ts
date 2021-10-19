@@ -58,7 +58,7 @@ export type Machine = "linux" | "macos" | "windows";
 export type Architecture = "ARM32" | "x64" | "x86";
 export type ExpressionSyntax = string;
 
-export interface Workflow {
+export interface GitHubActionsWorkflow {
  /**
   * The name of your workflow. GitHub displays the names of your workflows on your repository's actions page. If you omit this field, GitHub sets the name to the workflow's filename.
   */

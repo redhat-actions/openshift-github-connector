@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useContext, useState, useRef } from "react";
 import classNames from "classnames";
 import {
   Card, CardBody, CardTitle, Checkbox,
@@ -9,10 +9,10 @@ import { v4 as uuid } from "uuid";
 
 import { ExternalLinkAltIcon } from "@patternfly/react-icons";
 import ImageRegistry from "../../common/types/image-registries";
-import { ExternalLink } from "../components/external-link";
+import { NewTabLink } from "../components/external-link";
 import { TooltipIcon } from "../components/tooltip-icon";
 import ApiResponses from "../../common/api-responses";
-import Banner from "../components/banner";
+import MyBanner from "../components/banner";
 import BtnBody from "../components/btn-body";
 import { fetchJSON } from "../util/client-util";
 import ApiEndpoints from "../../common/api-endpoints";
@@ -20,6 +20,7 @@ import ApiRequests from "../../common/api-requests";
 import DataFetcher from "../components/data-fetcher";
 import { containsBannedCharacters } from "../../common/common-util";
 import { CommonIcons } from "../util/icons";
+import { PushAlertContext } from "../contexts";
 
 export default function ImageRegistriesPage(): JSX.Element {
 
@@ -49,7 +50,7 @@ export default function ImageRegistriesPage(): JSX.Element {
                     (() => {
                       if (!registriesRes.success) {
                         return (
-                          <Banner
+                          <MyBanner
                             severity="danger"
                             title={"Failed to get image registries: " + registriesRes.message}
                           />
@@ -99,6 +100,7 @@ export default function ImageRegistriesPage(): JSX.Element {
 }
 
 function ImageRegistryRow({ registry, onChange }: { registry: ImageRegistry.Info, onChange: () => Promise<void> }): JSX.Element {
+  const pushAlert = useContext(PushAlertContext);
   const [ isDeleting, setIsDeleting ] = useState(false);
 
   return (
@@ -112,10 +114,10 @@ function ImageRegistryRow({ registry, onChange }: { registry: ImageRegistry.Info
           {registry.fullPath}
         </div>
         <div className="text-right">
-          <ExternalLink href={"https://" + registry.fullPath} icon={{ position: "right", Icon: ExternalLinkAltIcon }} />
+          <NewTabLink href={"https://" + registry.fullPath} icon={{ position: "right", Icon: ExternalLinkAltIcon }} />
         </div>
       </td>
-      <td >{registry.username}</td>
+      <td>{registry.username}</td>
       <td className="text-right">
         <Button variant="danger" disabled={isDeleting} onClick={async () => {
           setIsDeleting(true);
@@ -124,10 +126,10 @@ function ImageRegistryRow({ registry, onChange }: { registry: ImageRegistry.Info
               id: registry.id,
             });
 
-            void onChange();
+            await onChange();
           }
           catch (err) {
-            console.error(err);
+            pushAlert({ severity: "warning", title: `Error deleting ${registry.fullPath}`, body: err.toString() });
           }
           finally {
             setIsDeleting(false);
@@ -178,16 +180,16 @@ function CreateImageRegistryCard({ onChange }: { onChange: () => Promise<void> }
           The starter workflow requires a Container Image Registry to push built images to, and pull images from.
         </p>
         <p>
-          You can use the <ExternalLink href="https://docs.github.com/en/packages/guides/about-github-container-registry">
+          You can use the <NewTabLink href="https://docs.github.com/en/packages/guides/about-github-container-registry">
             GitHub container registry
-          </ExternalLink>, the <ExternalLink
+          </NewTabLink>, the <NewTabLink
             href="https://docs.openshift.com/container-platform/4.7/registry/architecture-component-ImageRegistries.html">
             OpenShift Integrated Registry
-          </ExternalLink>,
+          </NewTabLink>,
           or another image registry such
-          as <ExternalLink href="https://quay.io">quay.io</ExternalLink> or <ExternalLink href="https://www.docker.com/products/docker-hub">
+          as <NewTabLink href="https://quay.io">quay.io</NewTabLink> or <NewTabLink href="https://www.docker.com/products/docker-hub">
             DockerHub
-          </ExternalLink>.
+          </NewTabLink>.
         </p>
 
         <div>
@@ -205,17 +207,19 @@ function CreateImageRegistryCard({ onChange }: { onChange: () => Promise<void> }
 
             try {
               const createResponse = await fetchJSON<
-                ApiRequests.AddImageRegistry,
-                ApiResponses.ImageRegistryCreationResult
+              ApiRequests.AddImageRegistry,
+              ApiResponses.ImageRegistryCreationResult
               >("POST", ApiEndpoints.User.ImageRegistries, registryInfo);
 
               setSubmissionResult(createResponse);
 
-              void onChange();
+              await onChange();
             }
             catch (err) {
               setSubmissionResult({
                 message: err.message,
+                status: err.status,
+                statusMessage: err.statusMessage,
                 success: false,
                 severity: "danger",
               });
@@ -224,81 +228,78 @@ function CreateImageRegistryCard({ onChange }: { onChange: () => Promise<void> }
               setIsSubmitting(false);
             }
           }}>
-            <div>
-              <FormGroup fieldId="registry" label="Registry">
-                <FormSelect
-                  aria-label="Registry"
-                  value={registryInfo.type}
-                  onChange={(value) => {
-                    const type = value as ImageRegistry.Type;
-                    const reg = ImageRegistry.Registries[type];
+            <FormGroup fieldId="registry" label="Registry">
+              <FormSelect
+                aria-label="Registry"
+                value={registryInfo.type}
+                onChange={(value) => {
+                  const type = value as ImageRegistry.Type;
+                  const reg = ImageRegistry.Registries[type];
 
-                    const isGhcr = type === "GHCR";
-                    const ghcrUseGitHubToken = registryInfo.ghcrUseGitHubToken && isGhcr;
-                    // setRegistryType(type);
+                  const isGhcr = type === "GHCR";
+                  const ghcrUseGitHubToken = registryInfo.ghcrUseGitHubToken && isGhcr;
+                  // setRegistryType(type);
 
-                    if (!reg.hostname) {
-                      setShowHostnameInput(true);
-                      setRegistryInfo({ type, hostname: "", ghcrUseGitHubToken });
-                    }
-                    else {
-                      setShowHostnameInput(false);
-                      setRegistryInfo({ type, hostname: reg.hostname, ghcrUseGitHubToken });
-                    }
-                  }}
-                >
-                  {
-                    Object.entries(ImageRegistry.Registries).map(([ type, reg ]) => {
-                      return (
-                        <option
-                          value={type}
-                          key={type}
-                          title={reg.description}
-                        >
-                          {reg.description} {reg.hostname ? `(${reg.hostname})` : ""}
-                        </option>
-                      );
-                    })
+                  if (!reg.hostname) {
+                    setShowHostnameInput(true);
+                    setRegistryInfo({ type, hostname: "", ghcrUseGitHubToken });
                   }
-                </FormSelect>
-              </FormGroup>
-
-              <FormGroup
-                fieldId="namespace"
-                label="Namespace"
-                labelIcon={
-                  <TooltipIcon title="Registry Namespace" body={(
-                    <>
-                      <p>
-                       The namespace is the first segment of the registry path, between the first and second slashes.
-                      </p>
-                      <p>
-                       For example, for the image path<br/>&quot;
-                        <span className="">ghcr.io/</span>
-                        <span className="b">redhat-actions</span>/my-image:latest&quot;
-                      </p>
-                      <p>
-                       The registry hostname is &quot;ghcr.io&quot;, and
-                       the namespace is <span className="b">&quot;redhat-actions&quot;</span>.
-                      </p>
-                    </>
-                  )}
-                  />
-                }
-                validated={validateNoBannedCharacters(registryInfo.namespace)}
-                helperTextInvalid={registryInfo.namespace.length > 0 ? "The namespace contains illegal characters." : undefined}
+                  else {
+                    setShowHostnameInput(false);
+                    setRegistryInfo({ type, hostname: reg.hostname, ghcrUseGitHubToken });
+                  }
+                }}
               >
-                <TextInput
-                  aria-label="Namespace"
-                  defaultValue={registryInfo.namespace}
-                  onChange={(value) => {
-                    const namespace = value;
-                    const username = userNameIsNamespace ? namespace : registryInfo.username;
-                    setRegistryInfo({ namespace, username });
-                  }}
+                {
+                  Object.entries(ImageRegistry.Registries).map(([ type, reg ]) => {
+                    return (
+                      <option
+                        value={type}
+                        key={type}
+                        title={reg.description}
+                      >
+                        {reg.description} {reg.hostname ? `(${reg.hostname})` : ""}
+                      </option>
+                    );
+                  })
+                }
+              </FormSelect>
+            </FormGroup>
+
+            <FormGroup
+              fieldId="namespace"
+              label="Namespace"
+              labelIcon={
+                <TooltipIcon title="Registry Namespace" body={(
+                  <>
+                    <p>
+                      The namespace is the first segment of the registry path, between the first and second slashes.
+                    </p>
+                    <p>
+                      For example, for the image path<br/>&quot;
+                      <span className="">ghcr.io/</span>
+                      <span className="b">redhat-actions</span>/my-image:latest&quot;,
+                      <br/>
+                      the registry hostname is &quot;ghcr.io&quot;, and
+                      the namespace is <span className="b">&quot;redhat-actions&quot;</span>.
+                    </p>
+                  </>
+                )}
                 />
-              </FormGroup>
-            </div>
+              }
+              validated={validateNoBannedCharacters(registryInfo.namespace)}
+              helperTextInvalid={registryInfo.namespace.length > 0 ? "The namespace contains illegal characters." : undefined}
+            >
+              <TextInput
+                aria-label="Namespace"
+                defaultValue={registryInfo.namespace}
+                onChange={(value) => {
+                  const namespace = value;
+                  const username = userNameIsNamespace ? namespace : registryInfo.username;
+                  setRegistryInfo({ namespace, username });
+                }}
+              />
+            </FormGroup>
 
             <div className={classNames({ "d-none": !showHostnameInput })}>
               <FormGroup fieldId="hostname" label="Hostname" validated={validateNoBannedCharacters(registryInfo.hostname)}>
@@ -329,58 +330,55 @@ function CreateImageRegistryCard({ onChange }: { onChange: () => Promise<void> }
               </FormGroup>
             </div>
 
-            <hr/>
-
             <FormGroup
-              isInline
-              fieldId="username"
               label="Username"
+              fieldId="username"
               validated={validateNoBannedCharacters(registryInfo.username)}
             >
-              <TextInput
-                className="col-6"
-                defaultValue={userNameIsNamespace ? registryInfo.namespace : registryInfo.username}
-                isReadOnly={userNameIsNamespace}
-                title={userNameIsNamespace ? "Username is same as namespace" : ""}
-                onChange={(value) => { setRegistryInfo({ username: value }); }}
-              />
               <Checkbox
-                label="Username same as namespace"
+                className="mb-2"
                 id="username-same-as-namespace"
+                label="Username same as namespace"
                 isChecked={userNameIsNamespace}
                 onChange={(checked) => { setUserNameIsNamespace(checked); }}
+              />
+
+              <TextInput
+                value={userNameIsNamespace ? registryInfo.namespace : registryInfo.username}
+                isReadOnly={userNameIsNamespace}
+                title={userNameIsNamespace ? "Disabled: Username is same as namespace" : ""}
+                onChange={(value) => { setRegistryInfo({ username: value }); }}
               />
             </FormGroup>
 
             <FormGroup
-              isInline
               fieldId="password-or-token"
               label="Password or Token"
             >
-              <TextInput
-                className="col-6"
-                type="password"
-                isReadOnly={registryInfo.ghcrUseGitHubToken}
-                value={registryInfo.passwordOrToken}
-                onChange={(value) => { setRegistryInfo({ passwordOrToken: value }); }}
-              />
-
               <Checkbox
                 label={
                   <div className="center-y">
                     Use built-in Actions workflow token
-                    <ExternalLink
+                    <NewTabLink
                       className="mx-2"
                       href="https://docs.github.com/en/actions/reference/authentication-in-a-workflow"
                     >
-                      <TooltipIcon body="Click to open GitHub Documentation" iconClasses="text-fg" />
-                    </ExternalLink>
+                      <TooltipIcon body="Click to open GitHub Documentation" />
+                    </NewTabLink>
                   </div>
                 }
                 id="use-github-token"
                 isChecked={registryInfo.ghcrUseGitHubToken ?? false}
                 className={classNames({ "d-none": registryInfo.type !== "GHCR" })}
                 onChange={(checked) => { setRegistryInfo({ ghcrUseGitHubToken: checked, passwordOrToken: "" }); }}
+              />
+
+              <TextInput
+                className="col-6"
+                type="password"
+                isReadOnly={registryInfo.ghcrUseGitHubToken}
+                value={registryInfo.passwordOrToken}
+                onChange={(value) => { setRegistryInfo({ passwordOrToken: value }); }}
               />
             </FormGroup>
 
@@ -413,7 +411,7 @@ function SubmissionStatusBanner(props: {
 
   if (props.isSubmitting) {
     return (
-      <Banner id={props.bannerId}
+      <MyBanner id={props.bannerId}
         className="my-3"
         display={props.isSubmitting}
         severity={"info"}
@@ -423,12 +421,12 @@ function SubmissionStatusBanner(props: {
     );
   }
   else if (!props.submissionResult) {
-    return <Banner id={props.bannerId} display={false} />;
+    return <MyBanner id={props.bannerId} display={false} />;
   }
 
   return (
     <>
-      <Banner
+      <MyBanner
         className="my-3"
         id={props.bannerId}
         display={true}

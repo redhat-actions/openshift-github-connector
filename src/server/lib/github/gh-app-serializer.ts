@@ -4,7 +4,6 @@ import Log from "server/logger";
 import { getFriendlyHTTPError, fromb64 } from "server/util/server-util";
 import SecretUtil from "../kube/secret-util";
 import User from "../user/user";
-import UserSerializer from "../user/user-serializer";
 import GitHubApp from "./gh-app";
 import { getAppOctokit, getGitHubHostname } from "./gh-util";
 
@@ -84,25 +83,36 @@ namespace GitHubAppSerializer {
 			webhook_secret: app.config.webhook_secret,
 		};
 
-		await SecretUtil.deleteSecret(
-			SecretUtil.getSAClient(),
-			SecretUtil.getStorageSecretsNamespace(),
-			getAppSecretName(appId),
-		);
+		if (cache.has(appId)) {
+			// the secret must exist
+			await SecretUtil.patchSecret(
+				SecretUtil.getSAClient(),
+				SecretUtil.getStorageSecretsNamespace(),
+				getAppSecretName(appId),
+				memento,
+			);
+		}
+		else {
+			// the secret may or may not exist
 
-		// Log.debug("APP MEMENTO", memento);
+			await SecretUtil.deleteSecret(
+				SecretUtil.getSAClient(),
+				SecretUtil.getStorageSecretsNamespace(),
+				getAppSecretName(appId),
+			);
 
-		await SecretUtil.createSecret(
-			SecretUtil.getSAClient(),
-			SecretUtil.getStorageSecretsNamespace(),
-			getAppSecretName(appId),
-			memento,
-			SecretUtil.getSAName(),
-			SecretUtil.Subtype.APP,
-			{
-				[SecretUtil.CONNECTOR_LABEL_NAMESPACE + "/app"]: toValidK8sName(app.config.slug),
-			}
-		);
+			await SecretUtil.createSecret(
+				SecretUtil.getSAClient(),
+				SecretUtil.getStorageSecretsNamespace(),
+				getAppSecretName(appId),
+				memento,
+				SecretUtil.getSAName(),
+				SecretUtil.Subtype.APP,
+				{
+					[SecretUtil.CONNECTOR_LABEL_NAMESPACE + "/app"]: toValidK8sName(app.config.slug),
+				}
+			);
+		}
 
 		Log.info(`Saving app ${app.config.name} into cache`);
 		cache.set(appId, app);
@@ -131,13 +141,15 @@ namespace GitHubAppSerializer {
 
 		const app = await create(appAuth);
 
+		/*
 		const activeUsers = await UserSerializer.loadAllActiveUsers();
 		const owner = activeUsers.find((user) => user.githubUserInfo?.id === app.ownerId);
 		if (owner) {
 			owner.addOwnsApp(app);
 		}
+		*/
 
-		save(app);
+		// save(app);
 
 		return app;
 	}

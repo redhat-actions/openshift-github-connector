@@ -9,7 +9,7 @@ import GitHubAppSerializer from "server/lib/github/gh-app-serializer";
 const router = express.Router();
 
 router.route(ApiEndpoints.App.Root.path)
-  .get(async (req, res: express.Response<ApiResponses.ClusterAppState>, next) => {
+  .get(async (req, res: express.Response<ApiResponses.AllConnectorApps>, next) => {
 
     const apps = await GitHubAppSerializer.loadAll();
 
@@ -20,17 +20,17 @@ router.route(ApiEndpoints.App.Root.path)
 
     if (apps == null || apps.length === 0) {
       return res.json({
-        success: false,
-        severity: "warning",
-        message: "No app exists",
+        success: true,
+        doesAnyAppExist: false,
+        visibleApps: [],
       });
     }
 
     Log.info(`There are ${apps.length} apps`);
 
-    const resBody: ApiResponses.ClusterAppState = {
+    const resBody: ApiResponses.AllConnectorApps = {
       success: true,
-      totalCount: apps.length,
+      doesAnyAppExist: apps.length > 0,
       visibleApps: apps.map((app) => {
         return {
           appId: app.id,
@@ -52,25 +52,20 @@ router.route(ApiEndpoints.App.Root.path)
     };
 
     return res.json(resBody);
-  });
-
-const PARAM_APPID = "appId";
-
-router.route(ApiEndpoints.App.Root.path + "/:" + PARAM_APPID)
-  .delete(async (req, res: express.Response<ApiResponses.RemovalResult>, next) => {
+  })
+  .delete(async (req, res: express.Response<ApiResponses.Result>, next) => {
     const user = await req.getUserOr401();
     if (!user) {
       return undefined;
     }
 
-    if (!req.params[PARAM_APPID]) {
-      return res.sendError(400, `App ID not provided in request path`);
+    const { appId } = req.body;
+
+    if (appId == null) {
+      return res.sendError(400, `App ID not provided in request body`);
     }
-
-    const appId = Number(req.params[PARAM_APPID]);
-
-    if (Number.isNaN(appId)) {
-      return res.sendError(400, `Invalid app ID "${appId}" provided in request path`);
+    else if (Number.isNaN(appId)) {
+      return res.sendError(400, `Invalid app ID "${appId}" provided in request path - not a number`);
     }
 
     const app = await GitHubAppSerializer.load(appId);
@@ -88,7 +83,6 @@ router.route(ApiEndpoints.App.Root.path + "/:" + PARAM_APPID)
     await GitHubAppSerializer.remove(app, user);
 
     return res.json({
-      removed: true,
       message: `Removed ${app.config.name}`,
       success: true,
     });

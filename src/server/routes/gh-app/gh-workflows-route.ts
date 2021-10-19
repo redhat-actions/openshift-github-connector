@@ -1,20 +1,18 @@
-import express from "express";
-import path from "path";
-
 import ApiEndpoints from "common/api-endpoints";
 import ApiRequests from "common/api-requests";
 import ApiResponses from "common/api-responses";
+import { getSecretsUrlForRepo, resolveGitHubFileUrl } from "common/types/gh-types";
+import { GITHUB_WORKFLOWS_DIR, WORKFLOW_INFOS } from "common/workflows/workflows";
+import express from "express";
+import path from "path";
+import { send405 } from "server/express-extends";
+import { getFileContentsFromGitHub } from "server/lib/github/gh-util";
+import { buildWorkflow } from "server/lib/github/workflows-wizard/workflows-util";
 import Log from "server/logger";
-import { getFriendlyHTTPError, tob64 } from "server/util/server-util";
-import { GitHubContentFile, getSecretsUrlForRepo } from "common/types/gh-types";
-import { editWorkflow, getStarterWorkflowContents } from "server/lib/github/starter-workflow";
-import { createActionsSecret } from "server/lib/github/gh-util";
-import { DEFAULT_SECRET_NAMES } from "common/default-secret-names";
+import { tob64 } from "server/util/server-util";
 
 const router = express.Router();
 export default router;
-
-const WORKFLOWS_DIR = `.github/workflows/`;
 
 router.route(ApiEndpoints.App.Workflows.path)
   .post(async (
@@ -22,124 +20,129 @@ router.route(ApiEndpoints.App.Workflows.path)
     res: express.Response<ApiResponses.WorkflowCreationResult>,
     next,
   ) => {
-
-    // we have to do the following
-    // ? clone the user repo
-    // - download the workflow file
-    // - create .github/workflows if necessary
-    // - copy the workflow file into the repo
-    // ? commit the changes
-    // ? push somewhere - fork somehow? permissions to push to user repo?
-    // ? put up a PR
-    // ? return URL to that PR or to the now-added file
-
-    // single file permission?
-    // workflow permission?
-    // workflow permission scope exists in edit app page but not in documentation
-    // https://docs.github.com/en/rest/reference/permissions-required-for-github-apps#permission-on-single-file
-
-    const user = await req.getUserOr401();
-    if (!user) {
+    const installation = await req.getInstallationOr400();
+    if (!installation) {
       return undefined;
     }
 
-    const installation = user.installation;
-    if (!installation) {
-      return res.sendError(400, `No installation for user ${user.name}`);
-    }
+    const { repo } = req.body;
 
-    const imageRegistry = user.imageRegistries.getById(req.body.imageRegistryId);
-    if (!imageRegistry) {
-      return res.sendError(404, `Image registry with Id ${req.body.imageRegistryId} was not found`);
-    }
-
-    await createActionsSecret(
-      installation.octokit, req.body.repo, DEFAULT_SECRET_NAMES.registryPassword, imageRegistry.passwordOrToken
-    );
-
-    const registrySecretName = `${req.body.repo.full_name}/${DEFAULT_SECRET_NAMES.registryPassword}`;
-
-    Log.info(`Create workflow file into "${req.body.repo.full_name}"`);
-
-    const workflowFilePath = path.join(WORKFLOWS_DIR, req.body.workflowFile.name + req.body.workflowFile.extension);
-    Log.info(`Workflow file path is ${workflowFilePath}`);
+    Log.info(`Trying to add workflow ${req.body.workflowConfig.id} to ${repo.full_name}`);
 
     const repoMeta = (await installation.octokit.request("GET /repos/{owner}/{repo}", {
-      owner: req.body.repo.owner,
-      repo: req.body.repo.name,
+      owner: repo.owner,
+      repo: repo.name,
     })).data;
 
     const defaultBranch = repoMeta.default_branch;
     Log.info(`Default branch is ${defaultBranch}`);
+    const defaultBranchRef = `heads/${defaultBranch}`;
 
-    let existingWorkflowSha: string | undefined;
-    try {
-      // https://docs.github.com/en/rest/reference/repos#get-repository-content
+    const defaultBranchHeadSha = (await installation.octokit.request("GET /repos/{owner}/{repo}/git/ref/{ref}", {
+      owner: repo.owner,
+      repo: repo.name,
+      ref: defaultBranchRef,
+    })).data.object.sha;
 
-      const existingFileRes = await installation.octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
-        owner: req.body.repo.owner,
-        repo: req.body.repo.name,
-        path: workflowFilePath,
-        ref: defaultBranch,
-        mediaType: {
-          format: "json",
-        },
-      });
+    Log.info(`Default branch HEAD sha is ${defaultBranchHeadSha}`);
 
-      existingWorkflowSha = (existingFileRes.data as GitHubContentFile).sha;
+    const { workflowConfig } = req.body;
 
-      Log.info(`${workflowFilePath} already exists`);
+    const workflowFilePath = path.join(GITHUB_WORKFLOWS_DIR, req.body.fileBasename + req.body.fileExtension);
+    Log.info(`Create workflow file ${workflowFilePath} into "${req.body.repo.full_name}"`);
 
-      if (!req.body.overwriteExisting) {
-        return res.sendError(
-          409,
-          `"${workflowFilePath}" already exists in repository ${req.body.repo.full_name}`, "warning"
-        );
-      }
-      // TODO
+    const { createdSecrets, workflow } = await buildWorkflow(
+      installation,
+      repo,
+      workflowConfig,
+      // [ defaultBranch ]
+    );
+
+    Log.info(`Successfully built workflow and created secrets ${JSON.stringify(createdSecrets)}`);
+
+    const existingWorkflowFile = await getFileContentsFromGitHub(installation, {
+      owner: repo.owner,
+      repo: repo.name,
+      path: workflowFilePath,
+      ref: defaultBranchRef,
+    }, false);
+
+    const author = {
+      name: `${installation.user.githubUserInfo.name} with ${installation.app.config.name}`,
+      email: installation.user.githubUserInfo.email ?? "noreply@github.com",
+    };
+
+    const repoBranches = (await installation.octokit.request("GET /repos/{owner}/{repo}/branches", {
+      owner: repo.owner,
+      repo: repo.name,
+    })).data;
+
+    const newBranchBaseName = `add-${workflowConfig.id}-workflow`;
+    let newBranchName = newBranchBaseName;
+    let branchId = 0;
+    while (repoBranches.map((branch) => branch.name).includes(newBranchName)) {
+      branchId++;
+      newBranchName = newBranchBaseName + `-${branchId}`;
     }
-    catch (err) {
-      if (err.status !== 404) {
-        throw getFriendlyHTTPError(err);
-      }
+    Log.info(`New branch will be ${newBranchName}`);
 
-      // the file does not exist
-    }
+    const branchCreateRes = (await installation.octokit.request("POST /repos/{owner}/{repo}/git/refs", {
+      owner: repo.owner,
+      repo: repo.name,
+      ref: `refs/heads/${newBranchName}`,
+      sha: defaultBranchHeadSha,
+    })).data;
 
-    const workflowFileContents = await getStarterWorkflowContents(installation);
-    const workflowEdited = editWorkflow(req.body, imageRegistry, [ defaultBranch ], workflowFileContents);
-    // const workflowEdited = workflowFileDecoded.replace("$default-branch", defaultBranch);
+    Log.info(`Created ref ${branchCreateRes.ref}, commit is ${branchCreateRes.object.sha}`);
 
     // https://docs.github.com/en/rest/reference/repos#create-or-update-file-contents
-    const writeRes = await installation.octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
-      owner: req.body.repo.owner,
-      repo: req.body.repo.name,
+    const writeFileRes = (await installation.octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
+      owner: repo.owner,
+      repo: repo.name,
       path: workflowFilePath,
-      // branch defaults to repo's default branch
-      message: "Add OpenShift Starter Workflow",
-      content: tob64(workflowEdited),
-      sha: existingWorkflowSha,
-      branch: defaultBranch,
-      committer: {
-        name: installation.app.config.name,
-        email: `no-email-here@github.com`,
-      },
-    });
+      message: `${existingWorkflowFile == null ? "Add" : "Update"} ${workflowConfig.id} workflow`,
+      content: tob64(workflow),
+      sha: existingWorkflowFile?.sha,
+      branch: newBranchName,
+      author,
+      committer: author,
+    })).data;
 
-    // const newWorkflowFileName = writeRes.data.content.name;
+    Log.info(`Wrote new workflow file ${writeFileRes.content?.html_url}`);
 
-    // eslint-disable-next-line
-    const newWorkflowFileUrl = writeRes.data.content?.html_url ?? repoMeta.html_url;
+    const workflowInfo = WORKFLOW_INFOS[workflowConfig.id];
+
+    const prTitle = `${existingWorkflowFile == null ? "Add" : "Update"} ${workflowConfig.id} workflow`;
+    const prBody = `[${installation.user.githubUserInfo.name}](${installation.user.githubUserInfo.html_url}) `
+      + `wants to ${existingWorkflowFile == null ? "add" : "update"} the ${workflowInfo.name} `
+      + `GitHub Actions workflow ${existingWorkflowFile == null ? "to" : "in"} this repository.\n\n`
+      + `This workflow is based on ${resolveGitHubFileUrl(workflowInfo.templateFileLocation)}`;
+
+    const pullRes = (await installation.octokit.request("POST /repos/{owner}/{repo}/pulls", {
+      owner: repo.owner,
+      repo: repo.name,
+      head: newBranchName,
+      base: defaultBranch,
+      title: prTitle,
+      body: prBody,
+      maintainer_can_modify: true,
+    })).data;
+
+    Log.info(`Created pull request ${pullRes.html_url}`);
 
     const resBody: ApiResponses.WorkflowCreationResult = {
-      message: `Successfully created registry password secret, `
-        + `and added starter workflow to ${req.body.repo.full_name}.`,
+      message: `Successfully opened workflow pull request`,
       success: true,
-      severity: "success",
-      secretsUrl: getSecretsUrlForRepo(repoMeta),
-      workflowFileUrl: newWorkflowFileUrl,
-      registrySecret: registrySecretName,
+      id: workflowInfo.id,
+      repo,
+      createdSecrets,
+      prNumber: pullRes.number,
+      urls: {
+        pullRequest: pullRes.html_url,
+        secrets: getSecretsUrlForRepo(repoMeta),
+        workflowFile: writeFileRes.content?.html_url ?? repoMeta.html_url,
+      },
     };
 
     return res.json(resBody);
-  });
+  }).all(send405([ "POST" ]));

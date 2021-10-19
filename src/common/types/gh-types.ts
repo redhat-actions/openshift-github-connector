@@ -3,8 +3,19 @@ import { components } from "@octokit/openapi-types/types";
 // we "extract" a series of types from the GitHub schemas, so they're easier to find and reduce imports.
 /* eslint-disable camelcase */
 
-// an organization can also be a simple-user
 export type GitHubUserDetails = NonNullable<components["schemas"]["simple-user"]>;
+
+export type GitHubUserOAuth = {
+  access_token: string,
+  expires_in: number,
+  refresh_token: string,
+  refresh_token_expires_in: number,
+  scope: string,
+  token_type: string,
+};
+
+export type GitHubUserDetailsWithOAuth = GitHubUserDetails & GitHubUserOAuth;
+
 export type GitHubUserType = "Organization" | "User";
 export type GitHubOrg = components["schemas"]["organization-simple"];
 export type GitHubRepo = components["schemas"]["repository"] & { owner: GitHubUserDetails };
@@ -27,15 +38,6 @@ export interface GitHubAppConfigSecrets {
 export interface GitHubAppAuthData extends GitHubAppConfigSecrets {
   id: number,
 }
-
-export type GitHubOAuthResponse = {
-  access_token: string,
-  expires_in: number,
-  refresh_token: string,
-  refresh_token_expires_in: number,
-  scope: string,
-  token_type: string,
-};
 
 export type GitHubAppConfig = components["schemas"]["integration"] & GitHubAppConfigSecrets & {
   // some keys are inexplicably marked optional
@@ -77,10 +79,10 @@ export function getSecretsUrlForRepo(repo: { html_url: string }): string {
 }
 
 // The API is structured as /repos/{owner}/{name}/<path>
-// so you can't just use the repo Id as a unique identifier, which is a bummer.
+// so you can't just use the repo ID as a unique identifier, which is a bummer.
 export interface GitHubRepoId {
   /**
-   * The ID is (shockingly) not really used in the GitHub API.
+   * The ID is not really used in the GitHub API.
    * But, we use it internally as a unique identifier, since repos can be moved.
    */
   id: number,
@@ -94,6 +96,40 @@ export interface GitHubRepoId {
   name: string,
 
   full_name: string,
+  // html_url: string,
+}
+
+export interface RepoWithSecrets {
+  repo: GitHubRepo,
+  hasClusterSecrets: boolean,
+  hasNamespaceSecret: boolean,
+  hasRegistrySecret: boolean,
+  secrets: GitHubActionsSecret[],
+}
+
+export interface GitHubFileLocation {
+  readonly owner: string,
+  readonly repo: string,
+  readonly path: string,
+  readonly ref: string,
+}
+
+export function resolveGitHubFileUrl(file: GitHubFileLocation): string {
+  return `https://github.com/${file.owner}/${file.repo}/blob/${file.ref}/${file.path}`;
+}
+
+export function toGitHubRepoId(repo: {
+  id: number,
+  name: string,
+  full_name: string,
+  owner: { login: string },
+}): GitHubRepoId {
+  return {
+    id: repo.id,
+    name: repo.name,
+    full_name: repo.full_name,
+    owner: repo.owner.login,
+  };
 }
 
 export interface GitHubAppOwnerUrls {

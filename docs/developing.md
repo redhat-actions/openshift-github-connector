@@ -32,29 +32,23 @@ This service account name is then passed through the environment, in the `deploy
 ```sh
 # One-liner to generate a UUID
 export OAUTH_CLIENT_SECRET=$(node -e 'console.log(require("uuid").v4())') && echo "$OAUTH_CLIENT_SECRET"
+# Create the OAuthClient
 cat <<EOF | oc create -f-
 apiVersion: oauth.openshift.io/v1
 kind: OAuthClient
 metadata:
   # must match .env OAUTH_CLIENT_ID
   name: github-connector-oauth-client-dev
+grantMethod: auto
 # substitute your own uuid
 secret: ${OAUTH_CLIENT_SECRET}
 redirectURIs:
 	# You can put any number of callback URLs in this array
   # the env callback must be one of these
   - https://localhost:3000/api/v1/auth/callback
-grantMethod: auto
 EOF
 ```
 3. Add the client secret UUID to `.env.local` as `OAUTH_CLIENT_SECRET=<the OAUTH_CLIENT_SECRET UUID>`
-
-### Debugging OAuth Problems
-Passport is poor at error reporting. Make sure that:
-- The redirect URI is in the OAuthClient object, as above.
-- The redirect URI in the environment matches the OAuthClient.
-- The client ID and client secret in the environment match the OAuthClient.
-- The cluster's authentication route's TLS certificates are trusted by the connector (see [TLS Certificates](./certs.md))
 
 ## TLS Certificates
 
@@ -81,18 +75,37 @@ SERVING_CA_DIRECTORY=/var/certs/localhost
 # Steps below are necessary only if your cluster uses untrusted TLS certs
 # See certs.md
 ROUTER_CA_DIRECTORY=/var/certs/crc/
-INSECURE_TRUST_APISERVER_CERT: true
 ```
 
 Then run `yarn dev` to run the development server.
 
 The project runs at [https://localhost:3000](https://localhost:3000). You will not get a response if you use regular HTTP.
 
+### Installing GitHub Apps on localhost
+When creating or installing a GitHub app, the callback URL where the connector is running cannot be a `localhost` url, or the CRC local domain.
+
+If you are using an internet-accessible cluster, this section does not apply.
+
+I use [ngrok](https://ngrok.com/) to proxy to my machine to work around this. The free plan is sufficient, though you'll have to repeat the steps below each time you restart ngrok and the subdomain changes.
+
+Run `ngrok http https://localhost:3000` if the app is being developed on the default port 3000.
+
+You'll have to replace the `OAUTH_CALLBACK_URL` with the ngrok proxy address, `https://<id>.ngrok.io/api/v1/callback`. Then add the same URL to the OpenShift OAuthClient Callback URLs array, and redo the OpenShift login step through the app frontend.
+
+Then, you can create and install the Connector GitHub app. Once the app is created and installed, you can stop using ngrok, but will have to log in through OpenShift OAuth again (since the domain is different, you will need to acquire a new auth cookie).
+
+### Debugging OAuth Problems
+Passport is poor at error reporting. Make sure that:
+- The redirect URI is in the OAuthClient object, as above.
+- The redirect URI in the environment matches the OAuthClient.
+- The client ID and client secret in the environment match the OAuthClient.
+- The cluster's authentication route's TLS certificates are trusted by the connector (see [TLS Certificates](./certs.md))
+
 ## Project Structure
 
 The backend is in Express, and the frontend is in React using create-react-app (CRA). Code can be shared across the stack from the `common/` directory.
 
-Be careful about adding package dependencies here because they will be webpacked separately into the frontend and backend. Modules must be compatible with both and should not be large.
+Be careful about adding package dependencies in `common` because they will be webpacked separately into the frontend and backend. Modules must be compatible with both and should not be large.
 
 The structure is adapted from [this blog post](https://spin.atomicobject.com/2020/08/17/cra-express-share-code), and the boilerplate code is in [this repository](https://github.com/gvanderclay/cra-express).
 
@@ -118,10 +131,11 @@ Sometimes VS Code intellisense stops working altogether, particularly when using
 ## Resources
 
 ### Frontend
-- https://react-bootstrap.github.io/components/alerts/
-- https://getbootstrap.com/docs/5.0/getting-started/introduction/
+- Patternfly for components https://www.patternfly.org/v4/components/about-modal
+- Bootstrap for utility classes https://getbootstrap.com/docs/5.0/getting-started/introduction/
 
 ### Backend
 - https://docs.github.com/en/rest/reference
 - https://docs.github.com/en/developers/apps/creating-a-github-app-from-a-manifest
 - https://docs.github.com/en/rest/reference/permissions-required-for-github-apps
+- https://docs.openshift.com/container-platform/4.8/authentication/configuring-oauth-clients.htm

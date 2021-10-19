@@ -1,33 +1,31 @@
+import { Title } from "@patternfly/react-core";
 import { Table } from "@patternfly/react-table";
+import { ReactNode } from "react";
 
-import { Stringable } from "../../common/common-util";
-import { ExternalLink } from "./external-link";
-
-export function ObjectTable({ obj, label }: { obj: Record<string | number, Stringable>, label: string }): JSX.Element {
+export function ObjectTable(
+  { className, obj, label }:
+  { className?: string, obj: Record<string | number, ReactNode>, label: string }
+): JSX.Element {
 
   return (
-    <Table aria-label={label}>
-      <tbody>
-        {Object.entries(obj).map(([ key, value ], i) => {
-          const valueStr = value.toString();
-
-          let valueElem: JSX.Element = <>{value.toString()}</>;
-          if (valueStr.startsWith("http://") || valueStr.startsWith("https://")) {
-            valueElem = <ExternalLink href={valueStr}>{valueStr}</ExternalLink>;
-          }
-
-          return (
-            <tr key={i}>
-              <td className="b">
-                {key}
-              </td>
-              <td>
-                {valueElem}
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </Table>
+    <div className={className}>
+      <Title headingLevel="h3" className="border-bottom pb-3">{label}</Title>
+      <Table aria-label={label}>
+        <tbody>
+          {Object.entries(obj).map(([ key, value ], i) => {
+            return (
+              <tr key={i}>
+                <td className="b w-50">
+                  {key}
+                </td>
+                <td>
+                  {value}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </Table>
+    </div>
   );
 }

@@ -19,21 +19,21 @@ interface BaseDataFetcherProps<Data> {
 }
 
 interface GenericDataFetcherProps<Data> extends BaseDataFetcherProps<Data> {
-    type: "generic",
-    fetchData: (abortSignal: AbortSignal) => Promise<Data>,
+  type: "generic",
+  fetchData: (abortSignal: AbortSignal) => Promise<Data>,
 }
 
 interface ApiDataFetcherProps<Data> extends BaseDataFetcherProps<Data> {
-    type: "api",
-    endpoint: UrlPath,
+  type: "api",
+  endpoint: UrlPath,
 }
 
 export type DataFetcherProps<Data> = GenericDataFetcherProps<Data> | ApiDataFetcherProps<Data>;
 
 interface DataFetcherState<Data> {
-    data: Data | undefined,
-    loaded: boolean,
-    loadingError: Error | undefined,
+  data: Data | undefined,
+  loaded: boolean,
+  loadingError: Error | undefined,
 }
 
 // Heavily inspired by https://github.com/argoproj/argo-ui/blob/master/src/components/data-loader.tsx

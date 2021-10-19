@@ -5,27 +5,29 @@ If certs are not properly configured, the server will crash on startup due to no
 
 ## OpenShift Certs to Trust
 
-For in-cluster deployment (using the Helm chart), the serving cert bundle is copied into the pod and trusted at runtime. Refer to [the OpenShift documentation](https://docs.openshift.com/container-platform/3.11/dev_guide/secrets.html#service-serving-certificate-secrets).
+For in-cluster deployment (using the Helm chart), the serving cert bundle is copied into the pod and trusted at runtime. Refer to [the OpenShift documentation](https://docs.openshift.com/container-platform/4.8/nodes/pods/nodes-pods-secrets.html#nodes-pods-secrets-certificates-about_nodes-pods-secrets).
 
 For local development, copy out that file to your local system:
 
 ```sh
-oc exec github-connector-<pod-id> -- cat /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt > service-ca.crt
+oc exec -n openshift-authentication oauth-openshift-<id> -- cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt > ca.crt
 ```
+
+You can use any pod; they should all have this file.
 
 Move the file somewhere suitable, eg:
 ```sh
-chmod 644 service-ca.crt
-sudo mv service-ca.crt /var/certs/crc/
+chmod 644 ca.crt
+sudo mv ca.crt /var/certs/crc/
 ```
 
 Refer to this file in `.env.local`:
 ```properties
 # For multiple files, can be comma-separated
-TRUST_CERT_FILES=/var/certs/crc/service-ca.crt
+TRUST_CERT_FILES=/var/certs/crc/ca.crt
 ```
 
-This step must be repeated when your change your current cluster, so you can keep a directory for each cluster and just change the `.env.local` entry.
+This step must be **repeated** when your change your current cluster, so you can keep a directory for each cluster and just change the `.env.local` entry.
 
 Refer to `certs.ts` for the logic that loads these files.
 

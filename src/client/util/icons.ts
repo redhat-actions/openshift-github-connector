@@ -1,7 +1,7 @@
 import {
   BookOpenIcon,
   CheckCircleIcon, CogIcon, EditIcon, ExclamationTriangleIcon,
-  GithubIcon, InfoCircleIcon, PlusIcon, SyncAltIcon, TimesCircleIcon,
+  GithubIcon, InfoCircleIcon, PlusIcon, QuestionCircleIcon, SyncAltIcon, TimesCircleIcon,
   TrashAltIcon,
 } from "@patternfly/react-icons";
 import { SVGIconProps } from "@patternfly/react-icons/dist/js/createIcon";
@@ -19,6 +19,7 @@ export const CommonIcons = {
 
   Configure: CogIcon,
   Edit: EditIcon,
+  Help: QuestionCircleIcon,
 
   GitHub: GithubIcon,
 };

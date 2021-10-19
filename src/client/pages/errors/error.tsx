@@ -1,7 +1,7 @@
 export interface ErrorPageProps {
-    statusCode: number,
-    statusMessage: string,
-    message: string,
+  statusCode: number,
+  statusMessage: string,
+  message: string,
 }
 
 export default function error(props: ErrorPageProps): JSX.Element {

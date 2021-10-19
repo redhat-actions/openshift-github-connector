@@ -104,7 +104,7 @@ namespace SecretUtil {
     client: k8s.CoreV1Api,
     namespace: string,
     secretName: string,
-    data: Record<string, SimpleValue>
+    data: Record<string, SimpleValue>,
   ): Promise<k8s.V1Secret> {
     const secrets = await client.listNamespacedSecret(namespace);
 

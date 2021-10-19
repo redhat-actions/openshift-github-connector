@@ -40,6 +40,9 @@ namespace KubeUtil {
 
 		if (serviceAccountClusterRole) {
 			const rolebinding: k8s.V1RoleBinding = {
+				metadata: {
+					generateName: serviceAccount + "-",
+				},
 				subjects: [{
 					kind: "ServiceAccount",
 					name: serviceAccount,

@@ -5,10 +5,11 @@ import { useState } from "react";
 import ApiEndpoints from "../../../common/api-endpoints";
 import ApiResponses from "../../../common/api-responses";
 import { toValidK8sName } from "../../../common/common-util";
+import { DEFAULT_SECRET_NAMES } from "../../../common/default-secret-names";
 import DataFetcher from "../../components/data-fetcher";
 import { DataFetcherCard } from "../../components/data-fetcher-card";
-import { ExternalLink } from "../../components/external-link";
-import NamespaceSelect from "../../components/namespace-select";
+import { NewTabLink } from "../../components/external-link";
+import ProjectSelect from "../../components/project-select";
 import { CommonIcons } from "../../util/icons";
 
 export function ConnectReposIntroCard(): JSX.Element {
@@ -21,25 +22,32 @@ export function ConnectReposIntroCard(): JSX.Element {
         <CardBody>
           <p>
           This step connects GitHub repositories to your OpenShift cluster by
-          creating <ExternalLink href="https://docs.github.com/en/actions/reference/encrypted-secrets">
+          creating <NewTabLink href="https://docs.github.com/en/actions/reference/encrypted-secrets">
             encrypted secrets
-            </ExternalLink> in
+            </NewTabLink> in
           your repositories which you can then reference in your workflows to log in to this cluster.
           </p>
           <p>
             A Service Account Token will be created for each repository that you connect.
             This way, you can revoke a single {`repository's`} access by deleting its token without affecting other repositories.
+            In addition, service account tokens do not expire and so are perfect for script use.
           </p>
           <p>
-            Service account tokens do not expire
           </p>
           <p>
-            <ExternalLink
+            <NewTabLink
               href={"https://github.com/redhat-actions/oc-login#readme"}
             >
               <CommonIcons.Documentation className="me-2" />
             Read More about using oc-login to log in to OpenShift from GitHub Actions.
-            </ExternalLink>
+            </NewTabLink>
+            <br/>
+            <NewTabLink
+              href={"https://github.com/redhat-actions/oc-login/wiki/Using-a-Service-Account-for-GitHub-Actions"}
+            >
+              <CommonIcons.Documentation className="me-2" />
+                Read More about authenticating using a service account for GitHub Actions.
+            </NewTabLink>
           </p>
 
           {/* <p>
@@ -68,126 +76,110 @@ export function ConnectReposIntroCard(): JSX.Element {
   );
 }
 
-export function DefaultSecretsCard(
-  { namespace, createNamespaceSecret, serviceAccount }:
-  { namespace?: string, createNamespaceSecret: boolean, serviceAccount?: string }
+export function SecretsWillBeCreatedCard(
+  { project, createProjectSecret, serviceAccount }:
+  { project?: string, createProjectSecret: boolean, serviceAccount?: string }
 ) {
+
+  const count = createProjectSecret ? "three" : "two";
+
   return (
     <Card>
       <CardTitle>
         Secrets
       </CardTitle>
       <CardBody>
-        <DataFetcher key={"" + namespace + serviceAccount}
-          type="api"
-          endpoint={ApiEndpoints.App.Repos.RepoSecretDefaults}
-          loadingDisplay="card-body"
-        >
-          {
-            (res: ApiResponses.DefaultSecretsResponse) => {
+        <div>
+          <p>
+          To each repository, {count} secrets will be added:
+          </p>
+          <ol>
+            <li>
+              <code>{DEFAULT_SECRET_NAMES.clusterServerUrl}</code> will
+                contain the URL to this OpenShift {"cluster's"} API server
+              <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root} loadingDisplay="none">{
+                (clusterData: ApiResponses.ClusterState) => {
+                  if (!clusterData.connected) {
+                    return ".";
+                  }
 
-              const count = createNamespaceSecret ? "three" : "two";
-
-              return (
-                <div>
-                  <p>
-                  To each repository, {count} secrets will be added:
-                  </p>
-                  <ol>
-                    <li>
-                      <code>{res.defaultSecrets.clusterServerUrl}</code> will
-                    contain the URL to this OpenShift {"cluster's"} API server
-                      <DataFetcher type="api" endpoint={ApiEndpoints.Cluster.Root} loadingDisplay="none">{
-                        (clusterData: ApiResponses.ClusterState) => {
-                          if (!clusterData.connected) {
-                            return ".";
-                          }
-
-                          return (
-                            <>
-                            : <ExternalLink href={clusterData.clusterInfo.externalServer}>
-                                {clusterData.clusterInfo.externalServer}
-                              </ExternalLink>
-                            </>
-                          );
-                        }
-                      }
-                      </DataFetcher>
-                    </li>
-                    <li>
-                      <code>{res.defaultSecrets.clusterToken}</code> will
-                      contain a Service Account Token for the service account,&nbsp;
-                      {
-                        namespace && serviceAccount ? <b>{namespace}/{serviceAccount} </b> : ""
-                      }
-                      which can be used to log into the OpenShift API server.
-                      A different service account token is generated for each repository, but they all log in as the same service account.
-                    </li>
-                    {
-                      createNamespaceSecret ?
-                        <li>
-                          <code>{res.defaultSecrets.namespace}</code> will contain the configured namespace{
-                            namespace ? <>, <b>{namespace}</b></> : ""
-                          }.
-                        </li>
-                        : ""
-                    }
-                  </ol>
-                </div>
-              );
-            }}
-        </DataFetcher>
+                  return (
+                    <>
+                    : <NewTabLink href={clusterData.clusterInfo.externalServer}>
+                        {clusterData.clusterInfo.externalServer}
+                      </NewTabLink>
+                    </>
+                  );
+                }
+              }
+              </DataFetcher>
+            </li>
+            <li>
+              <code>{DEFAULT_SECRET_NAMES.clusterToken}</code> will
+              contain a Service Account Token for the service account,&nbsp;
+              {
+                project && serviceAccount ? <b>{project}/{serviceAccount} </b> : ""
+              }
+              which can be used to log into the OpenShift API server.
+              A different service account token is generated for each repository, but they all log in as the same service account.
+            </li>
+            {
+              createProjectSecret ?
+                <li>
+                  <code>{DEFAULT_SECRET_NAMES.namespace}</code> will contain the configured project{
+                    project ? <>, <b>{project}</b></> : ""
+                  }.
+                </li>
+                : ""
+            }
+          </ol>
+        </div>
       </CardBody>
     </Card>
   );
 }
 
-export function NamespaceSACards(
+export function ProjectSACards(
   {
-    namespace, setNamespace, serviceAccount, setServiceAccount,
-    createNamespaceSecret, setCreateNamespaceSecret,
+    project, setProject, serviceAccount, setServiceAccount,
+    createProjectSecret, setCreateProjectSecret,
   }: {
-    namespace: string | undefined,
-    setNamespace: (namespace: string | undefined) => void,
+    project: string | undefined,
+    setProject: (project: string | undefined) => void,
     serviceAccount: string | undefined,
     setServiceAccount: (serviceAccount: string | undefined, role: string | undefined) => void,
-    createNamespaceSecret: boolean,
-    setCreateNamespaceSecret: (createNamespaceSecret: boolean) => void,
+    createProjectSecret: boolean,
+    setCreateProjectSecret: (createProjectSecret: boolean) => void,
   }
 ): JSX.Element {
 
   return (
-    <DataFetcherCard type="api" title="Service Account for Workflow Authentication" endpoint={ApiEndpoints.Cluster.Namespaces.Root}>{
-      (namespacesRes: ApiResponses.UserNamespaces) => {
+    <DataFetcherCard type="api" title="Service Account for Workflow Authentication" endpoint={ApiEndpoints.Cluster.Projects.Root}>{
+      (projectsRes: ApiResponses.UserProjects) => {
 
         return (
           <>
             <p>
-              Select the namespace you want these repositories&apos; workflows to use for authentication.
+              Select the project you want these repositories&apos; workflows to use for authentication.
               <br/>
-              Workflows will execute in this namespace, and will not be able to access other namespaces.
+              Workflows will execute in this project, and will not be able to access other projects.
             </p>
 
-            <NamespaceSelect namespacesRes={namespacesRes} namespace={namespace} setNamespace={setNamespace} />
+            <ProjectSelect projectsRes={projectsRes} project={project} setProject={setProject} />
 
-            <Checkbox
-              id="create-ns-secret-cb"
-              className="my-3"
-              label={"Create an Actions secret containing this namespace"}
-              isChecked={createNamespaceSecret}
-              onChange={(checked) => { setCreateNamespaceSecret(checked); }}
-            />
+            {
+              projectsRes.projects.length > 0 ? (
+                <Checkbox
+                  id="create-ns-secret-cb"
+                  className="my-3"
+                  label={"Create an Actions secret containing this project"}
+                  isChecked={createProjectSecret}
+                  onChange={(checked) => { setCreateProjectSecret(checked); }}
+                />
+              ) : <></>
+            }
 
-            <Divider className="my-4"/>
-
-            <ServiceAccountSection namespace={namespace} serviceAccount={serviceAccount} setServiceAccount={setServiceAccount} />
-
-            <ExternalLink
-              href={"https://github.com/redhat-actions/oc-login/wiki/Using-a-Service-Account-for-GitHub-Actions"}
-            >
-              <CommonIcons.Documentation className="me-2" />
-              Read More about authenticating using a service account for GitHub Actions.
-            </ExternalLink>
+            <ServiceAccountSection project={project} serviceAccount={serviceAccount} setServiceAccount={setServiceAccount} />
           </>
         );
       }
@@ -196,95 +188,102 @@ export function NamespaceSACards(
   );
 }
 
+export const SERVICEACCOUNT_SELECT_ID = "service-account-select";
+
 const DEFAULT_SA_ROLE = "edit";
 
-export function ServiceAccountSection(
-  { namespace, serviceAccount, setServiceAccount }: {
-    namespace: string | undefined, serviceAccount: string | undefined,
-    setServiceAccount: (serviceAccount: string | undefined, role: string | undefined) => void,
-  }
-): JSX.Element {
+export function ServiceAccountSection({
+  project, serviceAccount, setServiceAccount,
+}: {
+  project: string | undefined, serviceAccount: string | undefined,
+  setServiceAccount: (serviceAccount: string | undefined, role: string | undefined) => void,
+}): JSX.Element {
 
   const [ isOpen, setIsOpen ] = useState(false);
 
-  if (!namespace) {
+  if (!project) {
     return (
       <></>
     );
   }
 
   return (
-    <DataFetcher
-      key={namespace} loadingDisplay="card-body" type="api"
-      endpoint={ApiEndpoints.Cluster.Namespaces.ServiceAccounts.withParam(namespace)}
-    >{
-        ({ serviceAccounts }: ApiResponses.UserNamespacedServiceAccounts) => {
-          if (serviceAccounts.length === 0) {
+    <>
+      <Divider className="my-4"/>
+      <DataFetcher
+        key={project} loadingDisplay="card-body" type="api"
+        endpoint={ApiEndpoints.Cluster.Projects.ServiceAccounts.withParam(project)}
+      >{
+          ({ serviceAccounts }: ApiResponses.UserNamespacedServiceAccounts) => {
+            if (serviceAccounts.length === 0) {
+              return (
+                <p className="error">
+              There are no service account in {project}
+                </p>
+              );
+            }
+
+            const selectPlaceholder = "Select a Service Account, or start typing";
+
             return (
-              <p className="error">
-              There are no service account in {namespace}
-              </p>
+              <>
+                <p>
+                Select the Service Account in <b>{project}</b> you want these repositories to have access to.
+                  <br/>
+                The service account must be granted the permissions it needs to execute workflows.
+                  <br/>
+                You may enter the name of a new Service Account.
+                </p>
+                <div id={SERVICEACCOUNT_SELECT_ID}>
+                  <Select
+                    variant={SelectVariant.typeahead}
+                    typeAheadAriaLabel={selectPlaceholder}
+                    isCreatable={true}
+                    onToggle={(isExpanded) => setIsOpen(isExpanded)}
+                    onClear={() => setServiceAccount(undefined, undefined)}
+                    isOpen={isOpen}
+                    placeholderText={selectPlaceholder}
+                    selections={serviceAccount}
+                    onSelect={(_event, selection, isPlaceholder) => {
+                      setIsOpen(false);
+                      if (isPlaceholder || selection === "") {
+                        setServiceAccount(undefined, undefined);
+                        return;
+                      }
+                      setServiceAccount(toValidK8sName(selection.toString().trim()), DEFAULT_SA_ROLE);
+                    }}
+                  >
+                    {
+                      serviceAccounts.map((sa, i) => (
+                        <SelectOption key={i} value={sa} />
+                      ))
+                    }
+                  </Select>
+                </div>
+
+                {
+                  serviceAccount && !serviceAccounts.includes(serviceAccount) ?
+                    <p>
+                      <CommonIcons.Info className="me-2"/>
+                      A new Service Account <b>{serviceAccount}</b> will be created in the <b>{project}</b>{" "}
+                      project and given the <b>{DEFAULT_SA_ROLE}</b> role.
+                    </p>
+                    : ""
+                }
+                {
+                  project && serviceAccount ?
+                    <p>
+                  The Service Account tokens created, and copied into the Actions secrets, will belong to this service account.
+                    </p>
+                    : ""
+                }
+
+                <Divider className="my-3"/>
+              </>
             );
           }
-
-          const selectPlaceholder = "Select a Service Account, or start typing to filter";
-
-          return (
-            <>
-              <p>
-                Select the Service Account in <b>{namespace}</b> you want these repositories to have access to.
-                <br/>
-                The service account must be granted the permissions it needs to execute workflows.
-                <br/>
-                You may enter the name of a new Service Account. It will be bound to the <b>{DEFAULT_SA_ROLE}</b> ClusterRole in its namespace.
-              </p>
-              <Select
-                variant={SelectVariant.typeahead}
-                typeAheadAriaLabel={selectPlaceholder}
-                isCreatable={true}
-                onToggle={(isExpanded) => setIsOpen(isExpanded)}
-                onClear={() => setServiceAccount(undefined, undefined)}
-                isOpen={isOpen}
-                placeholderText={selectPlaceholder}
-                selections={serviceAccount}
-                onSelect={(_event, selection, isPlaceholder) => {
-                  setIsOpen(false);
-                  if (isPlaceholder || selection === "") {
-                    setServiceAccount(undefined, undefined);
-                    return;
-                  }
-                  setServiceAccount(toValidK8sName(selection.toString().trim()), DEFAULT_SA_ROLE);
-                }}
-              >
-                {
-                  serviceAccounts.map((sa, i) => (
-                    <SelectOption key={i} value={sa} />
-                  ))
-                }
-              </Select>
-
-              {
-                serviceAccount && !serviceAccounts.includes(serviceAccount) ?
-                  <p>
-                    <CommonIcons.Info className="me-2"/>
-                    <b>{serviceAccount}</b> will be created in the <b>{namespace}</b> namespace.
-                  </p>
-                  : ""
-              }
-              {
-                namespace && serviceAccount ?
-                  <p>
-                  The Service Account tokens created, and copied into the Actions secrets, will belong to this service account.
-                  </p>
-                  : ""
-              }
-
-              <Divider className="my-3"/>
-
-            </>
-          );
         }
-      }
-    </DataFetcher>
+      </DataFetcher>
+    </>
   );
 }

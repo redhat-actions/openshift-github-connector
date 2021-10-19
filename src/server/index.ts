@@ -4,7 +4,6 @@ import "express-async-errors";
 import https from "https";
 import cookieParser from "cookie-parser";
 import path from "path";
-import cors from "cors";
 
 import ApiEndpoints from "common/api-endpoints";
 import ApiResponses from "common/api-responses";
@@ -72,10 +71,10 @@ async function main(): Promise<void> {
 
   // const allowedOrigins = getAllowedOrigins();
   // Log.info(`Allow origins: ${allowedOrigins.join(" ")}`);
-  app.use(cors({
-    // origin: allowedOrigins,
-    allowedHeaders: [ "X-CSRFToken" ],
-  }));
+  // app.use(cors({
+  //   origin: allowedOrigins,
+  //   allowedHeaders: [ "X-CSRFToken" ],
+  // }));
 
   app.use(getSessionMiddleware());
 
@@ -86,6 +85,7 @@ async function main(): Promise<void> {
   await setupPassport(app);
 
   ///// Serve static assets in production mode /////
+  // this is handled by webpack dev server in dev mode
 
   if (isProduction()) {
     [ frontendPath, pluginPath ].forEach((staticPath) => {

@@ -2,17 +2,13 @@ import ApiResponses from "../../common/api-responses";
 import { Severity, Stringable } from "../../common/common-util";
 import HttpConstants from "../../common/http-constants";
 
-export function getSearchParam(param: string): string | null {
-  return new URLSearchParams(window.location.search).get(param);
-}
-
 export function isJsonContentType(res: Response): boolean {
   const contentType = res.headers.get(HttpConstants.Headers.ContentType);
 
   return !!contentType
     && (
       contentType.startsWith(HttpConstants.ContentTypes.Json)
-      || contentType.startsWith(HttpConstants.ContentTypes.Problem)
+      // || contentType.startsWith(HttpConstants.ContentTypes.Problem)
     );
 }
 
@@ -22,8 +18,8 @@ async function getHttpError(res: Response): Promise<Error> {
   let severity: Severity | undefined;
   if (isJsonContentType(res)) {
     const resBody = await res.json();
-    if ((resBody as ApiResponses.Error).message) {
-      const errorBody = resBody as ApiResponses.Error;
+    if ((resBody as ApiResponses.ResultFailed).message) {
+      const errorBody = resBody as ApiResponses.ResultFailed;
       message = `${errorBody.message}`;
       severity = errorBody.severity;
       statusMessage = errorBody.statusMessage;
@@ -129,4 +125,26 @@ export function isInOpenShiftConsole(): boolean {
 export function getConsoleModifierClass(): string {
   // "console" class is already used by bootstrap so we add 'is'
   return isInOpenShiftConsole() ? "is-console" : "is-standalone";
+}
+
+export function tryFocusElement(id: string, severity: Severity | "primary" = "primary"): void {
+  const elem = document.getElementById(id);
+  if (!elem) {
+    return;
+  }
+
+  // https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
+  elem.scrollIntoView({
+    behavior: "auto",
+    block: "center",
+    inline: "center",
+  });
+
+  if (elem.style.display === "none") {
+    return;
+  }
+
+  const classes = [ "border", "border-" + severity ];
+  elem.classList.add(...classes);
+  setTimeout(() => elem.classList.remove(...classes), 1000);
 }

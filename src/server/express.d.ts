@@ -4,6 +4,7 @@ import { StatusCodes } from "http-status-codes";
 // eslint-disable-next-line import/no-named-default
 import { default as MyUser } from "server/lib/user/user";
 import { UserSessionData } from "server/lib/user/server-user-types";
+import UserInstallation from "./lib/github/user-app-installation";
 
 declare module "express-session" {
   interface SessionData {
@@ -25,6 +26,11 @@ declare global {
        * the caller MUST exit the request handler.
        */
       getUserOr401: (die?: boolean) => Promise<MyUser | undefined>,
+
+      /**
+       * Similar to getUserOr401, but tries to get the user's GitHub app installation.
+       */
+      getInstallationOr400: (die?: boolean) => Promise<UserInstallation | undefined>,
     }
 
     interface Response {

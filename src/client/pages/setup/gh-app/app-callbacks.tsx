@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 
 import { Spinner } from "@patternfly/react-core";
@@ -8,6 +8,8 @@ import { fetchJSON } from "../../../util/client-util";
 import ApiRequests from "../../../../common/api-requests";
 import ApiResponses from "../../../../common/api-responses";
 import { getSetupPagePath } from "../setup";
+import { RELOAD_APPS_SEARCH } from "./install-existing-app";
+import { ConnectorUserContext } from "../../../contexts";
 
 enum CallbackSearchParams {
   // APP_ID = "app_id",
@@ -49,18 +51,15 @@ export function PostCreateAppCallbackPage() {
             },
           );
 
-          console.log("ABCDEFG!#$&!#$*");
-          console.log(res.message);
-          // pushAlert({ severity: "success", title: res.message });
-
           history.replace({
             pathname: getSetupPagePath("INSTALL_APP"),
+            search: `?${RELOAD_APPS_SEARCH}`,
           });
 
           return res;
         }
       }>
-        {(res: ApiResponses.CreatingAppResponse) => {
+        {(_res: ApiResponses.CreatingAppResponse) => {
           // pushAlert({ severity: "success", title: res.message });
 
           return (
@@ -103,6 +102,7 @@ export function InstalledAppPage(): JSX.Element {
 
   const history = useHistory();
   const { search } = useLocation();
+  const { reload: reloadUser } = useContext(ConnectorUserContext);
 
   useEffect(() => {
     const aborter = new AbortController();
@@ -119,6 +119,8 @@ export function InstalledAppPage(): JSX.Element {
         { signal: aborter.signal }
       );
 
+      await reloadUser();
+
       // pushAlert({ severity: "success", title: res.message });
 
     }
@@ -127,6 +129,7 @@ export function InstalledAppPage(): JSX.Element {
       .then(() => {
         history.replace({
           pathname: getSetupPagePath("VIEW_APP"),
+          // search: `?${RELOAD_USER_SEARCH}`,
         });
       })
       .catch((err) => {
@@ -136,7 +139,7 @@ export function InstalledAppPage(): JSX.Element {
     return () => {
       aborter.abort();
     };
-  }, [ setError, search, history ]);
+  }, [ setError, search, history, reloadUser ]);
 
   return (
     <>

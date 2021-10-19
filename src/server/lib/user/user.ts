@@ -173,7 +173,12 @@ export default class User {
   }
 
   public addOwnsApp(app: GitHubApp): void {
-    if (app.ownerId !== this.githubUserInfo?.id) {
+    if (!this.githubUserInfo) {
+      Log.error(`Tried to add owned app ${app.config.name} with ID ${app.config.id} to user ${this.name}, `
+        + `but user's GitHub info was null`);
+      return;
+    }
+    else if (app.ownerId !== this.githubUserInfo.id) {
       Log.error(`Tried to add owned app ${app.config.name} with ID ${app.config.id} to user ${this.name}, `
         + `but owner ID ${app.ownerId} does not match github user ID ${this.githubUserInfo?.id}`)
       return;
@@ -248,6 +253,8 @@ export default class User {
       ...this.openshiftUserInfo,
       githubInfo: this.githubUserInfo,
       githubInstallationInfo: this.installation?.info,
+      ownsAppIds: this.ownsAppIds,
+      hasCompletedSetup: this.installation != null || this.ownsAppIds.length > 0,
     };
   }
 

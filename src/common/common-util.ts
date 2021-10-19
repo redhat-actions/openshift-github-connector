@@ -1,15 +1,7 @@
 export type Stringable = { toString(): string };
 
-// these map to Bootstrap colours
+// these map to Bootstrap and PF colours
 export type Severity = "success" | "info" | "warning" | "danger";
-
-export const STARTER_WORKFLOW = {
-  raw: "https://raw.githubusercontent.com/actions/starter-workflows/main/ci/openshift.yml",
-  htmlFile: "https://github.com/actions/starter-workflows/blob/main/ci/openshift.yml",
-
-  blog: "https://www.openshift.com/blog/deploying-to-openshift-using-github-actions",
-  youtube: "https://www.youtube.com/watch?v=6hgBO-1pKho",
-};
 
 /**
  * Joins a string array into a user-friendly list.
@@ -144,4 +136,46 @@ export function toValidK8sName(rawName: string): string {
   }
 
   return cookedName;
+}
+
+export function uppercaseFirstChar(s: string): string {
+  return s.charAt(0).toUpperCase() + s.substring(1);
+}
+
+interface ValidatePathOptions {
+  allowEmpty: boolean,
+  filenameOnly: boolean,
+}
+
+/**
+ *
+ * @returns An error message if the basename is illegal, or undefined if it is legal.
+ */
+export function validatePath(
+  pathInput: string,
+  options: ValidatePathOptions,
+): string | undefined {
+  try {
+    if (pathInput.length === 0 && !options.allowEmpty) {
+      return "Cannot be empty.";
+    }
+
+    let illegalsRx;
+    if (options.filenameOnly) {
+      illegalsRx = /([\\/<>:"*|]).*/g;
+    }
+    else {
+      illegalsRx = /([<>:"*|]).*/g;
+    }
+
+    const match = illegalsRx.exec(pathInput);
+    if (match != null && match.length > 1) {
+      return `Illegal character "${match[1]}" in input.`;
+    }
+  }
+  catch (err) {
+    return err.message;
+  }
+
+  return undefined;
 }

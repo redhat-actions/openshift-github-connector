@@ -18,28 +18,40 @@ namespace UserSerializer {
 		if (user.githubUserInfo) {
 			memento.githubUserId = user.githubUserInfo.id.toString();
 			memento.githubUserName = user.githubUserInfo.name;
+			Log.info(`User being saved is github ${user.githubUserInfo.name}`);
 			memento.githubUserType = user.githubUserInfo.type;
+			memento.githubUserUrl = user.githubUserInfo.html_url;
 
 			if (user.installation) {
 				memento.installedAppId = user.installation.app.config.id.toString();
 				memento.installationId = user.installation.installationId.toString();
+				Log.info(`User being saved has install ${memento.installationId}`);
 			}
 		}
 
-		await SecretUtil.deleteSecret(
-			SecretUtil.getSAClient(),
-			SecretUtil.getStorageSecretsNamespace(),
-			getUserSecretName(user.uid),
-		);
+		const secretName = getUserSecretName(user.uid);
 
-		await SecretUtil.createSecret(
-			SecretUtil.getSAClient(),
-			SecretUtil.getStorageSecretsNamespace(),
-			getUserSecretName(user.uid),
-			memento,
-			SecretUtil.getSAName(),
-			SecretUtil.Subtype.USER,
-		);
+		if (userCache.has(user.uid)) {
+			// this means the user has been saved, and the secret already exists
+			await SecretUtil.patchSecret(SecretUtil.getSAClient(), SecretUtil.getStorageSecretsNamespace(), secretName, memento);
+		}
+		else {
+			// the secret may or may not exist
+			await SecretUtil.deleteSecret(
+				SecretUtil.getSAClient(),
+				SecretUtil.getStorageSecretsNamespace(),
+				secretName,
+			);
+
+			await SecretUtil.createSecret(
+				SecretUtil.getSAClient(),
+				SecretUtil.getStorageSecretsNamespace(),
+				secretName,
+				memento,
+				SecretUtil.getSAName(),
+				SecretUtil.Subtype.USER,
+			);
+		}
 
 		Log.info(`Update user ${user.name} data in cache`);
 		userCache.set(user.uid, user);
@@ -64,11 +76,13 @@ namespace UserSerializer {
 			uid: secret.data.uid,
 		};
 
-		if (secret.data.githubUserId && secret.data.githubUserName && secret.data.githubUserType) {
+		if (secret.data.githubUserId && secret.data.githubUserName && secret.data.githubUserType && secret.data.githubUserUrl) {
 			result.githubUserInfo = {
 				id: Number(secret.data.githubUserId),
 				name: secret.data.githubUserName,
+				email: secret.data.githubUserEmail,
 				type: secret.data.githubUserType as GitHubUserType,
+				html_url: secret.data.githubUserUrl,
 			}
 		}
 
@@ -109,7 +123,7 @@ namespace UserSerializer {
 	}
 
 	function getUserSecretName(uid: string) {
-		return `connector-user-${uid}`;
+		return `github-connector-user-${uid}`;
 	}
 }
 

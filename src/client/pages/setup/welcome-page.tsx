@@ -5,7 +5,7 @@ import {
 export default function WelcomePage(): JSX.Element {
   return (
     <>
-      <Card isLarge>
+      <Card>
         <CardTitle>
           Welcome to the OpenShift GitHub Connector
         </CardTitle>

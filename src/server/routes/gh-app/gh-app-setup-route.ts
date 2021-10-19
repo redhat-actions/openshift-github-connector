@@ -22,6 +22,10 @@ router.route(ApiEndpoints.Setup.SetCreateAppState.path)
       return undefined;
     }
 
+    if (!user.isAdmin) {
+      return res.status(403).sendError(403, `Only administrators can add GitHub apps.`);
+    }
+
     const state: string | undefined = req.body.state;
     if (!state) {
       return res.sendError(400, `Required parameter "state" missing from request body`);
@@ -43,6 +47,10 @@ router.route(ApiEndpoints.Setup.CreatingApp.path)
       return undefined;
     }
 
+    if (!user.isAdmin) {
+      return res.status(403).sendError(403, `Only administrators can add GitHub apps.`);
+    }
+
     const code = req.body.code;
     const state = req.body.state;
 
@@ -59,16 +67,23 @@ router.route(ApiEndpoints.Setup.CreatingApp.path)
 
     const appConfig = await exchangeCodeForAppConfig(code);
 
-    user.startInstallingApp(appConfig.id);
+    const newApp = await GitHubAppSerializer.create(appConfig);
+    Log.info(`Saved app ${appConfig.name}`);
 
-    await GitHubAppSerializer.create(appConfig);
+    await user.addGitHubUserInfo({
+      email: newApp.config.owner.email ?? undefined,
+      html_url: newApp.config.owner.html_url,
+      id: newApp.config.owner.id,
+      name: newApp.config.owner.login,
+      type: newApp.config.owner.type as GitHubUserType,
+    }, true);
 
-    Log.info(`Saved app ${appConfig.name} into secret`);
+    user.addOwnsApp(newApp);
 
     const appInstallUrl = appConfig.html_url + "/installations/new";
     // const appInstallUrl = `https://github.com/settings/apps/${appConfig.slug}/installations`;
 
-    return res.json({
+    return res.status(201).json({
       success: true,
       message: `Successfully saved ${appConfig.name}`,
       appInstallUrl,
@@ -131,11 +146,25 @@ router.route(ApiEndpoints.Setup.PostInstallApp.path)
       oauthCode,
     );
 
-    await user.addGitHubUserInfo({
-      id: userData.id,
-      name: userData.login,
-      type: userData.type as GitHubUserType,
-    }, true);
+    let addGitHubUserInfo = user.githubUserInfo == null;
+    if (user.githubUserInfo && userData.id !== user.githubUserInfo.id) {
+      addGitHubUserInfo = true;
+      Log.warn(
+        `Received installation for user ${userData.id}, `
+        + `but user already had GitHub user info with ID ${user.githubUserInfo.id}`
+      );
+    }
+
+    if (addGitHubUserInfo) {
+      await user.addGitHubUserInfo({
+        id: userData.id,
+        name: userData.login,
+        email: userData.email ?? undefined,
+        type: userData.type as GitHubUserType,
+        html_url: userData.html_url,
+      }, true);
+    }
+
     await user.addInstallation({ appId, installationId }, true);
 
     return res.sendStatus(201);

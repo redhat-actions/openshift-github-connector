@@ -101,16 +101,16 @@ hr {
   font-weight: bold !important;
 }
 
+a {
+  font-weight: bold;
+}
+
 dl, ol, ul {
   padding-inline-start: 1em;
 }
 
 li {
   line-height: 1.75em;
-}
-
-.copy-btn {
-  min-width: 12ch;
 }
 
 .no-bullets {
@@ -124,11 +124,10 @@ ul, .bullets-disc {
 
 code, pre {
   &:not(.syntax-highlighted) {
-    background-color: #111;
+    background-color: #333;
     color: white;
     border-radius: 0.33em;
     padding: 0.15em 0.5em;
-    margin: 0 0.15em;
   }
 }
 
@@ -212,7 +211,7 @@ label {
   }
 
   &.flex-column {
-    & > :not(:last-child).btn {
+    & > :not(:last-child) {
       &.btn, &.pf-c-button {
         margin-bottom: c.$pf-global--spacer--md;
       }
