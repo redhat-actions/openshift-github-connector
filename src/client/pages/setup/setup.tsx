@@ -24,7 +24,8 @@ export default function SetupWizard() {
         const wizardSteps = getWizardSteps({
           isAdmin: user.isAdmin,
           hasInstallation: user.githubInstallationInfo != null,
-          ownsAppOrInstall: user.githubInstallationInfo != null || user.ownsAppIds.length > 0,
+          ownsApp: user.ownsAppIds.length > 0,
+          hasCompletedSetup: user.hasCompletedSetup,
         }, appState, reload);
 
         return (
@@ -57,7 +58,7 @@ export function getSetupPagePath(page: keyof typeof SetupPagePaths): string {
 }
 
 function getWizardSteps(
-  userInfo: { isAdmin: boolean, hasInstallation: boolean, ownsAppOrInstall: boolean },
+  userInfo: { isAdmin: boolean, hasInstallation: boolean, hasCompletedSetup: boolean, ownsApp: boolean },
   appState: ApiResponses.AllConnectorApps, reloadAppState: () => void
 ): MyWizardStep[] {
   const wizardSteps: MyWizardStep[] = [];
@@ -68,20 +69,20 @@ function getWizardSteps(
 
   if (userInfo.isAdmin) {
     wizardSteps.push(toWizardStep(
-      <AdminSetupAppPage appState={appState} reloadAppState={reloadAppState} />, "Setup GitHub App", SetupPagePaths.SETUP_APP, i++,
-      { enableNext: userInfo.ownsAppOrInstall }
+      <AdminSetupAppPage appState={appState} />, "Setup GitHub App", SetupPagePaths.SETUP_APP, i++,
+      { enableNext: userInfo.hasCompletedSetup }
     ));
   }
 
   wizardSteps.push(toWizardStep(
     <InstallExistingAppCard appState={appState} reloadAppState={reloadAppState} />, "Install GitHub App", SetupPagePaths.INSTALL_APP, i++,
-    { enableNext: userInfo.ownsAppOrInstall, canJumpTo: appState.success && appState.doesAnyAppExist }
+    { enableNext: userInfo.hasCompletedSetup, canJumpTo: appState.success && appState.doesAnyAppExist }
   ));
 
   wizardSteps.push(toWizardStep(
     <GitHubAppPage />, "View GitHub App", SetupPagePaths.VIEW_APP, i++, {
-      enableNext: userInfo.ownsAppOrInstall,
-      canJumpTo: userInfo.ownsAppOrInstall,
+      enableNext: userInfo.hasCompletedSetup,
+      canJumpTo: userInfo.hasCompletedSetup,
     }
   ));
 

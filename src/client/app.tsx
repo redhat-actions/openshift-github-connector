@@ -1,7 +1,6 @@
 import {
   Route, Switch, useHistory, useLocation,
 } from "react-router-dom";
-import { Spinner } from "@patternfly/react-core";
 
 import ClientPages from "./pages/client-pages";
 import NotFound from "./pages/errors/404";
@@ -31,14 +30,15 @@ export default function App(): JSX.Element {
                 redirectToLogin();
               }
             }}
-            loadingDisplay={
+            loadingDisplay={"none"}
+            /*
               <>
                 <div className="centers flex-column p-5">
                   <Spinner size="xl" />
-                  {/* <p>Checking login status...</p> */}
                 </div>
               </>
-            }>{
+            }*/
+          >{
               (loginResponse: ApiResponses.UserResponse, reload) => {
 
                 if (search.includes(RELOAD_USER_SEARCH)) {
@@ -56,6 +56,7 @@ export default function App(): JSX.Element {
                     </ConnectorUserContext.Provider>
                   );
                 }
+                // else not logged in
                 return redirectToLogin();
               }
             }

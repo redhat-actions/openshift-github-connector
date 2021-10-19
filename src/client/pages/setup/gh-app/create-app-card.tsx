@@ -15,7 +15,7 @@ import { getGitHubAppManifest, GitHubAppManifestSettings } from "../../../util/g
 import { CommonIcons } from "../../../util/icons";
 import ApiResponses from "../../../../common/api-responses";
 
-export const CREATE_NEW_TITLE = "Create New App";
+export const CREATE_NEW_TITLE = "Create a New App";
 
 export default function CreateAppCard(): JSX.Element {
   const [ publicChecked, setPublicChecked ] = useState(true);
@@ -82,7 +82,7 @@ export default function CreateAppCard(): JSX.Element {
                 try {
                   const user = await fetchJSON<never, ApiResponses.UserResponse>("GET", ApiEndpoints.User.Root);
                   if (user.success) {
-                    appName = user.name + "s " + appName;
+                    appName = user.name.replace(/[:]/g, "") + "s " + appName;
                   }
                 }
                 catch (err) {
@@ -107,7 +107,7 @@ export default function CreateAppCard(): JSX.Element {
                   const manifestForm = document.getElementById(manifestFormId) as HTMLFormElement;
                   manifestForm.submit();
                 }
-                catch (err) {
+                catch (err: any) {
                   setError(`Failed to start creation flow: ${err.message}`);
                 }
                 finally {

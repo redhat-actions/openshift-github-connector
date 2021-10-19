@@ -45,4 +45,5 @@ export interface ConnectorUserInfo extends OpenShiftUserInfo {
   readonly githubInfo?: ConnectorGitHubUserInfo,
   readonly githubInstallationInfo?: ConnectorGitHubAppInstallInfo,
   readonly ownsAppIds: number[],
+  readonly hasCompletedSetup: boolean,
 }

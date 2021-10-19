@@ -20,7 +20,7 @@ import { getSetupPagePath } from "../setup";
 
 export const RELOAD_APPS_SEARCH = "reload-apps";
 
-export const USE_EXISTING_TITLE = "Install a GitHub App";
+export const USE_EXISTING_TITLE = "Install Existing GitHub App";
 
 // export function InstallExistingAppPage() {
 //   return (
@@ -62,7 +62,7 @@ export function InstallExistingAppCard(
       Since you have already created an app, you can simply exit the set up and let others start using the connector.
       </p>
       <p>
-      However, the connector&apos;s features will not be available to you until you install the app on a GitHub account or organization.
+      However, the connector&apos;s features will not be available to you personally until you install the app on a GitHub account or organization.
       </p>
     </>;
   }

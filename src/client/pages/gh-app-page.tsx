@@ -21,6 +21,7 @@ import { fetchJSON } from "../util/client-util";
 import { NewTabLink } from "../components/external-link";
 import { CommonIcons } from "../util/icons";
 import { ConnectorUserContext, PushAlertContext } from "../contexts";
+import { getSetupPagePath } from "./setup/setup";
 
 type ViewType = "owner" | "user";
 
@@ -88,7 +89,7 @@ function GitHubAppPageBody({
                 await reload();
               }
               catch (err) {
-                pushAlert({ severity: "danger", title: `Error removing app`, body: err.message });
+                pushAlert({ severity: "danger", title: `Error removing app`, body: ((err as any).message ?? undefined) });
               }
               finally {
                 setIsDeleting(false);
@@ -164,9 +165,14 @@ function AppOwnerCards(props: ApiResponses.UserOwnedAppData) {
       }]}>
         {
           props.installations.length === 0 ? (
-            <p>
-          No one has installed this app. Click <b>Manage Installations</b> to install the app on your GitHub account or organization.
-            </p>
+            <>
+              <p>
+                No one has installed this app. Click <b>Manage Installations</b> to install the app on your GitHub account or organization.
+              </p>
+              <p>
+                Or, return to the <Link to={getSetupPagePath("INSTALL_APP")}>Install</Link> page.
+              </p>
+            </>
           ) : (
             <ul>
               {props.installations.map((installation) => {

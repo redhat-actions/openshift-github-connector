@@ -15,7 +15,7 @@ export function ObjectTable(
           {Object.entries(obj).map(([ key, value ], i) => {
             return (
               <tr key={i}>
-                <td className="b">
+                <td className="b w-50">
                   {key}
                 </td>
                 <td>

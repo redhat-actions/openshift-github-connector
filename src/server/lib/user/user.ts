@@ -254,6 +254,7 @@ export default class User {
       githubInfo: this.githubUserInfo,
       githubInstallationInfo: this.installation?.info,
       ownsAppIds: this.ownsAppIds,
+      hasCompletedSetup: this.installation != null || this.ownsAppIds.length > 0,
     };
   }
 
