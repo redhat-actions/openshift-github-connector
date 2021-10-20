@@ -251,9 +251,6 @@ export function ConfigureCRDAWorkflow(): JSX.Element {
             security implications of scanning pull requests.
           </NewTabLink>
         </p>
-        <p>
-          {"Here's"} some information about scanning pull requests.
-        </p>
       </FormGroup>
 
       <FormGroup fieldId="manifest-directory" label={

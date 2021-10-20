@@ -6,7 +6,7 @@ export function getTitle(subtitle: string | undefined): JSX.Element {
 
   let title = baseTitle;
   if (subtitle) {
-    title = `${baseTitle} | ${subtitle}`;
+    title = `${subtitle} | ${baseTitle}`;
   }
 
   return (

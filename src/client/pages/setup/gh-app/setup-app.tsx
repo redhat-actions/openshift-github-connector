@@ -22,10 +22,10 @@ export default function AdminSetupAppPage(
   const { user } = useContext(ConnectorUserContext);
   const history = useHistory();
 
-  const [ showCreateCard, setShowCreateCard ] = useState(false);
-
   const canCreate = user.isAdmin;
   const appExists = appState.success && appState.doesAnyAppExist;
+
+  const [ showCreateCard, setShowCreateCard ] = useState(!appExists);
 
   const { direction, isDirectionError } = getCreateOrInstallDirection({ appExists, canCreate });
 

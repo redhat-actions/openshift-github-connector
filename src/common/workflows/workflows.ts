@@ -40,7 +40,7 @@ export const WORKFLOW_INFOS: { [key in WorkflowIDs]: WorkflowInfo } = {
     templateFileLocation: {
       owner: RHA_ORG,
       repo: "oc-login",
-      path: `${GITHUB_WORKFLOWS_DIR}/template.yml`,
+      path: `${GITHUB_WORKFLOWS_DIR}template.yml`,
       ref: "main",
     },
   },
@@ -53,7 +53,7 @@ export const WORKFLOW_INFOS: { [key in WorkflowIDs]: WorkflowInfo } = {
     templateFileLocation: {
       owner: RHA_ORG,
       repo: "crda",
-      path: `${GITHUB_WORKFLOWS_DIR}/template.yml`,
+      path: `${GITHUB_WORKFLOWS_DIR}template.yml`,
       ref: "main",
     },
   },
@@ -67,7 +67,7 @@ export const WORKFLOW_INFOS: { [key in WorkflowIDs]: WorkflowInfo } = {
     templateFileLocation: {
       owner: RHA_ORG,
       repo: "openshift-actions-runner-installer",
-      path: `${GITHUB_WORKFLOWS_DIR}/template.yml`,
+      path: `${GITHUB_WORKFLOWS_DIR}template.yml`,
       ref: "main",
     },
   },
