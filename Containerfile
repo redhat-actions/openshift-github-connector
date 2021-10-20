@@ -13,7 +13,7 @@ COPY public/ ./public
 COPY src/ ./src
 
 RUN yarn build
-RUN mv -v dist/plugin plugin/
+# RUN mv -v dist/plugin plugin/
 RUN mv -v build/ client/
 RUN mv -v dist/server server/
 
@@ -53,7 +53,7 @@ EXPOSE $PORT
 
 # These paths must match those in server/index.ts so they can be served statically
 COPY --chown=$USER --from=builder /app/client ./client
-COPY --chown=$USER --from=builder /app/plugin ./plugin
+# COPY --chown=$USER --from=builder /app/plugin ./plugin
 COPY --chown=$USER --from=builder /app/server .
 COPY --chown=$USER README.md .
 

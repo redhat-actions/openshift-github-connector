@@ -29,7 +29,7 @@
     "build:client": "react-scripts build",
     "build:server": "yarn webpack --config webpack.config.server.ts --mode=production",
     "build:plugin": "yarn webpack --config webpack.config.plugin.ts --mode=production",
-    "build": "yarn clean && concurrently --kill-others-on-fail -p name -c 'cyan,magenta,yellow' -n 'client,server,plugin', 'yarn build:client' 'yarn build:server' 'yarn build:plugin'",
+    "build": "yarn clean && concurrently --kill-others-on-fail -p name -c 'cyan,magenta,yellow' -n 'client,server,plugin', 'yarn build:client' 'yarn build:server'",
     "container-build": "buildah bud -f Containerfile --build-arg VCS_REF=$(git rev-parse HEAD | cut -c -7) -t openshift-github-connector:latest .",
     "container-run": "podman run --rm --name openshift-github-connector -p 3443:3443 openshift-github-connector:latest",
     "container-run-d": "podman run -d --rm --name openshift-github-connector -p 3443:3443 openshift-github-connector:latest",
