@@ -58,12 +58,9 @@ export async function buildCRDAWorkflow(
 
   if (config.scanPRs) {
     // https://github.com/redhat-actions/crda#scanning-pull-requests
-    workflow.set([ "on" ], [ "push", "workflow_dispatch", {
-          pull_request_target: {
-            types: [ "opened", "synchronize", "reopened", "labeled", "edited" ]
-          }
-        }
-      ]
+    workflow.setIn([ "on", "pull_request_target" ], {
+        types: [ "opened", "synchronize", "reopened", "labeled", "edited" ]
+      }
     );
   }
 
