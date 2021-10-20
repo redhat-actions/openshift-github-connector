@@ -153,7 +153,13 @@ input {
     font-weight: bold;
     display: inline-flex;
     align-items: center;
+
+    padding: 0.2em 0;
   }
+}
+
+.pf-c-select__toggle {
+  box-shadow: var(--pf-c-select__menu--BoxShadow);
 }
 
 .tooltip-icon {

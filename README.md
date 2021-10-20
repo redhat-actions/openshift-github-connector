@@ -25,6 +25,10 @@ See the [`values.yaml`](./chart/openshift-github-connector/values.yaml) for an e
 
 The chart creates a Route through which the app can be accessed. The route host is `github-connector.<clusterAppsSubdomain>`. For example, for CRC, the host is `github-connector.apps-crc.testing`.
 
+You can also access the frontend through navigating to the Developer perspective, selecting the `github-connector` project in the Projects list, and clicking **GitHub Connector** in the Launcher.
+
+![Connector launcher](./launcher.png)
+
 The route must be accessible from the internet, so GitHub can call back to it when the GitHub app is created.
 
 ## Developing
