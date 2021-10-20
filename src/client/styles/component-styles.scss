@@ -154,12 +154,14 @@ input {
     display: inline-flex;
     align-items: center;
 
-    padding: 0.2em 0;
+    margin-bottom: 0.5em;
   }
+
+  margin-bottom: 1rem;
 }
 
 .pf-c-select__toggle {
-  box-shadow: var(--pf-c-select__menu--BoxShadow);
+  border: 1px solid #aaa;
 }
 
 .tooltip-icon {

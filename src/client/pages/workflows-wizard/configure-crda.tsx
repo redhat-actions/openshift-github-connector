@@ -88,7 +88,7 @@ export function ConfigureCRDAWorkflow(): JSX.Element {
           />
         </>
       }>
-        <p>
+        <p className="mt-0">
           You can authenticate using either a Snyk Token or a CRDA Key.
         </p>
         <div className="d-flex">
@@ -125,7 +125,7 @@ export function ConfigureCRDAWorkflow(): JSX.Element {
 
           <ManagedTextInput
             // isRequired={true}
-            formGroupProps={{ className: "w-100" }}
+            formGroupProps={{ className: "w-100 mb-0" }}
             placeholder={`* Paste your ${(configState.auth.type === "snyk" ? "Snyk token" : "CRDA key")} here`}
             value={configState.auth.token || null}
             onValueChange={(newValue) => {
